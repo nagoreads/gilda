@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>gilda — club de lectura</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tipografía Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet CSS & JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- React, ReactDOM y Babel -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@babel/standalone/babel.min.js"
+    ></script>
+
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f8f9fa;
+        color: #1a1a1a;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .figma-card {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s ease;
+      }
+      .figma-card:hover {
+        border-color: rgba(173, 174, 29, 0.3);
+        box-shadow: 0 4px 16px -2px rgba(173, 174, 29, 0.08);
+      }
+
+      .figma-input {
+        background: #fbfbfb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        color: #1a1a1a;
+        transition: all 0.2s ease;
+      }
+      .figma-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #adae1d;
+        box-shadow: 0 0 0 3px rgba(173, 174, 29, 0.12);
+      }
+
+      .figma-btn {
+        background: #adae1d;
+        color: #ffffff;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+      }
+      .figma-btn:hover {
+        background: #959616;
+      }
+      .figma-btn:active {
+        transform: scale(0.98);
+      }
+
+      .figma-nav {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .fade-in {
+        animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #mapa-gilda {
+        height: 260px;
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        z-index: 1;
+      }
+
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useMemo, useRef } = React;
+
+      const GOOGLE_API_URL =
+        'https://script.google.com/macros/s/AKfycbwT3L4N90fOGK_jkcT5YJUJJPgPJcr9MmsD3jMvudcofQ6RAHeY7H65w6-XkXcsH-ga/exec';
+
+      const URL_CSV_USUARIAS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=0&single=true&output=csv';
+      const URL_CSV_CAPITULOS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=536736940&single=true&output=csv';
+      const URL_CSV_COMENTARIOS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=1746227102&single=true&output=csv';
+      const URL_CSV_CAFECITOS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=1029816201&single=true&output=csv';
+      const URL_CSV_LECTURAS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=91270604&single=true&output=csv';
+      const URL_CSV_CHAT =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=634671025&single=true&output=csv';
+
+      const URL_CSV_PROPUESTAS =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=2022110866&single=true&output=csv';
+      
+      const URL_CSV_VOTACION_CAFE =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=952595833&single=true&output=csv';
+      
+      const URL_CSV_FRASES =
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1bF0f8RnI8F9wcgilmGg9YDMMqe8EHs8SxklFTgcBFC__Hoxt9VxnVFwDI3_dw26sU5XITlFNJfYg/pub?gid=398852548&single=true&output=csv';
+
+      const FRASES_INICIALES_BOTELLA = [
+        '"Leer no es huir del mundo, sino encontrar una linterna para entenderlo mejor en compañía."',
+        '"Hay libros que nos leen a nosotras antes de que terminemos la primera página."',
+        '"Un café caliente, silencio en la habitación y cien gildas leyendo al mismo tiempo."',
+        '"No te preocupes si vas despacio: las buenas historias merecen degustarse paso a paso."',
+      ];
+
+      const COORDENADAS_CIUDADES = {
+        madrid: [40.4168, -3.7038],
+        barcelona: [41.3851, 2.1734],
+        bilbao: [43.263, -2.935],
+        eibar: [43.1843, -2.4716],
+        valencia: [39.4699, -0.3763],
+        sevilla: [37.3891, -5.9845],
+        zaragoza: [41.6488, -0.8896],
+        malaga: [36.7213, -4.4214],
+        murcia: [37.9922, -1.1307],
+        oviedo: [43.3614, -5.8593],
+        granada: [37.1773, -3.5986],
+        'san sebastian': [43.3183, -1.9812],
+        santander: [43.4623, -3.8099],
+        vigo: [42.2406, -8.7207],
+      };
+
+      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
+        const [errorImg, setErrorImg] = useState(false);
+
+        const sizeClasses =
+          size === 'large'
+            ? 'w-20 h-28 text-[10px]'
+            : size === 'grid'
+            ? 'w-16 h-24 text-[9px]'
+            : 'w-10 h-14 text-[8px]';
+
+        if (portada && !errorImg) {
+          return (
+            <img
+              src={portada}
+              alt={titulo || 'Libro'}
+              onError={() => setErrorImg(true)}
+              className={`${sizeClasses} object-cover rounded-lg border border-[#e5e7eb] shrink-0 shadow-sm`}
+            />
+          );
+        }
+
+        return (
+          <div
+            className={`${sizeClasses} bg-[#1a1a1a] text-white p-2 rounded-lg border border-[#333] shrink-0 flex flex-col justify-between shadow-sm overflow-hidden text-left relative`}
+          >
+            <div className="absolute top-0 right-0 w-2 h-full bg-[#ADAE1D]/30"></div>
+            <span className="font-bold tracking-tight line-clamp-3 leading-tight">
+              {titulo || 'Sin título'}
+            </span>
+            <span className="text-[7px] text-[#ADAE1D] uppercase truncate">
+              {autora || 'gilda'}
+            </span>
+          </div>
+        );
+      }
+
+      function ComponenteMapa({ usuarias }) {
+        const mapRef = useRef(null);
+        const markersGroupRef = useRef(null);
+
+        useEffect(() => {
+          if (!mapRef.current) {
+            const map = L.map('mapa-gilda', { zoomControl: false }).setView(
+              [40.4168, -3.7038],
+              5
+            );
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors',
+              maxZoom: 18,
+            }).addTo(map);
+
+            const markersGroup = L.layerGroup().addTo(map);
+            markersGroupRef.current = markersGroup;
+            mapRef.current = map;
+          }
+
+          if (markersGroupRef.current) {
+            markersGroupRef.current.clearLayers();
+
+            usuarias.forEach((u) => {
+              const ciudadClean = (u.ciudad || u.ubicacion || '')
+                .trim()
+                .toLowerCase();
+              if (COORDENADAS_CIUDADES[ciudadClean]) {
+                const coords = COORDENADAS_CIUDADES[ciudadClean];
+                const marker = L.circleMarker(coords, {
+                  radius: 7,
+                  fillColor: '#ADAE1D',
+                  color: '#ffffff',
+                  weight: 2,
+                  opacity: 1,
+                  fillOpacity: 0.95,
+                });
+                marker.bindPopup(
+                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1a1a1a; padding:8px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"><b>${
+                    u.nombre || 'Socia'
+                  }</b><br><span style="font-size:11px; color:#6b7280;">${
+                    u.ciudad || u.ubicacion
+                  }</span></div>`
+                );
+                markersGroupRef.current.addLayer(marker);
+              }
+            });
+          }
+        }, [usuarias]);
+
+        return <div id="mapa-gilda"></div>;
+      }
+
+      function App() {
+        const [sesion, setSesion] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem('gilda_sesion'));
+          } catch {
+            return null;
+          }
+        });
+        const [inputEmail, setInputEmail] = useState('');
+        const [errorLogin, setErrorLogin] = useState('');
+        const [seccionApp, setSeccionApp] = useState('inicio');
+        const [subTabComunidad, setSubTabComunidad] = useState('chat');
+
+        const [usuariasClub, setUsuariasClub] = useState([]);
+        const [capitulos, setCapitulos] = useState([]);
+        const [comentarios, setComentarios] = useState([]);
+        const [cafecitos, setCafecitos] = useState([]);
+        const [lecturas, setLecturas] = useState([]);
+        const [chatMsgs, setChatMsgs] = useState([]);
+        
+        const [propuestas, setPropuestas] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem('gilda_propuestas')) || [];
+          } catch {
+            return [];
+          }
+        });
+
+        const [opcionesVotacionCafe, setOpcionesVotacionCafe] = useState([]);
+        const [frasesClub, setFrasesClub] = useState([]);
+
+        const [estrellasLibro, setEstrellasLibro] = useState(5);
+        const [resenaLibro, setResenaLibro] = useState('');
+        const [resenasGuardadas, setResenasGuardadas] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem('gilda_resenas')) || [];
+          } catch {
+            return [];
+          }
+        });
+
+        const [cargando, setCargando] = useState(true);
+
+        const [miPagina, setMiPagina] = useState(0);
+        
+        const [miCiudad, setMiCiudad] = useState(() => {
+          return localStorage.getItem('gilda_mi_ciudad') || '';
+        });
+
+        const [guardandoCiudad, setGuardandoCiudad] = useState(false);
+        const [toastMsg, setToastMsg] = useState(null);
+
+        const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] =
+          useState(() => {
+            return localStorage.getItem('gilda_nombre_usuario') || '';
+          });
+        const [editandoNombre, setEditandoNombre] = useState(false);
+
+        const [nuevoComentario, setNuevoComentario] = useState({});
+        const [nuevaCitaCapsula, setNuevaCitaCapsula] = useState({});
+        const [nuevoChat, setNuevoChat] = useState('');
+        const [nuevaPropuesta, setNuevaPropuesta] = useState('');
+        const [mensajeFundadora, setMensajeFundadora] = useState('');
+
+        const [misCitas, setMisCitas] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem('gilda_mis_citas')) || [];
+          } catch {
+            return [];
+          }
+        });
+        const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
+        const [botellaAbierta, setBotellaAbierta] = useState(false);
+        const [fraseActualBotella, setFraseActualBotella] = useState(0);
+
+        const [enviandoForm, setEnviandoForm] = useState(false);
+        const [libroSeleccionadoModal, setLibroSeleccionadoModal] =
+          useState(null);
+
+        const mostrarToast = (texto) => {
+          setToastMsg(texto);
+          setTimeout(() => setToastMsg(null), 3000);
+        };
+
+        useEffect(() => {
+          const parsearHoja = (url, callback) => {
+            Papa.parse(url, {
+              download: true,
+              header: true,
+              skipEmptyLines: true,
+              complete: (res) => callback(res.data || []),
+              error: () => callback([]),
+            });
+          };
+
+          parsearHoja(URL_CSV_USUARIAS, (data) => {
+            const usuariasValidas = data.filter(
+              (u) =>
+                (u.email || '').trim() !== '' && (u.nombre || '').trim() !== ''
+            );
+
+            const unicasMap = new Map();
+            usuariasValidas.forEach((u) => {
+              const emailKey = (u.email || '').trim().toLowerCase();
+              if (!unicasMap.has(emailKey)) {
+                unicasMap.set(emailKey, u);
+              }
+            });
+
+            if (sesion) {
+              const emailSesion = sesion.email.toLowerCase();
+              const ciudadLocal = localStorage.getItem('gilda_mi_ciudad');
+              if (unicasMap.has(emailSesion) && ciudadLocal) {
+                const sociaObj = unicasMap.get(emailSesion);
+                sociaObj.ciudad = ciudadLocal;
+              }
+            }
+
+            const usuariasUnicas = Array.from(unicasMap.values());
+            setUsuariasClub(usuariasUnicas);
+
+            if (sesion) {
+              const sociaActual = usuariasUnicas.find(
+                (u) =>
+                  (u.email || '').trim().toLowerCase() ===
+                  sesion.email.toLowerCase()
+              );
+              if (sociaActual) {
+                if (sociaActual.pagina || sociaActual.pagina_actual)
+                  setMiPagina(
+                    Number(sociaActual.pagina || sociaActual.pagina_actual)
+                  );
+                
+                const ciudadLocal = localStorage.getItem('gilda_mi_ciudad');
+                if (ciudadLocal) {
+                  setMiCiudad(ciudadLocal);
+                } else if (sociaActual.ciudad || sociaActual.ubicacion) {
+                  const c = sociaActual.ciudad || sociaActual.ubicacion;
+                  setMiCiudad(c);
+                  localStorage.setItem('gilda_mi_ciudad', c);
+                }
+
+                if (!nombreUsuarioPersonalizado) {
+                  const nombreDef =
+                    sociaActual.nombre || sesion.email.split('@')[0];
+                  setNombreUsuarioPersonalizado(nombreDef);
+                  localStorage.setItem('gilda_nombre_usuario', nombreDef);
+                }
+              }
+            }
+          });
+
+          let completados = 0;
+          const totalHojas = 5;
+          const checkCargando = () => {
+            completados++;
+            if (completados >= totalHojas) setCargando(false);
+          };
+
+          parsearHoja(URL_CSV_CAPITULOS, (data) => {
+            setCapitulos(data);
+            checkCargando();
+          });
+          parsearHoja(URL_CSV_COMENTARIOS, (data) => {
+            setComentarios(data.reverse());
+            checkCargando();
+          });
+          parsearHoja(URL_CSV_CAFECITOS, (data) => {
+            setCafecitos(data);
+            checkCargando();
+          });
+          parsearHoja(URL_CSV_LECTURAS, (data) => {
+            setLecturas(data);
+            checkCargando();
+          });
+          parsearHoja(URL_CSV_CHAT, (data) => {
+            setChatMsgs(data);
+            checkCargando();
+          });
+
+          parsearHoja(URL_CSV_PROPUESTAS, (data) => {
+            if (data && data.length > 0) {
+              try {
+                const locales = JSON.parse(localStorage.getItem('gilda_propuestas') || '[]');
+                const titulosCsv = new Set(data.map(p => (p.titulo || '').trim().toLowerCase()));
+                const extraLocales = locales.filter(p => !titulosCsv.has((p.titulo || '').trim().toLowerCase()));
+                const finalPropuestas = [...data, ...extraLocales];
+                setPropuestas(finalPropuestas);
+                localStorage.setItem('gilda_propuestas', JSON.stringify(finalPropuestas));
+              } catch {
+                setPropuestas(data);
+              }
+            }
+          });
+
+          parsearHoja(URL_CSV_VOTACION_CAFE, (data) => {
+            setOpcionesVotacionCafe(data);
+          });
+          parsearHoja(URL_CSV_FRASES, (data) => {
+            setFrasesClub(data);
+          });
+        }, []);
+
+        const iniciarSesion = (e) => {
+          e.preventDefault();
+          setErrorLogin('');
+          const emailBuscado = inputEmail.trim().toLowerCase();
+          if (!emailBuscado) return;
+
+          const sociaEncontrada = usuariasClub.find(
+            (u) => (u.email || '').trim().toLowerCase() === emailBuscado
+          );
+
+          if (!sociaEncontrada) {
+            setErrorLogin(
+              'Este correo no está registrado como socia de gilda.'
+            );
+            return;
+          }
+
+          const nombreDef =
+            sociaEncontrada.nombre || emailBuscado.split('@')[0];
+          setNombreUsuarioPersonalizado(nombreDef);
+          localStorage.setItem('gilda_nombre_usuario', nombreDef);
+
+          const datosSesion = {
+            nombre: nombreDef,
+            email: emailBuscado,
+            modalidad: (sociaEncontrada.modalidad || 'gilda absoluta')
+              .trim()
+              .toLowerCase(),
+          };
+
+          localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+          setSesion(datosSesion);
+        };
+
+        const cerrarSesion = () => {
+          localStorage.removeItem('gilda_sesion');
+          localStorage.removeItem('gilda_nombre_usuario');
+          setSesion(null);
+          setInputEmail('');
+          setErrorLogin('');
+        };
+
+        const guardarNombrePersonalizado = () => {
+          const limpio = nombreUsuarioPersonalizado.trim();
+          if (!limpio) return;
+          localStorage.setItem('gilda_nombre_usuario', limpio);
+
+          setSesion((prev) => ({ ...prev, nombre: limpio }));
+
+          setUsuariasClub((prev) =>
+            prev.map((u) =>
+              u.email.toLowerCase() === sesion.email.toLowerCase()
+                ? { ...u, nombre: limpio }
+                : u
+            )
+          );
+
+          enviarAccion('actualizar_nombre', { nuevoNombre: limpio });
+
+          setEditandoNombre(false);
+          mostrarToast('Nombre actualizado al instante.');
+        };
+
+        const actualizarPagina = (nuevaPag) => {
+          const pagValida = Math.max(0, nuevaPag);
+          setMiPagina(pagValida);
+
+          if (sesion) {
+            setUsuariasClub((prev) =>
+              prev.map((u) =>
+                u.email.toLowerCase() === sesion.email.toLowerCase()
+                  ? { ...u, pagina: pagValida }
+                  : u
+              )
+            );
+          }
+
+          enviarAccion('actualizar_pagina', { pagina: pagValida });
+          mostrarToast(`Progreso actualizado: pág. ${pagValida}`);
+        };
+
+        const guardarMiCiudad = () => {
+          const ciudadLimpia = miCiudad.trim();
+          if (!ciudadLimpia) return;
+          setGuardandoCiudad(true);
+
+          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
+
+          if (sesion) {
+            setUsuariasClub((prev) =>
+              prev.map((u) =>
+                u.email.toLowerCase() === sesion.email.toLowerCase()
+                  ? { ...u, ciudad: ciudadLimpia }
+                  : u
+              )
+            );
+          }
+
+          enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia });
+          setTimeout(() => {
+            setGuardandoCiudad(false);
+            mostrarToast('Ubicación guardada en el mapa.');
+          }, 500);
+        };
+
+        const guardarFraseBotella = () => {
+          const textoFrase = nuevaFraseBotella.trim();
+          if (!textoFrase) return;
+
+          const nuevaListaCitas = [textoFrase, ...misCitas];
+          setMisCitas(nuevaListaCitas);
+          localStorage.setItem(
+            'gilda_mis_citas',
+            JSON.stringify(nuevaListaCitas)
+          );
+
+          enviarAccion('mensaje_botella', { frase: textoFrase });
+          setNuevaFraseBotella('');
+          mostrarToast(
+            '¡Frase guardada en tus tesoros y compartida con el club!'
+          );
+        };
+
+        const enviarValoracionLibro = () => {
+          const textoResena = resenaLibro.trim();
+          if (!textoResena) return;
+
+          const nombreActual =
+            localStorage.getItem('gilda_nombre_usuario') || sesion.nombre;
+          const nuevaValoracion = {
+            libro: libroActual.titulo,
+            estrellas: estrellasLibro,
+            resena: textoResena,
+            autora: nombreActual,
+            fecha: new Date().toLocaleDateString('es-ES'),
+          };
+
+          const nuevaListaResenas = [nuevaValoracion, ...resenasGuardadas];
+          setResenasGuardadas(nuevaListaResenas);
+          localStorage.setItem(
+            'gilda_resenas',
+            JSON.stringify(nuevaListaResenas)
+          );
+
+          enviarAccion('valoracion_libro', {
+            libro: libroActual.titulo,
+            estrellas: estrellasLibro,
+            resena: textoResena,
+          });
+
+          setResenaLibro('');
+          mostrarToast('¡Valoración y opinión enviadas con éxito!');
+        };
+
+        const enviarChat = (e) => {
+          e.preventDefault();
+          const textoMsg = nuevoChat.trim();
+          if (!textoMsg) return;
+
+          const nombreActual =
+            localStorage.getItem('gilda_nombre_usuario') || sesion.nombre;
+          const mensajeObj = {
+            usuario: nombreActual,
+            mensaje: textoMsg,
+            fecha: 'Ahora',
+          };
+          setChatMsgs((prev) => [...prev, mensajeObj]);
+
+          enviarAccion('enviar_chat', { mensaje: textoMsg });
+          setNuevoChat('');
+          mostrarToast('Mensaje enviado al chat.');
+        };
+
+        const frasesBotellaTotales = useMemo(() => {
+          const frasesDeHoja = frasesClub
+            .map((f) => f.frase || f.texto || Object.values(f)[0])
+            .filter(Boolean);
+          return [...misCitas, ...frasesDeHoja, ...FRASES_INICIALES_BOTELLA];
+        }, [misCitas, frasesClub]);
+
+        const enviarAccion = async (action, payload) => {
+          setEnviandoForm(true);
+          try {
+            const nombreActual =
+              localStorage.getItem('gilda_nombre_usuario') ||
+              sesion?.nombre ||
+              'Socia';
+            const datosCompletos = {
+              action,
+              usuaria: nombreActual,
+              email: sesion?.email || '',
+              ...payload,
+              fecha: new Date().toLocaleDateString('es-ES'),
+            };
+
+            await fetch(GOOGLE_API_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(datosCompletos),
+            });
+          } catch (err) {
+            console.error('Error al enviar acción a Google Sheets:', err);
+          } finally {
+            setTimeout(() => setEnviandoForm(false), 500);
+          }
+        };
+
+        const modalidadUser = (sesion?.modalidad || '').toLowerCase();
+        const esAbsoluta = modalidadUser.includes('absoluta');
+        const esCotilla = modalidadUser.includes('cotilla');
+        const esVirtual = modalidadUser.includes('virtual');
+        const esCafe =
+          modalidadUser.includes('café') || modalidadUser.includes('cafe');
+
+        const tieneAccesoChat = esAbsoluta || esVirtual || esCafe;
+        const tieneAccesoCafe = esAbsoluta || esVirtual || esCafe;
+        const puedeComentarCapitulos = !esCotilla;
+        const puedeProponerLibros = !esCotilla;
+
+        const libroActual = useMemo(() => {
+          return (
+            lecturas[0] || {
+              titulo: 'La campana de cristal',
+              autora: 'Sylvia Plath',
+              descripcion: 'Lectura actual del club.',
+              portada: '',
+              paginas_totales: 280,
+            }
+          );
+        }, [lecturas]);
+
+        const totalGildas = usuariasClub.length || 1;
+        const gildasLeyendoAhora = useMemo(() => {
+          return (
+            usuariasClub.filter(
+              (u) => Number(u.pagina || u.pagina_actual || 0) > 0
+            ).length || 1
+          );
+        }, [usuariasClub]);
+
+        const porcentajeLibro = useMemo(() => {
+          const pagTotales = Number(libroActual.paginas_totales || 280);
+          return Math.min(Math.round((miPagina / pagTotales) * 100), 100);
+        }, [miPagina, libroActual]);
+
+        const paginaFinalLibro = useMemo(() => {
+          if (capitulos.length === 0)
+            return Number(libroActual.paginas_totales || 280);
+          const ultimoCap = capitulos[capitulos.length - 1];
+          const valFin =
+            ultimoCap.pagina_fin ||
+            ultimoCap.fin ||
+            Object.values(ultimoCap)[3] ||
+            Object.values(ultimoCap)[2];
+          const numFin = parseFloat(
+            String(valFin || '').replace(/[^0-9.]/g, '')
+          );
+          return !isNaN(numFin)
+            ? numFin
+            : Number(libroActual.paginas_totales || 280);
+        }, [capitulos, libroActual]);
+
+        const estaDesbloqueadaValoracion = miPagina >= paginaFinalLibro;
+
+        if (!sesion) {
+          return (
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f8f9fa]">
+              <div className="figma-card max-w-sm w-full p-8 space-y-6 fade-in">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ADAE1D]"></span>
+                    <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a]">
+                      gilda
+                    </h1>
+                  </div>
+                  <p className="text-xs text-[#6b7280]">Club de lectura</p>
+                </div>
+                <div className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between text-xs text-[#6b7280]">
+                  <span>Lectoras registradas</span>
+                  <span className="text-[#1a1a1a] font-medium">
+                    {totalGildas}
+                  </span>
+                </div>
+
+                <form onSubmit={iniciarSesion} className="space-y-3.5">
+                  <input
+                    type="email"
+                    placeholder="nombre@correo.com"
+                    value={inputEmail}
+                    onChange={(e) => setInputEmail(e.target.value)}
+                    required
+                    className="w-full figma-input px-3.5 py-2.5 text-xs outline-none"
+                  />
+                  {errorLogin && (
+                    <p className="text-[11px] text-red-500 font-medium">
+                      {errorLogin}
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    className="w-full figma-btn py-2.5 text-xs font-medium tracking-wide"
+                  >
+                    Entrar al club
+                  </button>
+                </form>
+
+                <div className="pt-2 border-t border-[#e5e7eb] text-center">
+                  <a
+                    href="https://gildaclub.netlify.app"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-[#ADAE1D] font-medium hover:underline"
+                  >
+                    ¿Quieres registrarte? Haz clic aquí
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f8f9fa]">
+            {toastMsg && (
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1a1a1a] text-white text-xs px-4 py-2.5 rounded-xl shadow-xl fade-in flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
+                <span>{toastMsg}</span>
+              </div>
+            )}
+
+            {libroSeleccionadoModal && (
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+                <div className="figma-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
+                  <button
+                    onClick={() => setLibroSeleccionadoModal(null)}
+                    className="absolute top-4 right-4 text-xs text-[#6b7280] hover:text-[#1a1a1a] bg-[#f9fafb] px-2.5 py-1 rounded-md border border-[#e5e7eb]"
+                  >
+                    cerrar
+                  </button>
+                  <div className="flex gap-4 items-start pt-2">
+                    <PortadaLibro
+                      titulo={libroSeleccionadoModal.titulo}
+                      autora={libroSeleccionadoModal.autora || libroSeleccionadoModal.propuestoPor}
+                      portada={libroSeleccionadoModal.portada}
+                      size="large"
+                    />
+                    <div className="space-y-1 pt-1">
+                      <span className="text-[11px] text-[#ADAE1D] font-medium block">
+                        Propuesto por {libroSeleccionadoModal.propuestoPor}
+                      </span>
+                      <h3 className="text-base font-bold text-[#1a1a1a] leading-tight">
+                        {libroSeleccionadoModal.titulo}
+                      </h3>
+                      <p className="text-xs text-[#6b7280]">
+                        {libroSeleccionadoModal.autora || ''}
+                      </p>
+                      <span className="text-xs text-[#6b7280] block">
+                        Votos actuales: {libroSeleccionadoModal.votos || 1}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 pt-2 border-t border-[#e5e7eb]">
+                    <h4 className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold">
+                      Sinopsis
+                    </h4>
+                    <p className="text-xs text-[#4b5563] leading-relaxed max-h-48 overflow-y-auto pr-1">
+                      {libroSeleccionadoModal.sinopsis ||
+                        'Sin sinopsis detallada disponible por el momento.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#6b7280]">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
+                  <span className="text-[#1a1a1a] font-semibold">
+                    {nombreUsuarioPersonalizado || sesion.nombre}
+                  </span>
+                  <span className="text-[10px] bg-[#e5e7eb] px-2 py-0.5 rounded text-[#4b5563] uppercase font-medium">
+                    {sesion.modalidad}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditandoNombre(!editandoNombre)}
+                    className="text-[#ADAE1D] hover:underline font-medium"
+                  >
+                    {editandoNombre ? 'cancelar' : 'cambiar nombre'}
+                  </button>
+                  <span>•</span>
+                  <button
+                    onClick={cerrarSesion}
+                    className="hover:text-[#1a1a1a] transition-colors"
+                  >
+                    salir
+                  </button>
+                </div>
+              </div>
+
+              {editandoNombre && (
+                <div className="figma-card p-3 bg-white flex gap-2 items-center fade-in">
+                  <input
+                    type="text"
+                    placeholder="Tu nombre de usuario"
+                    value={nombreUsuarioPersonalizado}
+                    onChange={(e) =>
+                      setNombreUsuarioPersonalizado(e.target.value)
+                    }
+                    className="flex-grow figma-input px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    onClick={guardarNombrePersonalizado}
+                    className="figma-btn px-3 py-1.5 text-xs shrink-0"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <header className="w-full mb-6 space-y-1">
+              <div className="flex justify-between items-center">
+                <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a] flex items-center gap-2">
+                  <span>gilda</span>
+                </h1>
+                <span className="text-xs text-[#6b7280] bg-white px-3 py-1 rounded-full border border-[#e5e7eb]">
+                  {gildasLeyendoAhora} leyendo ahora
+                </span>
+              </div>
+            </header>
+
+            <main className="w-full fade-in space-y-4">
+              {cargando ? (
+                <div className="text-center py-24 text-xs text-[#6b7280]">
+                  Cargando club...
+                </div>
+              ) : (
+                <div>
+                  {seccionApp === 'inicio' && (
+                    <div className="space-y-4 fade-in">
+                      {/* Botón de Quiero registrarme */}
+                      <a
+                        href="https://gildaclub.netlify.app"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="figma-card p-4 flex items-center justify-between bg-[#fcfcea] border border-[#adae1d]/30 hover:border-[#adae1d] transition-all block group"
+                      >
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] text-[#ADAE1D] font-semibold uppercase tracking-wider block">
+                            ¿Quieres unirte al club?
+                          </span>
+                          <span className="text-sm font-bold text-[#1a1a1a] block group-hover:underline">
+                            Quiero registrarme →
+                          </span>
+                        </div>
+                        <span className="figma-btn px-4 py-2 text-xs shrink-0">
+                          Acceder
+                        </span>
+                      </a>
+
+                      <div className="figma-card p-5 flex flex-col sm:flex-row gap-4 items-center">
+                        <PortadaLibro
+                          titulo={libroActual.titulo}
+                          autora={libroActual.autora}
+                          portada={libroActual.portada}
+                          size="large"
+                        />
+                        <div className="space-y-2.5 flex-grow w-full">
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold">
+                              Lectura actual
+                            </span>
+                          </div>
+                          <h2 className="text-base font-bold text-[#1a1a1a] leading-snug">
+                            {libroActual.titulo}
+                          </h2>
+                          <p className="text-xs text-[#6b7280]">
+                            {libroActual.autora}
+                          </p>
+
+                          <div>
+                            <div className="flex justify-between text-[11px] text-[#6b7280] mb-1">
+                              <span>Progreso</span>
+                              <span>{porcentajeLibro}%</span>
+                            </div>
+                            <div className="w-full bg-[#f9fafb] rounded-full h-1.5 border border-[#e5e7eb] overflow-hidden">
+                              <div
+                                className="bg-[#ADAE1D] h-full transition-all duration-300 rounded-full"
+                                style={{ width: `${porcentajeLibro}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-[#e5e7eb] flex items-center justify-between gap-2">
+                            <span className="text-xs text-[#6b7280]">
+                              Página:
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => actualizarPagina(miPagina - 5)}
+                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                              >
+                                -5
+                              </button>
+                              <input
+                                type="number"
+                                value={miPagina}
+                                onChange={(e) =>
+                                  setMiPagina(Number(e.target.value))
+                                }
+                                className="w-12 figma-input py-1 text-center text-xs"
+                              />
+                              <button
+                                onClick={() => actualizarPagina(miPagina + 5)}
+                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                              >
+                                +5
+                              </button>
+                              <button
+                                onClick={() => actualizarPagina(miPagina)}
+                                className="figma-btn px-3 py-1 text-xs"
+                              >
+                                ok
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="figma-card p-4 space-y-3">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-[#1a1a1a]">
+                            Ubícate :)
+                          </span>
+                          <span className="text-[11px] text-[#6b7280]">
+                            Ubicación
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Ciudad (ej. Bilbao, Madrid...)"
+                            value={miCiudad}
+                            onChange={(e) => setMiCiudad(e.target.value)}
+                            className="flex-grow figma-input px-3 py-2 text-xs"
+                          />
+                          <button
+                            onClick={guardarMiCiudad}
+                            disabled={guardandoCiudad}
+                            className="figma-btn px-4 py-2 text-xs shrink-0"
+                          >
+                            {guardandoCiudad ? '...' : 'Actualizar'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="figma-card p-4 space-y-3">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-[#1a1a1a]">
+                            Buzón anónimo de frases
+                          </span>
+                          <button
+                            onClick={() => {
+                              setBotellaAbierta(!botellaAbierta);
+                              if (!botellaAbierta)
+                                setFraseActualBotella(
+                                  (prev) =>
+                                    (prev + 1) % frasesBotellaTotales.length
+                                );
+                            }}
+                            className="text-xs text-[#6b7280] hover:text-[#1a1a1a]"
+                          >
+                            {botellaAbierta
+                              ? 'guardar otra'
+                              : 'descubrir frase'}
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-[#6b7280] leading-relaxed">
+                          Guarda aquí tus fragmentos subrayados favoritos para
+                          tenerlos siempre en tu perfil y lánzalos al buzón para
+                          inspirar a otras lectoras con tus libros.
+                        </p>
+
+                        {botellaAbierta && (
+                          <div className="p-3.5 bg-[#fcfcea] border border-[#eef2cf] rounded-xl space-y-1.5 fade-in">
+                            <p className="text-xs text-[#4b5563] italic leading-relaxed">
+                              {frasesBotellaTotales[fraseActualBotella]}
+                            </p>
+                            <span className="text-[10px] text-[#8c8d17] block text-right">
+                              — Mensaje anónimo del club
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="space-y-2 pt-1 border-t border-[#e5e7eb]">
+                          <textarea
+                            placeholder="Escribe tu frase favorita (Ej: «...» - Título)"
+                            value={nuevaFraseBotella}
+                            onChange={(e) =>
+                              setNuevaFraseBotella(e.target.value)
+                            }
+                            rows="2"
+                            className="w-full figma-input p-2.5 text-xs resize-none"
+                          />
+                          <button
+                            onClick={guardarFraseBotella}
+                            disabled={enviandoForm}
+                            className="w-full figma-btn py-2 text-xs"
+                          >
+                            Guardar en mis tesoros
+                          </button>
+                        </div>
+
+                        {misCitas.length > 0 && (
+                          <div className="pt-2 border-t border-[#e5e7eb] space-y-2">
+                            <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
+                              Tus tesoros guardados ({misCitas.length})
+                            </span>
+                            <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">
+                              {misCitas.map((cita, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-xs text-[#374151] italic"
+                                >
+                                  {cita}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-[11px] text-[#6b7280] uppercase tracking-wider font-semibold pl-1">
+                          Actividad reciente
+                        </span>
+                        <div className="grid grid-cols-1 gap-2">
+                          {usuariasClub.slice(0, 3).map((u, i) => (
+                            <div
+                              key={i}
+                              className="figma-card p-3.5 flex justify-between items-center"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <div>
+                                  <span className="text-xs font-semibold text-[#1a1a1a] block">
+                                    {u.nombre || 'Socia'}
+                                  </span>
+                                  <span className="text-[10px] text-[#6b7280]">
+                                    {u.modalidad || 'gilda'}
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="text-xs text-[#4b5563] bg-[#f9fafb] px-2.5 py-1 rounded-lg border border-[#e5e7eb]">
+                                pág. {u.pagina || '0'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {seccionApp === 'capitulos' && (
+                    <div className="space-y-3 fade-in">
+                      <div className="figma-card p-3.5 text-xs flex items-center justify-between text-[#6b7280] bg-white">
+                        <span>Progreso: pág. {miPagina}</span>
+                        <span className="text-[#ADAE1D] font-medium">
+                          Anti-spoilers activo
+                        </span>
+                      </div>
+
+                      {capitulos.map((cap, i) => {
+                        let paginaFin = 99999;
+                        const valFin =
+                          cap.pagina_fin ||
+                          cap.fin ||
+                          Object.values(cap)[3] ||
+                          Object.values(cap)[2];
+                        if (
+                          valFin !== undefined &&
+                          valFin !== null &&
+                          String(valFin).trim() !== ''
+                        ) {
+                          const numFin = parseFloat(
+                            String(valFin).replace(/[^0-9.]/g, '')
+                          );
+                          if (!isNaN(numFin)) paginaFin = Math.floor(numFin);
+                        }
+                        const estaDesbloqueado = miPagina >= paginaFin;
+                        const tituloCap =
+                          cap.id_titulo ||
+                          cap.titulo ||
+                          cap.nombre ||
+                          `Capítulo ${i}`;
+                        const notasCapitulo = comentarios.filter(
+                          (com) =>
+                            (com.capitulo || '').trim().toLowerCase() ===
+                            tituloCap.trim().toLowerCase()
+                        );
+
+                        return (
+                          <div
+                            key={i}
+                            className={`figma-card p-5 space-y-3 ${
+                              !estaDesbloqueado ? 'opacity-50 bg-[#f9fafb]' : ''
+                            }`}
+                          >
+                            {!estaDesbloqueado ? (
+                              <div className="text-center py-3 space-y-1 text-xs text-[#6b7280]">
+                                <p className="font-medium text-[#1a1a1a]">
+                                  Sección bloqueada
+                                </p>
+                                <p className="text-[11px]">
+                                  Se desbloquea en la página {paginaFin}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-3 fade-in">
+                                <div className="flex justify-between items-center text-[11px] text-[#6b7280]">
+                                  <span>Sección {i + 1}</span>
+                                  <span>Mínimo pág. {paginaFin}</span>
+                                </div>
+                                <h3 className="text-sm font-bold text-[#1a1a1a]">
+                                  {tituloCap}
+                                </h3>
+                                <p className="text-[#4b5563] text-xs leading-relaxed">
+                                  {cap.descripcion || cap.texto || ''}
+                                </p>
+
+                                <div className="p-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-2">
+                                  <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
+                                    Cápsula del Tiempo
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Añade una cita memorable..."
+                                      value={nuevaCitaCapsula[i] || ''}
+                                      onChange={(e) =>
+                                        setNuevaCitaCapsula({
+                                          ...nuevaCitaCapsula,
+                                          [i]: e.target.value,
+                                        })
+                                      }
+                                      className="flex-grow figma-input px-3 py-1.5 text-xs"
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        if (!nuevaCitaCapsula[i]?.trim())
+                                          return;
+                                        enviarAccion('capsula_tiempo', {
+                                          cita: nuevaCitaCapsula[i],
+                                          capitulo: tituloCap,
+                                        });
+                                        setNuevaCitaCapsula({
+                                          ...nuevaCitaCapsula,
+                                          [i]: '',
+                                        });
+                                        mostrarToast('Cita guardada.');
+                                      }}
+                                      className="figma-btn px-3 py-1.5 text-xs"
+                                    >
+                                      Guardar
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="pt-2.5 border-t border-[#e5e7eb] space-y-2.5">
+                                  <h4 className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold">
+                                    Reflexiones
+                                  </h4>
+                                  {puedeComentarCapitulos && (
+                                    <div className="space-y-2">
+                                      <textarea
+                                        placeholder="Escribe tu reflexión..."
+                                        value={nuevoComentario[i] || ''}
+                                        onChange={(e) =>
+                                          setNuevoComentario({
+                                            ...nuevoComentario,
+                                            [i]: e.target.value,
+                                          })
+                                        }
+                                        rows="2"
+                                        className="w-full figma-input p-3 text-xs resize-none"
+                                      />
+                                      <button
+                                        onClick={() => {
+                                          const textoNota = nuevoComentario[i];
+                                          if (!textoNota || !textoNota.trim())
+                                            return;
+                                          const nombreActual =
+                                            localStorage.getItem(
+                                              'gilda_nombre_usuario'
+                                            ) || sesion.nombre;
+                                          setComentarios([
+                                            {
+                                              autora: nombreActual,
+                                              texto: textoNota,
+                                              capitulo: tituloCap,
+                                              fecha: 'Ahora',
+                                            },
+                                            ...comentarios,
+                                          ]);
+                                          enviarAccion('comentario', {
+                                            texto: textoNota,
+                                            capitulo: tituloCap,
+                                          });
+                                          setNuevoComentario({
+                                            ...nuevoComentario,
+                                            [i]: '',
+                                          });
+                                          mostrarToast('Nota publicada.');
+                                        }}
+                                        disabled={enviandoForm}
+                                        className="figma-btn px-4 py-2 text-xs"
+                                      >
+                                        Publicar nota
+                                      </button>
+                                    </div>
+                                  )}
+                                  {notasCapitulo.map((com, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="p-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-1"
+                                    >
+                                      <div className="flex justify-between text-[11px] text-[#6b7280]">
+                                        <span className="font-semibold text-[#1a1a1a]">
+                                          {com.autora}
+                                        </span>
+                                        <span>{com.fecha}</span>
+                                      </div>
+                                      <p className="text-xs text-[#374151]">
+                                        {com.texto}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div
+                        className={`figma-card p-5 space-y-3 mt-6 ${
+                          !estaDesbloqueadaValoracion
+                            ? 'opacity-50 bg-[#f9fafb]'
+                            : ''
+                        }`}
+                      >
+                        {!estaDesbloqueadaValoracion ? (
+                          <div className="text-center py-4 space-y-1 text-xs text-[#6b7280]">
+                            <p className="font-medium text-[#1a1a1a]">
+                              Valoración final bloqueada
+                            </p>
+                            <p className="text-[11px]">
+                              Se desbloquea al llegar a la página{' '}
+                              {paginaFinalLibro} (final del libro).
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3 fade-in">
+                            <div className="space-y-1">
+                              <span className="text-[11px] text-[#ADAE1D] font-medium block">
+                                Fin de la lectura
+                              </span>
+                              <h3 className="text-sm font-bold text-[#1a1a1a]">
+                                Valora "{libroActual.titulo}"
+                              </h3>
+                              <p className="text-xs text-[#6b7280]">
+                                Has llegado al final. Deja tu puntuación y
+                                opinión personal.
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 pt-1">
+                              <span className="text-xs text-[#6b7280] pr-1">
+                                Estrellas:
+                              </span>
+                              {[1, 2, 3, 4, 5].map((num) => (
+                                <button
+                                  key={num}
+                                  type="button"
+                                  onClick={() => setEstrellasLibro(num)}
+                                  className={`text-lg transition-transform active:scale-95 ${
+                                    num <= estrellasLibro
+                                      ? 'text-amber-400'
+                                      : 'text-gray-300'
+                                  }`}
+                                >
+                                  ★
+                                </button>
+                              ))}
+                              <span className="text-xs font-semibold text-[#1a1a1a] pl-2">
+                                ({estrellasLibro}/5)
+                              </span>
+                            </div>
+
+                            <div className="space-y-2 pt-1">
+                              <textarea
+                                placeholder="Escribe tu opinión general sobre el libro..."
+                                value={resenaLibro}
+                                onChange={(e) => setResenaLibro(e.target.value)}
+                                rows="3"
+                                className="w-full figma-input p-3 text-xs resize-none"
+                              />
+                              <button
+                                onClick={enviarValoracionLibro}
+                                disabled={enviandoForm}
+                                className="w-full figma-btn py-2 text-xs"
+                              >
+                                Enviar valoración
+                              </button>
+                            </div>
+
+                            {resenasGuardadas.length > 0 && (
+                              <div className="pt-3 border-t border-[#e5e7eb] space-y-2">
+                                <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
+                                  Tus reseñas guardadas
+                                </span>
+                                <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                                  {resenasGuardadas.map((r, i) => (
+                                    <div
+                                      key={i}
+                                      className="p-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-1 text-xs"
+                                    >
+                                      <div className="flex justify-between font-semibold text-[#1a1a1a]">
+                                        <span>{r.libro}</span>
+                                        <span className="text-amber-500">
+                                          {'★'.repeat(r.estrellas)}
+                                        </span>
+                                      </div>
+                                      <p className="text-[#4b5563] italic">
+                                        "{r.resena}"
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {seccionApp === 'comunidad' && (
+                    <div className="space-y-3 fade-in">
+                      <div className="flex bg-[#e5e7eb] p-1 rounded-xl text-xs">
+                        <button
+                          onClick={() => setSubTabComunidad('chat')}
+                          className={`flex-1 py-2 rounded-lg transition-all ${
+                            subTabComunidad === 'chat'
+                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
+                              : 'text-[#6b7280]'
+                          }`}
+                        >
+                          Chat
+                        </button>
+                        <button
+                          onClick={() => setSubTabComunidad('mapa')}
+                          className={`flex-1 py-2 rounded-lg transition-all ${
+                            subTabComunidad === 'mapa'
+                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
+                              : 'text-[#6b7280]'
+                          }`}
+                        >
+                          Ubícate :)
+                        </button>
+                        <button
+                          onClick={() => setSubTabComunidad('cafecitos')}
+                          className={`flex-1 py-2 rounded-lg transition-all ${
+                            subTabComunidad === 'cafecitos'
+                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
+                              : 'text-[#6b7280]'
+                          }`}
+                        >
+                          Café
+                        </button>
+                        <button
+                          onClick={() => setSubTabComunidad('gildas')}
+                          className={`flex-1 py-2 rounded-lg transition-all ${
+                            subTabComunidad === 'gildas'
+                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
+                              : 'text-[#6b7280]'
+                          }`}
+                        >
+                          gildas &lt;3
+                        </button>
+                      </div>
+
+                      {subTabComunidad === 'chat' &&
+                        (tieneAccesoChat ? (
+                          <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
+                            <div className="overflow-y-auto space-y-2.5 pr-1 flex flex-col text-xs">
+                              {chatMsgs.map((msg, i) => {
+                                const nombreUsuario =
+                                  msg.usuario || msg.usuaria || 'Socia';
+                                const nombreActual =
+                                  localStorage.getItem(
+                                    'gilda_nombre_usuario'
+                                  ) || sesion.nombre;
+                                const esMio = nombreUsuario === nombreActual;
+                                return (
+                                  <div
+                                    key={i}
+                                    className={`flex flex-col ${
+                                      esMio
+                                        ? 'items-end ml-auto'
+                                        : 'items-start mr-auto'
+                                    } max-w-[85%]`}
+                                  >
+                                    <div className="text-[10px] text-[#6b7280] mb-0.5 px-1">
+                                      {nombreUsuario}
+                                    </div>
+                                    <div
+                                      className={`p-3 rounded-xl border ${
+                                        esMio
+                                          ? 'bg-[#ADAE1D] text-white border-transparent shadow-sm'
+                                          : 'bg-[#f9fafb] text-[#1a1a1a] border-[#e5e7eb]'
+                                      }`}
+                                    >
+                                      {msg.mensaje}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <form
+                              onSubmit={enviarChat}
+                              className="mt-3 pt-3 border-t border-[#e5e7eb] flex gap-2"
+                            >
+                              <input
+                                type="text"
+                                placeholder="Escribe un mensaje..."
+                                value={nuevoChat}
+                                onChange={(e) => setNuevoChat(e.target.value)}
+                                className="flex-grow figma-input px-3 py-2 text-xs"
+                              />
+                              <button
+                                type="submit"
+                                className="figma-btn px-4 py-2 text-xs"
+                              >
+                                Enviar
+                              </button>
+                            </form>
+                          </div>
+                        ) : (
+                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
+                            Acceso reservado a Gilda Absoluta, Virtual y de
+                            Café.
+                          </div>
+                        ))}
+
+                      {subTabComunidad === 'mapa' && (
+                        <div className="figma-card p-4 space-y-3">
+                          <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
+                            Ubícate :)
+                          </h3>
+                          <ComponenteMapa usuarias={usuariasClub} />
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {usuariasClub
+                              .filter((u) => u.ciudad || u.ubicacion)
+                              .map((u, idx) => (
+                                <span
+                                  key={idx}
+                                  className="bg-[#f9fafb] border border-[#e5e7eb] text-[11px] text-[#4b5563] px-2.5 py-1 rounded-lg"
+                                >
+                                  {u.nombre} ({u.ciudad || u.ubicacion})
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {subTabComunidad === 'cafecitos' &&
+                        (tieneAccesoCafe ? (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              {cafecitos.map((caf, i) => (
+                                <div
+                                  key={i}
+                                  className="figma-card p-4 flex justify-between items-center text-xs"
+                                >
+                                  <div>
+                                    <h3 className="font-semibold text-[#1a1a1a]">
+                                      {caf.titulo}
+                                    </h3>
+                                    <p className="text-[11px] text-[#6b7280]">
+                                      {caf.fecha}
+                                    </p>
+                                  </div>
+                                  <a
+                                    href={caf.enlace || '#'}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="figma-btn px-3.5 py-1.5 text-xs"
+                                  >
+                                    Enlace
+                                  </a>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="figma-card p-4 space-y-3">
+                              <div className="space-y-1">
+                                <span className="text-[11px] text-[#ADAE1D] font-medium block">
+                                  Votación oficial
+                                </span>
+                                <h3 className="text-sm font-bold text-[#1a1a1a]">
+                                  ¿Qué día y hora prefieres para el cafecito
+                                  virtual con la autora?
+                                </h3>
+                                <p className="text-xs text-[#6b7280]">
+                                  Vota tu opción favorita para fijar el
+                                  encuentro.
+                                </p>
+                              </div>
+
+                              <div className="space-y-2 pt-1">
+                                {opcionesVotacionCafe.map((opcion, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
+                                      <span className="font-medium text-[#1a1a1a]">
+                                        {opcion.fecha ||
+                                          opcion.nombre ||
+                                          'Opción de fecha'}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => {
+                                        const actualizadas = [
+                                          ...opcionesVotacionCafe,
+                                        ];
+                                        const votosActuales =
+                                          Number(actualizadas[idx].votos || 0) +
+                                          1;
+                                        actualizadas[idx].votos = votosActuales;
+                                        setOpcionesVotacionCafe(actualizadas);
+                                        enviarAccion('voto_cafecito', {
+                                          opcion: opcion.fecha || opcion.nombre,
+                                          nuevosVotos: votosActuales,
+                                        });
+                                        mostrarToast(
+                                          '¡Voto registrado para el cafecito!'
+                                        );
+                                      }}
+                                      className="bg-white border border-[#e5e7eb] text-[#1a1a1a] hover:bg-[#f3f4f6] px-3 py-1.5 text-xs rounded-lg shadow-sm shrink-0 transition-all font-medium"
+                                    >
+                                      Votar ({opcion.votos || 0})
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
+                            Acceso reservado a Gilda Absoluta, Virtual y de
+                            Café.
+                          </div>
+                        ))}
+
+                      {subTabComunidad === 'gildas' && (
+                        <div className="grid grid-cols-1 gap-2">
+                          {usuariasClub.map((u, i) => (
+                            <div
+                              key={i}
+                              className="figma-card p-3.5 flex justify-between items-center text-xs"
+                            >
+                              <div>
+                                <span className="font-semibold text-[#1a1a1a] block">
+                                  {u.nombre || 'Socia'}
+                                </span>
+                                <span className="text-[11px] text-[#6b7280] uppercase">
+                                  {u.modalidad}
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-[#4b5563] bg-[#f9fafb] px-2.5 py-1 rounded-lg border border-[#e5e7eb]">
+                                pág. {u.pagina || '0'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {seccionApp === 'biblioteca' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="figma-card p-5 space-y-1">
+                        <span className="text-[11px] text-[#ADAE1D] font-medium block">
+                          Archivo
+                        </span>
+                        <h2 className="text-sm font-bold text-[#1a1a1a]">
+                          Historial y votaciones
+                        </h2>
+                        <p className="text-xs text-[#6b7280]">
+                          Obras leídas y propuestas para el próximo libro.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {lecturas.map((lec, i) => (
+                          <div
+                            key={i}
+                            className="figma-card p-3 text-center space-y-2 flex flex-col items-center"
+                          >
+                            <PortadaLibro
+                              titulo={lec.titulo}
+                              autora={lec.autora}
+                              portada={lec.portada}
+                              size="grid"
+                            />
+                            <div className="w-full truncate">
+                              <h3 className="text-xs font-semibold text-[#1a1a1a] truncate">
+                                {lec.titulo}
+                              </h3>
+                              <p className="text-[11px] text-[#6b7280] truncate">
+                                {lec.autora}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="figma-card p-4 space-y-3">
+                        <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
+                          Propuestas activas
+                        </h3>
+
+                        {puedeProponerLibros && (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              placeholder="Ej: Las olas - Virginia Woolf"
+                              value={nuevaPropuesta}
+                              onChange={(e) =>
+                                setNuevaPropuesta(e.target.value)
+                              }
+                              className="w-full figma-input px-3 py-2 text-xs"
+                            />
+                            <p className="text-[11px] text-[#6b7280] pl-0.5">
+                              Formato requerido: Título - Autora
+                            </p>
+                            <button
+                              onClick={async () => {
+                                const textoInput = nuevaPropuesta.trim();
+                                if (!textoInput) return;
+
+                                if (!textoInput.includes('-')) {
+                                  mostrarToast(
+                                    'Usa el formato: Título - Autora'
+                                  );
+                                  return;
+                                }
+
+                                const partes = textoInput.split('-');
+                                const tituloLibro = partes[0].trim();
+                                const autoraLibro = partes.slice(1).join('-').trim();
+
+                                mostrarToast('Buscando portada...');
+                                let portadaUrl = '';
+
+                                try {
+                                  const res = await fetch(
+                                    `https://openlibrary.org/search.json?q=${encodeURIComponent(
+                                      tituloLibro + ' ' + autoraLibro
+                                    )}&fields=title,cover_i&limit=1`
+                                  );
+                                  const data = await res.json();
+
+                                  if (
+                                    data.docs &&
+                                    data.docs.length > 0 &&
+                                    data.docs[0].cover_i
+                                  ) {
+                                    portadaUrl = `https://covers.openlibrary.org/b/id/${data.docs[0].cover_i}-M.jpg`;
+                                  }
+                                } catch (err) {
+                                  console.error('Error buscando portada:', err);
+                                }
+
+                                const nombreActual =
+                                  localStorage.getItem(
+                                    'gilda_nombre_usuario'
+                                  ) || sesion.nombre;
+                                
+                                const nuevaObra = {
+                                  titulo: tituloLibro,
+                                  autora: autoraLibro,
+                                  propuestoPor: nombreActual,
+                                  votos: 1,
+                                  portada: portadaUrl,
+                                  sinopsis:
+                                    'Sinopsis pendiente de actualización.',
+                                };
+
+                                const listaActualizada = [nuevaObra, ...propuestas];
+                                setPropuestas(listaActualizada);
+                                localStorage.setItem('gilda_propuestas', JSON.stringify(listaActualizada));
+
+                                enviarAccion('propuesta', {
+                                  titulo: tituloLibro,
+                                  autora: autoraLibro,
+                                  portada: portadaUrl,
+                                  propuestoPor: nombreActual,
+                                });
+                                setNuevaPropuesta('');
+                                mostrarToast('¡Propuesta añadida con éxito!');
+                              }}
+                              disabled={enviandoForm}
+                              className="w-full figma-btn py-2 text-xs"
+                            >
+                              Proponer obra
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-2.5 pt-1">
+                          {propuestas.map((prop, i) => (
+                            <div
+                              key={i}
+                              className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
+                            >
+                              <div
+                                onClick={() => setLibroSeleccionadoModal(prop)}
+                                className="flex items-center gap-3 cursor-pointer flex-grow hover:opacity-80 transition-opacity"
+                              >
+                                <PortadaLibro
+                                  titulo={prop.titulo}
+                                  autora={prop.autora || prop.propuestoPor}
+                                  portada={prop.portada}
+                                  size="small"
+                                />
+                                <div>
+                                  <span className="font-semibold text-[#1a1a1a] block leading-tight">
+                                    {prop.titulo}
+                                  </span>
+                                  <span className="text-[11px] text-[#6b7280] block">
+                                    {prop.autora || 'Autora desconocida'}
+                                  </span>
+                                  <span className="text-[11px] text-[#6b7280]">
+                                    por {prop.propuestoPor || 'Socia'} •{' '}
+                                    <span className="text-[#ADAE1D] underline">
+                                      sinopsis
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  const actualizadas = [...propuestas];
+                                  const votosActuales =
+                                    Number(actualizadas[i].votos || 0) + 1;
+                                  actualizadas[i].votos = votosActuales;
+                                  setPropuestas(actualizadas);
+                                  localStorage.setItem('gilda_propuestas', JSON.stringify(actualizadas));
+
+                                  enviarAccion('voto', {
+                                    tituloPropuesta: prop.titulo,
+                                    nuevosVotos: votosActuales,
+                                  });
+                                  mostrarToast('¡Voto registrado!');
+                                }}
+                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] hover:bg-[#f3f4f6] px-3 py-2 text-xs rounded-lg shadow-sm shrink-0 transition-all font-medium"
+                              >
+                                Votar ({prop.votos || 0})
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {seccionApp === 'buzon' && (
+                    <div className="space-y-3 fade-in">
+                      <div className="figma-card p-5 space-y-3">
+                        <h2 className="text-sm font-bold text-[#1a1a1a]">
+                          Buzón con la creadora
+                        </h2>
+                        <p className="text-xs text-[#6b7280]">
+                          Canal directo y privado de sugerencias para el club.
+                        </p>
+                        <textarea
+                          placeholder="Escribe tu mensaje..."
+                          value={mensajeFundadora}
+                          onChange={(e) => setMensajeFundadora(e.target.value)}
+                          rows="4"
+                          className="w-full figma-input p-3 text-xs resize-none"
+                        />
+                        <button
+                          onClick={() => {
+                            if (!mensajeFundadora.trim()) return;
+                            enviarAccion('mensaje_fundadora', {
+                              mensaje: mensajeFundadora,
+                            });
+                            setMensajeFundadora('');
+                            mostrarToast('Mensaje enviado.');
+                          }}
+                          disabled={enviandoForm}
+                          className="w-full figma-btn py-2.5 text-xs"
+                        >
+                          Enviar mensaje
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </main>
+
+            <nav className="figma-nav fixed bottom-0 left-0 right-0 py-2.5 px-3 flex justify-around items-center max-w-md mx-auto z-50">
+              {[
+                { key: 'inicio', label: 'Inicio' },
+                { key: 'capitulos', label: 'Capítulos' },
+                { key: 'comunidad', label: 'Comunidad' },
+                { key: 'biblioteca', label: 'Archivo' },
+                { key: 'buzon', label: 'Buzón' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() =>
+                    seccionApp !== tab.key && setSeccionApp(tab.key)
+                  }
+                  className={`py-1.5 px-3 rounded-xl transition-all text-xs tracking-tight ${
+                    seccionApp === tab.key
+                      ? 'text-[#ADAE1D] bg-[#fcfcea] font-semibold'
+                      : 'text-[#6b7280] hover:text-[#1a1a1a]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
