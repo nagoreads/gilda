@@ -222,7 +222,7 @@
         );
       }
 
-function ComponenteMapa({ usuarias }) {
+      function ComponenteMapa({ usuarias }) {
         const mapRef = useRef(null);
         const markersGroupRef = useRef(null);
         const extraCoordsRef = useRef({});
@@ -263,10 +263,8 @@ function ComponenteMapa({ usuarias }) {
               const ciudadClean = limpiarTexto(ciudadRaw);
               if (!ciudadClean) continue;
 
-              // 1. Busca en la lista rápida o en la memoria caché
               let coords = COORDENADAS_CIUDADES[ciudadClean] || extraCoordsRef.current[ciudadClean];
 
-              // 2. Si no está, consulta el servicio global de mapas
               if (!coords) {
                 try {
                   const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadRaw)}&limit=1`);
@@ -280,7 +278,6 @@ function ComponenteMapa({ usuarias }) {
                 }
               }
 
-              // 3. Dibuja el marcador verde si encuentra las coordenadas
               if (coords && markersGroupRef.current) {
                 const marker = L.circleMarker(coords, {
                   radius: 7,
@@ -1064,7 +1061,7 @@ function ComponenteMapa({ usuarias }) {
                         <div className="flex gap-2">
                           <input
                             type="text"
-                            placeholder="Ciudad (ej. Bilbao, Madrid...)"
+                            placeholder="Ciudad, País (ej. Bilbao, Buenos Aires...)"
                             value={miCiudad}
                             onChange={(e) => setMiCiudad(e.target.value)}
                             className="flex-grow figma-input px-3 py-2 text-xs"
@@ -1519,7 +1516,28 @@ function ComponenteMapa({ usuarias }) {
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
                           <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
-                            <div className="overflow-y-auto space-y-2.5 pr-1 flex flex-col text-xs">
+                            {/* Cabecera estilo WhatsApp - En línea */}
+                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e5e7eb] shrink-0">
+                              <div className="flex items-center gap-2.5">
+                                <div className="relative flex items-center justify-center">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                                  <span className="absolute w-4 h-4 rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
+                                </div>
+                                <div>
+                                  <span className="text-xs font-bold text-[#1a1a1a] block leading-none">
+                                    Chat del club
+                                  </span>
+                                  <span className="text-[10px] text-[#6b7280]">
+                                    {gildasLeyendoAhora} lectoras en línea
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="text-[10px] text-[#ADAE1D] font-medium bg-[#fcfcea] px-2 py-0.5 rounded-full border border-[#adae1d]/20">
+                                En línea
+                              </span>
+                            </div>
+
+                            <div className="overflow-y-auto space-y-2.5 pr-1 flex flex-col text-xs flex-grow">
                               {chatMsgs.map((msg, i) => {
                                 const nombreUsuario =
                                   msg.usuario || msg.usuaria || 'Socia';
@@ -1537,7 +1555,8 @@ function ComponenteMapa({ usuarias }) {
                                         : 'items-start mr-auto'
                                     } max-w-[85%]`}
                                   >
-                                    <div className="text-[10px] text-[#6b7280] mb-0.5 px-1">
+                                    <div className="text-[10px] text-[#6b7280] mb-0.5 px-1 flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
                                       {nombreUsuario}
                                     </div>
                                     <div
@@ -1555,7 +1574,7 @@ function ComponenteMapa({ usuarias }) {
                             </div>
                             <form
                               onSubmit={enviarChat}
-                              className="mt-3 pt-3 border-t border-[#e5e7eb] flex gap-2"
+                              className="mt-3 pt-3 border-t border-[#e5e7eb] flex gap-2 shrink-0"
                             >
                               <input
                                 type="text"
