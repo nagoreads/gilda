@@ -45,8 +45,8 @@
     <style>
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: #f7f6f2;
-        color: #1c1c1c;
+        background-color: #f7f5ef;
+        color: #262624;
         -webkit-tap-highlight-color: transparent;
       }
 
@@ -56,9 +56,9 @@
 
       .editorial-card {
         background: #ffffff;
-        border: 1px solid #e3e3dc;
-        border-radius: 14px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        border: 1px solid #dfded5;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
         transition: all 0.2s ease;
       }
       .editorial-card:hover {
@@ -66,10 +66,10 @@
       }
 
       .editorial-input {
-        background: #fafaf7;
-        border: 1px solid #e3e3dc;
-        border-radius: 8px;
-        color: #1c1c1c;
+        background: #faf9f5;
+        border: 1px solid #dfded5;
+        border-radius: 10px;
+        color: #262624;
         transition: all 0.2s ease;
       }
       .editorial-input:focus {
@@ -82,7 +82,7 @@
       .editorial-btn {
         background: #adae1d;
         color: #ffffff;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 500;
         transition: all 0.15s ease;
       }
@@ -94,19 +94,19 @@
       }
 
       .editorial-nav {
-        background: rgba(247, 246, 242, 0.95);
+        background: rgba(247, 245, 239, 0.94);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-top: 1px solid #e3e3dc;
+        border-top: 1px solid #dfded5;
       }
 
       .fade-in {
-        animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(4px);
+          transform: translateY(6px);
         }
         to {
           opacity: 1;
@@ -114,25 +114,25 @@
         }
       }
 
-      /* Estilos para el Póster / Lámina de la Habitación */
-      .poster-paper {
-        background-color: #faf8f3;
-        background-image: radial-gradient(#e5e2d9 0.75px, transparent 0.75px);
-        background-size: 16px 16px;
-        border: 1px solid #dcd8cc;
+      /* Estética Lo-Fi / Edificio de Habitaciones */
+      .lofi-poster {
+        background-color: #f3efe6;
+        background-image: radial-gradient(#dcd5c4 0.8px, transparent 0.8px);
+        background-size: 18px 18px;
+        border: 1px solid #d4ccb8;
       }
 
-      .window-active-paper {
-        background: #fef9c3;
-        border-color: #facc15 !important;
-        box-shadow: inset 0 0 10px rgba(250, 204, 21, 0.2);
+      .lofi-window-active {
+        background: #fef08a !important;
+        border-color: #eab308 !important;
+        box-shadow: inset 0 0 14px rgba(234, 179, 8, 0.35);
       }
 
       #mapa-gilda {
         height: 260px;
         width: 100%;
-        border-radius: 8px;
-        border: 1px solid #e3e3dc;
+        border-radius: 10px;
+        border: 1px solid #dfded5;
         z-index: 1;
       }
 
@@ -144,7 +144,7 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #d4d0c5;
+        background: #d4ccb8;
         border-radius: 2px;
       }
     </style>
@@ -217,14 +217,14 @@
               src={portada}
               alt={titulo || 'Libro'}
               onError={() => setErrorImg(true)}
-              className={`${sizeClasses} object-cover rounded border border-[#e3e3dc] shrink-0`}
+              className={`${sizeClasses} object-cover rounded border border-[#dfded5] shrink-0`}
             />
           );
         }
 
         return (
           <div
-            className={`${sizeClasses} bg-[#1c1c1c] text-white p-2 rounded border border-[#333] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}
+            className={`${sizeClasses} bg-[#262624] text-white p-2 rounded border border-[#444] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}
           >
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#adae1d]/40"></div>
             <span className="font-medium tracking-tight line-clamp-3 leading-tight text-[9px]">
@@ -303,7 +303,7 @@
                   fillOpacity: 0.9,
                 });
                 marker.bindPopup(
-                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1c1c1c; padding:8px; border-radius:6px; font-size:11px;"><b>${
+                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#262624; padding:8px; border-radius:6px; font-size:11px;"><b>${
                     u.nombre || 'Socia'
                   }</b><br><span style="color:#666;">${
                     u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación
@@ -625,7 +625,7 @@
           setIsReadingNow(nuevoEstado);
           localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
           enviarAccion('estado_lectura', { leyendo: nuevoEstado });
-          mostrarToast(nuevoEstado ? 'Ventana iluminada.' : 'Luz apagada.');
+          mostrarToast(nuevoEstado ? 'Luz encendida en tu ventana.' : 'Luz apagada.');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -737,17 +737,17 @@
 
         const descargarStoryInstagram = async () => {
           if (!storyCardRef.current) return;
-          mostrarToast('Generando story para Instagram...');
+          mostrarToast('Generando story lo-fi...');
           try {
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#faf8f3'
+              backgroundColor: '#f3efe6'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-habitacion-story.png';
+            link.download = 'gilda-habitacion-lofi.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -883,20 +883,20 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f7f6f2]">
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f7f5ef]">
               <div className="editorial-card max-w-sm w-full p-8 space-y-6 fade-in">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#adae1d]"></span>
-                    <h1 className="text-lg font-medium tracking-tight text-[#1c1c1c]">
+                    <h1 className="text-lg font-medium tracking-tight text-[#262624]">
                       gilda
                     </h1>
                   </div>
-                  <p className="text-xs text-[#666660]">club de lectura</p>
+                  <p className="text-xs text-[#73736e]">club de lectura</p>
                 </div>
-                <div className="bg-[#fafaf7] border border-[#e3e3dc] p-3 rounded-lg flex items-center justify-between text-xs text-[#666660]">
+                <div className="bg-[#faf9f5] border border-[#dfded5] p-3 rounded-lg flex items-center justify-between text-xs text-[#73736e]">
                   <span>lectoras registradas</span>
-                  <span className="text-[#1c1c1c] font-medium">
+                  <span className="text-[#262624] font-medium">
                     {totalGildas}
                   </span>
                 </div>
@@ -923,7 +923,7 @@
                   </button>
                 </form>
 
-                <div className="pt-2 border-t border-[#e3e3dc] text-center">
+                <div className="pt-2 border-t border-[#dfded5] text-center">
                   <a
                     href="https://gildaclub.netlify.app"
                     target="_blank"
@@ -939,9 +939,9 @@
         }
 
         return (
-          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f7f6f2]">
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f7f5ef]">
             {toastMsg && (
-              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1c1c1c] text-white text-xs px-4 py-2 rounded shadow-lg fade-in flex items-center gap-2">
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#262624] text-white text-xs px-4 py-2 rounded shadow-lg fade-in flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
                 <span>{toastMsg}</span>
               </div>
@@ -952,42 +952,46 @@
                 <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-4 relative shadow-2xl flex flex-col items-center">
                   <button
                     onClick={() => setModalStoryAbierto(false)}
-                    className="absolute top-3 right-3 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf7] px-2 py-1 rounded border border-[#e3e3dc]"
+                    className="absolute top-3 right-3 text-xs text-[#73736e] hover:text-[#262624] bg-[#faf9f5] px-2 py-1 rounded border border-[#dfded5]"
                   >
                     cerrar
                   </button>
                   <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
-                    Vista previa Story 9:16
+                    Vista previa Story Lo-Fi (9:16)
                   </span>
 
+                  {/* Tarjeta Story con marcas @nagoreads y @gilda.mailclub incluidas */}
                   <div
                     ref={storyCardRef}
-                    className="poster-paper w-[270px] h-[480px] p-6 rounded-xl flex flex-col justify-between shadow-sm relative overflow-hidden text-left"
+                    className="lofi-poster w-[270px] h-[480px] p-5 rounded-2xl flex flex-col justify-between shadow-md relative overflow-hidden text-left"
                   >
                     <div className="space-y-1">
-                      <span className="text-[9px] uppercase tracking-widest text-[#adae1d] block font-semibold">
-                        gilda — club de lectura
-                      </span>
-                      <h3 className="font-serif-title text-base font-medium text-[#1c1c1c]">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] uppercase tracking-widest text-[#adae1d] block font-semibold">
+                          gilda — club de lectura
+                        </span>
+                        <span className="text-[8px] text-[#73736e] font-mono">@gilda.mailclub</span>
+                      </div>
+                      <h3 className="font-serif-title text-base font-medium text-[#262624]">
                         Una habitación propia
                       </h3>
-                      <p className="text-[10px] text-[#666660]">
-                        Lectura actual: {libroActual.titulo}
+                      <p className="text-[10px] text-[#73736e] truncate">
+                        Lectura: {libroActual.titulo}
                       </p>
                     </div>
 
-                    <div className="my-auto py-2 grid grid-cols-2 gap-2.5 w-full">
+                    <div className="my-auto py-1 grid grid-cols-2 gap-2 w-full">
                       {miembrosEdificio.slice(0, 8).map((m, i) => (
                         <div
                           key={i}
-                          className={`p-2 rounded text-[9px] border flex flex-col justify-between ${
+                          className={`p-2 rounded-t-xl rounded-b text-[9px] border flex flex-col justify-between ${
                             m.estaLeyendo
-                              ? 'window-active-paper text-[#1c1c1c]'
-                              : 'bg-white border-[#e3e3dc] text-[#555]'
+                              ? 'lofi-window-active text-[#262624]'
+                              : 'bg-white border-[#dfded5] text-[#666]'
                           }`}
                         >
                           <div className="flex justify-between font-mono text-[7px] text-[#888]">
-                            <span>{m.estaLeyendo ? 'ACTIVA' : 'OFF'}</span>
+                            <span>{m.estaLeyendo ? 'LIT' : 'OFF'}</span>
                             <span>0{i+1}</span>
                           </div>
                           <span className="font-medium truncate pt-1">{m.nombreReal}</span>
@@ -995,9 +999,15 @@
                       ))}
                     </div>
 
-                    <div className="pt-2 border-t border-[#dcd8cc] flex justify-between items-center text-[9px] text-[#666660]">
-                      <span>{miembrosEdificio.filter(m => m.estaLeyendo).length} lectoras en línea</span>
-                      <span className="font-semibold text-[#adae1d]">gildaclub.netlify.app</span>
+                    <div className="pt-2 border-t border-[#d4ccb8] flex flex-col gap-0.5 text-[9px] text-[#73736e]">
+                      <div className="flex justify-between items-center">
+                        <span>{miembrosEdificio.filter(m => m.estaLeyendo).length} lectoras en línea</span>
+                        <span className="font-semibold text-[#adae1d]">@nagoreads</span>
+                      </div>
+                      <div className="flex justify-between items-center text-[8px] text-[#888]">
+                        <span>gildaclub.netlify.app</span>
+                        <span>@gilda.mailclub</span>
+                      </div>
                     </div>
                   </div>
 
@@ -1016,7 +1026,7 @@
                 <div className="editorial-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-xl">
                   <button
                     onClick={() => setLibroSeleccionadoModal(null)}
-                    className="absolute top-4 right-4 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf7] px-2 py-1 rounded border border-[#e3e3dc]"
+                    className="absolute top-4 right-4 text-xs text-[#73736e] hover:text-[#262624] bg-[#faf9f5] px-2 py-1 rounded border border-[#dfded5]"
                   >
                     cerrar
                   </button>
@@ -1031,19 +1041,19 @@
                       <span className="text-[11px] text-[#adae1d] font-medium block">
                         propuesto por {libroSeleccionadoModal.propuestoPor}
                       </span>
-                      <h3 className="text-sm font-semibold text-[#1c1c1c] leading-tight">
+                      <h3 className="text-sm font-semibold text-[#262624] leading-tight">
                         {libroSeleccionadoModal.titulo}
                       </h3>
-                      <p className="text-xs text-[#666660]">
+                      <p className="text-xs text-[#73736e]">
                         {libroSeleccionadoModal.autora || ''}
                       </p>
-                      <span className="text-xs text-[#666660] block pt-1">
+                      <span className="text-xs text-[#73736e] block pt-1">
                         votos: {libroSeleccionadoModal.votos || 1}
                       </span>
                     </div>
                   </div>
-                  <div className="space-y-1 pt-2 border-t border-[#e3e3dc]">
-                    <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                  <div className="space-y-1 pt-2 border-t border-[#dfded5]">
+                    <h4 className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold">
                       sinopsis
                     </h4>
                     <p className="text-xs text-[#444] leading-relaxed max-h-48 overflow-y-auto pr-1">
@@ -1055,14 +1065,14 @@
               </div>
             )}
 
-            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#666660]">
+            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#73736e]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
-                  <span className="text-[#1c1c1c] font-medium">
+                  <span className="text-[#262624] font-medium">
                     {nombreUsuarioPersonalizado || sesion.nombre}
                   </span>
-                  <span className="text-[10px] bg-[#e3e3dc] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
+                  <span className="text-[10px] bg-[#dfded5] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
                     {sesion.modalidad}
                   </span>
                 </div>
@@ -1076,7 +1086,7 @@
                   <span>/</span>
                   <button
                     onClick={cerrarSesion}
-                    className="hover:text-[#1c1c1c] transition-colors"
+                    className="hover:text-[#262624] transition-colors"
                   >
                     salir
                   </button>
@@ -1105,14 +1115,14 @@
             </div>
 
             <header className="w-full mb-6 space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight text-[#1c1c1c]">
+              <h1 className="text-lg font-semibold tracking-tight text-[#262624]">
                 gilda
               </h1>
             </header>
 
             <main className="w-full fade-in space-y-4">
               {cargando ? (
-                <div className="text-center py-24 text-xs text-[#666660]">
+                <div className="text-center py-24 text-xs text-[#73736e]">
                   cargando espacio...
                 </div>
               ) : (
@@ -1134,19 +1144,19 @@
                                 lectura actual
                               </span>
                             </div>
-                            <h2 className="text-sm font-semibold text-[#1c1c1c] leading-snug">
+                            <h2 className="text-sm font-semibold text-[#262624] leading-snug">
                               {libroActual.titulo}
                             </h2>
-                            <p className="text-xs text-[#666660]">
+                            <p className="text-xs text-[#73736e]">
                               {libroActual.autora}
                             </p>
 
                             <div>
-                              <div className="flex justify-between text-[11px] text-[#666660] mb-1">
+                              <div className="flex justify-between text-[11px] text-[#73736e] mb-1">
                                 <span>progreso</span>
                                 <span>{porcentajeLibro}%</span>
                               </div>
-                              <div className="w-full bg-[#fafaf7] rounded-full h-1 border border-[#e3e3dc] overflow-hidden">
+                              <div className="w-full bg-[#faf9f5] rounded-full h-1 border border-[#dfded5] overflow-hidden">
                                 <div
                                   className="bg-[#adae1d] h-full transition-all duration-300 rounded-full"
                                   style={{ width: `${porcentajeLibro}%` }}
@@ -1157,9 +1167,9 @@
                         </div>
 
                         {/* Configurar lectura personal */}
-                        <div className="pt-3 border-t border-[#e3e3dc] space-y-2">
+                        <div className="pt-3 border-t border-[#dfded5] space-y-2">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="font-medium text-[#1c1c1c]">
+                            <span className="font-medium text-[#262624]">
                               ¿Qué libro estás leyendo?
                             </span>
                             <button
@@ -1186,19 +1196,19 @@
                               </button>
                             </div>
                           ) : (
-                            <p className="text-xs text-[#666660]">
+                            <p className="text-xs text-[#73736e]">
                               {miLibroActual ? `actual: ${miLibroActual}` : `actual: ${libroActual.titulo} (club)`}
                             </p>
                           )}
                         </div>
 
                         {/* Estado de Lectura / Lámpara */}
-                        <div className="pt-3 border-t border-[#e3e3dc] flex items-center justify-between">
+                        <div className="pt-3 border-t border-[#dfded5] flex items-center justify-between">
                           <div>
-                            <span className="text-xs font-medium text-[#1c1c1c] block">
+                            <span className="text-xs font-medium text-[#262624] block">
                               estado de lectura
                             </span>
-                            <span className="text-[10px] text-[#666660]">
+                            <span className="text-[10px] text-[#73736e]">
                               {isReadingNow ? 'luz encendida en tu ventana' : 'luz apagada'}
                             </span>
                           </div>
@@ -1207,21 +1217,21 @@
                             className={`px-3.5 py-1.5 text-xs rounded-lg font-medium transition-all ${
                               isReadingNow
                                 ? 'bg-[#adae1d] text-white'
-                                : 'bg-[#fafaf7] text-[#444] border border-[#e3e3dc]'
+                                : 'bg-[#faf9f5] text-[#444] border border-[#dfded5]'
                             }`}
                           >
                             {isReadingNow ? 'apagar luz' : 'encender luz'}
                           </button>
                         </div>
 
-                        <div className="pt-2 border-t border-[#e3e3dc] flex items-center justify-between gap-2">
-                          <span className="text-xs text-[#666660]">
+                        <div className="pt-2 border-t border-[#dfded5] flex items-center justify-between gap-2">
+                          <span className="text-xs text-[#73736e]">
                             página actual:
                           </span>
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => actualizarPagina(miPagina - 5)}
-                              className="bg-white border border-[#e3e3dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
+                              className="bg-white border border-[#dfded5] text-[#262624] px-2 py-1 rounded text-xs"
                             >
                               -5
                             </button>
@@ -1235,7 +1245,7 @@
                             />
                             <button
                               onClick={() => actualizarPagina(miPagina + 5)}
-                              className="bg-white border border-[#e3e3dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
+                              className="bg-white border border-[#dfded5] text-[#262624] px-2 py-1 rounded text-xs"
                             >
                               +5
                             </button>
@@ -1251,10 +1261,10 @@
 
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-medium text-[#1c1c1c]">
+                          <span className="font-medium text-[#262624]">
                             ubicación geográfica
                           </span>
-                          <span className="text-[10px] text-[#666660]">mapa</span>
+                          <span className="text-[10px] text-[#73736e]">mapa</span>
                         </div>
                         <div className="flex gap-2">
                           <input
@@ -1276,7 +1286,7 @@
 
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-medium text-[#1c1c1c]">
+                          <span className="font-medium text-[#262624]">
                             notas y fragmentos
                           </span>
                           <button
@@ -1288,14 +1298,14 @@
                                     (prev + 1) % frasesBotellaTotales.length
                                 );
                             }}
-                            className="text-xs text-[#666660] hover:text-[#1c1c1c]"
+                            className="text-xs text-[#73736e] hover:text-[#262624]"
                           >
                             {botellaAbierta ? 'ocultar' : 'descubrir nota'}
                           </button>
                         </div>
 
                         {botellaAbierta && (
-                          <div className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded-lg space-y-1 fade-in">
+                          <div className="p-3 bg-[#faf9f5] border border-[#dfded5] rounded-lg space-y-1 fade-in">
                             <p className="text-xs text-[#444] italic leading-relaxed">
                               "{frasesBotellaTotales[fraseActualBotella]}"
                             </p>
@@ -1305,7 +1315,7 @@
                           </div>
                         )}
 
-                        <div className="space-y-2 pt-1 border-t border-[#e3e3dc]">
+                        <div className="space-y-2 pt-1 border-t border-[#dfded5]">
                           <textarea
                             placeholder="Guardar cita o fragmento..."
                             value={nuevaFraseBotella}
@@ -1325,15 +1335,15 @@
                         </div>
 
                         {misCitas.length > 0 && (
-                          <div className="pt-2 border-t border-[#e3e3dc] space-y-2">
-                            <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
+                          <div className="pt-2 border-t border-[#dfded5] space-y-2">
+                            <span className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold block">
                               tus notas guardadas ({misCitas.length})
                             </span>
                             <div className="max-h-28 overflow-y-auto space-y-1.5 pr-1">
                               {misCitas.map((cita, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-2.5 bg-white border border-[#e3e3dc] rounded text-xs text-[#444] italic"
+                                  className="p-2.5 bg-white border border-[#dfded5] rounded text-xs text-[#444] italic"
                                 >
                                   {cita}
                                 </div>
@@ -1345,25 +1355,26 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION */}
+                  {/* PESTAÑA: HABITACION (ESTÉTICA LO-FI) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      <div className="poster-paper w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-sm">
+                      <div className="lofi-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-md">
                         
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#adae1d] block">
                             gilda — club de lectura
                           </span>
-                          <h2 className="font-serif-title text-lg font-medium text-[#1c1c1c]">
+                          <h2 className="font-serif-title text-lg font-medium text-[#262624]">
                             Una habitación propia
                           </h2>
-                          <p className="text-[11px] text-[#666660]">
-                            Silencio en la noche, {miembrosEdificio.length} lectoras en activo
+                          <p className="text-[11px] text-[#73736e]">
+                            Silencio nocturno, {miembrosEdificio.length} lectoras en activo
                           </p>
                         </div>
 
-                        <div className="relative w-full max-w-[280px] bg-white rounded-t-lg p-4 grid grid-cols-2 gap-3 border border-[#dcd8cc] z-10 shadow-xs">
-                          <div className="absolute -top-5 right-6 w-2.5 h-4 bg-[#d4d0c5] rounded-t"></div>
+                        {/* Fachada Lo-Fi con ventanas arqueadas */}
+                        <div className="relative w-full max-w-[280px] bg-white rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#d4ccb8] z-10 shadow-xs">
+                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#c8c0ad] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
@@ -1372,10 +1383,10 @@
                             return (
                               <div
                                 key={i}
-                                className={`p-3 rounded border flex flex-col justify-between transition-all duration-300 ${
+                                className={`p-3 rounded-t-2xl rounded-b border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'window-active-paper text-[#1c1c1c]' : 'bg-[#fafaf7] border-[#e3e3dc]')
-                                    : 'bg-[#f4f3ee] border-[#e3e3dc] opacity-60'
+                                    ? (estaActiva ? 'lofi-window-active text-[#262624]' : 'bg-[#faf9f5] border-[#dfded5]')
+                                    : 'bg-[#f0ece1] border-[#dfded5] opacity-65'
                                 }`}
                               >
                                 <div className="flex justify-between items-center text-[9px] font-mono tracking-wider text-[#888]">
@@ -1385,10 +1396,10 @@
                                 <div className="pt-2 truncate">
                                   {miembro ? (
                                     <>
-                                      <span className="font-medium text-[11px] text-[#1c1c1c] block truncate">
+                                      <span className="font-medium text-[11px] text-[#262624] block truncate">
                                         {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] text-[#666]">(tú)</span>}
                                       </span>
-                                      <span className="text-[9px] text-[#666660] block truncate font-light">
+                                      <span className="text-[9px] text-[#73736e] block truncate font-light">
                                         {miembro.libroReal}
                                       </span>
                                     </>
@@ -1407,14 +1418,15 @@
                             );
                           })}
                         </div>
-                        <div className="w-8 h-10 bg-[#e3e3dc] rounded-t border border-[#dcd8cc] z-10 -mt-px mx-auto"></div>
+                        <div className="w-8 h-10 bg-[#dfded5] rounded-t border border-[#d4ccb8] z-10 -mt-px mx-auto"></div>
 
+                        {/* Botón para compartir en Instagram Stories */}
                         <div className="mt-6 w-full max-w-[280px]">
                           <button
                             onClick={() => setModalStoryAbierto(true)}
                             className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
                           >
-                            Compartir en Instagram (Story 9:16)
+                            Compartir en Instagram (Story Lo-Fi)
                           </button>
                         </div>
                       </div>
@@ -1423,7 +1435,7 @@
 
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-3 fade-in">
-                      <div className="editorial-card p-3 text-xs flex items-center justify-between text-[#666660] bg-white">
+                      <div className="editorial-card p-3 text-xs flex items-center justify-between text-[#73736e] bg-white">
                         <span>progreso: pág. {miPagina}</span>
                         <span className="text-[#adae1d] font-medium">anti-spoilers activo</span>
                       </div>
@@ -1461,29 +1473,29 @@
                           <div
                             key={i}
                             className={`editorial-card p-5 space-y-3 ${
-                              !estaDesbloqueado ? 'opacity-40 bg-[#fafaf7]' : ''
+                              !estaDesbloqueado ? 'opacity-40 bg-[#faf9f5]' : ''
                             }`}
                           >
                             {!estaDesbloqueado ? (
-                              <div className="text-center py-3 space-y-1 text-xs text-[#666660]">
-                                <p className="font-medium text-[#1c1c1c]">sección bloqueada</p>
+                              <div className="text-center py-3 space-y-1 text-xs text-[#73736e]">
+                                <p className="font-medium text-[#262624]">sección bloqueada</p>
                                 <p className="text-[11px]">se desbloquea en la página {paginaFin}</p>
                               </div>
                             ) : (
                               <div className="space-y-3 fade-in">
-                                <div className="flex justify-between items-center text-[10px] text-[#666660] uppercase tracking-wider">
+                                <div className="flex justify-between items-center text-[10px] text-[#73736e] uppercase tracking-wider">
                                   <span>sección {i + 1}</span>
                                   <span>mínimo pág. {paginaFin}</span>
                                 </div>
-                                <h3 className="text-sm font-semibold text-[#1c1c1c]">
+                                <h3 className="text-sm font-semibold text-[#262624]">
                                   {tituloCap}
                                 </h3>
                                 <p className="text-[#444] text-xs leading-relaxed">
                                   {cap.descripcion || cap.texto || ''}
                                 </p>
 
-                                <div className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded space-y-2">
-                                  <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
+                                <div className="p-3 bg-[#faf9f5] border border-[#dfded5] rounded space-y-2">
+                                  <span className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold block">
                                     cápsula del tiempo
                                   </span>
                                   <div className="flex gap-2">
@@ -1519,8 +1531,8 @@
                                   </div>
                                 </div>
 
-                                <div className="pt-2 border-t border-[#e3e3dc] space-y-2">
-                                  <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                                <div className="pt-2 border-t border-[#dfded5] space-y-2">
+                                  <h4 className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold">
                                     reflexiones
                                   </h4>
                                   {puedeComentarCapitulos && (
@@ -1574,10 +1586,10 @@
                                   {notasCapitulo.map((com, idx) => (
                                     <div
                                       key={idx}
-                                      className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded space-y-1"
+                                      className="p-3 bg-[#faf9f5] border border-[#dfded5] rounded space-y-1"
                                     >
-                                      <div className="flex justify-between text-[10px] text-[#666660]">
-                                        <span className="font-medium text-[#1c1c1c]">
+                                      <div className="flex justify-between text-[10px] text-[#73736e]">
+                                        <span className="font-medium text-[#262624]">
                                           {com.autora}
                                         </span>
                                         <span>{com.fecha}</span>
@@ -1596,12 +1608,12 @@
 
                       <div
                         className={`editorial-card p-5 space-y-3 mt-6 ${
-                          !estaDesbloqueadaValoracion ? 'opacity-40 bg-[#fafaf7]' : ''
+                          !estaDesbloqueadaValoracion ? 'opacity-40 bg-[#faf9f5]' : ''
                         }`}
                       >
                         {!estaDesbloqueadaValoracion ? (
-                          <div className="text-center py-4 space-y-1 text-xs text-[#666660]">
-                            <p className="font-medium text-[#1c1c1c]">valoración final bloqueada</p>
+                          <div className="text-center py-4 space-y-1 text-xs text-[#73736e]">
+                            <p className="font-medium text-[#262624]">valoración final bloqueada</p>
                             <p className="text-[11px]">disponible al llegar a la página {paginaFinalLibro}.</p>
                           </div>
                         ) : (
@@ -1610,13 +1622,13 @@
                               <span className="text-[10px] text-[#adae1d] uppercase tracking-wider font-semibold block">
                                 fin de lectura
                               </span>
-                              <h3 className="text-sm font-semibold text-[#1c1c1c]">
+                              <h3 className="text-sm font-semibold text-[#262624]">
                                 Valora "{libroActual.titulo}"
                               </h3>
                             </div>
 
                             <div className="flex items-center gap-1.5 pt-1">
-                              <span className="text-xs text-[#666660] pr-1">puntuación:</span>
+                              <span className="text-xs text-[#73736e] pr-1">puntuación:</span>
                               {[1, 2, 3, 4, 5].map((num) => (
                                 <button
                                   key={num}
@@ -1624,14 +1636,14 @@
                                   onClick={() => setEstrellasLibro(num)}
                                   className={`text-sm transition-transform active:scale-95 ${
                                     num <= estrellasLibro
-                                      ? 'text-[#1c1c1c] font-bold'
+                                      ? 'text-[#262624] font-bold'
                                       : 'text-stone-300'
                                   }`}
                                 >
                                   ★
                                 </button>
                               ))}
-                              <span className="text-xs font-medium text-[#1c1c1c] pl-2">
+                              <span className="text-xs font-medium text-[#262624] pl-2">
                                 ({estrellasLibro}/5)
                               </span>
                             </div>
@@ -1660,13 +1672,13 @@
 
                   {seccionApp === 'comunidad' && (
                     <div className="space-y-3 fade-in">
-                      <div className="flex bg-[#e3e3dc] p-1 rounded-lg text-xs">
+                      <div className="flex bg-[#dfded5] p-1 rounded-lg text-xs">
                         <button
                           onClick={() => setSubTabComunidad('chat')}
                           className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'chat'
-                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
-                              : 'text-[#666660]'
+                              ? 'bg-white text-[#262624] shadow-xs font-medium'
+                              : 'text-[#73736e]'
                           }`}
                         >
                           chat
@@ -1675,8 +1687,8 @@
                           onClick={() => setSubTabComunidad('mapa')}
                           className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'mapa'
-                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
-                              : 'text-[#666660]'
+                              ? 'bg-white text-[#262624] shadow-xs font-medium'
+                              : 'text-[#73736e]'
                           }`}
                         >
                           mapa
@@ -1685,8 +1697,8 @@
                           onClick={() => setSubTabComunidad('cafecitos')}
                           className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'cafecitos'
-                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
-                              : 'text-[#666660]'
+                              ? 'bg-white text-[#262624] shadow-xs font-medium'
+                              : 'text-[#73736e]'
                           }`}
                         >
                           café
@@ -1695,8 +1707,8 @@
                           onClick={() => setSubTabComunidad('gildas')}
                           className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'gildas'
-                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
-                              : 'text-[#666660]'
+                              ? 'bg-white text-[#262624] shadow-xs font-medium'
+                              : 'text-[#73736e]'
                           }`}
                         >
                           socias
@@ -1706,9 +1718,9 @@
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
                           <div className="editorial-card p-4 h-[380px] flex flex-col justify-between">
-                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e3e3dc] shrink-0 text-xs">
-                              <span className="font-medium text-[#1c1c1c]">conversación en vivo</span>
-                              <span className="text-[10px] text-[#adae1d] bg-[#fafaf7] px-2 py-0.5 rounded border border-[#e3e3dc]">
+                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#dfded5] shrink-0 text-xs">
+                              <span className="font-medium text-[#262624]">conversación en vivo</span>
+                              <span className="text-[10px] text-[#adae1d] bg-[#faf9f5] px-2 py-0.5 rounded border border-[#dfded5]">
                                 {nombresEnLinea.length} activas
                               </span>
                             </div>
@@ -1731,14 +1743,14 @@
                                         : 'items-start mr-auto'
                                     } max-w-[85%]`}
                                   >
-                                    <span className="text-[9px] text-[#666660] mb-0.5 px-1">
+                                    <span className="text-[9px] text-[#73736e] mb-0.5 px-1">
                                       {nombreUsuario}
                                     </span>
                                     <div
                                       className={`p-2.5 rounded text-xs ${
                                         esMio
-                                          ? 'bg-[#1c1c1c] text-white'
-                                          : 'bg-[#fafaf7] text-[#1c1c1c] border border-[#e3e3dc]'
+                                          ? 'bg-[#262624] text-white'
+                                          : 'bg-[#faf9f5] text-[#262624] border border-[#dfded5]'
                                       }`}
                                     >
                                       {msg.mensaje}
@@ -1749,7 +1761,7 @@
                             </div>
                             <form
                               onSubmit={enviarChat}
-                              className="mt-3 pt-3 border-t border-[#e3e3dc] flex gap-2 shrink-0"
+                              className="mt-3 pt-3 border-t border-[#dfded5] flex gap-2 shrink-0"
                             >
                               <input
                                 type="text"
@@ -1767,14 +1779,14 @@
                             </form>
                           </div>
                         ) : (
-                          <div className="editorial-card p-6 text-center text-xs text-[#666660]">
+                          <div className="editorial-card p-6 text-center text-xs text-[#73736e]">
                             Acceso restringido según modalidad.
                           </div>
                         ))}
 
                       {subTabComunidad === 'mapa' && (
                         <div className="editorial-card p-4 space-y-3">
-                          <h3 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                          <h3 className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold">
                             distribución geográfica
                           </h3>
                           <ComponenteMapa usuarias={usuariasClub} />
@@ -1791,10 +1803,10 @@
                                   className="editorial-card p-4 flex justify-between items-center text-xs"
                                 >
                                   <div>
-                                    <h3 className="font-medium text-[#1c1c1c]">
+                                    <h3 className="font-medium text-[#262624]">
                                       {caf.titulo}
                                     </h3>
-                                    <p className="text-[11px] text-[#666660]">
+                                    <p className="text-[11px] text-[#73736e]">
                                       {caf.fecha}
                                     </p>
                                   </div>
@@ -1811,7 +1823,7 @@
                             </div>
                           </div>
                         ) : (
-                          <div className="editorial-card p-6 text-center text-xs text-[#666660]">
+                          <div className="editorial-card p-6 text-center text-xs text-[#73736e]">
                             Acceso restringido según modalidad.
                           </div>
                         ))}
@@ -1824,14 +1836,14 @@
                               className="editorial-card p-3.5 flex justify-between items-center text-xs"
                             >
                               <div>
-                                <span className="font-medium text-[#1c1c1c] block">
+                                <span className="font-medium text-[#262624] block">
                                   {u.nombre || 'Socia'}
                                 </span>
-                                <span className="text-[10px] text-[#666660] uppercase">
+                                <span className="text-[10px] text-[#73736e] uppercase">
                                   {u.modalidad}
                                 </span>
                               </div>
-                              <span className="text-[11px] text-[#444] bg-[#fafaf7] px-2 py-0.5 rounded border border-[#e3e3dc]">
+                              <span className="text-[11px] text-[#444] bg-[#faf9f5] px-2 py-0.5 rounded border border-[#dfded5]">
                                 pág. {u.pagina || '0'}
                               </span>
                             </div>
@@ -1847,10 +1859,10 @@
                         <span className="text-[10px] text-[#adae1d] uppercase tracking-wider font-semibold block">
                           archivo
                         </span>
-                        <h2 className="text-sm font-semibold text-[#1c1c1c]">
+                        <h2 className="text-sm font-semibold text-[#262624]">
                           historial y propuestas
                         </h2>
-                        <p className="text-xs text-[#666660]">
+                        <p className="text-xs text-[#73736e]">
                           Obras leídas y votaciones para la próxima lectura.
                         </p>
                       </div>
@@ -1868,10 +1880,10 @@
                               size="grid"
                             />
                             <div className="w-full truncate">
-                              <h3 className="text-xs font-medium text-[#1c1c1c] truncate">
+                              <h3 className="text-xs font-medium text-[#262624] truncate">
                                 {lec.titulo}
                               </h3>
-                              <p className="text-[10px] text-[#666660] truncate">
+                              <p className="text-[10px] text-[#73736e] truncate">
                                 {lec.autora}
                               </p>
                             </div>
@@ -1880,7 +1892,7 @@
                       </div>
 
                       <div className="editorial-card p-4 space-y-3">
-                        <h3 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                        <h3 className="text-[10px] uppercase tracking-wider text-[#73736e] font-semibold">
                           propuestas activas
                         </h3>
 
@@ -1895,7 +1907,7 @@
                               }
                               className="w-full editorial-input px-3 py-2 text-xs"
                             />
-                            <p className="text-[10px] text-[#666660] pl-0.5">
+                            <p className="text-[10px] text-[#73736e] pl-0.5">
                               Formato requerido: Título - Autora
                             </p>
                             <button
@@ -1974,7 +1986,7 @@
                           {propuestas.map((prop, i) => (
                             <div
                               key={i}
-                              className="bg-[#fafaf7] border border-[#e3e3dc] p-3 rounded-lg flex items-center justify-between gap-3 text-xs"
+                              className="bg-[#faf9f5] border border-[#dfded5] p-3 rounded-lg flex items-center justify-between gap-3 text-xs"
                             >
                               <div
                                 onClick={() => setLibroSeleccionadoModal(prop)}
@@ -1987,13 +1999,13 @@
                                   size="small"
                                 />
                                 <div>
-                                  <span className="font-medium text-[#1c1c1c] block leading-tight">
+                                  <span className="font-medium text-[#262624] block leading-tight">
                                     {prop.titulo}
                                   </span>
-                                  <span className="text-[10px] text-[#666660] block">
+                                  <span className="text-[10px] text-[#73736e] block">
                                     {prop.autora || 'Autora desconocida'}
                                   </span>
-                                  <span className="text-[10px] text-[#666660]">
+                                  <span className="text-[10px] text-[#73736e]">
                                     por {prop.propuestoPor || 'Socia'} /{' '}
                                     <span className="text-[#adae1d] underline">
                                       sinopsis
@@ -2017,7 +2029,7 @@
                                   });
                                   mostrarToast('Voto registrado.');
                                 }}
-                                className="bg-white border border-[#e3e3dc] text-[#1c1c1c] hover:bg-[#f3f4f6] px-3 py-2 text-xs rounded shadow-xs shrink-0 transition-all font-medium"
+                                className="bg-white border border-[#dfded5] text-[#262624] hover:bg-[#f3f4f6] px-3 py-2 text-xs rounded shadow-xs shrink-0 transition-all font-medium"
                               >
                                 votar ({prop.votos || 0})
                               </button>
@@ -2031,10 +2043,10 @@
                   {seccionApp === 'buzon' && (
                     <div className="space-y-3 fade-in">
                       <div className="editorial-card p-5 space-y-3">
-                        <h2 className="text-sm font-semibold text-[#1c1c1c]">
+                        <h2 className="text-sm font-semibold text-[#262624]">
                           buzón privado
                         </h2>
-                        <p className="text-xs text-[#666660]">
+                        <p className="text-xs text-[#73736e]">
                           Sugerencias y comunicación directa con la administración.
                         </p>
                         <textarea
@@ -2081,8 +2093,8 @@
                   }
                   className={`py-1.5 px-2 rounded transition-all text-xs tracking-tight ${
                     seccionApp === tab.key
-                      ? 'text-[#1c1c1c] font-semibold bg-white shadow-xs'
-                      : 'text-[#666660] hover:text-[#1c1c1c]'
+                      ? 'text-[#262624] font-semibold bg-white shadow-xs'
+                      : 'text-[#73736e] hover:text-[#262624]'
                   }`}
                 >
                   {tab.label}
@@ -2093,7 +2105,7 @@
         );
       }
 
-      const root = ReactDOM.createRoot(document.getElementById('root'));
+      const root = ReactDOM.createRoot(getElementById ? document.getElementById('root') : document.getElementById('root'));
       root.render(<App />);
     </script>
   </body>
