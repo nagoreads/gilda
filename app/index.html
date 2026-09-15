@@ -118,21 +118,27 @@
         }
       }
 
-      /* Contenedor con fondo blanco puro y estilo vector lofi */
+      /* Contenedor con fondo blanco puro para las ventanas */
       .lofi-scene-container {
         background: #ffffff;
         border: 2px solid #262624;
         position: relative;
         overflow: hidden;
-        color: #262624;
       }
 
-      /* Ventana activa con luz cálida de lectura */
-      .lofi-window-active {
+      /* Estilo de ventana realista con luz cálida activa (ON) */
+      .window-card-active {
         background: #fbbf24 !important;
-        border-color: #b45309 !important;
+        border-color: #92400e !important;
         color: #1e1b4b !important;
-        box-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+        box-shadow: 0 0 14px rgba(251, 191, 36, 0.75), inset 0 0 6px rgba(255, 255, 255, 0.5);
+      }
+
+      /* Estilo de ventana inactiva (OFF) */
+      .window-card-inactive {
+        background: #18181b !important;
+        border-color: #3f3f46 !important;
+        color: #a1a1aa !important;
       }
 
       #mapa-gilda {
@@ -207,19 +213,6 @@
         santander: [43.4623, -3.8099],
         vigo: [42.2406, -8.7207],
       };
-
-      // Ilustración vectorial de edificios residenciales (morado oscuro y gris oscuro, sin cielo ni nubes ni estrellas)
-      function SiluetaEdificiosVectorial() {
-        return (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 498" preserveAspectRatio="none">
-            {/* Silueta de edificios de fondo en la base */}
-            <path d="M 0 498 L 0 380 L 35 380 L 35 340 L 75 340 L 75 498 Z" fill="#2d223c" />
-            <path d="M 70 498 L 70 310 L 140 310 L 140 498 Z" fill="#1e1e24" />
-            <path d="M 135 498 L 135 350 L 210 350 L 210 498 Z" fill="#2d223c" />
-            <path d="M 205 498 L 205 320 L 280 320 L 280 498 Z" fill="#1e1e24" />
-          </svg>
-        );
-      }
 
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
@@ -645,7 +638,7 @@
           setIsReadingNow(nuevoEstado);
           localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
           enviarAccion('estado_lectura', { leyendo: nuevoEstado });
-          mostrarToast(nuevoEstado ? 'Luz encendida en tu ventana.' : 'Luz apagada.');
+          mostrarToast(nuevoEstado ? 'Luz encendida en tu ventana (ON).' : 'Luz apagada (OFF).');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -767,7 +760,7 @@
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-story-white.png';
+            link.download = 'gilda-ventanas-story.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -980,13 +973,11 @@
                     Vista previa Story (9:16)
                   </span>
 
-                  {/* TARJETA STORY CON FONDO BLANCO PURO Y EDIFICIOS LOHI */}
+                  {/* TARJETA STORY CON VENTANAS REALISTAS */}
                   <div
                     ref={storyCardRef}
-                    className="lofi-scene-container w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
+                    className="lofi-scene-container w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-white"
                   >
-                    <SiluetaEdificiosVectorial />
-
                     {/* Cabecera */}
                     <div className="space-y-1 pt-1 z-10">
                       <div className="flex justify-between items-center">
@@ -996,34 +987,38 @@
                         <span className="text-[9px] font-mono-code text-[#6b7280]">@gilda.mailclub</span>
                       </div>
                       <h3 className="font-serif-title text-lg font-bold text-[#262624] leading-tight">
-                        Una habitación propia
+                        Ventanas de Lectura
                       </h3>
                       <p className="text-[10px] text-[#4b5563] italic truncate font-serif">
                         Leyendo: {libroActual.titulo}
                       </p>
                     </div>
 
-                    {/* Bloque central del edificio (paredes en tonos morado/gris oscuro, marcos oscuros) */}
-                    <div className="my-auto py-2 px-3 bg-[#2d223c]/95 backdrop-blur-xs rounded-2xl border-2 border-[#1e1e24] shadow-xl z-10 space-y-2">
-                      <div className="flex justify-between items-center text-[9px] font-mono-code text-[#cbd5e1] px-1">
-                        <span>VENTANAS RESIDENCIALES</span>
-                        <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} activas</span>
+                    {/* Cuadrícula de ventanas realistas */}
+                    <div className="my-auto py-2 px-3 bg-[#111113] rounded-2xl border-2 border-[#27272a] shadow-xl z-10 space-y-2">
+                      <div className="flex justify-between items-center text-[9px] font-mono-code text-[#a1a1aa] px-1">
+                        <span>ESTADO VENTANAS</span>
+                        <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} ON</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {miembrosEdificio.slice(0, 6).map((m, i) => (
                           <div
                             key={i}
-                            className={`p-2.5 rounded-xl text-[9px] border-2 flex flex-col justify-between transition-all ${
-                              m.estaLeyendo
-                                ? 'lofi-window-active font-semibold shadow-md'
-                                : 'bg-[#1e1e24] border-[#374151] text-[#9ca3af]'
+                            className={`relative p-2.5 rounded-lg border-2 text-[9px] flex flex-col justify-between h-20 overflow-hidden ${
+                              m.estaLeyendo ? 'window-card-active font-bold' : 'window-card-inactive'
                             }`}
                           >
-                            <div className="flex justify-between font-mono-code text-[7px] opacity-80">
-                              <span>{m.estaLeyendo ? 'ON' : 'OFF'}</span>
+                            <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
+                              <div className="border-r border-b border-current"></div>
+                              <div className="border-b border-current"></div>
+                              <div className="border-r border-current"></div>
+                              <div></div>
+                            </div>
+                            <div className="flex justify-between font-mono-code text-[7px] z-10">
+                              <span className="px-1 rounded bg-black/20">{m.estaLeyendo ? 'ON' : 'OFF'}</span>
                               <span>0{i+1}</span>
                             </div>
-                            <span className="font-semibold truncate pt-1">{m.nombreReal}</span>
+                            <span className="font-semibold truncate z-10">{m.nombreReal}</span>
                           </div>
                         ))}
                       </div>
@@ -1033,7 +1028,7 @@
                     <div className="pt-2 border-t border-stone-300 flex flex-col gap-1 text-[9px] text-stone-600 z-10">
                       <div className="flex justify-between items-center font-medium">
                         <span className="bg-stone-100 text-[#2d223c] px-2 py-0.5 rounded text-[8px] font-mono-code border border-stone-300">
-                          vector lofi
+                          modo activo
                         </span>
                         <span className="font-bold text-[#2d223c] tracking-wide">@nagoreads</span>
                       </div>
@@ -1237,21 +1232,21 @@
                         <div className="pt-3 border-t border-[#dfded5] flex items-center justify-between">
                           <div>
                             <span className="text-xs font-medium text-[#262624] block">
-                              estado de lectura
+                              estado de lectura (ventanas)
                             </span>
                             <span className="text-[10px] text-[#73736e]">
-                              {isReadingNow ? 'luz encendida en tu ventana' : 'luz apagada'}
+                              {isReadingNow ? 'tu ventana está encendida (ON)' : 'tu ventana está apagada (OFF)'}
                             </span>
                           </div>
                           <button
                             onClick={toggleLecturaLamp}
                             className={`px-3.5 py-1.5 text-xs rounded-lg font-medium transition-all ${
                               isReadingNow
-                                ? 'bg-[#adae1d] text-white'
+                                ? 'bg-[#adae1d] text-white shadow-sm'
                                 : 'bg-[#faf9f5] text-[#444] border border-[#dfded5]'
                             }`}
                           >
-                            {isReadingNow ? 'apagar luz' : 'encender luz'}
+                            {isReadingNow ? 'apagar luz (OFF)' : 'encender luz (ON)'}
                           </button>
                         </div>
 
@@ -1388,71 +1383,61 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      {/* Pestaña habitación con fondo blanco puro y edificios vectoriales en tonos morado/gris oscuro */}
-                      <div className="lofi-scene-container w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg">
-                        <SiluetaEdificiosVectorial />
-
+                      {/* Pestaña habitación con ventanas realistas interactivas */}
+                      <div className="lofi-scene-container w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg bg-white">
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#2d223c] bg-stone-100 px-2.5 py-0.5 rounded border border-stone-300 block">
                             gilda — club de lectura
                           </span>
                           <h2 className="font-serif-title text-lg font-medium text-[#262624]">
-                            Una habitación propia
+                            Ventanas de Lectura
                           </h2>
                           <p className="text-[11px] text-[#73736e]">
-                            Silencio residencial, {miembrosEdificio.length} lectoras en activo
+                            {miembrosEdificio.filter(m => m.estaLeyendo).length} de {miembrosEdificio.length} lectoras con la luz encendida (ON)
                           </p>
                         </div>
 
-                        {/* Bloque de edificios con paredes de color morado oscuro (#2d223c) y marcos oscuros */}
-                        <div className="relative w-full max-w-[280px] bg-[#2d223c] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border-2 border-[#1e1e24] z-10 shadow-xl">
-                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#1e1e24] rounded-t"></div>
-
-                          {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
-                            const miembro = miembrosEdificio[i];
-                            const estaActiva = miembro ? miembro.estaLeyendo : false;
+                        {/* Cuadrícula de ventanas realistas */}
+                        <div className="w-full max-w-[320px] grid grid-cols-2 gap-3 z-10">
+                          {miembrosEdificio.map((miembro, i) => {
+                            const estaActiva = miembro.estaLeyendo;
 
                             return (
                               <div
                                 key={i}
-                                className={`p-3 rounded-t-xl rounded-b border-2 flex flex-col justify-between transition-all duration-300 ${
-                                  miembro
-                                    ? (estaActiva ? 'lofi-window-active font-semibold' : 'bg-[#1e1e24] border-[#374151] text-[#9ca3af]')
-                                    : 'bg-[#18181b] border-[#27272a] opacity-40'
+                                className={`relative p-3.5 rounded-xl border-2 transition-all duration-300 flex flex-col justify-between h-28 overflow-hidden shadow-sm ${
+                                  estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
                                 }`}
                               >
-                                <div className="flex justify-between items-center text-[9px] font-mono tracking-wider opacity-75">
-                                  <span>{miembro ? (estaActiva ? 'ON' : 'OFF') : 'VACÍA'}</span>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${estaActiva ? 'bg-[#fbbf24]' : 'bg-stone-500'}`}></span>
+                                {/* Líneas de división de cristales (cuarterones de ventana) */}
+                                <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
+                                  <div className="border-r border-b border-current"></div>
+                                  <div className="border-b border-current"></div>
+                                  <div className="border-r border-current"></div>
+                                  <div></div>
                                 </div>
-                                <div className="pt-2 truncate">
-                                  {miembro ? (
-                                    <>
-                                      <span className={`font-medium text-[11px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
-                                        {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
-                                      </span>
-                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
-                                        {miembro.libroReal}
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="font-normal text-[10px] text-stone-500 block truncate">
-                                        disponible
-                                      </span>
-                                      <span className="text-[8px] text-stone-600 block truncate">
-                                        habitación 0{i+1}
-                                      </span>
-                                    </>
-                                  )}
+
+                                <div className="flex justify-between items-center text-[9px] font-mono tracking-wider z-10">
+                                  <span className={`px-1.5 py-0.5 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
+                                    {estaActiva ? 'ON' : 'OFF'}
+                                  </span>
+                                  <span className="opacity-75">0{i+1}</span>
+                                </div>
+
+                                <div className="z-10 truncate pt-2">
+                                  <span className={`font-semibold text-xs block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
+                                    {miembro.nombreReal} {miembro.esYo && <span className="text-[9px] opacity-75">(tú)</span>}
+                                  </span>
+                                  <span className={`text-[10px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
+                                    {miembro.libroReal}
+                                  </span>
                                 </div>
                               </div>
                             );
                           })}
                         </div>
-                        <div className="w-8 h-10 bg-[#1e1e24] rounded-t border-2 border-[#111113] z-10 -mt-px mx-auto"></div>
 
-                        <div className="mt-6 w-full max-w-[280px] z-10">
+                        <div className="mt-6 w-full max-w-[320px] z-10">
                           <button
                             onClick={() => setModalStoryAbierto(true)}
                             className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
