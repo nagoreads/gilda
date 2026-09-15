@@ -621,7 +621,7 @@
         };
 
         useEffect(() => {
-          // RED DE SEGURIDAD: Forzar fin de carga a los 2.5s si alguna hoja de cálculo falla
+          // RED DE SEGURIDAD: Forzar fin de carga a los 2.5s para evitar pantalla en blanco
           const timerSeguridad = setTimeout(() => {
             setCargando(false);
           }, 2500);
