@@ -109,26 +109,6 @@
         }
       }
 
-      /* Arquitectura de Ventanas Viva */
-      @keyframes windowGlow {
-        0%, 100% { opacity: 1; filter: brightness(1); }
-        50% { opacity: 0.9; filter: brightness(0.96); }
-      }
-      .window-active {
-        animation: windowGlow 5s infinite ease-in-out;
-        background: #fbf5b7;
-        border-color: #facc15 !important;
-        box-shadow: inset 0 0 12px rgba(250, 204, 21, 0.25);
-      }
-
-      @keyframes subtleRise {
-        0% { transform: translateY(0) scale(0.6); opacity: 0.5; }
-        100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
-      }
-      .smoke-line {
-        animation: subtleRise 4s infinite ease-out;
-      }
-
       #mapa-gilda {
         height: 260px;
         width: 100%;
@@ -623,7 +603,7 @@
           setIsReadingNow(nuevoEstado);
           localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
           enviarAccion('estado_lectura', { leyendo: nuevoEstado });
-          mostrarToast(nuevoEstado ? 'Habitación iluminada.' : 'Luz apagada.');
+          mostrarToast(nuevoEstado ? 'Ventana iluminada.' : 'Luz apagada.');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -1119,7 +1099,7 @@
                             onClick={toggleLecturaLamp}
                             className={`px-3.5 py-1.5 text-xs rounded-lg font-medium transition-all ${
                               isReadingNow
-                                ? 'bg-[#1c1c1c] text-white'
+                                ? 'bg-[#adae1d] text-white'
                                 : 'bg-[#fafaf8] text-[#444] border border-[#e2e2dc]'
                             }`}
                           >
@@ -1258,27 +1238,24 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION (ARQUITECTURA MINIMALISTA EDITORIAL) */}
+                  {/* PESTAÑA: HABITACION (ARQUITECTURA CLARA Y LUMINOSA) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      <div className="w-full bg-[#1c1c1c] text-white rounded-xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg border border-[#333]">
+                      <div className="w-full editorial-card p-6 relative overflow-hidden flex flex-col items-center">
                         
                         <div className="text-center z-10 mb-6 space-y-1">
                           <h2 className="text-xs font-medium uppercase tracking-widest text-[#adae1d]">
                             una habitación propia
                           </h2>
-                          <p className="text-[11px] text-[#999]">
-                            silencio en la noche, {miembrosEdificio.length} lectoras en activo
+                          <p className="text-[11px] text-[#666660]">
+                            espacio compartido, {miembrosEdificio.length} lectoras en activo
                           </p>
                         </div>
 
-                        {/* Fachada Arquitectónica Dinámica */}
-                        <div className="relative w-full max-w-[280px] bg-[#242424] rounded-t p-4 grid grid-cols-2 gap-3 border border-[#333] z-10">
+                        {/* Fachada Luminosa y Arquitectónica */}
+                        <div className="relative w-full max-w-[280px] bg-[#f2f2ee] rounded-t-lg p-4 grid grid-cols-2 gap-3 border border-[#e2e2dc] z-10 shadow-xs">
                           
-                          {/* Detalles estructurales minimalistas */}
-                          <div className="absolute -top-6 right-6 w-3 h-5 bg-[#333] rounded-t">
-                            <div className="absolute -top-2 left-0.5 w-2 h-1 bg-gray-500/50 rounded-full smoke-line"></div>
-                          </div>
+                          <div className="absolute -top-6 right-6 w-2.5 h-5 bg-[#d4d4cd] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
@@ -1287,32 +1264,32 @@
                             return (
                               <div
                                 key={i}
-                                className={`p-2.5 rounded border flex flex-col justify-between transition-all duration-300 ${
+                                className={`p-3 rounded border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'window-active text-stone-900 border-amber-400' : 'bg-[#2a2a2a] border-[#383838] text-stone-300')
-                                    : 'bg-[#1e1e1e] border-[#292929] text-stone-600 opacity-50'
+                                    ? (estaActiva ? 'bg-[#fffbeb] border-[#facc15] shadow-xs' : 'bg-white border-[#e2e2dc]')
+                                    : 'bg-[#fafaf8] border-[#e2e2dc] opacity-60'
                                 }`}
                               >
-                                <div className="flex justify-between items-center text-[8px] font-mono tracking-wider">
+                                <div className="flex justify-between items-center text-[9px] font-mono tracking-wider text-[#888]">
                                   <span>{miembro ? (estaActiva ? 'LIT' : 'OFF') : 'VACÍA'}</span>
-                                  <span className={`w-1 h-1 rounded-full ${estaActiva ? 'bg-amber-600' : 'bg-stone-600'}`}></span>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${estaActiva ? 'bg-[#adae1d]' : 'bg-[#ccc]'}`}></span>
                                 </div>
                                 <div className="pt-2 truncate">
                                   {miembro ? (
                                     <>
-                                      <span className="font-medium text-[11px] block truncate">
-                                        {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-65">(tú)</span>}
+                                      <span className="font-medium text-[11px] text-[#1c1c1c] block truncate">
+                                        {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] text-[#666]">(tú)</span>}
                                       </span>
-                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-stone-800' : 'text-stone-400'}`}>
+                                      <span className="text-[9px] text-[#666660] block truncate font-light">
                                         {miembro.libroReal}
                                       </span>
                                     </>
                                   ) : (
                                     <>
-                                      <span className="font-normal text-[10px] text-stone-600 block truncate">
+                                      <span className="font-normal text-[10px] text-[#888] block truncate">
                                         disponible
                                       </span>
-                                      <span className="text-[8px] text-stone-700 block truncate">
+                                      <span className="text-[8px] text-[#aaa] block truncate">
                                         habitación 0{i+1}
                                       </span>
                                     </>
@@ -1322,8 +1299,8 @@
                             );
                           })}
                         </div>
-                        {/* Entrada del edificio */}
-                        <div className="w-8 h-10 bg-[#2a2a2a] rounded-t border border-[#383838] z-10 -mt-px mx-auto"></div>
+                        {/* Entrada del edificio clara */}
+                        <div className="w-8 h-10 bg-[#e2e2dc] rounded-t border border-[#d4d4cd] z-10 -mt-px mx-auto"></div>
                       </div>
                     </div>
                   )}
@@ -1636,7 +1613,7 @@
                                       esMio
                                         ? 'items-end ml-auto'
                                         : 'items-start mr-auto'
-                                    } max-w-[85%]` }
+                                    } max-w-[85%]`}
                                   >
                                     <span className="text-[9px] text-[#666660] mb-0.5 px-1">
                                       {nombreUsuario}
