@@ -412,7 +412,6 @@
         const [libroSeleccionadoModal, setLibroSeleccionadoModal] =
           useState(null);
 
-        // Estado para el modal de descarga de Story
         const [modalStoryAbierto, setModalStoryAbierto] = useState(false);
         const storyCardRef = useRef(null);
 
@@ -948,7 +947,6 @@
               </div>
             )}
 
-            {/* MODAL PREVIEW PARA DESCARGAR STORY 9:16 */}
             {modalStoryAbierto && (
               <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-4 relative shadow-2xl flex flex-col items-center">
@@ -962,7 +960,6 @@
                     Vista previa Story 9:16
                   </span>
 
-                  {/* CONTENEDOR 9:16 PARA CAPTURAR CON HTML2CANVAS */}
                   <div
                     ref={storyCardRef}
                     className="poster-paper w-[270px] h-[480px] p-6 rounded-xl flex flex-col justify-between shadow-sm relative overflow-hidden text-left"
@@ -1348,7 +1345,7 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION (LÁMINA / PÓSTER EDITORIAL Y BOTÓN DE STORY) */}
+                  {/* PESTAÑA: HABITACION */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
                       <div className="poster-paper w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-sm">
@@ -1365,7 +1362,6 @@
                           </p>
                         </div>
 
-                        {/* Fachada Arquitectónica tipo lámina */}
                         <div className="relative w-full max-w-[280px] bg-white rounded-t-lg p-4 grid grid-cols-2 gap-3 border border-[#dcd8cc] z-10 shadow-xs">
                           <div className="absolute -top-5 right-6 w-2.5 h-4 bg-[#d4d0c5] rounded-t"></div>
 
@@ -1413,7 +1409,6 @@
                         </div>
                         <div className="w-8 h-10 bg-[#e3e3dc] rounded-t border border-[#dcd8cc] z-10 -mt-px mx-auto"></div>
 
-                        {/* Botón para compartir en Instagram Stories */}
                         <div className="mt-6 w-full max-w-[280px]">
                           <button
                             onClick={() => setModalStoryAbierto(true)}
@@ -1948,9 +1943,8 @@
         );
       }
 
-      const root = ReactDOM.createRoot(getElementById('root'));
-      // Note: fixed getElementById typo to document.getElementById
-      document.getElementById('root') && root.render(<App />);
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
     </script>
   </body>
 </html>
