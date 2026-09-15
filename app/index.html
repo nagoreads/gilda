@@ -44,7 +44,7 @@
     <style>
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: #0b1329;
+        background-color: #f8f9fa;
         color: #1a1a1a;
         -webkit-tap-highlight-color: transparent;
       }
@@ -881,17 +881,17 @@
         }
 
         return (
-          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#0b1329] text-white">
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f8f9fa]">
             {toastMsg && (
-              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1a1a1a] text-white text-xs px-4 py-2.5 rounded-xl shadow-xl fade-in flex items-center gap-2 border border-gray-700">
-                <span className="w-2 h-2 rounded-full bg-[#fde047]"></span>
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1a1a1a] text-white text-xs px-4 py-2.5 rounded-xl shadow-xl fade-in flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
                 <span>{toastMsg}</span>
               </div>
             )}
 
             {libroSeleccionadoModal && (
-              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-                <div className="bg-white text-black max-w-sm w-full p-6 space-y-4 relative rounded-2xl shadow-2xl">
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+                <div className="figma-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
                   <button
                     onClick={() => setLibroSeleccionadoModal(null)}
                     className="absolute top-4 right-4 text-xs text-[#6b7280] hover:text-[#1a1a1a] bg-[#f9fafb] px-2.5 py-1 rounded-md border border-[#e5e7eb]"
@@ -933,28 +933,28 @@
               </div>
             )}
 
-            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-gray-300">
-              <div className="flex justify-between items-center bg-[#1f2937]/80 p-3 rounded-xl border border-gray-800 backdrop-blur-sm">
+            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#6b7280]">
+              <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#fde047]"></span>
-                  <span className="text-white font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
+                  <span className="text-[#1a1a1a] font-semibold">
                     {nombreUsuarioPersonalizado || sesion.nombre}
                   </span>
-                  <span className="text-[10px] bg-gray-800 px-2 py-0.5 rounded text-gray-300 uppercase font-medium">
+                  <span className="text-[10px] bg-[#e5e7eb] px-2 py-0.5 rounded text-[#4b5563] uppercase font-medium">
                     {sesion.modalidad}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditandoNombre(!editandoNombre)}
-                    className="text-[#fde047] hover:underline font-medium"
+                    className="text-[#ADAE1D] hover:underline font-medium"
                   >
                     {editandoNombre ? 'cancelar' : 'cambiar nombre'}
                   </button>
                   <span>•</span>
                   <button
                     onClick={cerrarSesion}
-                    className="hover:text-white transition-colors"
+                    className="hover:text-[#1a1a1a] transition-colors"
                   >
                     salir
                   </button>
@@ -962,7 +962,7 @@
               </div>
 
               {editandoNombre && (
-                <div className="bg-[#1f2937] border border-gray-700 p-3 rounded-xl flex gap-2 items-center fade-in">
+                <div className="figma-card p-3 bg-white flex gap-2 items-center fade-in">
                   <input
                     type="text"
                     placeholder="Tu nombre de usuario"
@@ -970,7 +970,7 @@
                     onChange={(e) =>
                       setNombreUsuarioPersonalizado(e.target.value)
                     }
-                    className="flex-grow figma-input bg-[#111827] text-white border-gray-700 px-3 py-1.5 text-xs"
+                    className="flex-grow figma-input px-3 py-1.5 text-xs"
                   />
                   <button
                     onClick={guardarNombrePersonalizado}
@@ -982,28 +982,24 @@
               )}
             </div>
 
-            <header className="w-full mb-6 space-y-1 px-1">
+            <header className="w-full mb-6 space-y-1">
               <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a] flex items-center gap-2">
                   <span>gilda</span>
                 </h1>
-                <span className="text-xs text-gray-300 bg-[#1f2937] px-3.5 py-1.5 rounded-full border border-gray-800 flex items-center gap-1.5">
-                  <span className="text-sm">🌙</span>
-                  <span>Club de Lectura</span>
-                </span>
               </div>
             </header>
 
             <main className="w-full fade-in space-y-4">
               {cargando ? (
-                <div className="text-center py-24 text-xs text-gray-400">
+                <div className="text-center py-24 text-xs text-[#6b7280]">
                   Cargando club...
                 </div>
               ) : (
                 <div>
                   {seccionApp === 'inicio' && (
-                    <div className="space-y-4 fade-in text-[#1a1a1a]">
-                      <div className="figma-card p-5 space-y-4 bg-white">
+                    <div className="space-y-4 fade-in">
+                      <div className="figma-card p-5 space-y-4">
                         <div className="flex flex-col sm:flex-row gap-4 items-center">
                           <PortadaLibro
                             titulo={libroActual.titulo}
@@ -1138,7 +1134,7 @@
                         </div>
                       </div>
 
-                      <div className="figma-card p-4 space-y-3 bg-white">
+                      <div className="figma-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
                           <span className="font-semibold text-[#1a1a1a]">
                             Ubícate :)
@@ -1165,7 +1161,7 @@
                         </div>
                       </div>
 
-                      <div className="figma-card p-4 space-y-3 bg-white">
+                      <div className="figma-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
                           <span className="font-semibold text-[#1a1a1a]">
                             Buzón anónimo de frases
@@ -1244,7 +1240,7 @@
                     </div>
                   )}
 
-                  {/* NUEVA PESTAÑA: UN EDIFICIO PROPIO */}
+                  {/* NUEVA PESTAÑA: UNA HABITACIÓN PROPIA (EDIFICIO) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
                       <div className="w-full bg-[#111827] rounded-2xl p-5 relative overflow-hidden flex flex-col items-center shadow-xl border border-gray-800">
@@ -1253,7 +1249,7 @@
                         
                         <div className="text-center z-10 mb-5 space-y-1">
                           <h2 className="text-sm font-bold text-white tracking-wide">
-                            Edificio "una habitación propia"
+                            una habitación propia
                           </h2>
                           <p className="text-[11px] text-gray-400">
                             Ventanas iluminadas de las lectoras del club en directo.
@@ -1334,7 +1330,7 @@
                   )}
 
                   {seccionApp === 'capitulos' && (
-                    <div className="space-y-3 fade-in text-[#1a1a1a]">
+                    <div className="space-y-3 fade-in">
                       <div className="figma-card p-3.5 text-xs flex items-center justify-between text-[#6b7280] bg-white">
                         <span>Progreso: pág. {miPagina}</span>
                         <span className="text-[#ADAE1D] font-medium">
@@ -1374,7 +1370,7 @@
                         return (
                           <div
                             key={i}
-                            className={`figma-card p-5 space-y-3 bg-white ${
+                            className={`figma-card p-5 space-y-3 ${
                               !estaDesbloqueado ? 'opacity-50 bg-[#f9fafb]' : ''
                             }`}
                           >
@@ -1515,7 +1511,7 @@
                       })}
 
                       <div
-                        className={`figma-card p-5 space-y-3 mt-6 bg-white ${
+                        className={`figma-card p-5 space-y-3 mt-6 ${
                           !estaDesbloqueadaValoracion
                             ? 'opacity-50 bg-[#f9fafb]'
                             : ''
@@ -1618,7 +1614,7 @@
                   )}
 
                   {seccionApp === 'comunidad' && (
-                    <div className="space-y-3 fade-in text-[#1a1a1a]">
+                    <div className="space-y-3 fade-in">
                       <div className="flex bg-[#e5e7eb] p-1 rounded-xl text-xs">
                         <button
                           onClick={() => setSubTabComunidad('chat')}
@@ -1664,7 +1660,7 @@
 
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
-                          <div className="figma-card p-4 h-[400px] flex flex-col justify-between bg-white">
+                          <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
                             <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e5e7eb] shrink-0">
                               <div className="flex items-center gap-2.5 overflow-hidden">
                                 <div className="relative flex items-center justify-center shrink-0">
@@ -1743,14 +1739,14 @@
                             </form>
                           </div>
                         ) : (
-                          <div className="figma-card p-6 text-center text-xs text-[#6b7280] bg-white">
+                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
                             Acceso reservado a Gilda Absoluta, Virtual y de
                             Café.
                           </div>
                         ))}
 
                       {subTabComunidad === 'mapa' && (
-                        <div className="figma-card p-4 space-y-3 bg-white">
+                        <div className="figma-card p-4 space-y-3">
                           <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
                             Ubícate :)
                           </h3>
@@ -1777,7 +1773,7 @@
                               {cafecitos.map((caf, i) => (
                                 <div
                                   key={i}
-                                  className="figma-card p-4 flex justify-between items-center text-xs bg-white"
+                                  className="figma-card p-4 flex justify-between items-center text-xs"
                                 >
                                   <div>
                                     <h3 className="font-semibold text-[#1a1a1a]">
@@ -1799,7 +1795,7 @@
                               ))}
                             </div>
 
-                            <div className="figma-card p-4 space-y-3 bg-white">
+                            <div className="figma-card p-4 space-y-3">
                               <div className="space-y-1">
                                 <span className="text-[11px] text-[#ADAE1D] font-medium block">
                                   Votación oficial
@@ -1856,7 +1852,7 @@
                             </div>
                           </div>
                         ) : (
-                          <div className="figma-card p-6 text-center text-xs text-[#6b7280] bg-white">
+                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
                             Acceso reservado a Gilda Absoluta, Virtual y de
                             Café.
                           </div>
@@ -1867,7 +1863,7 @@
                           {usuariasClub.map((u, i) => (
                             <div
                               key={i}
-                              className="figma-card p-3.5 flex justify-between items-center text-xs bg-white"
+                              className="figma-card p-3.5 flex justify-between items-center text-xs"
                             >
                               <div>
                                 <span className="font-semibold text-[#1a1a1a] block">
@@ -1888,8 +1884,8 @@
                   )}
 
                   {seccionApp === 'biblioteca' && (
-                    <div className="space-y-4 fade-in text-[#1a1a1a]">
-                      <div className="figma-card p-5 space-y-1 bg-white">
+                    <div className="space-y-4 fade-in">
+                      <div className="figma-card p-5 space-y-1">
                         <span className="text-[11px] text-[#ADAE1D] font-medium block">
                           Archivo
                         </span>
@@ -1905,7 +1901,7 @@
                         {lecturas.map((lec, i) => (
                           <div
                             key={i}
-                            className="figma-card p-3 text-center space-y-2 flex flex-col items-center bg-white"
+                            className="figma-card p-3 text-center space-y-2 flex flex-col items-center"
                           >
                             <PortadaLibro
                               titulo={lec.titulo}
@@ -1925,7 +1921,7 @@
                         ))}
                       </div>
 
-                      <div className="figma-card p-4 space-y-3 bg-white">
+                      <div className="figma-card p-4 space-y-3">
                         <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
                           Propuestas activas
                         </h3>
@@ -2077,8 +2073,8 @@
                   )}
 
                   {seccionApp === 'buzon' && (
-                    <div className="space-y-3 fade-in text-[#1a1a1a]">
-                      <div className="figma-card p-5 space-y-3 bg-white">
+                    <div className="space-y-3 fade-in">
+                      <div className="figma-card p-5 space-y-3">
                         <h2 className="text-sm font-bold text-[#1a1a1a]">
                           Buzón con la creadora
                         </h2>
@@ -2113,10 +2109,10 @@
               )}
             </main>
 
-            <nav className="figma-nav fixed bottom-0 left-0 right-0 py-2.5 px-3 flex justify-around items-center max-w-md mx-auto z-50 bg-[#1f2937]/90 border-t border-gray-800">
+            <nav className="figma-nav fixed bottom-0 left-0 right-0 py-2.5 px-3 flex justify-around items-center max-w-md mx-auto z-50">
               {[
                 { key: 'inicio', label: 'Inicio' },
-                { key: 'edificio', label: 'Edificio' },
+                { key: 'edificio', label: 'Habitación' },
                 { key: 'capitulos', label: 'Capítulos' },
                 { key: 'comunidad', label: 'Comunidad' },
                 { key: 'biblioteca', label: 'Archivo' },
@@ -2129,8 +2125,8 @@
                   }
                   className={`py-1.5 px-2.5 rounded-xl transition-all text-xs tracking-tight ${
                     seccionApp === tab.key
-                      ? 'text-[#fde047] bg-[#374151] font-semibold'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'text-[#ADAE1D] bg-[#fcfcea] font-semibold'
+                      : 'text-[#6b7280] hover:text-[#1a1a1a]'
                   }`}
                 >
                   {tab.label}
