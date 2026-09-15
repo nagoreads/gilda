@@ -118,7 +118,6 @@
         }
       }
 
-      /* Estilos refinados para las ventanas de la habitación propia */
       .window-card-active {
         background: #fbbf24 !important;
         border-color: #92400e !important;
@@ -213,20 +212,17 @@
 
         return (
           <div className="fade-in space-y-4 max-w-md mx-auto px-1 pb-16">
-            {/* Cabecera literaria */}
             <div className="text-center pt-1 space-y-1">
               <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-3 py-0.5 rounded-full border border-stone-300 inline-block font-bold">
-                ✦ Una habitación propia
+                Una habitación propia
               </span>
               <h2 className="font-serif-title text-2xl text-[#262624]">El Edificio de Lectura</h2>
               <p className="text-xs text-[#73736e] font-sans max-w-xs mx-auto leading-relaxed">
-                Cada ventana encendida representa el refugio íntimo de una socia sumergida en sus páginas.
+                Cada ventana encendida representa el refugio íntimo de una socia sumergida en la obra actual del club.
               </p>
             </div>
 
-            {/* CONTENEDOR DE LA FACHADA LIFI MEJORADO (3 Columnas para más ventanas) */}
             <div className="editorial-card p-4 space-y-3 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
-              
               <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs px-1">
                 <span className="font-semibold text-[#262624]">Fachada del Club</span>
                 <span className="text-amber-700 font-bold font-mono-code bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
@@ -234,7 +230,6 @@
                 </span>
               </div>
 
-              {/* Bloque Residencial con 3 columnas */}
               <div className="w-full bg-[#1e1b4b] rounded-2xl p-3.5 border-2 border-[#111026] shadow-inner relative">
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-[#111026] rounded-t"></div>
 
@@ -256,7 +251,6 @@
                           estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
                         }`}
                       >
-                        {/* Cuarterones / divisiones de los cristales de la ventana */}
                         <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
                           <div className="border-r border-b border-current"></div>
                           <div className="border-b border-current"></div>
@@ -276,7 +270,7 @@
                             {miembro.nombre} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
                           </span>
                           <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
-                            {miembro.libroReal || libroActual.titulo}
+                            {libroActual.titulo}
                           </span>
                         </div>
                       </div>
@@ -287,13 +281,12 @@
                 <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-16 h-3 bg-[#111026] rounded-b"></div>
               </div>
 
-              {/* Botón irresistible para compartir en Instagram Stories */}
               <div className="pt-1">
                 <button
                   onClick={onAbrirStory}
                   className="w-full editorial-btn py-3 text-xs font-semibold tracking-wide flex items-center justify-center gap-2 shadow-md transform hover:-translate-y-0.5 transition-all"
                 >
-                  <span>✨</span> ¡Empiezo lectura! Compartir mi ventana en Stories
+                  ¡Empiezo lectura! Compartir mi ventana en Stories
                 </button>
                 <p className="text-[10px] text-[#73736e] text-center pt-1.5 italic">
                   Presume tu refugio literario en Instagram cuando enciendas tu luz.
@@ -301,10 +294,9 @@
               </div>
             </div>
 
-            {/* Panel explicativo de la Habitación Propia */}
             <div className="editorial-card p-4 space-y-2 bg-[#faf9f5]">
               <h3 className="font-serif-title text-sm font-semibold text-[#262624] flex items-center gap-2">
-                <span>🕯️</span> Tu espacio de lectura
+                Tu espacio de lectura
               </h3>
               <p className="text-xs text-[#73736e] leading-relaxed">
                 Cada vez que abras tu libro, enciende tu ventana desde la pestaña <b>inicio</b>. Tu espacio se iluminará en la fachada para recordarnos que nunca leemos solas.
@@ -475,7 +467,6 @@
         });
 
         const [cargando, setCargando] = useState(true);
-
         const [miPagina, setMiPagina] = useState(0);
         
         const [isReadingNow, setIsReadingNow] = useState(() => {
@@ -485,11 +476,6 @@
             return false;
           }
         });
-
-        const [miLibroActual, setMiLibroActual] = useState(() => {
-          return localStorage.getItem('gilda_mi_libro') || '';
-        });
-        const [editandoMiLibro, setEditandoMiLibro] = useState(false);
 
         const [miCiudad, setMiCiudad] = useState(() => {
           return localStorage.getItem('gilda_mi_ciudad') || '';
@@ -698,7 +684,6 @@
           localStorage.removeItem('gilda_sesion');
           localStorage.removeItem('gilda_nombre_usuario');
           localStorage.removeItem('gilda_is_reading');
-          localStorage.removeItem('gilda_mi_libro');
           setSesion(null);
           setInputEmail('');
           setErrorLogin('');
@@ -723,14 +708,6 @@
 
           setEditandoNombre(false);
           mostrarToast('Nombre actualizado.');
-        };
-
-        const guardarMiLibroPersonal = () => {
-          const limpio = miLibroActual.trim();
-          localStorage.setItem('gilda_mi_libro', limpio);
-          setEditandoMiLibro(false);
-          enviarAccion('actualizar_libro', { libro: limpio });
-          mostrarToast('Lectura actual actualizada.');
         };
 
         const toggleLecturaLamp = () => {
@@ -945,7 +922,6 @@
           const lista = [...usuariasClub];
           const emailActual = sesion?.email?.toLowerCase();
           const nombreActual = nombreUsuarioPersonalizado || sesion?.nombre;
-          const libroActualUser = miLibroActual || libroActual.titulo;
 
           const existeActual = lista.find(u => (u.email || '').toLowerCase() === emailActual);
           if (!existeActual && sesion) {
@@ -953,7 +929,6 @@
               nombre: nombreActual,
               email: sesion.email,
               pagina: isReadingNow ? 1 : 0,
-              libro: libroActualUser,
               esYo: true
             });
           }
@@ -964,11 +939,11 @@
               ...u,
               nombre: esMio ? (nombreUsuarioPersonalizado || sesion.nombre) : (u.nombre || 'Socia'),
               estaLeyendo: esMio ? isReadingNow : (Number(u.pagina || u.pagina_actual || 0) > 0),
-              libroReal: esMio ? (miLibroActual || libroActual.titulo) : (u.libro || u.libro_actual || libroActual.titulo || 'Lectura del club'),
+              libroReal: libroActual.titulo,
               esYo: esMio
             };
           });
-        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miLibroActual, isReadingNow, libroActual]);
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, isReadingNow, libroActual]);
 
         const porcentajeLibro = useMemo(() => {
           const pagTotales = Number(libroActual.paginas_totales || 280);
@@ -1073,19 +1048,17 @@
                     Vista previa Story (9:16)
                   </span>
 
-                  {/* NUEVA TARJETA STORY ULTRA-ESTÉTICA Y LIMPIA (SIN TÍTULOS GENÉRICOS) */}
+                  {/* TARJETA STORY ULTRA-ESTÉTICA, LIMPIA Y CON @gilda.mailclub GARANTIZADO */}
                   <div
                     ref={storyCardRef}
                     className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
                   >
-                    {/* Brillo sutil de fondo */}
                     <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-transparent to-transparent"></div>
 
-                    {/* Cabecera limpia */}
                     <div className="space-y-1.5 pt-1 z-10">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2.5 py-0.5 rounded-full font-bold border border-amber-800/50">
-                          ✦ una habitación propia
+                          Una habitación propia
                         </span>
                         <span className="text-[9px] font-mono-code text-zinc-400">@gilda.mailclub</span>
                       </div>
@@ -1094,12 +1067,11 @@
                           Ventana encendida
                         </h3>
                         <p className="text-[11px] text-amber-200/90 italic truncate font-serif pt-0.5">
-                          📖 {miLibroActual || libroActual.titulo}
+                          {libroActual.titulo}
                         </p>
                       </div>
                     </div>
 
-                    {/* Ventanas activas en la story */}
                     <div className="my-auto py-3 px-3 bg-zinc-900/90 rounded-2xl border border-zinc-800 shadow-xl z-10 space-y-2.5">
                       <div className="flex justify-between items-center text-[9px] font-mono-code text-zinc-400 px-1">
                         <span>REFUGIO ACTIVO</span>
@@ -1123,13 +1095,12 @@
                       </div>
                     </div>
 
-                    {/* Pie de página elegante */}
                     <div className="pt-2 border-t border-zinc-800 flex flex-col gap-1 text-[9px] text-zinc-400 z-10">
                       <div className="flex justify-between items-center font-medium">
                         <span className="text-zinc-300 text-[9px] font-mono-code">
                           Club de Lectura
                         </span>
-                        <span className="font-bold text-amber-400 tracking-wide">@nagoreads</span>
+                        <span className="font-bold text-amber-400 tracking-wide">@gilda.mailclub</span>
                       </div>
                       <div className="flex justify-between items-center text-[8px] text-zinc-500 font-mono-code">
                         <span>gildaclub.netlify.app</span>
@@ -1293,41 +1264,6 @@
                           </div>
                         </div>
 
-                        <div className="pt-3 border-t border-[#dfded5] space-y-2">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-medium text-[#262624]">
-                              ¿Qué libro estás leyendo?
-                            </span>
-                            <button
-                              onClick={() => setEditandoMiLibro(!editandoMiLibro)}
-                              className="text-[#adae1d] hover:underline font-medium"
-                            >
-                              {editandoMiLibro ? 'cancelar' : (miLibroActual ? 'cambiar' : 'añadir')}
-                            </button>
-                          </div>
-                          {editandoMiLibro ? (
-                            <div className="flex gap-2 items-center fade-in">
-                              <input
-                                type="text"
-                                placeholder="Título del libro"
-                                value={miLibroActual}
-                                onChange={(e) => setMiLibroActual(e.target.value)}
-                                className="flex-grow editorial-input px-3 py-1.5 text-xs"
-                              />
-                              <button
-                                onClick={guardarMiLibroPersonal}
-                                className="editorial-btn px-3 py-1.5 text-xs shrink-0"
-                              >
-                                guardar
-                              </button>
-                            </div>
-                          ) : (
-                            <p className="text-xs text-[#73736e]">
-                              {miLibroActual ? `actual: ${miLibroActual}` : `actual: ${libroActual.titulo} (club)`}
-                            </p>
-                          )}
-                        </div>
-
                         <div className="pt-3 border-t border-[#dfded5] flex items-center justify-between">
                           <div>
                             <span className="text-xs font-medium text-[#262624] block">
@@ -1349,14 +1285,13 @@
                           </button>
                         </div>
 
-                        {/* Botón directo para iniciar story al encender luz */}
                         {isReadingNow && (
                           <div className="pt-1 fade-in">
                             <button
                               onClick={() => setModalStoryAbierto(true)}
                               className="w-full bg-[#faf9f5] border border-[#adae1d] text-[#adae1d] hover:bg-[#adae1d] hover:text-white py-2 text-xs rounded-lg font-medium transition-all flex items-center justify-center gap-1.5"
                             >
-                              <span>✨</span> ¡Comparte en Stories que estás leyendo!
+                              Compartir en Stories que estás leyendo
                             </button>
                           </div>
                         )}
