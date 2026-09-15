@@ -205,18 +205,18 @@
         bottom: 0;
         left: 50%;
         transform: translateX(-50%);
-        width: 85%;
+        width: 92%;
         height: auto;
         min-height: 45%;
         background-color: #1a1a24;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-        padding: 24px 16px;
+        padding: 24px 12px;
         display: flex;
         flex-wrap: wrap-reverse;
         justify-content: center;
         align-content: flex-start;
-        gap: 12px;
+        gap: 14px 6px;
         border-top: 4px solid #2d2d3d;
         border-left: 4px solid #2d2d3d;
         border-right: 4px solid #2d2d3d;
@@ -235,8 +235,8 @@
       }
 
       .window {
-        width: 24px;
-        height: 36px;
+        width: 20px;
+        height: 30px;
         border-radius: 4px;
         cursor: pointer;
         position: relative;
@@ -377,14 +377,29 @@
                 return (
                   <div
                     key={i}
-                    onClick={() => {
-                      if (esLibre) return;
-                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                    }}
-                    className={`window ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
-                    title={miembro.nombre || ''}
+                    className="flex flex-col items-center gap-1 w-[44px]"
                   >
+                    <div
+                      onClick={() => {
+                        if (esLibre) return;
+                        if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                        else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                      }}
+                      className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
+                      title={miembro.nombre || ''}
+                    ></div>
+                    {!esLibre && (
+                      <div className="text-center w-full px-0.5 select-none">
+                        <span className={`block text-[7px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100' : 'text-indigo-200/50'}`}>
+                          {miembro.nombre}
+                        </span>
+                        {estaActiva && (
+                          <span className="block text-[6px] text-amber-300/90 truncate italic font-serif leading-none mt-0.5">
+                            {miembro.libroReal}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
