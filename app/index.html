@@ -347,6 +347,18 @@
 
         const [miPagina, setMiPagina] = useState(0);
         
+        // Estado de lectura On/Off (Lámpara)
+        const [isReadingNow, setIsReadingNow] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem('gilda_is_reading')) || false;
+          } catch {
+            return false;
+          }
+        });
+
+        // Ventana modal de la ventana aesthetic
+        const [showWindowModal, setShowWindowModal] = useState(false);
+
         const [miCiudad, setMiCiudad] = useState(() => {
           return localStorage.getItem('gilda_mi_ciudad') || '';
         });
@@ -550,6 +562,7 @@
         const cerrarSesion = () => {
           localStorage.removeItem('gilda_sesion');
           localStorage.removeItem('gilda_nombre_usuario');
+          localStorage.removeItem('gilda_is_reading');
           setSesion(null);
           setInputEmail('');
           setErrorLogin('');
@@ -574,6 +587,14 @@
 
           setEditandoNombre(false);
           mostrarToast('Nombre actualizado al instante.');
+        };
+
+        const toggleLecturaLamp = () => {
+          const nuevoEstado = !isReadingNow;
+          setIsReadingNow(nuevoEstado);
+          localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
+          enviarAccion('estado_lectura', { leyendo: nuevoEstado });
+          mostrarToast(nuevoEstado ? '💡 Lámpara encendida en tu ventana. ¡Leyendo ahora!' : 'Lámpara apagada.');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -856,6 +877,97 @@
               </div>
             )}
 
+            {/* Ventana Aesthetic y Moderna del Club */}
+            {showWindowModal && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 fade-in">
+                {/* Marco exterior de la ventana estilo arquitectónico moderno */}
+                <div className="bg-[#1f242d] border-8 border-[#3b4252] rounded-3xl max-w-sm w-full p-6 space-y-4 relative shadow-2xl overflow-hidden">
+                  
+                  {/* Luz ambiental superior de la ventana */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-amber-500/10 blur-xl pointer-events-none"></div>
+
+                  <div className="flex justify-between items-center border-b border-[#434c5e] pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 text-base">🪟</span>
+                      <h3 className="text-sm font-bold text-white tracking-wide">
+                        La Ventana del Club
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setShowWindowModal(false)}
+                      className="text-xs text-gray-300 hover:text-white bg-[#2e3440] px-3 py-1 rounded-lg border border-[#434c5e] transition-colors"
+                    >
+                      cerrar
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-gray-400">
+                    Asómate a la ventana nocturna: los cristales iluminados en ámbar muestran qué compañeras tienen la lámpara encendida leyendo ahora.
+                  </p>
+
+                  {/* Cuarterones de la ventana (Grid estilo moderno) */}
+                  <div className="max-h-72 overflow-y-auto grid grid-cols-2 gap-2.5 pr-1">
+                    
+                    {/* Tarjeta de la usuaria actual en la ventana */}
+                    <div className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isReadingNow 
+                        ? 'bg-amber-950/40 border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
+                        : 'bg-[#2e3440]/60 border-[#434c5e]'
+                    }`}>
+                      <div className="flex justify-between items-start">
+                        <span className={`text-lg ${isReadingNow ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'text-gray-500'}`}>
+                          💡
+                        </span>
+                        <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${isReadingNow ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-700/50 text-gray-400'}`}>
+                          {isReadingNow ? 'ON' : 'OFF'}
+                        </span>
+                      </div>
+                      <div className="pt-2">
+                        <span className="font-bold text-white text-xs block truncate">
+                          {nombreUsuarioPersonalizado || sesion.nombre} <span className="text-[9px] text-amber-400 font-normal">(tú)</span>
+                        </span>
+                        <span className="text-[10px] text-gray-400">Pág. {miPagina}</span>
+                      </div>
+                    </div>
+
+                    {/* Resto de socias del club */}
+                    {usuariasClub
+                      .filter((u) => (u.email || '').toLowerCase() !== sesion.email.toLowerCase())
+                      .map((u, i) => {
+                        const estaLeyendoSocia = Number(u.pagina || u.pagina_actual || 0) > 0;
+                        return (
+                          <div
+                            key={i}
+                            className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
+                              estaLeyendoSocia 
+                                ? 'bg-amber-950/40 border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
+                                : 'bg-[#2e3440]/60 border-[#434c5e]'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <span className={`text-lg ${estaLeyendoSocia ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'text-gray-500'}`}>
+                                💡
+                              </span>
+                              <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${estaLeyendoSocia ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-700/50 text-gray-400'}`}>
+                                {estaLeyendoSocia ? 'ON' : 'OFF'}
+                              </span>
+                            </div>
+                            <div className="pt-2">
+                              <span className="font-bold text-white text-xs block truncate">
+                                {u.nombre || 'Socia'}
+                              </span>
+                              <span className="text-[10px] text-gray-400">Pág. {u.pagina || u.pagina_actual || 0}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                  </div>
+
+                </div>
+              </div>
+            )}
+
             {libroSeleccionadoModal && (
               <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
                 <div className="figma-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
@@ -954,9 +1066,15 @@
                 <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a] flex items-center gap-2">
                   <span>gilda</span>
                 </h1>
-                <span className="text-xs text-[#6b7280] bg-white px-3 py-1 rounded-full border border-[#e5e7eb]">
-                  {gildasLeyendoAhora} leyendo ahora
-                </span>
+                <button
+                  onClick={() => setShowWindowModal(true)}
+                  className="text-xs text-[#1a1a1a] bg-white hover:bg-[#f9fafb] px-3.5 py-1.5 rounded-full border border-[#e5e7eb] flex items-center gap-1.5 transition-all shadow-sm font-medium"
+                >
+                  <span className={`text-sm ${isReadingNow ? 'text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]' : 'text-gray-400'}`}>
+                    🪟
+                  </span>
+                  <span>La Ventana ({gildasLeyendoAhora})</span>
+                </button>
               </div>
             </header>
 
@@ -969,72 +1087,101 @@
                 <div>
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
-                      <div className="figma-card p-5 flex flex-col sm:flex-row gap-4 items-center">
-                        <PortadaLibro
-                          titulo={libroActual.titulo}
-                          autora={libroActual.autora}
-                          portada={libroActual.portada}
-                          size="large"
-                        />
-                        <div className="space-y-2.5 flex-grow w-full">
+                      <div className="figma-card p-5 space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4 items-center">
+                          <PortadaLibro
+                            titulo={libroActual.titulo}
+                            autora={libroActual.autora}
+                            portada={libroActual.portada}
+                            size="large"
+                          />
+                          <div className="space-y-2.5 flex-grow w-full">
+                            <div className="flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold">
+                                Lectura actual
+                              </span>
+                            </div>
+                            <h2 className="text-base font-bold text-[#1a1a1a] leading-snug">
+                              {libroActual.titulo}
+                            </h2>
+                            <p className="text-xs text-[#6b7280]">
+                              {libroActual.autora}
+                            </p>
+
+                            <div>
+                              <div className="flex justify-between text-[11px] text-[#6b7280] mb-1">
+                                <span>Progreso</span>
+                                <span>{porcentajeLibro}%</span>
+                              </div>
+                              <div className="w-full bg-[#f9fafb] rounded-full h-1.5 border border-[#e5e7eb] overflow-hidden">
+                                <div
+                                  className="bg-[#ADAE1D] h-full transition-all duration-300 rounded-full"
+                                  style={{ width: `${porcentajeLibro}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botón de Lámpara de Lectura On/Off */}
+                        <div className="pt-3 border-t border-[#e5e7eb] flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold">
-                              Lectura actual
+                            <span className={`text-lg ${isReadingNow ? 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'text-gray-300'}`}>
+                              💡
                             </span>
-                          </div>
-                          <h2 className="text-base font-bold text-[#1a1a1a] leading-snug">
-                            {libroActual.titulo}
-                          </h2>
-                          <p className="text-xs text-[#6b7280]">
-                            {libroActual.autora}
-                          </p>
-
-                          <div>
-                            <div className="flex justify-between text-[11px] text-[#6b7280] mb-1">
-                              <span>Progreso</span>
-                              <span>{porcentajeLibro}%</span>
-                            </div>
-                            <div className="w-full bg-[#f9fafb] rounded-full h-1.5 border border-[#e5e7eb] overflow-hidden">
-                              <div
-                                className="bg-[#ADAE1D] h-full transition-all duration-300 rounded-full"
-                                style={{ width: `${porcentajeLibro}%` }}
-                              ></div>
+                            <div>
+                              <span className="text-xs font-semibold text-[#1a1a1a] block">
+                                Lámpara de lectura
+                              </span>
+                              <span className="text-[10px] text-[#6b7280]">
+                                {isReadingNow ? 'Encendida (leyendo ahora)' : 'Apagada'}
+                              </span>
                             </div>
                           </div>
+                          <button
+                            onClick={toggleLecturaLamp}
+                            className={`px-4 py-2 text-xs rounded-xl font-medium transition-all ${
+                              isReadingNow
+                                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                : 'bg-[#f1f3f5] text-[#4b5563] hover:bg-[#e2e8f0] border border-[#e5e7eb]'
+                            }`}
+                          >
+                            {isReadingNow ? 'Apagar lámpara' : 'Encender lámpara'}
+                          </button>
+                        </div>
 
-                          <div className="pt-2 border-t border-[#e5e7eb] flex items-center justify-between gap-2">
-                            <span className="text-xs text-[#6b7280]">
-                              Página:
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                onClick={() => actualizarPagina(miPagina - 5)}
-                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
-                              >
-                                -5
-                              </button>
-                              <input
-                                type="number"
-                                value={miPagina}
-                                onChange={(e) =>
-                                  setMiPagina(Number(e.target.value))
-                                }
-                                className="w-12 figma-input py-1 text-center text-xs"
-                              />
-                              <button
-                                onClick={() => actualizarPagina(miPagina + 5)}
-                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
-                              >
-                                +5
-                              </button>
-                              <button
-                                onClick={() => actualizarPagina(miPagina)}
-                                className="figma-btn px-3 py-1 text-xs"
-                              >
-                                ok
-                              </button>
-                            </div>
+                        <div className="pt-2 border-t border-[#e5e7eb] flex items-center justify-between gap-2">
+                          <span className="text-xs text-[#6b7280]">
+                            Página:
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => actualizarPagina(miPagina - 5)}
+                              className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                            >
+                              -5
+                            </button>
+                            <input
+                              type="number"
+                              value={miPagina}
+                              onChange={(e) =>
+                                setMiPagina(Number(e.target.value))
+                              }
+                              className="w-12 figma-input py-1 text-center text-xs"
+                            />
+                            <button
+                              onClick={() => actualizarPagina(miPagina + 5)}
+                              className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                            >
+                              +5
+                            </button>
+                            <button
+                              onClick={() => actualizarPagina(miPagina)}
+                              className="figma-btn px-3 py-1 text-xs"
+                            >
+                              ok
+                            </button>
                           </div>
                         </div>
                       </div>
