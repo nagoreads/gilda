@@ -1848,8 +1848,11 @@
                           archivo
                         </span>
                         <h2 className="text-sm font-semibold text-[#1c1c1c]">
-                          historial de lecturas
+                          historial y propuestas
                         </h2>
+                        <p className="text-xs text-[#666660]">
+                          Obras leídas y votaciones para la próxima lectura.
+                        </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -1874,6 +1877,153 @@
                             </div>
                           </div>
                         ))}
+                      </div>
+
+                      <div className="editorial-card p-4 space-y-3">
+                        <h3 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                          propuestas activas
+                        </h3>
+
+                        {puedeProponerLibros && (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              placeholder="Título - Autora"
+                              value={nuevaPropuesta}
+                              onChange={(e) =>
+                                setNuevaPropuesta(e.target.value)
+                              }
+                              className="w-full editorial-input px-3 py-2 text-xs"
+                            />
+                            <p className="text-[10px] text-[#666660] pl-0.5">
+                              Formato requerido: Título - Autora
+                            </p>
+                            <button
+                              onClick={async () => {
+                                const textoInput = nuevaPropuesta.trim();
+                                if (!textoInput) return;
+
+                                if (!textoInput.includes('-')) {
+                                  mostrarToast('Usa el formato: Título - Autora');
+                                  return;
+                                }
+
+                                const partes = textoInput.split('-');
+                                const tituloLibro = partes[0].trim();
+                                const autoraLibro = partes.slice(1).join('-').trim();
+
+                                mostrarToast('Buscando portada...');
+                                let portadaUrl = '';
+
+                                try {
+                                  const res = await fetch(
+                                    `https://openlibrary.org/search.json?q=${encodeURIComponent(
+                                      tituloLibro + ' ' + autoraLibro
+                                    )}&fields=title,cover_i&limit=1`
+                                  );
+                                  const data = await res.json();
+
+                                  if (
+                                    data.docs &&
+                                    data.docs.length > 0 &&
+                                    data.docs[0].cover_i
+                                  ) {
+                                    portadaUrl = `https://covers.openlibrary.org/b/id/${data.docs[0].cover_i}-M.jpg`;
+                                  }
+                                } catch (err) {
+                                  console.error('Error buscando portada:', err);
+                                }
+
+                                const nombreActual =
+                                  localStorage.getItem(
+                                    'gilda_nombre_usuario'
+                                  ) || sesion.nombre;
+                                
+                                const nuevaObra = {
+                                  titulo: tituloLibro,
+                                  autora: autoraLibro,
+                                  propuestoPor: nombreActual,
+                                  votos: 1,
+                                  portada: portadaUrl,
+                                  sinopsis:
+                                    'Sinopsis pendiente de actualización.',
+                                };
+
+                                const listaActualizada = [nuevaObra, ...propuestas];
+                                setPropuestas(listaActualizada);
+                                localStorage.setItem('gilda_propuestas', JSON.stringify(listaActualizada));
+
+                                enviarAccion('propuesta', {
+                                  titulo: tituloLibro,
+                                  autora: autoraLibro,
+                                  portada: portadaUrl,
+                                  propuestoPor: nombreActual,
+                                });
+                                setNuevaPropuesta('');
+                                mostrarToast('Propuesta añadida con éxito.');
+                              }}
+                              disabled={enviandoForm}
+                              className="w-full editorial-btn py-2 text-xs"
+                            >
+                              proponer obra
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-2.5 pt-1">
+                          {propuestas.map((prop, i) => (
+                            <div
+                              key={i}
+                              className="bg-[#fafaf7] border border-[#e3e3dc] p-3 rounded-lg flex items-center justify-between gap-3 text-xs"
+                            >
+                              <div
+                                onClick={() => setLibroSeleccionadoModal(prop)}
+                                className="flex items-center gap-3 cursor-pointer flex-grow hover:opacity-80 transition-opacity"
+                              >
+                                <PortadaLibro
+                                  titulo={prop.titulo}
+                                  autora={prop.autora || prop.propuestoPor}
+                                  portada={prop.portada}
+                                  size="small"
+                                />
+                                <div>
+                                  <span className="font-medium text-[#1c1c1c] block leading-tight">
+                                    {prop.titulo}
+                                  </span>
+                                  <span className="text-[10px] text-[#666660] block">
+                                    {prop.autora || 'Autora desconocida'}
+                                  </span>
+                                  <span className="text-[10px] text-[#666660]">
+                                    por {prop.propuestoPor || 'Socia'} /{' '}
+                                    <span className="text-[#adae1d] underline">
+                                      sinopsis
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  const actualizadas = [...propuestas];
+                                  const votosActuales =
+                                    Number(actualizadas[i].votos || 0) + 1;
+                                  actualizadas[i].votos = votosActuales;
+                                  setPropuestas(actualizadas);
+                                  localStorage.setItem('gilda_propuestas', JSON.stringify(actualizadas));
+
+                                  enviarAccion('voto', {
+                                    tituloPropuesta: prop.titulo,
+                                    nuevosVotos: votosActuales,
+                                  });
+                                  mostrarToast('Voto registrado.');
+                                }}
+                                className="bg-white border border-[#e3e3dc] text-[#1c1c1c] hover:bg-[#f3f4f6] px-3 py-2 text-xs rounded shadow-xs shrink-0 transition-all font-medium"
+                              >
+                                votar ({prop.votos || 0})
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
