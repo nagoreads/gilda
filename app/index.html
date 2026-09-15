@@ -225,6 +225,7 @@
       function ComponenteMapa({ usuarias }) {
         const mapRef = useRef(null);
         const markersGroupRef = useRef(null);
+        const [extraCoords, setExtraCoords] = useState({});
 
         const limpiarTexto = (str) => {
           if (!str) return '';
@@ -237,9 +238,10 @@
 
         useEffect(() => {
           if (!mapRef.current) {
+            // Vista global del mundo (zoom 2) centrada para abarcar cualquier país
             const map = L.map('mapa-gilda', { zoomControl: false }).setView(
-              [40.4168, -3.7038],
-              5
+              [20, 0],
+              2
             );
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -252,36 +254,55 @@
             markersGroupRef.current = markersGroup;
             mapRef.current = map;
           }
+        }, []);
 
-          if (markersGroupRef.current) {
-            markersGroupRef.current.clearLayers();
+        useEffect(() => {
+          if (!markersGroupRef.current) return;
+          markersGroupRef.current.clearLayers();
 
-            usuarias.forEach((u) => {
-              const ciudadRaw = u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación || '';
-              const ciudadClean = limpiarTexto(ciudadRaw);
+          usuarias.forEach(async (u) => {
+            const ciudadRaw = u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación || '';
+            const ciudadClean = limpiarTexto(ciudadRaw);
+            if (!ciudadClean) return;
 
-              if (COORDENADAS_CIUDADES[ciudadClean]) {
-                const coords = COORDENADAS_CIUDADES[ciudadClean];
-                const marker = L.circleMarker(coords, {
-                  radius: 7,
-                  fillColor: '#ADAE1D',
-                  color: '#ffffff',
-                  weight: 2,
-                  opacity: 1,
-                  fillOpacity: 0.95,
-                });
-                marker.bindPopup(
-                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1a1a1a; padding:8px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"><b>${
-                    u.nombre || 'Socia'
-                  }</b><br><span style="font-size:11px; color:#6b7280;">${
-                    u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación
-                  }</span></div>`
-                );
-                markersGroupRef.current.addLayer(marker);
+            // 1. Busca primero en la lista rápida de España
+            let coords = COORDENADAS_CIUDADES[ciudadClean] || extraCoords[ciudadClean];
+
+            // 2. Si no está, lo busca de forma global en todo el mundo
+            if (!coords) {
+              try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadRaw)}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                  coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                  setExtraCoords(prev => ({ ...prev, [ciudadClean]: coords }));
+                }
+              } catch (err) {
+                console.error("Error geocodificando ciudad global:", ciudadRaw);
               }
-            });
-          }
-        }, [usuarias]);
+            }
+
+            // 3. Si encuentra las coordenadas, dibuja el marcador verde
+            if (coords && markersGroupRef.current) {
+              const marker = L.circleMarker(coords, {
+                radius: 7,
+                fillColor: '#ADAE1D',
+                color: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.95,
+              });
+              marker.bindPopup(
+                `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1a1a1a; padding:8px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"><b>${
+                  u.nombre || 'Socia'
+                }</b><br><span style="font-size:11px; color:#6b7280;">${
+                  u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación
+                }</span></div>`
+              );
+              markersGroupRef.current.addLayer(marker);
+            }
+          });
+        }, [usuarias, extraCoords]);
 
         return <div id="mapa-gilda"></div>;
       }
