@@ -13,7 +13,7 @@
 
     <!-- Tipografía Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Courier+Prime&display=swap"
       rel="stylesheet"
     />
 
@@ -52,6 +52,10 @@
 
       .font-serif-title {
         font-family: 'Playfair Display', serif;
+      }
+
+      .font-mono-code {
+        font-family: 'Courier Prime', monospace;
       }
 
       .editorial-card {
@@ -114,18 +118,18 @@
         }
       }
 
-      /* Paleta Lo-Fi Estética y Cálida */
-      .lofi-poster {
-        background: linear-gradient(135deg, #f5f0e6 0%, #ede6d6 100%);
-        background-image: radial-gradient(#d4c7b0 0.9px, transparent 0.9px);
-        background-size: 16px 16px;
-        border: 1px solid #d0c2ab;
+      /* Estética Story Lo-Fi Ultra Estética y Mono */
+      .lofi-story-poster {
+        background: #f4eee1;
+        background-image: radial-gradient(#d6c9b0 1px, transparent 1px);
+        background-size: 20px 20px;
+        border: 2px solid #3d3832;
       }
 
-      .lofi-window-active {
+      .lofi-story-window-active {
         background: #fde047 !important;
-        border-color: #ca8a04 !important;
-        box-shadow: inset 0 0 16px rgba(234, 179, 8, 0.4);
+        border-color: #a16207 !important;
+        box-shadow: inset 0 0 12px rgba(234, 179, 8, 0.6);
       }
 
       #mapa-gilda {
@@ -742,12 +746,12 @@
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#f5f0e6'
+              backgroundColor: '#f4eee1'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-habitacion-lofi.png';
+            link.download = 'gilda-story-lofi.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -948,7 +952,7 @@
             )}
 
             {modalStoryAbierto && (
-              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+              <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-4 relative shadow-2xl flex flex-col items-center">
                   <button
                     onClick={() => setModalStoryAbierto(false)}
@@ -957,54 +961,68 @@
                     cerrar
                   </button>
                   <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
-                    Vista previa Story Lo-Fi (9:16)
+                    Vista previa Story (9:16)
                   </span>
 
-                  {/* Tarjeta Story con paleta lo-fi cálida y menciones @nagoreads / @gilda.mailclub */}
+                  {/* NUEVA TARJETA STORY ULTRA ESTÉTICA Y MONA */}
                   <div
                     ref={storyCardRef}
-                    className="lofi-poster w-[270px] h-[480px] p-5 rounded-2xl flex flex-col justify-between shadow-xl relative overflow-hidden text-left"
+                    className="lofi-story-poster w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
                   >
-                    <div className="space-y-1">
+                    {/* Elementos decorativos estilo ticket de biblioteca / fanzine */}
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#d97706] via-[#ca8a04] to-[#166534]"></div>
+
+                    {/* Cabecera de la Story */}
+                    <div className="space-y-1.5 pt-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] uppercase tracking-widest text-[#92400e] block font-bold">
-                          gilda — club de lectura
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#78350f] bg-[#fef3c7] px-2 py-0.5 rounded-full font-bold border border-[#fde68a]">
+                          ✦ club de lectura
                         </span>
-                        <span className="text-[8px] text-[#78716c] font-mono font-medium">@gilda.mailclub</span>
+                        <span className="text-[9px] font-mono-code text-[#78716c]">@gilda.mailclub</span>
                       </div>
-                      <h3 className="font-serif-title text-base font-semibold text-[#1c1917]">
+                      <h3 className="font-serif-title text-lg font-bold text-[#1c1917] leading-tight">
                         Una habitación propia
                       </h3>
-                      <p className="text-[10px] text-[#57534e] truncate">
-                        Lectura: {libroActual.titulo}
+                      <p className="text-[10px] text-[#57534e] italic truncate font-serif">
+                        Leyendo: {libroActual.titulo}
                       </p>
                     </div>
 
-                    <div className="my-auto py-1 grid grid-cols-2 gap-2 w-full">
-                      {miembrosEdificio.slice(0, 8).map((m, i) => (
-                        <div
-                          key={i}
-                          className={`p-2 rounded-t-xl rounded-b text-[9px] border flex flex-col justify-between transition-all ${
-                            m.estaLeyendo
-                              ? 'lofi-window-active text-[#1c1917]'
-                              : 'bg-[#fafaf9] border-[#e7e5e4] text-[#78716c]'
-                          }`}
-                        >
-                          <div className="flex justify-between font-mono text-[7px] text-[#78716c]">
-                            <span>{m.estaLeyendo ? 'LIT' : 'OFF'}</span>
-                            <span>0{i+1}</span>
+                    {/* Edificio de habitaciones rediseñado y súper mono */}
+                    <div className="my-auto py-1 bg-white/70 backdrop-blur-xs p-3 rounded-2xl border border-[#d6ccc2] shadow-xs space-y-2">
+                      <div className="flex justify-between items-center text-[9px] font-mono-code text-[#78716c] px-1">
+                        <span>VENTANAS ENCENDIDAS</span>
+                        <span className="text-[#b45309] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} activas</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {miembrosEdificio.slice(0, 6).map((m, i) => (
+                          <div
+                            key={i}
+                            className={`p-2.5 rounded-xl text-[9px] border flex flex-col justify-between transition-all ${
+                              m.estaLeyendo
+                                ? 'lofi-story-window-active text-[#1c1917] font-medium'
+                                : 'bg-[#fafaf9] border-[#e7e5e4] text-[#78716c]'
+                            }`}
+                          >
+                            <div className="flex justify-between font-mono-code text-[7px] opacity-75">
+                              <span>{m.estaLeyendo ? '☕ ON' : 'Zzz'}</span>
+                              <span>0{i+1}</span>
+                            </div>
+                            <span className="font-semibold truncate pt-1">{m.nombreReal}</span>
                           </div>
-                          <span className="font-medium truncate pt-1">{m.nombreReal}</span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="pt-2 border-t border-[#d6ccc2] flex flex-col gap-0.5 text-[9px] text-[#57534e]">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{miembrosEdificio.filter(m => m.estaLeyendo).length} lectoras en línea</span>
-                        <span className="font-bold text-[#b45309]">@nagoreads</span>
+                    {/* Pie de página con diseño estético de créditos y mención obligatoria */}
+                    <div className="pt-2 border-t border-[#d6ccc2]/60 flex flex-col gap-1 text-[9px] text-[#44403c]">
+                      <div className="flex justify-between items-center font-medium">
+                        <span className="bg-[#1c1917] text-[#f4eee1] px-2 py-0.5 rounded text-[8px] font-mono-code">
+                          modo nocturno
+                        </span>
+                        <span className="font-bold text-[#b45309] tracking-wide">@nagoreads</span>
                       </div>
-                      <div className="flex justify-between items-center text-[8px] text-[#78716c]">
+                      <div className="flex justify-between items-center text-[8px] text-[#78716c] font-mono-code">
                         <span>gildaclub.netlify.app</span>
                         <span>@gilda.mailclub</span>
                       </div>
@@ -1353,10 +1371,9 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION (ESTÉTICA LO-FI) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      <div className="lofi-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-md">
+                      <div className="lofi-story-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-md">
                         
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#92400e] block">
@@ -1382,7 +1399,7 @@
                                 key={i}
                                 className={`p-3 rounded-t-2xl rounded-b border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'lofi-window-active text-[#262624]' : 'bg-[#faf9f5] border-[#dfded5]')
+                                    ? (estaActiva ? 'lofi-story-window-active text-[#262624]' : 'bg-[#faf9f5] border-[#dfded5]')
                                     : 'bg-[#f0ece1] border-[#dfded5] opacity-65'
                                 }`}
                               >
