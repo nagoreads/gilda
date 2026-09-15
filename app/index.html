@@ -120,25 +120,6 @@
         }
       }
 
-      /* ESTANCIAS DEL PLANO EDITORIAL */
-      .room-active {
-        background: #fef9e7 !important;
-        border-color: #d97706 !important;
-        color: #451a03 !important;
-      }
-
-      .room-inactive {
-        background: #fdfcfa !important;
-        border-color: #e2ded0 !important;
-        color: #78716c !important;
-      }
-
-      .room-vacant {
-        background: #f7f5ef !important;
-        border: 1px dashed #d4ccb8 !important;
-        color: #a8a29e !important;
-      }
-
       #mapa-gilda {
         height: 260px;
         width: 100%;
@@ -205,9 +186,9 @@
         bottom: 0;
         left: 50%;
         transform: translateX(-50%);
-        width: 92%;
+        width: 96%;
         height: auto;
-        min-height: 45%;
+        min-height: 50%;
         background-color: #1a1a24;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
@@ -216,7 +197,7 @@
         flex-wrap: wrap-reverse;
         justify-content: center;
         align-content: flex-start;
-        gap: 14px 6px;
+        gap: 20px 8px; /* Ajustado el espacio vertical para que el texto de varias líneas encaje */
         border-top: 4px solid #2d2d3d;
         border-left: 4px solid #2d2d3d;
         border-right: 4px solid #2d2d3d;
@@ -377,7 +358,7 @@
                 return (
                   <div
                     key={i}
-                    className="flex flex-col items-center gap-1 w-[44px]"
+                    className="flex flex-col items-center gap-1.5 w-[54px]"
                   >
                     <div
                       onClick={() => {
@@ -389,12 +370,12 @@
                       title={miembro.nombre || ''}
                     ></div>
                     {!esLibre && (
-                      <div className="text-center w-full px-0.5 select-none">
-                        <span className={`block text-[7px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100' : 'text-indigo-200/50'}`}>
+                      <div className="text-center w-full select-none px-0.5">
+                        <span className={`block text-[7.5px] font-medium leading-tight break-words whitespace-normal ${estaActiva ? 'text-amber-100' : 'text-indigo-200/50'}`}>
                           {miembro.nombre}
                         </span>
                         {estaActiva && (
-                          <span className="block text-[6px] text-amber-300/90 truncate italic font-serif leading-none mt-0.5">
+                          <span className="block text-[7px] text-amber-300/90 italic font-serif leading-tight mt-0.5 break-words whitespace-normal">
                             {miembro.libroReal}
                           </span>
                         )}
@@ -1292,51 +1273,54 @@
                   {modoStory === 'ventana' && (
                     <div
                       ref={storyVentanaRef}
-                      className="w-[280px] h-[498px] rounded-2xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
+                      className="w-[280px] h-[498px] rounded-2xl relative overflow-hidden bg-[#0b0f19] postal-ratio flex flex-col border border-zinc-800 shadow-2xl"
                     >
-                      <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-950/20 via-transparent to-transparent"></div>
+                      {/* Fondo Estrellado */}
+                      <div id="stars-container-story">
+                        {Array.from({length: 40}).map((_, i) => (
+                           <div key={i} className="star" style={{left: `${Math.random()*100}%`, top: `${Math.random()*70}%`, width: `${Math.random()*2+1}px`, height: `${Math.random()*2+1}px`, animationDelay: `${Math.random()*3}s`}}></div>
+                        ))}
+                      </div>
+                      <div className="moon absolute top-[10%] right-[15%] w-[60px] h-[60px]"></div>
 
-                      <div className="space-y-1.5 pt-1 z-10">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[8px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded font-bold border border-amber-800/50">
-                            Una habitación propia
-                          </span>
-                          <span className="text-[8px] font-mono-code text-zinc-400">@gilda.mailclub</span>
-                        </div>
-                        <div>
-                          <h3 className="font-serif-title text-base font-bold text-white leading-tight">
-                            Estancia activa
+                      {/* Header */}
+                      <div className="relative z-10 pt-8 px-4 text-center">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-black/40 px-3 py-1 rounded-full border border-amber-800/50 backdrop-blur-sm">
+                          Casa Gilda
+                        </span>
+                      </div>
+
+                      {/* Centro - Ventana Individual */}
+                      <div className="relative z-10 flex flex-col items-center justify-center flex-grow mt-4">
+                        <div className={`window ${isReadingNow ? 'light-on' : 'light-off'} scale-[2] ring-4 ring-white/80 shadow-2xl mb-12`}></div>
+                        
+                        <div className="text-center px-4 w-full">
+                          <h3 className="font-serif-title text-2xl font-bold text-white leading-tight break-words">
+                            {nombreUsuarioPersonalizado || sesion.nombre}
                           </h3>
-                          <p className="text-[11px] text-amber-200/90 italic truncate font-serif pt-0.5">
-                            {libroActual.titulo}
-                          </p>
+                          {isReadingNow ? (
+                            <div className="mt-2 space-y-1">
+                              <span className="block text-[10px] font-mono-code text-amber-500/90 uppercase tracking-widest">
+                                Estancia en vela
+                              </span>
+                              <p className="text-amber-200 italic font-serif text-lg leading-snug break-words">
+                                {libroActual.titulo}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="mt-2 space-y-1">
+                              <span className="block text-[10px] font-mono-code text-indigo-300/80 uppercase tracking-widest">
+                                Estancia en silencio
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      <div className="my-auto py-5 px-4 bg-zinc-900/90 rounded-xl border border-zinc-800 shadow-xl z-10 space-y-3">
-                        <div className="flex justify-between items-center text-[9px] font-mono-code text-zinc-400">
-                          <span>REFUGIO PERSONAL</span>
-                          <span className="text-amber-400 font-bold">{isReadingNow ? 'En vela' : 'Silencio'}</span>
-                        </div>
-                        <div className="p-3.5 rounded-lg border room-active space-y-1">
-                          <div className="flex justify-between font-mono-code text-[8px] opacity-80">
-                            <span>{isReadingNow ? 'activo' : 'silencio'}</span>
-                            <span>habitación</span>
-                          </div>
-                          <span className="font-semibold text-xs block">{nombreUsuarioPersonalizado || sesion.nombre}</span>
-                          <span className="text-[9px] block font-light opacity-90">{libroActual.titulo}</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-zinc-800 flex flex-col gap-1 text-[9px] text-zinc-400 z-10">
-                        <div className="flex justify-between items-center font-medium">
-                          <span className="text-zinc-300 text-[9px] font-mono-code">Club de Lectura</span>
-                          <span className="font-bold text-amber-400 tracking-wide">@gilda.mailclub</span>
-                        </div>
-                        <div className="flex justify-between items-center text-[8px] text-zinc-500 font-mono-code">
-                          <span>gildaclub.netlify.app</span>
-                          <span>@gilda.mailclub</span>
-                        </div>
+                      {/* Footer */}
+                      <div className="relative z-10 pb-6 text-center flex flex-col gap-1 items-center">
+                        <span className="font-bold text-amber-400 tracking-wider text-xs">@gilda.mailclub</span>
+                        <span className="text-[8px] font-mono-code text-zinc-400 opacity-80">gildaclub.netlify.app</span>
                       </div>
                     </div>
                   )}
