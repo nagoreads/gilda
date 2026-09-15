@@ -118,18 +118,18 @@
         }
       }
 
-      /* Estilos específicos para las ventanas lofi */
+      /* Estilos para las ventanas de la habitación propia */
       .window-card-active {
         background: #fbbf24 !important;
-        border-color: #d97706 !important;
-        color: #0b132b !important;
-        box-shadow: 0 0 16px rgba(251, 191, 36, 0.85), inset 0 0 6px rgba(255, 255, 255, 0.6);
+        border-color: #92400e !important;
+        color: #1e1b4b !important;
+        box-shadow: 0 0 16px rgba(251, 191, 36, 0.65), inset 0 0 8px rgba(255, 255, 255, 0.7);
       }
 
       .window-card-inactive {
         background: #18181b !important;
-        border-color: #27272a !important;
-        color: #71717a !important;
+        border-color: #3f3f46 !important;
+        color: #a1a1aa !important;
       }
 
       #mapa-gilda {
@@ -206,123 +206,104 @@
       };
 
       /* ==========================================================================
-         PESTAÑA DE LA ESCENA LOFI Y COMUNIDAD
+         PESTAÑA: LA HABITACIÓN PROPIA (Ventanas de lectura de la comunidad)
          ========================================================================== */
-      function PestañaLofi({ usuarias = [] }) {
-        const [lectoras, setLectoras] = useState([]);
-
-        useEffect(() => {
-          if (usuarias.length > 0) {
-            const mapaLectoras = usuarias.map((u, index) => ({
-              id: u.id || index,
-              nombre: u.nombre || u.usuario || `Gilda #${index + 1}`,
-              leyendo: u.estaLeyendo !== undefined ? u.estaLeyendo : (Number(u.pagina || u.pagina_actual || 0) > 0)
-            }));
-            setLectoras(mapaLectoras);
-          } else {
-            const backup = Array.from({ length: 12 }, (_, i) => ({
-              id: i,
-              nombre: `Gilda Lectoras #${i + 1}`,
-              leyendo: i % 2 === 0
-            }));
-            setLectoras(backup);
-          }
-        }, [usuarias]);
-
-        const toggleVentana = (id) => {
-          setLectoras(prev =>
-            prev.map(l => l.id === id ? { ...l, leyendo: !l.leyendo } : l)
-          );
-        };
+      function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroActual }) {
+        const activasCount = usuarias.filter(m => m.estaLeyendo).length;
 
         return (
-          <div className="fade-in space-y-6 max-w-md mx-auto px-1 pb-10">
-            <div className="text-center pt-2">
-              <h2 className="font-serif-title text-2xl text-[#262624]">La Calle de las Gildas</h2>
-              <p className="text-xs text-neutral-500 font-sans mt-1">
-                Ventanas encendidas representan miembros del club leyendo ahora mismo.
+          <div className="fade-in space-y-5 max-w-md mx-auto px-1 pb-16">
+            {/* Cabecera literaria */}
+            <div className="text-center pt-2 space-y-1.5">
+              <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-3 py-1 rounded-full border border-stone-300 inline-block font-bold">
+                ✦ Una habitación propia
+              </span>
+              <h2 className="font-serif-title text-2xl text-[#262624]">El Edificio de Lectura</h2>
+              <p className="text-xs text-[#73736e] font-sans max-w-xs mx-auto leading-relaxed">
+                Cada ventana encendida representa el refugio íntimo de una socia sumergida en sus páginas en este instante.
               </p>
             </div>
 
-            <div 
-              className="lofi-scene-container w-full h-[420px] rounded-2xl shadow-xl flex flex-col justify-end p-4 border border-zinc-800 relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(to bottom, #09090b, #111119, #1e1b4b)'
-              }}
-            >
-              <div className="absolute inset-0 pointer-events-none opacity-80">
-                <div className="absolute top-6 right-8 w-10 h-10 rounded-full bg-transparent shadow-[3px_-3px_0_0_#fef08a] blur-[0.5px]"></div>
-                <div className="absolute top-16 left-6 w-24 h-4 bg-indigo-950/40 rounded-full blur-md"></div>
-                <div className="absolute top-10 right-20 w-32 h-6 bg-indigo-900/20 rounded-full blur-lg"></div>
-                <div className="absolute top-12 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse"></div>
-                <div className="absolute top-24 left-1/3 w-0.5 h-0.5 bg-white rounded-full opacity-60"></div>
-                <div className="absolute top-8 left-2/3 w-1 h-1 bg-amber-200 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                <div className="absolute top-20 right-1/4 w-0.5 h-0.5 bg-white rounded-full"></div>
+            {/* CONTENEDOR DE LA FACHADA LIFI */}
+            <div className="editorial-card p-5 space-y-4 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
+              
+              <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs">
+                <span className="font-semibold text-[#262624]">Foco Comunitario</span>
+                <span className="text-amber-600 font-bold font-mono-code bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  {activasCount} ventanas ON
+                </span>
               </div>
 
-              <div className="absolute top-0 left-0 pointer-events-none opacity-20 text-emerald-950 text-xs font-mono p-1">
-                🌿
-              </div>
+              {/* Bloque Residencial Estilo Lofi / Vectorial */}
+              <div className="w-full bg-[#1e1b4b] rounded-2xl p-4 grid grid-cols-2 gap-3.5 border-2 border-[#111026] shadow-inner relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-3 bg-[#111026] rounded-t"></div>
 
-              <div className="z-10 w-full bg-zinc-900/90 border-t-4 border-zinc-950 rounded-t-xl p-4 shadow-2xl relative">
-                <div className="absolute -top-3 left-4 right-4 h-3 bg-zinc-950 rounded-t-sm"></div>
+                {usuarias.map((miembro, i) => {
+                  const estaActiva = miembro.estaLeyendo;
 
-                <div className="grid grid-cols-3 gap-3 max-h-[280px] overflow-y-auto pr-1">
-                  {lectoras.map((lectora) => (
+                  return (
                     <div
-                      key={lectora.id}
-                      onClick={() => toggleVentana(lectora.id)}
-                      className={`cursor-pointer border-2 rounded-md h-20 p-1.5 flex flex-col justify-between transition-all duration-300 relative group overflow-hidden ${
-                        lectora.leyendo ? 'window-card-active' : 'window-card-inactive'
+                      key={i}
+                      onClick={() => {
+                        if (miembro.esYo && onToggleMiLuz) {
+                          onToggleMiLuz();
+                        }
+                      }}
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-300 flex flex-col justify-between h-28 overflow-hidden shadow-sm ${
+                        miembro.esYo ? 'cursor-pointer ring-2 ring-[#adae1d] scale-[1.02]' : ''
+                      } ${
+                        estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
                       }`}
                     >
-                      <div className="absolute inset-x-0 top-0 h-1 bg-black/20 pointer-events-none"></div>
-                      <div className="absolute inset-y-0 left-1/2 w-[1px] bg-black/10 pointer-events-none"></div>
-
-                      <div className="flex justify-between items-center w-full">
-                        <span className="text-[9px] font-mono-code uppercase tracking-wider opacity-70">
-                          {lectora.leyendo ? '📖 On' : '💤 Off'}
-                        </span>
-                        {lectora.leyendo && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
-                        )}
+                      {/* Cuarterones / divisiones de los cristales de la ventana */}
+                      <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
+                        <div className="border-r border-b border-current"></div>
+                        <div className="border-b border-current"></div>
+                        <div className="border-r border-current"></div>
+                        <div></div>
                       </div>
 
-                      {lectora.leyendo && (
-                        <div className="absolute bottom-1 right-2 text-base opacity-40 select-none pointer-events-none transform translate-y-0.5">
-                          👤
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center text-[9px] font-mono-code tracking-wider z-10">
+                        <span className={`px-1.5 py-0.5 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
+                          {estaActiva ? 'ON' : 'OFF'}
+                        </span>
+                        <span className="opacity-75">0{i+1}</span>
+                      </div>
 
-                      <div className="text-[10px] font-medium font-sans truncate w-full z-10 border-t border-black/5 pt-0.5">
-                        {lectora.nombre}
+                      <div className="z-10 truncate pt-2">
+                        <span className={`font-semibold text-xs block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
+                          {miembro.nombre} {miembro.esYo && <span className="text-[9px] opacity-75">(tú)</span>}
+                        </span>
+                        <span className={`text-[10px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
+                          {miembro.libroReal || libroActual.titulo}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
+
+              {/* Botón irresistible para compartir en Instagram Stories */}
+              <div className="pt-2">
+                <button
+                  onClick={onAbrirStory}
+                  className="w-full editorial-btn py-3 text-xs font-semibold tracking-wide flex items-center justify-center gap-2 shadow-md transform hover:-translate-y-0.5 transition-all"
+                >
+                  <span>✨</span> ¡Empiezo lectura! Compartir mi ventana en Stories
+                </button>
+                <p className="text-[10px] text-[#73736e] text-center pt-2 italic">
+                  Presume tu refugio literario en Instagram cuando enciendas tu luz.
+                </p>
               </div>
             </div>
 
-            <div className="editorial-card p-4 space-y-3">
+            {/* Panel explicativo de la Habitación Propia */}
+            <div className="editorial-card p-4 space-y-2.5 bg-[#faf9f5]">
               <h3 className="font-serif-title text-sm font-semibold text-[#262624] flex items-center gap-2">
-                <span>📊</span> Estado de la comunidad
+                <span>🕯️</span> Tu espacio de lectura
               </h3>
-              <div className="grid grid-cols-2 gap-4 text-xs font-sans text-neutral-600">
-                <div className="bg-[#faf9f5] p-2.5 rounded-lg border border-[#dfded5]">
-                  <p className="text-neutral-400 text-[10px] uppercase">Leyendo ahora</p>
-                  <p className="text-lg font-bold text-amber-600">
-                    {lectoras.filter(l => l.leyendo).length} ventanas
-                  </p>
-                </div>
-                <div className="bg-[#faf9f5] p-2.5 rounded-lg border border-[#dfded5]">
-                  <p className="text-neutral-400 text-[10px] uppercase">Descansando</p>
-                  <p className="text-lg font-bold text-neutral-500">
-                    {lectoras.filter(l => !l.leyendo).length} ventanas
-                  </p>
-                </div>
-              </div>
-              <p className="text-[11px] text-neutral-400 italic text-center pt-1">
-                Haz clic en cualquier ventana para encender o apagar su luz de lectura.
+              <p className="text-xs text-[#73736e] leading-relaxed">
+                Cada vez que abras tu libro, enciende tu ventana desde la pestaña <b>inicio</b>. Tu espacio se iluminará en la fachada para recordarnos que nunca leemos solas.
               </p>
             </div>
           </div>
@@ -870,12 +851,12 @@
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#09090b'
+              backgroundColor: '#ffffff'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-story-lofi.png';
+            link.download = 'gilda-habitacion-propia-story.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -1088,43 +1069,36 @@
                     Vista previa Story (9:16)
                   </span>
 
-                  {/* TARJETA STORY LOFI */}
+                  {/* TARJETA STORY: UNA HABITACIÓN PROPIA */}
                   <div
                     ref={storyCardRef}
-                    className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
-                    style={{ background: 'linear-gradient(to bottom, #09090b, #111119, #1e1b4b)', color: '#ffffff' }}
+                    className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-white border-2 border-[#262624]"
                   >
-                    <div className="absolute inset-0 pointer-events-none opacity-80">
-                      <div className="absolute top-6 right-8 w-10 h-10 rounded-full bg-transparent shadow-[3px_-3px_0_0_#fef08a]"></div>
-                      <div className="absolute top-12 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse"></div>
-                      <div className="absolute top-8 left-2/3 w-1 h-1 bg-amber-200 rounded-full"></div>
-                    </div>
-
                     <div className="space-y-1 pt-1 z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#1c2541]/90 px-2 py-0.5 rounded-full font-bold border border-[#3a506b]">
-                          ✦ club de lectura
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-2.5 py-0.5 rounded-full font-bold border border-stone-300">
+                          ✦ una habitación propia
                         </span>
-                        <span className="text-[9px] font-mono-code text-[#94a3b8]">@gilda.mailclub</span>
+                        <span className="text-[9px] font-mono-code text-[#73736e]">@gilda.mailclub</span>
                       </div>
-                      <h3 className="font-serif-title text-lg font-bold text-white leading-tight">
-                        La Calle de las Gildas
+                      <h3 className="font-serif-title text-base font-bold text-[#262624] leading-tight pt-1">
+                        Mi ventana ya está encendida
                       </h3>
-                      <p className="text-[10px] text-[#cbd5e1] italic truncate font-serif">
-                        Leyendo: {libroActual.titulo}
+                      <p className="text-[10px] text-[#73736e] italic truncate font-serif">
+                        Leyendo: {miLibroActual || libroActual.titulo}
                       </p>
                     </div>
 
-                    <div className="my-auto py-2 px-3 bg-zinc-900/90 rounded-2xl border border-zinc-700 z-10 space-y-2">
-                      <div className="flex justify-between items-center text-[9px] font-mono-code text-[#94a3b8] px-1">
-                        <span>VENTANAS ACTIVAS</span>
-                        <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} ON</span>
+                    <div className="my-auto py-3 px-3 bg-[#1e1b4b] rounded-2xl border-2 border-[#111026] shadow-xl z-10 space-y-2">
+                      <div className="flex justify-between items-center text-[9px] font-mono-code text-stone-300 px-1">
+                        <span>REFUGIO ACTIVO</span>
+                        <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} EN CASA</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {miembrosEdificio.slice(0, 6).map((m, i) => (
                           <div
                             key={i}
-                            className={`p-2 rounded-xl text-[9px] border flex flex-col justify-between ${
+                            className={`p-2.5 rounded-xl text-[9px] border-2 flex flex-col justify-between h-20 overflow-hidden ${
                               m.estaLeyendo ? 'window-card-active font-bold' : 'window-card-inactive'
                             }`}
                           >
@@ -1138,14 +1112,14 @@
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-zinc-700 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
+                    <div className="pt-2 border-t border-stone-300 flex flex-col gap-1 text-[9px] text-stone-600 z-10">
                       <div className="flex justify-between items-center font-medium">
-                        <span className="bg-zinc-800 text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code">
-                          modo nocturno
+                        <span className="bg-stone-100 text-[#2d223c] px-2 py-0.5 rounded text-[8px] font-mono-code border border-stone-300">
+                          nueva lectura
                         </span>
-                        <span className="font-bold text-[#fbbf24] tracking-wide">@nagoreads</span>
+                        <span className="font-bold text-[#2d223c] tracking-wide">@nagoreads</span>
                       </div>
-                      <div className="flex justify-between items-center text-[8px] text-[#94a3b8] font-mono-code">
+                      <div className="flex justify-between items-center text-[8px] text-stone-500 font-mono-code">
                         <span>gildaclub.netlify.app</span>
                         <span>@gilda.mailclub</span>
                       </div>
@@ -1345,10 +1319,10 @@
                         <div className="pt-3 border-t border-[#dfded5] flex items-center justify-between">
                           <div>
                             <span className="text-xs font-medium text-[#262624] block">
-                              estado de lectura (ventanas)
+                              estado de lectura (habitación propia)
                             </span>
                             <span className="text-[10px] text-[#73736e]">
-                              {isReadingNow ? 'tu ventana está encendida (ON)' : 'tu ventana está apagada (OFF)'}
+                              {isReadingNow ? 'tu luz está encendida (ON)' : 'tu luz está apagada (OFF)'}
                             </span>
                           </div>
                           <button
@@ -1362,6 +1336,18 @@
                             {isReadingNow ? 'apagar luz (OFF)' : 'encender luz (ON)'}
                           </button>
                         </div>
+
+                        {/* Botón directo para iniciar story al encender luz */}
+                        {isReadingNow && (
+                          <div className="pt-1 fade-in">
+                            <button
+                              onClick={() => setModalStoryAbierto(true)}
+                              className="w-full bg-[#faf9f5] border border-[#adae1d] text-[#adae1d] hover:bg-[#adae1d] hover:text-white py-2 text-xs rounded-lg font-medium transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <span>✨</span> ¡Comparte en Stories que estás leyendo!
+                            </button>
+                          </div>
+                        )}
 
                         <div className="pt-2 border-t border-[#dfded5] flex items-center justify-between gap-2">
                           <span className="text-xs text-[#73736e]">
@@ -1495,17 +1481,13 @@
                   )}
 
                   {seccionApp === 'edificio' && (
-                    <div className="space-y-4 fade-in flex flex-col items-center w-full">
-                      <PestañaLofi usuarias={miembrosEdificio} />
-                      <div className="w-full max-w-md px-1 pb-4">
-                        <button
-                          onClick={() => setModalStoryAbierto(true)}
-                          className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          Compartir en Instagram (Story)
-                        </button>
-                      </div>
-                    </div>
+                    <PestañaHabitacionPropia
+                      usuarias={miembrosEdificio}
+                      onToggleMiLuz={toggleLecturaLamp}
+                      isReadingNow={isReadingNow}
+                      onAbrirStory={() => setModalStoryAbierto(true)}
+                      libroActual={libroActual}
+                    />
                   )}
 
                   {seccionApp === 'capitulos' && (
