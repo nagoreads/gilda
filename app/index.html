@@ -44,8 +44,10 @@
 
     <style>
       body {
+        background: linear-gradient(to bottom, #0b132b, #1c2541, #3a506b);
+        margin: 0;
+        min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: #f7f5ef;
         color: #262624;
         -webkit-tap-highlight-color: transparent;
       }
@@ -118,19 +120,20 @@
         }
       }
 
-      /* Estética Lo-Fi Nocturna Detallada con Estrellas, Luna y Ramas */
-      .lofi-story-poster {
-        background: linear-gradient(180deg, #070919 0%, #111532 40%, #1e2246 100%);
-        border: 2px solid #3b3d75;
-        color: #f3f4f6;
+      /* Contenedor con el nuevo fondo base lo-fi nocturno limpio */
+      .lofi-scene-container {
+        background: linear-gradient(to bottom, #0b132b, #1c2541, #3a506b);
+        border: 2px solid #3a506b;
         position: relative;
         overflow: hidden;
+        color: #f3f4f6;
       }
 
-      .lofi-story-window-active {
+      /* Ventana activa con luz cálida de lectura */
+      .lofi-window-active {
         background: #fbbf24 !important;
         border-color: #d97706 !important;
-        color: #111532 !important;
+        color: #0b132b !important;
         box-shadow: 0 0 16px rgba(251, 191, 36, 0.85), inset 0 0 6px rgba(255, 255, 255, 0.6);
       }
 
@@ -207,54 +210,61 @@
         vigo: [42.2406, -8.7207],
       };
 
-      // Componente reutilizable con el paisaje nocturno detallado (Estrellas, Luna, Nubes, Ramas de árboles)
-      function PaisajeNocturnoFondo() {
+      // Componente SVG con el paisaje nocturno detallado sobre el gradiente
+      function PaisajeNocturnoIlustracion() {
         return (
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 498" preserveAspectRatio="none">
             <defs>
-              <filter id="moonGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
+              <filter id="moonGlowClean" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
             </defs>
 
-            {/* Estrellas brillantes definidas */}
-            <g fill="#ffffff" opacity="0.9">
-              <circle cx="35" cy="45" r="1.2" />
-              <circle cx="85" cy="25" r="1.8" />
-              <circle cx="120" cy="55" r="1" />
-              <circle cx="170" cy="30" r="1.5" />
-              <circle cx="215" cy="70" r="1.2" />
-              <circle cx="255" cy="38" r="1.6" />
-              <circle cx="25" cy="115" r="1.1" />
-              <circle cx="75" cy="135" r="1.4" />
-              <circle cx="240" cy="120" r="1" />
-              <circle cx="105" cy="95" r="0.9" />
+            {/* Cielo estrellado nítido */}
+            <g fill="#ffffff" opacity="0.95">
+              <circle cx="40" cy="40" r="1.3" />
+              <circle cx="95" cy="22" r="1.8" />
+              <circle cx="130" cy="50" r="1" />
+              <circle cx="180" cy="28" r="1.6" />
+              <circle cx="220" cy="65" r="1.2" />
+              <circle cx="260" cy="35" r="1.5" />
+              <circle cx="30" cy="110" r="1.1" />
+              <circle cx="80" cy="130" r="1.4" />
+              <circle cx="245" cy="115" r="1" />
+              <circle cx="110" cy="90" r="0.9" />
             </g>
 
-            {/* Luna creciente difusa */}
-            <g filter="url(#moonGlow)" opacity="0.85">
-              <path d="M 230 45 A 20 20 0 1 1 202 70 A 23 23 0 1 0 230 45 Z" fill="#fef08a" />
+            {/* Luna creciente difusa en la esquina superior */}
+            <g filter="url(#moonGlowClean)" opacity="0.9">
+              <path d="M 235 42 A 18 18 0 1 1 210 65 A 21 21 0 1 0 235 42 Z" fill="#fef08a" />
             </g>
 
-            {/* Nubes esponjosas iluminadas suavemente */}
-            <path d="M -10 170 Q 25 150 55 175 Q 85 155 115 175 L 115 210 L -10 210 Z" fill="#2d3363" opacity="0.45" />
-            <path d="M 165 130 Q 195 110 225 135 Q 255 115 290 135 L 290 170 L 165 170 Z" fill="#363d75" opacity="0.5" />
+            {/* Nubes esponjosas suaves iluminadas por la luna */}
+            <path d="M -10 160 Q 30 140 65 165 Q 95 145 130 165 L 130 200 L -10 200 Z" fill="#1c2541" opacity="0.5" />
+            <path d="M 155 120 Q 190 100 220 125 Q 255 105 290 125 L 290 160 L 155 160 Z" fill="#3a506b" opacity="0.4" />
 
-            {/* Ramas y hojas detalladas en los lados */}
+            {/* Ramas y hojas detalladas en los laterales */}
             {/* Rama izquierda */}
-            <path d="M 0 0 Q 35 45 20 95 Q 10 125 -5 145" stroke="#0e1124" strokeWidth="9" fill="none" strokeLinecap="round" />
-            <path d="M 20 70 Q 48 88 62 120" stroke="#0e1124" strokeWidth="4.5" fill="none" strokeLinecap="round" />
-            <circle cx="28" cy="100" r="13" fill="#181d3d" opacity="0.95" />
-            <circle cx="52" cy="122" r="11" fill="#212852" opacity="0.9" />
-            <circle cx="10" cy="138" r="15" fill="#151936" opacity="0.95" />
+            <path d="M 0 0 Q 32 40 18 88 Q 8 118 -5 138" stroke="#070d1f" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 18 65 Q 45 82 58 112" stroke="#070d1f" strokeWidth="4" fill="none" strokeLinecap="round" />
+            <circle cx="25" cy="92" r="12" fill="#0b132b" opacity="0.95" />
+            <circle cx="48" cy="115" r="10" fill="#1c2541" opacity="0.9" />
+            <circle cx="8" cy="130" r="14" fill="#0b132b" opacity="0.95" />
 
             {/* Rama derecha */}
-            <path d="M 280 12 Q 248 52 262 98 Q 272 128 288 150" stroke="#0e1124" strokeWidth="10" fill="none" strokeLinecap="round" />
-            <path d="M 262 75 Q 232 92 215 125" stroke="#0e1124" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <circle cx="252" cy="105" r="14" fill="#181d3d" opacity="0.95" />
-            <circle cx="225" cy="128" r="12" fill="#212852" opacity="0.9" />
-            <circle cx="275" cy="142" r="16" fill="#151936" opacity="0.95" />
+            <path d="M 280 10 Q 250 48 264 92 Q 274 122 288 142" stroke="#070d1f" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 264 70 Q 235 86 218 118" stroke="#070d1f" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+            <circle cx="254" cy="98" r="13" fill="#0b132b" opacity="0.95" />
+            <circle cx="228" cy="120" r="11" fill="#1c2541" opacity="0.9" />
+            <circle cx="275" cy="135" r="15" fill="#0b132b" opacity="0.95" />
+
+            {/* Postes de luz cálida en la calle inferior */}
+            <path d="M 40 498 L 40 430 Q 40 420 50 420 L 55 420" stroke="#070d1f" strokeWidth="4" fill="none" />
+            <circle cx="55" cy="423" r="6" fill="#fbbf24" opacity="0.9" filter="url(#moonGlowClean)" />
+            
+            <path d="M 240 498 L 240 430 Q 240 420 230 420 L 225 420" stroke="#070d1f" strokeWidth="4" fill="none" />
+            <circle cx="225" cy="423" r="6" fill="#fbbf24" opacity="0.9" filter="url(#moonGlowClean)" />
           </svg>
         );
       }
@@ -795,17 +805,17 @@
 
         const descargarStoryInstagram = async () => {
           if (!storyCardRef.current) return;
-          mostrarToast('Generando story detallada...');
+          mostrarToast('Generando story nocturna...');
           try {
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#070919'
+              backgroundColor: '#0b132b'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-story-nocturna-detallada.png';
+            link.download = 'gilda-story-nocturna.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -941,7 +951,7 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f7f5ef]">
+            <div className="min-h-screen flex items-center justify-center px-4">
               <div className="editorial-card max-w-sm w-full p-8 space-y-6 fade-in">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -997,7 +1007,7 @@
         }
 
         return (
-          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f7f5ef]">
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative">
             {toastMsg && (
               <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#262624] text-white text-xs px-4 py-2 rounded shadow-lg fade-in flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
@@ -1015,22 +1025,22 @@
                     cerrar
                   </button>
                   <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
-                    Vista previa Story Detallada (9:16)
+                    Vista previa Story (9:16)
                   </span>
 
-                  {/* TARJETA STORY LO-FI CON PAISAJE NOCTURNO DETALLADO */}
+                  {/* TARJETA STORY CON EL PAISAJE NOCTURNO NUEVO */}
                   <div
                     ref={storyCardRef}
-                    className="lofi-story-poster w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
+                    className="lofi-scene-container w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
                   >
-                    <PaisajeNocturnoFondo />
+                    <PaisajeNocturnoIlustracion />
 
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-400/60 shadow-[0_0_12px_rgba(251,191,36,0.9)] pointer-events-none z-10"></div>
 
                     {/* Cabecera */}
                     <div className="space-y-1 pt-1 z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#1d224d]/90 px-2 py-0.5 rounded-full font-bold border border-[#3b3d75]">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#1c2541]/90 px-2 py-0.5 rounded-full font-bold border border-[#3a506b]">
                           ✦ club de lectura
                         </span>
                         <span className="text-[9px] font-mono-code text-[#94a3b8]">@gilda.mailclub</span>
@@ -1043,8 +1053,8 @@
                       </p>
                     </div>
 
-                    {/* Bloque central del edificio con ventanas de luz activa */}
-                    <div className="my-auto py-1 bg-[#10132b]/85 backdrop-blur-xs p-3 rounded-2xl border border-[#3b3d75]/85 shadow-2xl z-10 space-y-2">
+                    {/* Bloque central del edificio con ventanas activas */}
+                    <div className="my-auto py-1 bg-[#0b132b]/85 backdrop-blur-xs p-3 rounded-2xl border border-[#3a506b]/80 shadow-2xl z-10 space-y-2">
                       <div className="flex justify-between items-center text-[9px] font-mono-code text-[#94a3b8] px-1">
                         <span>VENTANAS ACTIVAS</span>
                         <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} en línea</span>
@@ -1055,8 +1065,8 @@
                             key={i}
                             className={`p-2.5 rounded-xl text-[9px] border flex flex-col justify-between transition-all ${
                               m.estaLeyendo
-                                ? 'lofi-story-window-active font-semibold shadow-md'
-                                : 'bg-[#181c38] border-[#292d54] text-[#94a3b8]'
+                                ? 'lofi-window-active font-semibold shadow-md'
+                                : 'bg-[#151d38] border-[#293556] text-[#94a3b8]'
                             }`}
                           >
                             <div className="flex justify-between font-mono-code text-[7px] opacity-80">
@@ -1070,10 +1080,10 @@
                     </div>
 
                     {/* Pie de página con créditos */}
-                    <div className="pt-2 border-t border-[#3b3d75]/60 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
+                    <div className="pt-2 border-t border-[#3a506b]/60 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
                       <div className="flex justify-between items-center font-medium">
-                        <span className="bg-[#1d224d] text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code border border-[#3b3d75]">
-                          noche acogedora
+                        <span className="bg-[#1c2541] text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code border border-[#3a506b]">
+                          modo nocturno
                         </span>
                         <span className="font-bold text-[#fbbf24] tracking-wide">@nagoreads</span>
                       </div>
@@ -1138,14 +1148,14 @@
               </div>
             )}
 
-            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#73736e]">
+            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-stone-300">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
-                  <span className="text-[#262624] font-medium">
+                  <span className="text-white font-medium">
                     {nombreUsuarioPersonalizado || sesion.nombre}
                   </span>
-                  <span className="text-[10px] bg-[#dfded5] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
+                  <span className="text-[10px] bg-[#1c2541] px-1.5 py-0.5 rounded text-stone-300 uppercase tracking-wider border border-[#3a506b]">
                     {sesion.modalidad}
                   </span>
                 </div>
@@ -1159,7 +1169,7 @@
                   <span>/</span>
                   <button
                     onClick={cerrarSesion}
-                    className="hover:text-[#262624] transition-colors"
+                    className="hover:text-white transition-colors"
                   >
                     salir
                   </button>
@@ -1167,7 +1177,7 @@
               </div>
 
               {editandoNombre && (
-                <div className="editorial-card p-3 bg-white flex gap-2 items-center fade-in">
+                <div className="editorial-card p-3 bg-white text-[#262624] flex gap-2 items-center fade-in">
                   <input
                     type="text"
                     placeholder="Tu nombre"
@@ -1188,14 +1198,14 @@
             </div>
 
             <header className="w-full mb-6 space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight text-[#262624]">
+              <h1 className="text-lg font-semibold tracking-tight text-white">
                 gilda
               </h1>
             </header>
 
             <main className="w-full fade-in space-y-4">
               {cargando ? (
-                <div className="text-center py-24 text-xs text-[#73736e]">
+                <div className="text-center py-24 text-xs text-stone-300">
                   cargando espacio...
                 </div>
               ) : (
@@ -1428,9 +1438,9 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      {/* Pestaña habitación con paisaje nocturno detallado, estrellas, luna y ramas */}
-                      <div className="lofi-story-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg">
-                        <PaisajeNocturnoFondo />
+                      {/* Pestaña habitación con la nueva escena nocturna detallada */}
+                      <div className="lofi-scene-container w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg">
+                        <PaisajeNocturnoIlustracion />
 
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#fbbf24] block">
@@ -1444,8 +1454,8 @@
                           </p>
                         </div>
 
-                        <div className="relative w-full max-w-[280px] bg-[#10132b] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#3b3d75] z-10 shadow-md">
-                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#1d224d] rounded-t"></div>
+                        <div className="relative w-full max-w-[280px] bg-[#0b132b] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#3a506b] z-10 shadow-md">
+                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#1c2541] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
@@ -1456,8 +1466,8 @@
                                 key={i}
                                 className={`p-3 rounded-t-2xl rounded-b border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'lofi-story-window-active text-[#111532]' : 'bg-[#181c38] border-[#292d54] text-[#94a3b8]')
-                                    : 'bg-[#0d0f22] border-[#1d2038] opacity-50'
+                                    ? (estaActiva ? 'lofi-window-active text-[#0b132b]' : 'bg-[#151d38] border-[#293556] text-[#94a3b8]')
+                                    : 'bg-[#070d1f] border-[#182038] opacity-50'
                                 }`}
                               >
                                 <div className="flex justify-between items-center text-[9px] font-mono tracking-wider opacity-75">
@@ -1467,10 +1477,10 @@
                                 <div className="pt-2 truncate">
                                   {miembro ? (
                                     <>
-                                      <span className={`font-medium text-[11px] block truncate ${estaActiva ? 'text-[#111532]' : 'text-white'}`}>
+                                      <span className={`font-medium text-[11px] block truncate ${estaActiva ? 'text-[#0b132b]' : 'text-white'}`}>
                                         {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
                                       </span>
-                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#3b3d75]' : 'text-[#94a3b8]'}`}>
+                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#3a506b]' : 'text-[#94a3b8]'}`}>
                                         {miembro.libroReal}
                                       </span>
                                     </>
@@ -1489,14 +1499,14 @@
                             );
                           })}
                         </div>
-                        <div className="w-8 h-10 bg-[#1d224d] rounded-t border border-[#3b3d75] z-10 -mt-px mx-auto"></div>
+                        <div className="w-8 h-10 bg-[#1c2541] rounded-t border border-[#3a506b] z-10 -mt-px mx-auto"></div>
 
                         <div className="mt-6 w-full max-w-[280px] z-10">
                           <button
                             onClick={() => setModalStoryAbierto(true)}
                             className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
                           >
-                            Compartir en Instagram (Story Detallada)
+                            Compartir en Instagram (Story)
                           </button>
                         </div>
                       </div>
