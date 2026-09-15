@@ -131,6 +131,12 @@
         color: #a1a1aa !important;
       }
 
+      .window-card-vacant {
+        background: #121215 !important;
+        border: 1px dashed #3f3f46 !important;
+        color: #52525b !important;
+      }
+
       #mapa-gilda {
         height: 260px;
         width: 100%;
@@ -205,20 +211,37 @@
       };
 
       /* ==========================================================================
-         PESTAÑA: LA HABITACIÓN PROPIA (Edificio Arquitectónico con Plantas)
+         PESTAÑA: LA HABITACIÓN PROPIA (Edificio Arquitectónico con Vacantes)
          ========================================================================== */
       function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroActual }) {
         const [sociaSeleccionada, setSociaSeleccionada] = useState(null);
-        const activasCount = usuarias.filter(m => m.estaLeyendo).length;
+        
+        // Rellenar con habitaciones vacías hasta completar al menos 12 ventanas (4 plantas)
+        const MIN_VENTANAS = 12;
+        const miembrosConVacantes = useMemo(() => {
+          const lista = [...usuarias];
+          while (lista.length < MIN_VENTANAS) {
+            lista.push({
+              nombre: 'Habitación libre',
+              esLibre: true,
+              estaLeyendo: false,
+              libroReal: 'Disponible'
+            });
+          }
+          return lista;
+        }, [usuarias]);
 
-        // Dividir usuarias en plantas de 3 ventanas por piso
+        const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
+        const registradasCount = usuarias.filter(m => !m.esLibre).length;
+
+        // Agrupar en plantas de 3 ventanas
         const plantas = useMemo(() => {
           const resultado = [];
-          for (let i = 0; i < usuarias.length; i += 3) {
-            resultado.push(usuarias.slice(i, i + 3));
+          for (let i = 0; i < miembrosConVacantes.length; i += 3) {
+            resultado.push(miembrosConVacantes.slice(i, i + 3));
           }
           return resultado;
-        }, [usuarias]);
+        }, [miembrosConVacantes]);
 
         return (
           <div className="fade-in space-y-4 max-w-md mx-auto px-1 pb-16">
@@ -232,18 +255,16 @@
               </p>
             </div>
 
-            {/* CONTENEDOR PRINCIPAL ESTILO EDITORIAL */}
             <div className="editorial-card p-4 space-y-3 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
               <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs px-1">
                 <span className="font-semibold text-[#262624]">Fachada del Club</span>
                 <span className="text-amber-700 font-bold font-mono-code bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  {activasCount} / {usuarias.length} ON
+                  {activasCount} / {registradasCount} ON
                 </span>
               </div>
 
-              {/* FACHADA DE EDIFICIO CON ESTRUCTURA DE PLANTAS */}
+              {/* EDIFICIO ARQUITECTÓNICO */}
               <div className="w-full bg-[#1e1b4b] rounded-2xl p-3 border-2 border-[#111026] shadow-inner relative space-y-3">
-                {/* Tejado / Ático decorativo */}
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-24 h-3 bg-[#111026] rounded-t flex items-center justify-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-400/80"></div>
                 </div>
@@ -253,31 +274,35 @@
                     const numeroPlanta = plantas.length - indexPiso;
                     return (
                       <div key={indexPiso} className="space-y-1">
-                        {/* Marcador de planta / piso */}
                         <div className="flex justify-between items-center px-1 text-[8px] font-mono-code text-indigo-300/70 border-b border-indigo-950/80 pb-0.5">
                           <span>PLANTA 0{numeroPlanta}</span>
                           <span>ZONA RESIDENCIAL</span>
                         </div>
 
-                        {/* Fila de 3 ventanas */}
                         <div className="grid grid-cols-3 gap-2">
                           {piso.map((miembro, i) => {
+                            const esLibre = miembro.esLibre;
                             const estaActiva = miembro.estaLeyendo;
 
                             return (
                               <div
                                 key={i}
                                 onClick={() => {
+                                  if (esLibre) return;
                                   if (miembro.esYo && onToggleMiLuz) {
                                     onToggleMiLuz();
                                   } else {
                                     setSociaSeleccionada(miembro);
                                   }
                                 }}
-                                className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col justify-between h-22 overflow-hidden shadow-xs cursor-pointer hover:scale-[1.02] ${
+                                className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col justify-between h-22 overflow-hidden shadow-xs ${
+                                  esLibre ? 'window-card-vacant cursor-default' : 'cursor-pointer hover:scale-[1.02]'
+                                } ${
                                   miembro.esYo ? 'ring-2 ring-[#adae1d]' : ''
                                 } ${
-                                  estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
+                                  !esLibre && estaActiva ? 'window-card-active font-semibold' : ''
+                                } ${
+                                  !esLibre && !estaActiva ? 'window-card-inactive' : ''
                                 }`}
                               >
                                 <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
@@ -288,18 +313,18 @@
                                 </div>
 
                                 <div className="flex justify-between items-center text-[8px] font-mono-code tracking-wider z-10">
-                                  <span className={`px-1 py-0.2 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
-                                    {estaActiva ? 'ON' : 'OFF'}
+                                  <span className={`px-1 py-0.2 rounded ${esLibre ? 'bg-zinc-800 text-zinc-500' : estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
+                                    {esLibre ? 'LIBRE' : estaActiva ? 'ON' : 'OFF'}
                                   </span>
                                   <span className="opacity-75">v.{i+1}</span>
                                 </div>
 
                                 <div className="z-10 truncate pt-1">
-                                  <span className={`font-semibold text-[10px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
+                                  <span className={`font-semibold text-[10px] block truncate ${esLibre ? 'text-zinc-500 italic' : estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
                                     {miembro.nombre} {miembro.esYo && <span className="text-[7px] opacity-75">(tú)</span>}
                                   </span>
-                                  <span className={`text-[8px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
-                                    {libroActual.titulo}
+                                  <span className={`text-[8px] block truncate font-light ${esLibre ? 'text-zinc-600' : estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
+                                    {esLibre ? 'Disponible' : libroActual.titulo}
                                   </span>
                                 </div>
                               </div>
@@ -311,7 +336,6 @@
                   })}
                 </div>
 
-                {/* Base del edificio */}
                 <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-[#111026] rounded-b"></div>
               </div>
 
@@ -320,15 +344,14 @@
                   onClick={onAbrirStory}
                   className="w-full editorial-btn py-3 text-xs font-semibold tracking-wide flex items-center justify-center gap-2 shadow-md transform hover:-translate-y-0.5 transition-all"
                 >
-                  ¡Empiezo lectura! Compartir mi ventana en Stories
+                  Compartir refugio en Stories
                 </button>
                 <p className="text-[10px] text-[#73736e] text-center pt-1.5 italic">
-                  Presume tu refugio literario en Instagram cuando enciendas tu luz.
+                  Presume tu refugio literario o el edificio completo en Instagram.
                 </p>
               </div>
             </div>
 
-            {/* MODAL INTERACTIVO DE INSPECCIÓN DE VENTANA */}
             {sociaSeleccionada && (
               <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card bg-white max-w-xs w-full p-5 space-y-4 relative shadow-2xl">
@@ -597,7 +620,10 @@
           useState(null);
 
         const [modalStoryAbierto, setModalStoryAbierto] = useState(false);
-        const storyCardRef = useRef(null);
+        const [modoStory, setModoStory] = useState('ventana'); // 'ventana' o 'edificio'
+        
+        const storyVentanaRef = useRef(null);
+        const storyEdificioRef = useRef(null);
 
         const mostrarToast = (texto) => {
           setToastMsg(texto);
@@ -911,10 +937,12 @@
         };
 
         const descargarStoryInstagram = async () => {
-          if (!storyCardRef.current) return;
+          const refActiva = modoStory === 'ventana' ? storyVentanaRef.current : storyEdificioRef.current;
+          if (!refActiva) return;
+          
           mostrarToast('Generando story...');
           try {
-            const canvas = await html2canvas(storyCardRef.current, {
+            const canvas = await html2canvas(refActiva, {
               scale: 2,
               useCORS: true,
               backgroundColor: '#111119'
@@ -922,7 +950,7 @@
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-habitacion-propia-story.png';
+            link.download = `gilda-${modoStory}-story.png`;
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -1122,77 +1150,143 @@
 
             {modalStoryAbierto && (
               <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
-                <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-4 relative shadow-2xl flex flex-col items-center">
+                <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-3 relative shadow-2xl flex flex-col items-center">
                   <button
                     onClick={() => setModalStoryAbierto(false)}
                     className="absolute top-3 right-3 text-xs text-[#73736e] hover:text-[#262624] bg-[#faf9f5] px-2 py-1 rounded border border-[#dfded5]"
                   >
                     cerrar
                   </button>
+
                   <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
-                    Vista previa Story (9:16)
+                    Compartir en Stories (9:16)
                   </span>
 
-                  {/* TARJETA STORY ULTRA-ESTÉTICA, LIMPIA Y CON @gilda.mailclub GARANTIZADO */}
-                  <div
-                    ref={storyCardRef}
-                    className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
-                  >
-                    <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-transparent to-transparent"></div>
-
-                    <div className="space-y-1.5 pt-1 z-10">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2.5 py-0.5 rounded-full font-bold border border-amber-800/50">
-                          Una habitación propia
-                        </span>
-                        <span className="text-[9px] font-mono-code text-zinc-400">@gilda.mailclub</span>
-                      </div>
-                      <div>
-                        <h3 className="font-serif-title text-base font-bold text-white leading-tight">
-                          Ventana encendida
-                        </h3>
-                        <p className="text-[11px] text-amber-200/90 italic truncate font-serif pt-0.5">
-                          {libroActual.titulo}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="my-auto py-3 px-3 bg-zinc-900/90 rounded-2xl border border-zinc-800 shadow-xl z-10 space-y-2.5">
-                      <div className="flex justify-between items-center text-[9px] font-mono-code text-zinc-400 px-1">
-                        <span>REFUGIO ACTIVO</span>
-                        <span className="text-amber-400 font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} EN LÍNEA</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {miembrosEdificio.slice(0, 6).map((m, i) => (
-                          <div
-                            key={i}
-                            className={`p-2.5 rounded-xl text-[9px] border transition-all flex flex-col justify-between h-20 overflow-hidden ${
-                              m.estaLeyendo ? 'window-card-active font-bold' : 'window-card-inactive'
-                            }`}
-                          >
-                            <div className="flex justify-between font-mono-code text-[7px] opacity-80">
-                              <span>{m.estaLeyendo ? 'ON' : 'OFF'}</span>
-                              <span>0{i+1}</span>
-                            </div>
-                            <span className="font-semibold truncate pt-1">{m.nombre}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-zinc-800 flex flex-col gap-1 text-[9px] text-zinc-400 z-10">
-                      <div className="flex justify-between items-center font-medium">
-                        <span className="text-zinc-300 text-[9px] font-mono-code">
-                          Club de Lectura
-                        </span>
-                        <span className="font-bold text-amber-400 tracking-wide">@gilda.mailclub</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[8px] text-zinc-500 font-mono-code">
-                        <span>gildaclub.netlify.app</span>
-                        <span>@gilda.mailclub</span>
-                      </div>
-                    </div>
+                  {/* Selector de modo de Story */}
+                  <div className="flex bg-[#dfded5] p-0.5 rounded-lg text-xs w-full">
+                    <button
+                      onClick={() => setModoStory('ventana')}
+                      className={`flex-1 py-1 rounded transition-all ${
+                        modoStory === 'ventana' ? 'bg-white text-[#262624] font-semibold shadow-xs' : 'text-[#73736e]'
+                      }`}
+                    >
+                      Ventana individual
+                    </button>
+                    <button
+                      onClick={() => setModoStory('edificio')}
+                      className={`flex-1 py-1 rounded transition-all ${
+                        modoStory === 'edificio' ? 'bg-white text-[#262624] font-semibold shadow-xs' : 'text-[#73736e]'
+                      }`}
+                    >
+                      Edificio completo
+                    </button>
                   </div>
+
+                  {/* VISTA PREVIA: VENTANA INDIVIDUAL */}
+                  {modoStory === 'ventana' && (
+                    <div
+                      ref={storyVentanaRef}
+                      className="w-[280px] h-[440px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
+                    >
+                      <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-transparent to-transparent"></div>
+
+                      <div className="space-y-1.5 pt-1 z-10">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2.5 py-0.5 rounded-full font-bold border border-amber-800/50">
+                            Una habitación propia
+                          </span>
+                          <span className="text-[9px] font-mono-code text-zinc-400">@gilda.mailclub</span>
+                        </div>
+                        <div>
+                          <h3 className="font-serif-title text-base font-bold text-white leading-tight">
+                            Ventana encendida
+                          </h3>
+                          <p className="text-[11px] text-amber-200/90 italic truncate font-serif pt-0.5">
+                            {libroActual.titulo}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-auto py-5 px-4 bg-zinc-900/90 rounded-2xl border border-zinc-800 shadow-xl z-10 space-y-3">
+                        <div className="flex justify-between items-center text-[9px] font-mono-code text-zinc-400">
+                          <span>REFUGIO PERSONAL</span>
+                          <span className="text-amber-400 font-bold">{isReadingNow ? 'Luz viva' : 'Silencio'}</span>
+                        </div>
+                        <div className="p-3.5 rounded-xl border window-card-active space-y-1">
+                          <div className="flex justify-between font-mono-code text-[8px] opacity-80">
+                            <span>{isReadingNow ? 'ON' : 'OFF'}</span>
+                            <span>habitación</span>
+                          </div>
+                          <span className="font-semibold text-xs block">{nombreUsuarioPersonalizado || sesion.nombre}</span>
+                          <span className="text-[9px] block font-light opacity-90">{libroActual.titulo}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-zinc-800 flex flex-col gap-1 text-[9px] text-zinc-400 z-10">
+                        <div className="flex justify-between items-center font-medium">
+                          <span className="text-zinc-300 text-[9px] font-mono-code">Club de Lectura</span>
+                          <span className="font-bold text-amber-400 tracking-wide">@gilda.mailclub</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[8px] text-zinc-500 font-mono-code">
+                          <span>gildaclub.netlify.app</span>
+                          <span>@gilda.mailclub</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VISTA PREVIA: EDIFICIO COMPLETO */}
+                  {modoStory === 'edificio' && (
+                    <div
+                      ref={storyEdificioRef}
+                      className="w-[280px] h-[440px] rounded-3xl p-4 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
+                    >
+                      <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-transparent to-transparent"></div>
+
+                      <div className="space-y-1 pt-1 z-10">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[8px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-full font-bold border border-amber-800/50">
+                            El Edificio de Lectura
+                          </span>
+                          <span className="text-[8px] font-mono-code text-zinc-400">@gilda.mailclub</span>
+                        </div>
+                      </div>
+
+                      <div className="my-auto py-2 px-2.5 bg-zinc-900/90 rounded-xl border border-zinc-800 shadow-xl z-10 space-y-1.5">
+                        <div className="flex justify-between items-center text-[8px] font-mono-code text-zinc-400 px-0.5">
+                          <span>FACHADA DEL CLUB</span>
+                          <span className="text-amber-400 font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} ON</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1.5 max-h-[220px] overflow-hidden">
+                          {miembrosEdificio.slice(0, 9).map((m, i) => (
+                            <div
+                              key={i}
+                              className={`p-1.5 rounded-lg text-[8px] border flex flex-col justify-between h-16 ${
+                                m.estaLeyendo ? 'window-card-active font-bold' : 'window-card-inactive'
+                              }`}
+                            >
+                              <div className="flex justify-between font-mono-code text-[6px] opacity-80">
+                                <span>{m.estaLeyendo ? 'ON' : 'OFF'}</span>
+                                <span>0{i+1}</span>
+                              </div>
+                              <span className="truncate">{m.nombre}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-zinc-800 flex flex-col gap-0.5 text-[8px] text-zinc-400 z-10">
+                        <div className="flex justify-between items-center font-medium">
+                          <span className="text-zinc-300 font-mono-code">Club de Lectura</span>
+                          <span className="font-bold text-amber-400">@gilda.mailclub</span>
+                        </div>
+                        <div className="flex justify-between items-center text-zinc-500 font-mono-code">
+                          <span>gildaclub.netlify.app</span>
+                          <span>@gilda.mailclub</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <button
                     onClick={descargarStoryInstagram}
