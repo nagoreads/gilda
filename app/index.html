@@ -152,13 +152,10 @@
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv';
       const URL_CSV_CHAT =
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv';
-
       const URL_CSV_PROPUESTAS =
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
-      
       const URL_CSV_VOTACION_CAFE =
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
-      
       const URL_CSV_FRASES =
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1794892861&single=true&output=csv';
 
@@ -756,6 +753,19 @@
             ).length || 1
           );
         }, [usuariasClub]);
+
+        // Lista de nombres de las lectoras activas
+        const nombresEnLinea = useMemo(() => {
+          const activas = usuariasClub.filter(
+            (u) => Number(u.pagina || u.pagina_actual || 0) > 0
+          );
+          const lista = activas.map((u) => u.nombre || 'Socia');
+          if (lista.length === 0) {
+            const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre;
+            return nombreActual ? [nombreActual] : ['Socia'];
+          }
+          return lista;
+        }, [usuariasClub, sesion]);
 
         const porcentajeLibro = useMemo(() => {
           const pagTotales = Number(libroActual.paginas_totales || 280);
@@ -1516,23 +1526,26 @@
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
                           <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
-                            {/* Cabecera estilo WhatsApp - En línea */}
+                            {/* Cabecera estilo WhatsApp con nombres en línea */}
                             <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e5e7eb] shrink-0">
-                              <div className="flex items-center gap-2.5">
-                                <div className="relative flex items-center justify-center">
+                              <div className="flex items-center gap-2.5 overflow-hidden">
+                                <div className="relative flex items-center justify-center shrink-0">
                                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
                                   <span className="absolute w-4 h-4 rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
                                 </div>
-                                <div>
+                                <div className="overflow-hidden">
                                   <span className="text-xs font-bold text-[#1a1a1a] block leading-none">
                                     Chat del club
                                   </span>
-                                  <span className="text-[10px] text-[#6b7280]">
-                                    {gildasLeyendoAhora} lectoras en línea
+                                  <span
+                                    className="text-[10px] text-[#6b7280] truncate block max-w-[210px] pt-0.5"
+                                    title={nombresEnLinea.join(', ')}
+                                  >
+                                    {nombresEnLinea.join(', ')}
                                   </span>
                                 </div>
                               </div>
-                              <span className="text-[10px] text-[#ADAE1D] font-medium bg-[#fcfcea] px-2 py-0.5 rounded-full border border-[#adae1d]/20">
+                              <span className="text-[10px] text-[#ADAE1D] font-medium bg-[#fcfcea] px-2 py-0.5 rounded-full border border-[#adae1d]/20 shrink-0">
                                 En línea
                               </span>
                             </div>
