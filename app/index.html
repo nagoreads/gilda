@@ -356,8 +356,14 @@
           }
         });
 
-        // Ventana modal de la ventana aesthetic
-        const [showWindowModal, setShowWindowModal] = useState(false);
+        // Libro personal que está leyendo la usuaria actual
+        const [miLibroActual, setMiLibroActual] = useState(() => {
+          return localStorage.getItem('gilda_mi_libro') || '';
+        });
+        const [editandoMiLibro, setEditandoMiLibro] = useState(false);
+
+        // Ventana modal del Edificio
+        const [showBuildingModal, setShowBuildingModal] = useState(false);
 
         const [miCiudad, setMiCiudad] = useState(() => {
           return localStorage.getItem('gilda_mi_ciudad') || '';
@@ -563,6 +569,7 @@
           localStorage.removeItem('gilda_sesion');
           localStorage.removeItem('gilda_nombre_usuario');
           localStorage.removeItem('gilda_is_reading');
+          localStorage.removeItem('gilda_mi_libro');
           setSesion(null);
           setInputEmail('');
           setErrorLogin('');
@@ -587,6 +594,14 @@
 
           setEditandoNombre(false);
           mostrarToast('Nombre actualizado al instante.');
+        };
+
+        const guardarMiLibroPersonal = () => {
+          const limpio = miLibroActual.trim();
+          localStorage.setItem('gilda_mi_libro', limpio);
+          setEditandoMiLibro(false);
+          enviarAccion('actualizar_libro', { libro: limpio });
+          mostrarToast('Libro actual actualizado.');
         };
 
         const toggleLecturaLamp = () => {
@@ -877,56 +892,61 @@
               </div>
             )}
 
-            {/* Ventana Aesthetic y Moderna del Club */}
-            {showWindowModal && (
-              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 fade-in">
-                {/* Marco exterior de la ventana estilo arquitectónico moderno */}
-                <div className="bg-[#1f242d] border-8 border-[#3b4252] rounded-3xl max-w-sm w-full p-6 space-y-4 relative shadow-2xl overflow-hidden">
+            {/* Ventana Modal: El Edificio de gilda */}
+            {showBuildingModal && (
+              <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 fade-in">
+                {/* Fachada del Edificio */}
+                <div className="bg-[#1a1c23] border-4 border-[#333842] rounded-3xl max-w-md w-full p-5 space-y-4 relative shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
                   
-                  {/* Luz ambiental superior de la ventana */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-amber-500/10 blur-xl pointer-events-none"></div>
+                  {/* Luz de la fachada nocturna */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-16 bg-amber-500/10 blur-2xl pointer-events-none"></div>
 
-                  <div className="flex justify-between items-center border-b border-[#434c5e] pb-3">
+                  <div className="flex justify-between items-center border-b border-[#2d323b] pb-3 shrink-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-amber-400 text-base">🪟</span>
-                      <h3 className="text-sm font-bold text-white tracking-wide">
-                        La Ventana del Club
-                      </h3>
+                      <span className="text-amber-400 text-lg">🏢</span>
+                      <div>
+                        <h3 className="text-sm font-bold text-white tracking-wide">
+                          Edificio gilda
+                        </h3>
+                        <p className="text-[10px] text-gray-400">Ventanas de lectura en directo</p>
+                      </div>
                     </div>
                     <button
-                      onClick={() => setShowWindowModal(false)}
-                      className="text-xs text-gray-300 hover:text-white bg-[#2e3440] px-3 py-1 rounded-lg border border-[#434c5e] transition-colors"
+                      onClick={() => setShowBuildingModal(false)}
+                      className="text-xs text-gray-300 hover:text-white bg-[#262a33] px-3 py-1.5 rounded-xl border border-[#383f4d] transition-colors"
                     >
                       cerrar
                     </button>
                   </div>
 
-                  <p className="text-[11px] text-gray-400">
-                    Asómate a la ventana nocturna: los cristales iluminados en ámbar muestran qué compañeras tienen la lámpara encendida leyendo ahora.
-                  </p>
-
-                  {/* Cuarterones de la ventana (Grid estilo moderno) */}
-                  <div className="max-h-72 overflow-y-auto grid grid-cols-2 gap-2.5 pr-1">
+                  {/* Contenedor de las ventanas del edificio (Grid) */}
+                  <div className="overflow-y-auto space-y-3 pr-1 grid grid-cols-2 gap-3 flex-grow">
                     
-                    {/* Tarjeta de la usuaria actual en la ventana */}
-                    <div className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
+                    {/* Tarjeta de la usuaria actual */}
+                    <div className={`rounded-2xl border p-3.5 flex flex-col justify-between transition-all relative overflow-hidden ${
                       isReadingNow 
-                        ? 'bg-amber-950/40 border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
-                        : 'bg-[#2e3440]/60 border-[#434c5e]'
+                        ? 'bg-gradient-to-b from-[#382b16] to-[#211a10] border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.2)]' 
+                        : 'bg-[#22262f] border-[#313742]'
                     }`}>
+                      {/* Marco decorativo de ventana */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500/40"></div>
+                      
                       <div className="flex justify-between items-start">
-                        <span className={`text-lg ${isReadingNow ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'text-gray-500'}`}>
+                        <span className={`text-xl ${isReadingNow ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse' : 'text-gray-600'}`}>
                           💡
                         </span>
-                        <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${isReadingNow ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-700/50 text-gray-400'}`}>
-                          {isReadingNow ? 'ON' : 'OFF'}
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isReadingNow ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                          {isReadingNow ? 'ENCENDIDA' : 'APAGADA'}
                         </span>
                       </div>
-                      <div className="pt-2">
+
+                      <div className="pt-3 space-y-1">
                         <span className="font-bold text-white text-xs block truncate">
-                          {nombreUsuarioPersonalizado || sesion.nombre} <span className="text-[9px] text-amber-400 font-normal">(tú)</span>
+                          {nombreUsuarioPersonalizado || sesion.nombre} <span className="text-[9px] text-amber-400">(tú)</span>
                         </span>
-                        <span className="text-[10px] text-gray-400">Pág. {miPagina}</span>
+                        <p className="text-[11px] text-amber-200/90 font-medium italic truncate">
+                          📖 {miLibroActual || libroActual.titulo}
+                        </p>
                       </div>
                     </div>
 
@@ -935,28 +955,34 @@
                       .filter((u) => (u.email || '').toLowerCase() !== sesion.email.toLowerCase())
                       .map((u, i) => {
                         const estaLeyendoSocia = Number(u.pagina || u.pagina_actual || 0) > 0;
+                        const libroSocia = u.libro || u.libro_actual || libroActual.titulo;
                         return (
                           <div
                             key={i}
-                            className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
+                            className={`rounded-2xl border p-3.5 flex flex-col justify-between transition-all relative overflow-hidden ${
                               estaLeyendoSocia 
-                                ? 'bg-amber-950/40 border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
-                                : 'bg-[#2e3440]/60 border-[#434c5e]'
+                                ? 'bg-gradient-to-b from-[#382b16] to-[#211a10] border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.2)]' 
+                                : 'bg-[#22262f] border-[#313742]'
                             }`}
                           >
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500/40"></div>
+
                             <div className="flex justify-between items-start">
-                              <span className={`text-lg ${estaLeyendoSocia ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'text-gray-500'}`}>
+                              <span className={`text-xl ${estaLeyendoSocia ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse' : 'text-gray-600'}`}>
                                 💡
                               </span>
-                              <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${estaLeyendoSocia ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-700/50 text-gray-400'}`}>
-                                {estaLeyendoSocia ? 'ON' : 'OFF'}
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${estaLeyendoSocia ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                                {estaLeyendoSocia ? 'ENCENDIDA' : 'APAGADA'}
                               </span>
                             </div>
-                            <div className="pt-2">
+
+                            <div className="pt-3 space-y-1">
                               <span className="font-bold text-white text-xs block truncate">
                                 {u.nombre || 'Socia'}
                               </span>
-                              <span className="text-[10px] text-gray-400">Pág. {u.pagina || u.pagina_actual || 0}</span>
+                              <p className="text-[11px] text-amber-200/90 font-medium italic truncate">
+                                📖 {libroSocia}
+                              </p>
                             </div>
                           </div>
                         );
@@ -1067,13 +1093,13 @@
                   <span>gilda</span>
                 </h1>
                 <button
-                  onClick={() => setShowWindowModal(true)}
+                  onClick={() => setShowBuildingModal(true)}
                   className="text-xs text-[#1a1a1a] bg-white hover:bg-[#f9fafb] px-3.5 py-1.5 rounded-full border border-[#e5e7eb] flex items-center gap-1.5 transition-all shadow-sm font-medium"
                 >
                   <span className={`text-sm ${isReadingNow ? 'text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]' : 'text-gray-400'}`}>
-                    🪟
+                    🏢
                   </span>
-                  <span>La Ventana ({gildasLeyendoAhora})</span>
+                  <span>Edificio gilda ({gildasLeyendoAhora})</span>
                 </button>
               </div>
             </header>
@@ -1124,6 +1150,42 @@
                           </div>
                         </div>
 
+                        {/* Configurar el libro que estás leyendo */}
+                        <div className="pt-3 border-t border-[#e5e7eb] space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-semibold text-[#1a1a1a]">
+                              ¿Qué libro estás leyendo hoy?
+                            </span>
+                            <button
+                              onClick={() => setEditandoMiLibro(!editandoMiLibro)}
+                              className="text-[#ADAE1D] hover:underline font-medium"
+                            >
+                              {editandoMiLibro ? 'cancelar' : (miLibroActual ? 'cambiar libro' : 'añadir libro')}
+                            </button>
+                          </div>
+                          {editandoMiLibro ? (
+                            <div className="flex gap-2 items-center fade-in">
+                              <input
+                                type="text"
+                                placeholder="Título del libro (ej: Crimen y castigo)"
+                                value={miLibroActual}
+                                onChange={(e) => setMiLibroActual(e.target.value)}
+                                className="flex-grow figma-input px-3 py-1.5 text-xs"
+                              />
+                              <button
+                                onClick={guardarMiLibroPersonal}
+                                className="figma-btn px-3 py-1.5 text-xs shrink-0"
+                              >
+                                Guardar
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-[#6b7280] italic">
+                              {miLibroActual ? `📖 ${miLibroActual}` : `📖 ${libroActual.titulo} (Lectura del club)`}
+                            </p>
+                          )}
+                        </div>
+
                         {/* Botón de Lámpara de Lectura On/Off */}
                         <div className="pt-3 border-t border-[#e5e7eb] flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1135,7 +1197,7 @@
                                 Lámpara de lectura
                               </span>
                               <span className="text-[10px] text-[#6b7280]">
-                                {isReadingNow ? 'Encendida (leyendo ahora)' : 'Apagada'}
+                                {isReadingNow ? 'Encendida en tu ventana' : 'Apagada'}
                               </span>
                             </div>
                           </div>
