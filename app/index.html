@@ -226,6 +226,15 @@
         const mapRef = useRef(null);
         const markersGroupRef = useRef(null);
 
+        const limpiarTexto = (str) => {
+          if (!str) return '';
+          return str
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+        };
+
         useEffect(() => {
           if (!mapRef.current) {
             const map = L.map('mapa-gilda', { zoomControl: false }).setView(
@@ -248,9 +257,9 @@
             markersGroupRef.current.clearLayers();
 
             usuarias.forEach((u) => {
-              const ciudadClean = (u.ciudad || u.ubicacion || '')
-                .trim()
-                .toLowerCase();
+              const ciudadRaw = u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación || '';
+              const ciudadClean = limpiarTexto(ciudadRaw);
+
               if (COORDENADAS_CIUDADES[ciudadClean]) {
                 const coords = COORDENADAS_CIUDADES[ciudadClean];
                 const marker = L.circleMarker(coords, {
@@ -265,7 +274,7 @@
                   `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1a1a1a; padding:8px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"><b>${
                     u.nombre || 'Socia'
                   }</b><br><span style="font-size:11px; color:#6b7280;">${
-                    u.ciudad || u.ubicacion
+                    u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación
                   }</span></div>`
                 );
                 markersGroupRef.current.addLayer(marker);
@@ -497,7 +506,6 @@
             return;
           }
 
-          // Comprobamos el estado de la socia en la nueva columna
           const estadoSocia = (sociaEncontrada.estado || '').trim().toLowerCase();
           if (estadoSocia === 'pendiente') {
             setErrorLogin(
@@ -933,7 +941,6 @@
                 <div>
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
-                      {/* Botón de Quiero registrarme */}
                       <a
                         href="https://gildaclub.netlify.app"
                         target="_blank"
@@ -1558,13 +1565,13 @@
                           <ComponenteMapa usuarias={usuariasClub} />
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {usuariasClub
-                              .filter((u) => u.ciudad || u.ubicacion)
+                              .filter((u) => u.ciudad || u.ubicacion || u.Ciudad || u.Ubicación)
                               .map((u, idx) => (
                                 <span
                                   key={idx}
                                   className="bg-[#f9fafb] border border-[#e5e7eb] text-[11px] text-[#4b5563] px-2.5 py-1 rounded-lg"
                                 >
-                                  {u.nombre} ({u.ciudad || u.ubicacion})
+                                  {u.nombre} ({u.ciudad || u.ubicacion || u.Ciudad || u.Ubicación})
                                 </span>
                               ))}
                           </div>
