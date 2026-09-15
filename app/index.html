@@ -362,7 +362,7 @@
         });
         const [editandoMiLibro, setEditandoMiLibro] = useState(false);
 
-        // Ventana modal del Edificio
+        // Ventana modal del Edificio ("Una habitación propia")
         const [showBuildingModal, setShowBuildingModal] = useState(false);
 
         const [miCiudad, setMiCiudad] = useState(() => {
@@ -609,7 +609,7 @@
           setIsReadingNow(nuevoEstado);
           localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
           enviarAccion('estado_lectura', { leyendo: nuevoEstado });
-          mostrarToast(nuevoEstado ? '💡 Lámpara encendida en tu ventana. ¡Leyendo ahora!' : 'Lámpara apagada.');
+          mostrarToast(nuevoEstado ? '💡 Lámpara encendida en tu habitación. ¡Leyendo ahora!' : 'Lámpara apagada.');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -892,50 +892,50 @@
               </div>
             )}
 
-            {/* Ventana Modal: El Edificio de gilda */}
+            {/* Ventana Modal: Edificio con Habitaciones Propias */}
             {showBuildingModal && (
-              <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 fade-in">
-                {/* Fachada del Edificio */}
-                <div className="bg-[#1a1c23] border-4 border-[#333842] rounded-3xl max-w-md w-full p-5 space-y-4 relative shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+              <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 fade-in">
+                {/* Fachada del Edificio nocturno */}
+                <div className="bg-[#181a20] border-4 border-[#2d323d] rounded-3xl max-w-md w-full p-5 space-y-4 relative shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
                   
-                  {/* Luz de la fachada nocturna */}
+                  {/* Luz tenue ambiental superior */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-16 bg-amber-500/10 blur-2xl pointer-events-none"></div>
 
-                  <div className="flex justify-between items-center border-b border-[#2d323b] pb-3 shrink-0">
+                  <div className="flex justify-between items-center border-b border-[#262a33] pb-3 shrink-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-amber-400 text-lg">🏢</span>
+                      <span className="text-amber-400 text-lg">🪟</span>
                       <div>
                         <h3 className="text-sm font-bold text-white tracking-wide">
-                          Edificio gilda
+                          una habitación propia
                         </h3>
-                        <p className="text-[10px] text-gray-400">Ventanas de lectura en directo</p>
+                        <p className="text-[10px] text-gray-400">Edificio de lectura en directo</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowBuildingModal(false)}
-                      className="text-xs text-gray-300 hover:text-white bg-[#262a33] px-3 py-1.5 rounded-xl border border-[#383f4d] transition-colors"
+                      className="text-xs text-gray-300 hover:text-white bg-[#22252e] px-3 py-1.5 rounded-xl border border-[#353b49] transition-colors"
                     >
                       cerrar
                     </button>
                   </div>
 
-                  {/* Contenedor de las ventanas del edificio (Grid) */}
+                  {/* Contenedor de las ventanas/habitaciones del edificio */}
                   <div className="overflow-y-auto space-y-3 pr-1 grid grid-cols-2 gap-3 flex-grow">
                     
                     {/* Tarjeta de la usuaria actual */}
                     <div className={`rounded-2xl border p-3.5 flex flex-col justify-between transition-all relative overflow-hidden ${
                       isReadingNow 
-                        ? 'bg-gradient-to-b from-[#382b16] to-[#211a10] border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.2)]' 
-                        : 'bg-[#22262f] border-[#313742]'
+                        ? 'bg-gradient-to-b from-[#3a2c14] to-[#1f1810] border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)]' 
+                        : 'bg-[#1f232b] border-[#2c323f]'
                     }`}>
-                      {/* Marco decorativo de ventana */}
-                      <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500/40"></div>
+                      {/* Marco superior de ventana */}
+                      <div className={`absolute top-0 left-0 right-0 h-1.5 ${isReadingNow ? 'bg-amber-400 shadow-[0_0_8px_#f59e0b]' : 'bg-gray-700'}`}></div>
                       
-                      <div className="flex justify-between items-start">
-                        <span className={`text-xl ${isReadingNow ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse' : 'text-gray-600'}`}>
+                      <div className="flex justify-between items-start pt-1">
+                        <span className={`text-xl ${isReadingNow ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.9)] animate-pulse' : 'text-gray-600'}`}>
                           💡
                         </span>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isReadingNow ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isReadingNow ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-gray-800 text-gray-500'}`}>
                           {isReadingNow ? 'ENCENDIDA' : 'APAGADA'}
                         </span>
                       </div>
@@ -961,17 +961,17 @@
                             key={i}
                             className={`rounded-2xl border p-3.5 flex flex-col justify-between transition-all relative overflow-hidden ${
                               estaLeyendoSocia 
-                                ? 'bg-gradient-to-b from-[#382b16] to-[#211a10] border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.2)]' 
-                                : 'bg-[#22262f] border-[#313742]'
+                                ? 'bg-gradient-to-b from-[#3a2c14] to-[#1f1810] border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)]' 
+                                : 'bg-[#1f232b] border-[#2c323f]'
                             }`}
                           >
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500/40"></div>
+                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${estaLeyendoSocia ? 'bg-amber-400 shadow-[0_0_8px_#f59e0b]' : 'bg-gray-700'}`}></div>
 
-                            <div className="flex justify-between items-start">
-                              <span className={`text-xl ${estaLeyendoSocia ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse' : 'text-gray-600'}`}>
+                            <div className="flex justify-between items-start pt-1">
+                              <span className={`text-xl ${estaLeyendoSocia ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.9)] animate-pulse' : 'text-gray-600'}`}>
                                 💡
                               </span>
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${estaLeyendoSocia ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${estaLeyendoSocia ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-gray-800 text-gray-500'}`}>
                                 {estaLeyendoSocia ? 'ENCENDIDA' : 'APAGADA'}
                               </span>
                             </div>
@@ -1097,9 +1097,9 @@
                   className="text-xs text-[#1a1a1a] bg-white hover:bg-[#f9fafb] px-3.5 py-1.5 rounded-full border border-[#e5e7eb] flex items-center gap-1.5 transition-all shadow-sm font-medium"
                 >
                   <span className={`text-sm ${isReadingNow ? 'text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]' : 'text-gray-400'}`}>
-                    🏢
+                    🪟
                   </span>
-                  <span>Edificio gilda ({gildasLeyendoAhora})</span>
+                  <span>una habitación propia ({gildasLeyendoAhora})</span>
                 </button>
               </div>
             </header>
@@ -1197,7 +1197,7 @@
                                 Lámpara de lectura
                               </span>
                               <span className="text-[10px] text-[#6b7280]">
-                                {isReadingNow ? 'Encendida en tu ventana' : 'Apagada'}
+                                {isReadingNow ? 'Encendida en tu habitación' : 'Apagada'}
                               </span>
                             </div>
                           </div>
