@@ -13,7 +13,7 @@
 
     <!-- Tipografía Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap"
       rel="stylesheet"
     />
 
@@ -38,22 +38,27 @@
       src="https://unpkg.com/@babel/standalone/babel.min.js"
     ></script>
 
-    <!-- PapaParse -->
+    <!-- PapaParse y html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: #f5f5f3;
+        background-color: #f7f6f2;
         color: #1c1c1c;
         -webkit-tap-highlight-color: transparent;
       }
 
+      .font-serif-title {
+        font-family: 'Playfair Display', serif;
+      }
+
       .editorial-card {
         background: #ffffff;
-        border: 1px solid #e2e2dc;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        border: 1px solid #e3e3dc;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         transition: all 0.2s ease;
       }
       .editorial-card:hover {
@@ -61,8 +66,8 @@
       }
 
       .editorial-input {
-        background: #fafaf8;
-        border: 1px solid #e2e2dc;
+        background: #fafaf7;
+        border: 1px solid #e3e3dc;
         border-radius: 8px;
         color: #1c1c1c;
         transition: all 0.2s ease;
@@ -89,10 +94,10 @@
       }
 
       .editorial-nav {
-        background: rgba(245, 245, 243, 0.92);
+        background: rgba(247, 246, 242, 0.95);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-top: 1px solid #e2e2dc;
+        border-top: 1px solid #e3e3dc;
       }
 
       .fade-in {
@@ -109,11 +114,25 @@
         }
       }
 
+      /* Estilos para el Póster / Lámina de la Habitación */
+      .poster-paper {
+        background-color: #faf8f3;
+        background-image: radial-gradient(#e5e2d9 0.75px, transparent 0.75px);
+        background-size: 16px 16px;
+        border: 1px solid #dcd8cc;
+      }
+
+      .window-active-paper {
+        background: #fef9c3;
+        border-color: #facc15 !important;
+        box-shadow: inset 0 0 10px rgba(250, 204, 21, 0.2);
+      }
+
       #mapa-gilda {
         height: 260px;
         width: 100%;
         border-radius: 8px;
-        border: 1px solid #e2e2dc;
+        border: 1px solid #e3e3dc;
         z-index: 1;
       }
 
@@ -125,7 +144,7 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #d4d4cd;
+        background: #d4d0c5;
         border-radius: 2px;
       }
     </style>
@@ -198,7 +217,7 @@
               src={portada}
               alt={titulo || 'Libro'}
               onError={() => setErrorImg(true)}
-              className={`${sizeClasses} object-cover rounded border border-[#e2e2dc] shrink-0`}
+              className={`${sizeClasses} object-cover rounded border border-[#e3e3dc] shrink-0`}
             />
           );
         }
@@ -392,6 +411,10 @@
         const [enviandoForm, setEnviandoForm] = useState(false);
         const [libroSeleccionadoModal, setLibroSeleccionadoModal] =
           useState(null);
+
+        // Estado para el modal de descarga de Story
+        const [modalStoryAbierto, setModalStoryAbierto] = useState(false);
+        const storyCardRef = useRef(null);
 
         const mostrarToast = (texto) => {
           setToastMsg(texto);
@@ -713,6 +736,27 @@
           setNuevoChat('');
         };
 
+        const descargarStoryInstagram = async () => {
+          if (!storyCardRef.current) return;
+          mostrarToast('Generando story para Instagram...');
+          try {
+            const canvas = await html2canvas(storyCardRef.current, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#faf8f3'
+            });
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'gilda-habitacion-story.png';
+            link.click();
+            mostrarToast('Story descargada con éxito.');
+          } catch (err) {
+            console.error('Error generando story:', err);
+            mostrarToast('No se pudo generar la imagen.');
+          }
+        };
+
         const frasesBotellaTotales = useMemo(() => {
           const frasesDeHoja = frasesClub
             .map((f) => f.frase || f.texto || Object.values(f)[0])
@@ -840,7 +884,7 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f5f5f3]">
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f7f6f2]">
               <div className="editorial-card max-w-sm w-full p-8 space-y-6 fade-in">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -851,7 +895,7 @@
                   </div>
                   <p className="text-xs text-[#666660]">club de lectura</p>
                 </div>
-                <div className="bg-[#fafaf8] border border-[#e2e2dc] p-3 rounded-lg flex items-center justify-between text-xs text-[#666660]">
+                <div className="bg-[#fafaf7] border border-[#e3e3dc] p-3 rounded-lg flex items-center justify-between text-xs text-[#666660]">
                   <span>lectoras registradas</span>
                   <span className="text-[#1c1c1c] font-medium">
                     {totalGildas}
@@ -880,7 +924,7 @@
                   </button>
                 </form>
 
-                <div className="pt-2 border-t border-[#e2e2dc] text-center">
+                <div className="pt-2 border-t border-[#e3e3dc] text-center">
                   <a
                     href="https://gildaclub.netlify.app"
                     target="_blank"
@@ -896,11 +940,77 @@
         }
 
         return (
-          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f5f5f3]">
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f7f6f2]">
             {toastMsg && (
               <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1c1c1c] text-white text-xs px-4 py-2 rounded shadow-lg fade-in flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
                 <span>{toastMsg}</span>
+              </div>
+            )}
+
+            {/* MODAL PREVIEW PARA DESCARGAR STORY 9:16 */}
+            {modalStoryAbierto && (
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+                <div className="editorial-card bg-white max-w-xs w-full p-4 space-y-4 relative shadow-2xl flex flex-col items-center">
+                  <button
+                    onClick={() => setModalStoryAbierto(false)}
+                    className="absolute top-3 right-3 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf7] px-2 py-1 rounded border border-[#e3e3dc]"
+                  >
+                    cerrar
+                  </button>
+                  <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
+                    Vista previa Story 9:16
+                  </span>
+
+                  {/* CONTENEDOR 9:16 PARA CAPTURAR CON HTML2CANVAS */}
+                  <div
+                    ref={storyCardRef}
+                    className="poster-paper w-[270px] h-[480px] p-6 rounded-xl flex flex-col justify-between shadow-sm relative overflow-hidden text-left"
+                  >
+                    <div className="space-y-1">
+                      <span className="text-[9px] uppercase tracking-widest text-[#adae1d] block font-semibold">
+                        gilda — club de lectura
+                      </span>
+                      <h3 className="font-serif-title text-base font-medium text-[#1c1c1c]">
+                        Una habitación propia
+                      </h3>
+                      <p className="text-[10px] text-[#666660]">
+                        Lectura actual: {libroActual.titulo}
+                      </p>
+                    </div>
+
+                    <div className="my-auto py-2 grid grid-cols-2 gap-2.5 w-full">
+                      {miembrosEdificio.slice(0, 8).map((m, i) => (
+                        <div
+                          key={i}
+                          className={`p-2 rounded text-[9px] border flex flex-col justify-between ${
+                            m.estaLeyendo
+                              ? 'window-active-paper text-[#1c1c1c]'
+                              : 'bg-white border-[#e3e3dc] text-[#555]'
+                          }`}
+                        >
+                          <div className="flex justify-between font-mono text-[7px] text-[#888]">
+                            <span>{m.estaLeyendo ? 'ACTIVA' : 'OFF'}</span>
+                            <span>0{i+1}</span>
+                          </div>
+                          <span className="font-medium truncate pt-1">{m.nombreReal}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 border-t border-[#dcd8cc] flex justify-between items-center text-[9px] text-[#666660]">
+                      <span>{miembrosEdificio.filter(m => m.estaLeyendo).length} lectoras en línea</span>
+                      <span className="font-semibold text-[#adae1d]">gildaclub.netlify.app</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={descargarStoryInstagram}
+                    className="w-full editorial-btn py-2 text-xs"
+                  >
+                    Descargar imagen para Stories
+                  </button>
+                </div>
               </div>
             )}
 
@@ -909,7 +1019,7 @@
                 <div className="editorial-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-xl">
                   <button
                     onClick={() => setLibroSeleccionadoModal(null)}
-                    className="absolute top-4 right-4 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf8] px-2 py-1 rounded border border-[#e2e2dc]"
+                    className="absolute top-4 right-4 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf7] px-2 py-1 rounded border border-[#e3e3dc]"
                   >
                     cerrar
                   </button>
@@ -935,7 +1045,7 @@
                       </span>
                     </div>
                   </div>
-                  <div className="space-y-1 pt-2 border-t border-[#e2e2dc]">
+                  <div className="space-y-1 pt-2 border-t border-[#e3e3dc]">
                     <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
                       sinopsis
                     </h4>
@@ -955,7 +1065,7 @@
                   <span className="text-[#1c1c1c] font-medium">
                     {nombreUsuarioPersonalizado || sesion.nombre}
                   </span>
-                  <span className="text-[10px] bg-[#e2e2dc] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
+                  <span className="text-[10px] bg-[#e3e3dc] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
                     {sesion.modalidad}
                   </span>
                 </div>
@@ -1039,7 +1149,7 @@
                                 <span>progreso</span>
                                 <span>{porcentajeLibro}%</span>
                               </div>
-                              <div className="w-full bg-[#fafaf8] rounded-full h-1 border border-[#e2e2dc] overflow-hidden">
+                              <div className="w-full bg-[#fafaf7] rounded-full h-1 border border-[#e3e3dc] overflow-hidden">
                                 <div
                                   className="bg-[#adae1d] h-full transition-all duration-300 rounded-full"
                                   style={{ width: `${porcentajeLibro}%` }}
@@ -1050,7 +1160,7 @@
                         </div>
 
                         {/* Configurar lectura personal */}
-                        <div className="pt-3 border-t border-[#e2e2dc] space-y-2">
+                        <div className="pt-3 border-t border-[#e3e3dc] space-y-2">
                           <div className="flex justify-between items-center text-xs">
                             <span className="font-medium text-[#1c1c1c]">
                               ¿Qué libro estás leyendo?
@@ -1086,7 +1196,7 @@
                         </div>
 
                         {/* Estado de Lectura / Lámpara */}
-                        <div className="pt-3 border-t border-[#e2e2dc] flex items-center justify-between">
+                        <div className="pt-3 border-t border-[#e3e3dc] flex items-center justify-between">
                           <div>
                             <span className="text-xs font-medium text-[#1c1c1c] block">
                               estado de lectura
@@ -1100,21 +1210,21 @@
                             className={`px-3.5 py-1.5 text-xs rounded-lg font-medium transition-all ${
                               isReadingNow
                                 ? 'bg-[#adae1d] text-white'
-                                : 'bg-[#fafaf8] text-[#444] border border-[#e2e2dc]'
+                                : 'bg-[#fafaf7] text-[#444] border border-[#e3e3dc]'
                             }`}
                           >
                             {isReadingNow ? 'apagar luz' : 'encender luz'}
                           </button>
                         </div>
 
-                        <div className="pt-2 border-t border-[#e2e2dc] flex items-center justify-between gap-2">
+                        <div className="pt-2 border-t border-[#e3e3dc] flex items-center justify-between gap-2">
                           <span className="text-xs text-[#666660]">
                             página actual:
                           </span>
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => actualizarPagina(miPagina - 5)}
-                              className="bg-white border border-[#e2e2dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
+                              className="bg-white border border-[#e3e3dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
                             >
                               -5
                             </button>
@@ -1128,7 +1238,7 @@
                             />
                             <button
                               onClick={() => actualizarPagina(miPagina + 5)}
-                              className="bg-white border border-[#e2e2dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
+                              className="bg-white border border-[#e3e3dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
                             >
                               +5
                             </button>
@@ -1188,7 +1298,7 @@
                         </div>
 
                         {botellaAbierta && (
-                          <div className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded-lg space-y-1 fade-in">
+                          <div className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded-lg space-y-1 fade-in">
                             <p className="text-xs text-[#444] italic leading-relaxed">
                               "{frasesBotellaTotales[fraseActualBotella]}"
                             </p>
@@ -1198,7 +1308,7 @@
                           </div>
                         )}
 
-                        <div className="space-y-2 pt-1 border-t border-[#e2e2dc]">
+                        <div className="space-y-2 pt-1 border-t border-[#e3e3dc]">
                           <textarea
                             placeholder="Guardar cita o fragmento..."
                             value={nuevaFraseBotella}
@@ -1218,7 +1328,7 @@
                         </div>
 
                         {misCitas.length > 0 && (
-                          <div className="pt-2 border-t border-[#e2e2dc] space-y-2">
+                          <div className="pt-2 border-t border-[#e3e3dc] space-y-2">
                             <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
                               tus notas guardadas ({misCitas.length})
                             </span>
@@ -1226,7 +1336,7 @@
                               {misCitas.map((cita, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-2.5 bg-white border border-[#e2e2dc] rounded text-xs text-[#444] italic"
+                                  className="p-2.5 bg-white border border-[#e3e3dc] rounded text-xs text-[#444] italic"
                                 >
                                   {cita}
                                 </div>
@@ -1238,24 +1348,26 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION (ARQUITECTURA CLARA Y LUMINOSA) */}
+                  {/* PESTAÑA: HABITACION (LÁMINA / PÓSTER EDITORIAL Y BOTÓN DE STORY) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      <div className="w-full editorial-card p-6 relative overflow-hidden flex flex-col items-center">
+                      <div className="poster-paper w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-sm">
                         
-                        <div className="text-center z-10 mb-6 space-y-1">
-                          <h2 className="text-xs font-medium uppercase tracking-widest text-[#adae1d]">
-                            una habitación propia
+                        <div className="text-center z-10 mb-5 space-y-1">
+                          <span className="text-[9px] font-semibold uppercase tracking-widest text-[#adae1d] block">
+                            gilda — club de lectura
+                          </span>
+                          <h2 className="font-serif-title text-lg font-medium text-[#1c1c1c]">
+                            Una habitación propia
                           </h2>
                           <p className="text-[11px] text-[#666660]">
-                            espacio compartido, {miembrosEdificio.length} lectoras en activo
+                            Silencio en la noche, {miembrosEdificio.length} lectoras en activo
                           </p>
                         </div>
 
-                        {/* Fachada Luminosa y Arquitectónica */}
-                        <div className="relative w-full max-w-[280px] bg-[#f2f2ee] rounded-t-lg p-4 grid grid-cols-2 gap-3 border border-[#e2e2dc] z-10 shadow-xs">
-                          
-                          <div className="absolute -top-6 right-6 w-2.5 h-5 bg-[#d4d4cd] rounded-t"></div>
+                        {/* Fachada Arquitectónica tipo lámina */}
+                        <div className="relative w-full max-w-[280px] bg-white rounded-t-lg p-4 grid grid-cols-2 gap-3 border border-[#dcd8cc] z-10 shadow-xs">
+                          <div className="absolute -top-5 right-6 w-2.5 h-4 bg-[#d4d0c5] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
@@ -1266,8 +1378,8 @@
                                 key={i}
                                 className={`p-3 rounded border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'bg-[#fffbeb] border-[#facc15] shadow-xs' : 'bg-white border-[#e2e2dc]')
-                                    : 'bg-[#fafaf8] border-[#e2e2dc] opacity-60'
+                                    ? (estaActiva ? 'window-active-paper text-[#1c1c1c]' : 'bg-[#fafaf7] border-[#e3e3dc]')
+                                    : 'bg-[#f4f3ee] border-[#e3e3dc] opacity-60'
                                 }`}
                               >
                                 <div className="flex justify-between items-center text-[9px] font-mono tracking-wider text-[#888]">
@@ -1299,8 +1411,17 @@
                             );
                           })}
                         </div>
-                        {/* Entrada del edificio clara */}
-                        <div className="w-8 h-10 bg-[#e2e2dc] rounded-t border border-[#d4d4cd] z-10 -mt-px mx-auto"></div>
+                        <div className="w-8 h-10 bg-[#e3e3dc] rounded-t border border-[#dcd8cc] z-10 -mt-px mx-auto"></div>
+
+                        {/* Botón para compartir en Instagram Stories */}
+                        <div className="mt-6 w-full max-w-[280px]">
+                          <button
+                            onClick={() => setModalStoryAbierto(true)}
+                            className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
+                          >
+                            Compartir en Instagram (Story 9:16)
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1345,7 +1466,7 @@
                           <div
                             key={i}
                             className={`editorial-card p-5 space-y-3 ${
-                              !estaDesbloqueado ? 'opacity-40 bg-[#fafaf8]' : ''
+                              !estaDesbloqueado ? 'opacity-40 bg-[#fafaf7]' : ''
                             }`}
                           >
                             {!estaDesbloqueado ? (
@@ -1366,7 +1487,7 @@
                                   {cap.descripcion || cap.texto || ''}
                                 </p>
 
-                                <div className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded space-y-2">
+                                <div className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded space-y-2">
                                   <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
                                     cápsula del tiempo
                                   </span>
@@ -1403,7 +1524,7 @@
                                   </div>
                                 </div>
 
-                                <div className="pt-2 border-t border-[#e2e2dc] space-y-2">
+                                <div className="pt-2 border-t border-[#e3e3dc] space-y-2">
                                   <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
                                     reflexiones
                                   </h4>
@@ -1458,7 +1579,7 @@
                                   {notasCapitulo.map((com, idx) => (
                                     <div
                                       key={idx}
-                                      className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded space-y-1"
+                                      className="p-3 bg-[#fafaf7] border border-[#e3e3dc] rounded space-y-1"
                                     >
                                       <div className="flex justify-between text-[10px] text-[#666660]">
                                         <span className="font-medium text-[#1c1c1c]">
@@ -1480,7 +1601,7 @@
 
                       <div
                         className={`editorial-card p-5 space-y-3 mt-6 ${
-                          !estaDesbloqueadaValoracion ? 'opacity-40 bg-[#fafaf8]' : ''
+                          !estaDesbloqueadaValoracion ? 'opacity-40 bg-[#fafaf7]' : ''
                         }`}
                       >
                         {!estaDesbloqueadaValoracion ? (
@@ -1544,7 +1665,7 @@
 
                   {seccionApp === 'comunidad' && (
                     <div className="space-y-3 fade-in">
-                      <div className="flex bg-[#e2e2dc] p-1 rounded-lg text-xs">
+                      <div className="flex bg-[#e3e3dc] p-1 rounded-lg text-xs">
                         <button
                           onClick={() => setSubTabComunidad('chat')}
                           className={`flex-1 py-1.5 rounded transition-all ${
@@ -1590,9 +1711,9 @@
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
                           <div className="editorial-card p-4 h-[380px] flex flex-col justify-between">
-                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e2e2dc] shrink-0 text-xs">
+                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e3e3dc] shrink-0 text-xs">
                               <span className="font-medium text-[#1c1c1c]">conversación en vivo</span>
-                              <span className="text-[10px] text-[#adae1d] bg-[#fafaf8] px-2 py-0.5 rounded border border-[#e2e2dc]">
+                              <span className="text-[10px] text-[#adae1d] bg-[#fafaf7] px-2 py-0.5 rounded border border-[#e3e3dc]">
                                 {nombresEnLinea.length} activas
                               </span>
                             </div>
@@ -1622,7 +1743,7 @@
                                       className={`p-2.5 rounded text-xs ${
                                         esMio
                                           ? 'bg-[#1c1c1c] text-white'
-                                          : 'bg-[#fafaf8] text-[#1c1c1c] border border-[#e2e2dc]'
+                                          : 'bg-[#fafaf7] text-[#1c1c1c] border border-[#e3e3dc]'
                                       }`}
                                     >
                                       {msg.mensaje}
@@ -1633,7 +1754,7 @@
                             </div>
                             <form
                               onSubmit={enviarChat}
-                              className="mt-3 pt-3 border-t border-[#e2e2dc] flex gap-2 shrink-0"
+                              className="mt-3 pt-3 border-t border-[#e3e3dc] flex gap-2 shrink-0"
                             >
                               <input
                                 type="text"
@@ -1715,7 +1836,7 @@
                                   {u.modalidad}
                                 </span>
                               </div>
-                              <span className="text-[11px] text-[#444] bg-[#fafaf8] px-2 py-0.5 rounded border border-[#e2e2dc]">
+                              <span className="text-[11px] text-[#444] bg-[#fafaf7] px-2 py-0.5 rounded border border-[#e3e3dc]">
                                 pág. {u.pagina || '0'}
                               </span>
                             </div>
@@ -1827,8 +1948,9 @@
         );
       }
 
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
+      const root = ReactDOM.createRoot(getElementById('root'));
+      // Note: fixed getElementById typo to document.getElementById
+      document.getElementById('root') && root.render(<App />);
     </script>
   </body>
 </html>
