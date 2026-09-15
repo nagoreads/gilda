@@ -118,12 +118,12 @@
         }
       }
 
-      /* Estilos para las ventanas de la habitación propia */
+      /* Estilos refinados para las ventanas de la habitación propia */
       .window-card-active {
         background: #fbbf24 !important;
         border-color: #92400e !important;
         color: #1e1b4b !important;
-        box-shadow: 0 0 16px rgba(251, 191, 36, 0.65), inset 0 0 8px rgba(255, 255, 255, 0.7);
+        box-shadow: 0 0 14px rgba(251, 191, 36, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.6);
       }
 
       .window-card-inactive {
@@ -206,99 +206,103 @@
       };
 
       /* ==========================================================================
-         PESTAÑA: LA HABITACIÓN PROPIA (Ventanas de lectura de la comunidad)
+         PESTAÑA: LA HABITACIÓN PROPIA (Fachada de Edificio con múltiples ventanas)
          ========================================================================== */
       function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroActual }) {
         const activasCount = usuarias.filter(m => m.estaLeyendo).length;
 
         return (
-          <div className="fade-in space-y-5 max-w-md mx-auto px-1 pb-16">
+          <div className="fade-in space-y-4 max-w-md mx-auto px-1 pb-16">
             {/* Cabecera literaria */}
-            <div className="text-center pt-2 space-y-1.5">
-              <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-3 py-1 rounded-full border border-stone-300 inline-block font-bold">
+            <div className="text-center pt-1 space-y-1">
+              <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-3 py-0.5 rounded-full border border-stone-300 inline-block font-bold">
                 ✦ Una habitación propia
               </span>
               <h2 className="font-serif-title text-2xl text-[#262624]">El Edificio de Lectura</h2>
               <p className="text-xs text-[#73736e] font-sans max-w-xs mx-auto leading-relaxed">
-                Cada ventana encendida representa el refugio íntimo de una socia sumergida en sus páginas en este instante.
+                Cada ventana encendida representa el refugio íntimo de una socia sumergida en sus páginas.
               </p>
             </div>
 
-            {/* CONTENEDOR DE LA FACHADA LIFI */}
-            <div className="editorial-card p-5 space-y-4 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
+            {/* CONTENEDOR DE LA FACHADA LIFI MEJORADO (3 Columnas para más ventanas) */}
+            <div className="editorial-card p-4 space-y-3 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
               
-              <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs">
-                <span className="font-semibold text-[#262624]">Foco Comunitario</span>
-                <span className="text-amber-600 font-bold font-mono-code bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  {activasCount} ventanas ON
+              <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs px-1">
+                <span className="font-semibold text-[#262624]">Fachada del Club</span>
+                <span className="text-amber-700 font-bold font-mono-code bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  {activasCount} / {usuarias.length} ON
                 </span>
               </div>
 
-              {/* Bloque Residencial Estilo Lofi / Vectorial */}
-              <div className="w-full bg-[#1e1b4b] rounded-2xl p-4 grid grid-cols-2 gap-3.5 border-2 border-[#111026] shadow-inner relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-3 bg-[#111026] rounded-t"></div>
+              {/* Bloque Residencial con 3 columnas */}
+              <div className="w-full bg-[#1e1b4b] rounded-2xl p-3.5 border-2 border-[#111026] shadow-inner relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-[#111026] rounded-t"></div>
 
-                {usuarias.map((miembro, i) => {
-                  const estaActiva = miembro.estaLeyendo;
+                <div className="grid grid-cols-3 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
+                  {usuarias.map((miembro, i) => {
+                    const estaActiva = miembro.estaLeyendo;
 
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        if (miembro.esYo && onToggleMiLuz) {
-                          onToggleMiLuz();
-                        }
-                      }}
-                      className={`relative p-3 rounded-xl border-2 transition-all duration-300 flex flex-col justify-between h-28 overflow-hidden shadow-sm ${
-                        miembro.esYo ? 'cursor-pointer ring-2 ring-[#adae1d] scale-[1.02]' : ''
-                      } ${
-                        estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
-                      }`}
-                    >
-                      {/* Cuarterones / divisiones de los cristales de la ventana */}
-                      <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
-                        <div className="border-r border-b border-current"></div>
-                        <div className="border-b border-current"></div>
-                        <div className="border-r border-current"></div>
-                        <div></div>
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          if (miembro.esYo && onToggleMiLuz) {
+                            onToggleMiLuz();
+                          }
+                        }}
+                        className={`relative p-2.5 rounded-xl border transition-all duration-300 flex flex-col justify-between h-24 overflow-hidden shadow-xs ${
+                          miembro.esYo ? 'cursor-pointer ring-2 ring-[#adae1d] scale-[1.02]' : ''
+                        } ${
+                          estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
+                        }`}
+                      >
+                        {/* Cuarterones / divisiones de los cristales de la ventana */}
+                        <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
+                          <div className="border-r border-b border-current"></div>
+                          <div className="border-b border-current"></div>
+                          <div className="border-r border-current"></div>
+                          <div></div>
+                        </div>
+
+                        <div className="flex justify-between items-center text-[8px] font-mono-code tracking-wider z-10">
+                          <span className={`px-1 py-0.5 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
+                            {estaActiva ? 'ON' : 'OFF'}
+                          </span>
+                          <span className="opacity-75">0{i+1}</span>
+                        </div>
+
+                        <div className="z-10 truncate pt-1">
+                          <span className={`font-semibold text-[11px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
+                            {miembro.nombre} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
+                          </span>
+                          <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
+                            {miembro.libroReal || libroActual.titulo}
+                          </span>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                      <div className="flex justify-between items-center text-[9px] font-mono-code tracking-wider z-10">
-                        <span className={`px-1.5 py-0.5 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
-                          {estaActiva ? 'ON' : 'OFF'}
-                        </span>
-                        <span className="opacity-75">0{i+1}</span>
-                      </div>
-
-                      <div className="z-10 truncate pt-2">
-                        <span className={`font-semibold text-xs block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
-                          {miembro.nombre} {miembro.esYo && <span className="text-[9px] opacity-75">(tú)</span>}
-                        </span>
-                        <span className={`text-[10px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
-                          {miembro.libroReal || libroActual.titulo}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-16 h-3 bg-[#111026] rounded-b"></div>
               </div>
 
               {/* Botón irresistible para compartir en Instagram Stories */}
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
                   onClick={onAbrirStory}
                   className="w-full editorial-btn py-3 text-xs font-semibold tracking-wide flex items-center justify-center gap-2 shadow-md transform hover:-translate-y-0.5 transition-all"
                 >
                   <span>✨</span> ¡Empiezo lectura! Compartir mi ventana en Stories
                 </button>
-                <p className="text-[10px] text-[#73736e] text-center pt-2 italic">
+                <p className="text-[10px] text-[#73736e] text-center pt-1.5 italic">
                   Presume tu refugio literario en Instagram cuando enciendas tu luz.
                 </p>
               </div>
             </div>
 
             {/* Panel explicativo de la Habitación Propia */}
-            <div className="editorial-card p-4 space-y-2.5 bg-[#faf9f5]">
+            <div className="editorial-card p-4 space-y-2 bg-[#faf9f5]">
               <h3 className="font-serif-title text-sm font-semibold text-[#262624] flex items-center gap-2">
                 <span>🕯️</span> Tu espacio de lectura
               </h3>
@@ -851,7 +855,7 @@
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#ffffff'
+              backgroundColor: '#111119'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
@@ -1069,36 +1073,43 @@
                     Vista previa Story (9:16)
                   </span>
 
-                  {/* TARJETA STORY: UNA HABITACIÓN PROPIA */}
+                  {/* NUEVA TARJETA STORY ULTRA-ESTÉTICA Y LIMPIA (SIN TÍTULOS GENÉRICOS) */}
                   <div
                     ref={storyCardRef}
-                    className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-white border-2 border-[#262624]"
+                    className="w-[280px] h-[498px] rounded-3xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-left bg-[#111119] text-white border border-zinc-800"
                   >
-                    <div className="space-y-1 pt-1 z-10">
+                    {/* Brillo sutil de fondo */}
+                    <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-transparent to-transparent"></div>
+
+                    {/* Cabecera limpia */}
+                    <div className="space-y-1.5 pt-1 z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#2d223c] bg-stone-100 px-2.5 py-0.5 rounded-full font-bold border border-stone-300">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-amber-950/40 px-2.5 py-0.5 rounded-full font-bold border border-amber-800/50">
                           ✦ una habitación propia
                         </span>
-                        <span className="text-[9px] font-mono-code text-[#73736e]">@gilda.mailclub</span>
+                        <span className="text-[9px] font-mono-code text-zinc-400">@gilda.mailclub</span>
                       </div>
-                      <h3 className="font-serif-title text-base font-bold text-[#262624] leading-tight pt-1">
-                        Mi ventana ya está encendida
-                      </h3>
-                      <p className="text-[10px] text-[#73736e] italic truncate font-serif">
-                        Leyendo: {miLibroActual || libroActual.titulo}
-                      </p>
+                      <div>
+                        <h3 className="font-serif-title text-base font-bold text-white leading-tight">
+                          Ventana encendida
+                        </h3>
+                        <p className="text-[11px] text-amber-200/90 italic truncate font-serif pt-0.5">
+                          📖 {miLibroActual || libroActual.titulo}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="my-auto py-3 px-3 bg-[#1e1b4b] rounded-2xl border-2 border-[#111026] shadow-xl z-10 space-y-2">
-                      <div className="flex justify-between items-center text-[9px] font-mono-code text-stone-300 px-1">
+                    {/* Ventanas activas en la story */}
+                    <div className="my-auto py-3 px-3 bg-zinc-900/90 rounded-2xl border border-zinc-800 shadow-xl z-10 space-y-2.5">
+                      <div className="flex justify-between items-center text-[9px] font-mono-code text-zinc-400 px-1">
                         <span>REFUGIO ACTIVO</span>
-                        <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} EN CASA</span>
+                        <span className="text-amber-400 font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} EN LÍNEA</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {miembrosEdificio.slice(0, 6).map((m, i) => (
                           <div
                             key={i}
-                            className={`p-2.5 rounded-xl text-[9px] border-2 flex flex-col justify-between h-20 overflow-hidden ${
+                            className={`p-2.5 rounded-xl text-[9px] border transition-all flex flex-col justify-between h-20 overflow-hidden ${
                               m.estaLeyendo ? 'window-card-active font-bold' : 'window-card-inactive'
                             }`}
                           >
@@ -1112,14 +1123,15 @@
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-stone-300 flex flex-col gap-1 text-[9px] text-stone-600 z-10">
+                    {/* Pie de página elegante */}
+                    <div className="pt-2 border-t border-zinc-800 flex flex-col gap-1 text-[9px] text-zinc-400 z-10">
                       <div className="flex justify-between items-center font-medium">
-                        <span className="bg-stone-100 text-[#2d223c] px-2 py-0.5 rounded text-[8px] font-mono-code border border-stone-300">
-                          nueva lectura
+                        <span className="text-zinc-300 text-[9px] font-mono-code">
+                          Club de Lectura
                         </span>
-                        <span className="font-bold text-[#2d223c] tracking-wide">@nagoreads</span>
+                        <span className="font-bold text-amber-400 tracking-wide">@nagoreads</span>
                       </div>
-                      <div className="flex justify-between items-center text-[8px] text-stone-500 font-mono-code">
+                      <div className="flex justify-between items-center text-[8px] text-zinc-500 font-mono-code">
                         <span>gildaclub.netlify.app</span>
                         <span>@gilda.mailclub</span>
                       </div>
