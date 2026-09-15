@@ -754,7 +754,6 @@
           );
         }, [usuariasClub]);
 
-        // Lista de nombres de las lectoras activas
         const nombresEnLinea = useMemo(() => {
           const activas = usuariasClub.filter(
             (u) => Number(u.pagina || u.pagina_actual || 0) > 0
@@ -970,25 +969,6 @@
                 <div>
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
-                      <a
-                        href="https://gildaclub.netlify.app"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="figma-card p-4 flex items-center justify-between bg-[#fcfcea] border border-[#adae1d]/30 hover:border-[#adae1d] transition-all block group"
-                      >
-                        <div className="space-y-0.5">
-                          <span className="text-[11px] text-[#ADAE1D] font-semibold uppercase tracking-wider block">
-                            ¿Quieres unirte al club?
-                          </span>
-                          <span className="text-sm font-bold text-[#1a1a1a] block group-hover:underline">
-                            Quiero registrarme →
-                          </span>
-                        </div>
-                        <span className="figma-btn px-4 py-2 text-xs shrink-0">
-                          Acceder
-                        </span>
-                      </a>
-
                       <div className="figma-card p-5 flex flex-col sm:flex-row gap-4 items-center">
                         <PortadaLibro
                           titulo={libroActual.titulo}
@@ -1526,7 +1506,6 @@
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
                           <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
-                            {/* Cabecera estilo WhatsApp con nombres en línea */}
                             <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e5e7eb] shrink-0">
                               <div className="flex items-center gap-2.5 overflow-hidden">
                                 <div className="relative flex items-center justify-center shrink-0">
