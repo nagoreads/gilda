@@ -122,7 +122,7 @@
         background: #fbbf24 !important;
         border-color: #92400e !important;
         color: #1e1b4b !important;
-        box-shadow: 0 0 14px rgba(251, 191, 36, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.5), inset 0 0 6px rgba(255, 255, 255, 0.6);
       }
 
       .window-card-inactive {
@@ -205,10 +205,20 @@
       };
 
       /* ==========================================================================
-         PESTAÑA: LA HABITACIÓN PROPIA (Fachada de Edificio con múltiples ventanas)
+         PESTAÑA: LA HABITACIÓN PROPIA (Edificio Arquitectónico con Plantas)
          ========================================================================== */
       function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroActual }) {
+        const [sociaSeleccionada, setSociaSeleccionada] = useState(null);
         const activasCount = usuarias.filter(m => m.estaLeyendo).length;
+
+        // Dividir usuarias en plantas de 3 ventanas por piso
+        const plantas = useMemo(() => {
+          const resultado = [];
+          for (let i = 0; i < usuarias.length; i += 3) {
+            resultado.push(usuarias.slice(i, i + 3));
+          }
+          return resultado;
+        }, [usuarias]);
 
         return (
           <div className="fade-in space-y-4 max-w-md mx-auto px-1 pb-16">
@@ -222,6 +232,7 @@
               </p>
             </div>
 
+            {/* CONTENEDOR PRINCIPAL ESTILO EDITORIAL */}
             <div className="editorial-card p-4 space-y-3 bg-white border-2 border-[#262624] shadow-xl relative overflow-hidden">
               <div className="flex justify-between items-center pb-2 border-b border-[#dfded5] text-xs px-1">
                 <span className="font-semibold text-[#262624]">Fachada del Club</span>
@@ -230,55 +241,78 @@
                 </span>
               </div>
 
-              <div className="w-full bg-[#1e1b4b] rounded-2xl p-3.5 border-2 border-[#111026] shadow-inner relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-[#111026] rounded-t"></div>
+              {/* FACHADA DE EDIFICIO CON ESTRUCTURA DE PLANTAS */}
+              <div className="w-full bg-[#1e1b4b] rounded-2xl p-3 border-2 border-[#111026] shadow-inner relative space-y-3">
+                {/* Tejado / Ático decorativo */}
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-24 h-3 bg-[#111026] rounded-t flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400/80"></div>
+                </div>
 
-                <div className="grid grid-cols-3 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
-                  {usuarias.map((miembro, i) => {
-                    const estaActiva = miembro.estaLeyendo;
-
+                <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1 pt-1">
+                  {plantas.map((piso, indexPiso) => {
+                    const numeroPlanta = plantas.length - indexPiso;
                     return (
-                      <div
-                        key={i}
-                        onClick={() => {
-                          if (miembro.esYo && onToggleMiLuz) {
-                            onToggleMiLuz();
-                          }
-                        }}
-                        className={`relative p-2.5 rounded-xl border transition-all duration-300 flex flex-col justify-between h-24 overflow-hidden shadow-xs ${
-                          miembro.esYo ? 'cursor-pointer ring-2 ring-[#adae1d] scale-[1.02]' : ''
-                        } ${
-                          estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
-                        }`}
-                      >
-                        <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
-                          <div className="border-r border-b border-current"></div>
-                          <div className="border-b border-current"></div>
-                          <div className="border-r border-current"></div>
-                          <div></div>
+                      <div key={indexPiso} className="space-y-1">
+                        {/* Marcador de planta / piso */}
+                        <div className="flex justify-between items-center px-1 text-[8px] font-mono-code text-indigo-300/70 border-b border-indigo-950/80 pb-0.5">
+                          <span>PLANTA 0{numeroPlanta}</span>
+                          <span>ZONA RESIDENCIAL</span>
                         </div>
 
-                        <div className="flex justify-between items-center text-[8px] font-mono-code tracking-wider z-10">
-                          <span className={`px-1 py-0.5 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
-                            {estaActiva ? 'ON' : 'OFF'}
-                          </span>
-                          <span className="opacity-75">0{i+1}</span>
-                        </div>
+                        {/* Fila de 3 ventanas */}
+                        <div className="grid grid-cols-3 gap-2">
+                          {piso.map((miembro, i) => {
+                            const estaActiva = miembro.estaLeyendo;
 
-                        <div className="z-10 truncate pt-1">
-                          <span className={`font-semibold text-[11px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
-                            {miembro.nombre} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
-                          </span>
-                          <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
-                            {libroActual.titulo}
-                          </span>
+                            return (
+                              <div
+                                key={i}
+                                onClick={() => {
+                                  if (miembro.esYo && onToggleMiLuz) {
+                                    onToggleMiLuz();
+                                  } else {
+                                    setSociaSeleccionada(miembro);
+                                  }
+                                }}
+                                className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col justify-between h-22 overflow-hidden shadow-xs cursor-pointer hover:scale-[1.02] ${
+                                  miembro.esYo ? 'ring-2 ring-[#adae1d]' : ''
+                                } ${
+                                  estaActiva ? 'window-card-active font-semibold' : 'window-card-inactive'
+                                }`}
+                              >
+                                <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 opacity-15">
+                                  <div className="border-r border-b border-current"></div>
+                                  <div className="border-b border-current"></div>
+                                  <div className="border-r border-current"></div>
+                                  <div></div>
+                                </div>
+
+                                <div className="flex justify-between items-center text-[8px] font-mono-code tracking-wider z-10">
+                                  <span className={`px-1 py-0.2 rounded ${estaActiva ? 'bg-black/15 font-bold' : 'bg-white/10'}`}>
+                                    {estaActiva ? 'ON' : 'OFF'}
+                                  </span>
+                                  <span className="opacity-75">v.{i+1}</span>
+                                </div>
+
+                                <div className="z-10 truncate pt-1">
+                                  <span className={`font-semibold text-[10px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-stone-200'}`}>
+                                    {miembro.nombre} {miembro.esYo && <span className="text-[7px] opacity-75">(tú)</span>}
+                                  </span>
+                                  <span className={`text-[8px] block truncate font-light ${estaActiva ? 'text-[#312e81]' : 'text-stone-400'}`}>
+                                    {libroActual.titulo}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-16 h-3 bg-[#111026] rounded-b"></div>
+                {/* Base del edificio */}
+                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-[#111026] rounded-b"></div>
               </div>
 
               <div className="pt-1">
@@ -294,8 +328,59 @@
               </div>
             </div>
 
+            {/* MODAL INTERACTIVO DE INSPECCIÓN DE VENTANA */}
+            {sociaSeleccionada && (
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+                <div className="editorial-card bg-white max-w-xs w-full p-5 space-y-4 relative shadow-2xl">
+                  <button
+                    onClick={() => setSociaSeleccionada(null)}
+                    className="absolute top-3 right-3 text-xs text-[#73736e] hover:text-[#262624] bg-[#faf9f5] px-2 py-1 rounded border border-[#dfded5]"
+                  >
+                    cerrar
+                  </button>
+
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[9px] font-mono-code uppercase tracking-wider text-[#adae1d] block">
+                      habitación de socia
+                    </span>
+                    <h3 className="text-base font-semibold text-[#262624]">
+                      {sociaSeleccionada.nombre}
+                    </h3>
+                  </div>
+
+                  <div className="p-3 bg-[#faf9f5] border border-[#dfded5] rounded-xl space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-[#73736e]">Estado de luz:</span>
+                      <span className={`font-semibold ${sociaSeleccionada.estaLeyendo ? 'text-amber-600' : 'text-neutral-500'}`}>
+                        {sociaSeleccionada.estaLeyendo ? 'Luz viva (ON)' : 'En silencio (OFF)'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#73736e]">Lectura actual:</span>
+                      <span className="font-medium text-[#262624] text-right truncate max-w-[150px]">
+                        {libroActual.titulo}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#73736e]">Progreso:</span>
+                      <span className="font-medium text-[#262624]">
+                        pág. {sociaSeleccionada.pagina || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setSociaSeleccionada(null)}
+                    className="w-full editorial-btn py-2 text-xs"
+                  >
+                    volver al edificio
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="editorial-card p-4 space-y-2 bg-[#faf9f5]">
-              <h3 className="font-serif-title text-sm font-semibold text-[#262624] flex items-center gap-2">
+              <h3 className="font-serif-title text-sm font-semibold text-[#262624]">
                 Tu espacio de lectura
               </h3>
               <p className="text-xs text-[#73736e] leading-relaxed">
