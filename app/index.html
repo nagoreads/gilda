@@ -639,14 +639,22 @@
           parsearHoja(URL_CSV_USUARIAS, (data) => {
             const usuariasValidas = data.filter(
               (u) =>
-                (u.email || '').trim() !== '' && (u.nombre || '').trim() !== ''
+                (u.email || u.Email || '').trim() !== '' && (u.nombre || u.Nombre || '').trim() !== ''
             );
 
             const unicasMap = new Map();
             usuariasValidas.forEach((u) => {
-              const emailKey = (u.email || '').trim().toLowerCase();
+              const emailKey = (u.email || u.Email || '').trim().toLowerCase();
               if (!unicasMap.has(emailKey)) {
-                unicasMap.set(emailKey, u);
+                unicasMap.set(emailKey, {
+                  ...u,
+                  nombre: u.nombre || u.Nombre || '',
+                  email: emailKey,
+                  modalidad: u.modalidad || u.Modalidad || 'gilda absoluta',
+                  pagina: Number(u.pagina_actual || u.pagina || u['Página actual'] || 0),
+                  ciudad: u.ciudad || u.Ciudad || u.ubicacion || '',
+                  estado: u.estado_acceso || u.estado || u.Estado || 'aprobado'
+                });
               }
             });
 
@@ -669,18 +677,15 @@
                   sesion.email.toLowerCase()
               );
               if (sociaActual) {
-                if (sociaActual.pagina || sociaActual.pagina_actual)
-                  setMiPagina(
-                    Number(sociaActual.pagina || sociaActual.pagina_actual)
-                  );
+                if (sociaActual.pagina !== undefined)
+                  setMiPagina(Number(sociaActual.pagina));
                 
                 const ciudadLocal = localStorage.getItem('gilda_mi_ciudad');
                 if (ciudadLocal) {
                   setMiCiudad(ciudadLocal);
-                } else if (sociaActual.ciudad || sociaActual.ubicacion) {
-                  const c = sociaActual.ciudad || sociaActual.ubicacion;
-                  setMiCiudad(c);
-                  localStorage.setItem('gilda_mi_ciudad', c);
+                } else if (sociaActual.ciudad) {
+                  setMiCiudad(sociaActual.ciudad);
+                  localStorage.setItem('gilda_mi_ciudad', sociaActual.ciudad);
                 }
 
                 if (!nombreUsuarioPersonalizado) {
@@ -1019,7 +1024,7 @@
         const totalGildas = usuariasClub.length || 1;
         const nombresEnLinea = useMemo(() => {
           const activas = usuariasClub.filter(
-            (u) => Number(u.pagina || u.pagina_actual || 0) > 0
+            (u) => Number(u.pagina || 0) > 0
           );
           const lista = activas.map((u) => u.nombre || 'Socia');
           if (lista.length === 0) {
@@ -1049,7 +1054,7 @@
             return {
               ...u,
               nombre: esMio ? (nombreUsuarioPersonalizado || sesion.nombre) : (u.nombre || 'Socia'),
-              estaLeyendo: esMio ? isReadingNow : (Number(u.pagina || u.pagina_actual || 0) > 0),
+              estaLeyendo: esMio ? isReadingNow : (Number(u.pagina || 0) > 0),
               libroReal: libroActual.titulo,
               esYo: esMio
             };
