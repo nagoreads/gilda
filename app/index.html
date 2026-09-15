@@ -118,25 +118,20 @@
         }
       }
 
-      /* Estética Lo-Fi Nocturna Ampliada: Cielo estrellado, luna difusa, neblina y brillo cálido */
+      /* Estética Lo-Fi Nocturna Detallada con Estrellas, Luna y Ramas */
       .lofi-story-poster {
-        background: linear-gradient(180deg, #0b0c1a 0%, #171934 35%, #252347 70%, #191829 100%);
-        background-image: 
-          radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
-          radial-gradient(rgba(251, 191, 36, 0.4) 1.5px, transparent 1.5px),
-          radial-gradient(rgba(147, 197, 253, 0.15) 60px, transparent 120px);
-        background-size: 28px 28px, 55px 55px, 200px 200px;
-        background-position: 0 0, 15px 15px, 50px 20px;
-        border: 2px solid #4338ca;
+        background: linear-gradient(180deg, #070919 0%, #111532 40%, #1e2246 100%);
+        border: 2px solid #3b3d75;
         color: #f3f4f6;
         position: relative;
+        overflow: hidden;
       }
 
       .lofi-story-window-active {
         background: #fbbf24 !important;
         border-color: #d97706 !important;
-        color: #1e1b4b !important;
-        box-shadow: 0 0 18px rgba(251, 191, 36, 0.75), inset 0 0 8px rgba(255, 255, 255, 0.5);
+        color: #111532 !important;
+        box-shadow: 0 0 16px rgba(251, 191, 36, 0.85), inset 0 0 6px rgba(255, 255, 255, 0.6);
       }
 
       #mapa-gilda {
@@ -211,6 +206,58 @@
         santander: [43.4623, -3.8099],
         vigo: [42.2406, -8.7207],
       };
+
+      // Componente reutilizable con el paisaje nocturno detallado (Estrellas, Luna, Nubes, Ramas de árboles)
+      function PaisajeNocturnoFondo() {
+        return (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 498" preserveAspectRatio="none">
+            <defs>
+              <filter id="moonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            {/* Estrellas brillantes definidas */}
+            <g fill="#ffffff" opacity="0.9">
+              <circle cx="35" cy="45" r="1.2" />
+              <circle cx="85" cy="25" r="1.8" />
+              <circle cx="120" cy="55" r="1" />
+              <circle cx="170" cy="30" r="1.5" />
+              <circle cx="215" cy="70" r="1.2" />
+              <circle cx="255" cy="38" r="1.6" />
+              <circle cx="25" cy="115" r="1.1" />
+              <circle cx="75" cy="135" r="1.4" />
+              <circle cx="240" cy="120" r="1" />
+              <circle cx="105" cy="95" r="0.9" />
+            </g>
+
+            {/* Luna creciente difusa */}
+            <g filter="url(#moonGlow)" opacity="0.85">
+              <path d="M 230 45 A 20 20 0 1 1 202 70 A 23 23 0 1 0 230 45 Z" fill="#fef08a" />
+            </g>
+
+            {/* Nubes esponjosas iluminadas suavemente */}
+            <path d="M -10 170 Q 25 150 55 175 Q 85 155 115 175 L 115 210 L -10 210 Z" fill="#2d3363" opacity="0.45" />
+            <path d="M 165 130 Q 195 110 225 135 Q 255 115 290 135 L 290 170 L 165 170 Z" fill="#363d75" opacity="0.5" />
+
+            {/* Ramas y hojas detalladas en los lados */}
+            {/* Rama izquierda */}
+            <path d="M 0 0 Q 35 45 20 95 Q 10 125 -5 145" stroke="#0e1124" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 20 70 Q 48 88 62 120" stroke="#0e1124" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+            <circle cx="28" cy="100" r="13" fill="#181d3d" opacity="0.95" />
+            <circle cx="52" cy="122" r="11" fill="#212852" opacity="0.9" />
+            <circle cx="10" cy="138" r="15" fill="#151936" opacity="0.95" />
+
+            {/* Rama derecha */}
+            <path d="M 280 12 Q 248 52 262 98 Q 272 128 288 150" stroke="#0e1124" strokeWidth="10" fill="none" strokeLinecap="round" />
+            <path d="M 262 75 Q 232 92 215 125" stroke="#0e1124" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <circle cx="252" cy="105" r="14" fill="#181d3d" opacity="0.95" />
+            <circle cx="225" cy="128" r="12" fill="#212852" opacity="0.9" />
+            <circle cx="275" cy="142" r="16" fill="#151936" opacity="0.95" />
+          </svg>
+        );
+      }
 
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
@@ -748,17 +795,17 @@
 
         const descargarStoryInstagram = async () => {
           if (!storyCardRef.current) return;
-          mostrarToast('Generando story nocturna ampliada...');
+          mostrarToast('Generando story detallada...');
           try {
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#0b0c1a'
+              backgroundColor: '#070919'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-story-nocturna-ampliada.png';
+            link.download = 'gilda-story-nocturna-detallada.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -968,28 +1015,22 @@
                     cerrar
                   </button>
                   <span className="text-xs font-medium uppercase tracking-wider text-[#adae1d] pt-1">
-                    Vista previa Story Nocturna (9:16)
+                    Vista previa Story Detallada (9:16)
                   </span>
 
-                  {/* TARJETA STORY LO-FI CON CIELO ESTRELLADO, LUNA Y SILUETAS DE CIUDAD */}
+                  {/* TARJETA STORY LO-FI CON PAISAJE NOCTURNO DETALLADO */}
                   <div
                     ref={storyCardRef}
                     className="lofi-story-poster w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
                   >
-                    {/* Elementos ambientales de fondo: Luna creciente y siluetas distantes */}
-                    <div className="absolute top-4 right-6 w-7 h-7 rounded-full border-t-2 border-amber-200/60 opacity-80 rotate-45 pointer-events-none"></div>
-                    <div className="absolute top-20 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-[#13152d]/40 to-[#1a1b38]/80 pointer-events-none"></div>
-                    <div className="absolute top-28 left-4 right-4 flex justify-between opacity-25 pointer-events-none text-[8px] font-mono text-indigo-300">
-                      <span>▌║█║▌│ 🏙️</span>
-                      <span>neblina suave</span>
-                    </div>
+                    <PaisajeNocturnoFondo />
 
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.8)] pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-400/60 shadow-[0_0_12px_rgba(251,191,36,0.9)] pointer-events-none z-10"></div>
 
                     {/* Cabecera */}
                     <div className="space-y-1 pt-1 z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#312e81]/80 px-2 py-0.5 rounded-full font-bold border border-[#4338ca]">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#1d224d]/90 px-2 py-0.5 rounded-full font-bold border border-[#3b3d75]">
                           ✦ club de lectura
                         </span>
                         <span className="text-[9px] font-mono-code text-[#94a3b8]">@gilda.mailclub</span>
@@ -1003,7 +1044,7 @@
                     </div>
 
                     {/* Bloque central del edificio con ventanas de luz activa */}
-                    <div className="my-auto py-1 bg-[#15182e]/85 backdrop-blur-xs p-3 rounded-2xl border border-[#4338ca]/60 shadow-xl z-10 space-y-2">
+                    <div className="my-auto py-1 bg-[#10132b]/85 backdrop-blur-xs p-3 rounded-2xl border border-[#3b3d75]/85 shadow-2xl z-10 space-y-2">
                       <div className="flex justify-between items-center text-[9px] font-mono-code text-[#94a3b8] px-1">
                         <span>VENTANAS ACTIVAS</span>
                         <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} en línea</span>
@@ -1015,7 +1056,7 @@
                             className={`p-2.5 rounded-xl text-[9px] border flex flex-col justify-between transition-all ${
                               m.estaLeyendo
                                 ? 'lofi-story-window-active font-semibold shadow-md'
-                                : 'bg-[#1f2238] border-[#313656] text-[#94a3b8]'
+                                : 'bg-[#181c38] border-[#292d54] text-[#94a3b8]'
                             }`}
                           >
                             <div className="flex justify-between font-mono-code text-[7px] opacity-80">
@@ -1029,10 +1070,10 @@
                     </div>
 
                     {/* Pie de página con créditos */}
-                    <div className="pt-2 border-t border-[#4338ca]/40 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
+                    <div className="pt-2 border-t border-[#3b3d75]/60 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
                       <div className="flex justify-between items-center font-medium">
-                        <span className="bg-[#312e81] text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code border border-[#4338ca]">
-                          atardecer / noche
+                        <span className="bg-[#1d224d] text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code border border-[#3b3d75]">
+                          noche acogedora
                         </span>
                         <span className="font-bold text-[#fbbf24] tracking-wide">@nagoreads</span>
                       </div>
@@ -1387,11 +1428,9 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      {/* Pestaña habitación con atmósfera ampliada de cielo estrellado y luna */}
+                      {/* Pestaña habitación con paisaje nocturno detallado, estrellas, luna y ramas */}
                       <div className="lofi-story-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg">
-                        
-                        {/* Luna creciente difusa decorativa */}
-                        <div className="absolute top-4 right-6 w-8 h-8 rounded-full border-t-2 border-amber-200/50 opacity-75 rotate-45 pointer-events-none"></div>
+                        <PaisajeNocturnoFondo />
 
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#fbbf24] block">
@@ -1405,8 +1444,8 @@
                           </p>
                         </div>
 
-                        <div className="relative w-full max-w-[280px] bg-[#15182e] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#4338ca] z-10 shadow-md">
-                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#312e81] rounded-t"></div>
+                        <div className="relative w-full max-w-[280px] bg-[#10132b] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#3b3d75] z-10 shadow-md">
+                          <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#1d224d] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
@@ -1417,8 +1456,8 @@
                                 key={i}
                                 className={`p-3 rounded-t-2xl rounded-b border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'lofi-story-window-active text-[#1e1b4b]' : 'bg-[#1f2238] border-[#313656] text-[#94a3b8]')
-                                    : 'bg-[#121424] border-[#20233b] opacity-50'
+                                    ? (estaActiva ? 'lofi-story-window-active text-[#111532]' : 'bg-[#181c38] border-[#292d54] text-[#94a3b8]')
+                                    : 'bg-[#0d0f22] border-[#1d2038] opacity-50'
                                 }`}
                               >
                                 <div className="flex justify-between items-center text-[9px] font-mono tracking-wider opacity-75">
@@ -1428,10 +1467,10 @@
                                 <div className="pt-2 truncate">
                                   {miembro ? (
                                     <>
-                                      <span className={`font-medium text-[11px] block truncate ${estaActiva ? 'text-[#1e1b4b]' : 'text-white'}`}>
+                                      <span className={`font-medium text-[11px] block truncate ${estaActiva ? 'text-[#111532]' : 'text-white'}`}>
                                         {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
                                       </span>
-                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#4338ca]' : 'text-[#94a3b8]'}`}>
+                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-[#3b3d75]' : 'text-[#94a3b8]'}`}>
                                         {miembro.libroReal}
                                       </span>
                                     </>
@@ -1450,14 +1489,14 @@
                             );
                           })}
                         </div>
-                        <div className="w-8 h-10 bg-[#312e81] rounded-t border border-[#4338ca] z-10 -mt-px mx-auto"></div>
+                        <div className="w-8 h-10 bg-[#1d224d] rounded-t border border-[#3b3d75] z-10 -mt-px mx-auto"></div>
 
-                        <div className="mt-6 w-full max-w-[280px]">
+                        <div className="mt-6 w-full max-w-[280px] z-10">
                           <button
                             onClick={() => setModalStoryAbierto(true)}
                             className="w-full editorial-btn py-2.5 text-xs font-medium tracking-wide flex items-center justify-center gap-2 shadow-sm"
                           >
-                            Compartir en Instagram (Story Nocturna)
+                            Compartir en Instagram (Story Detallada)
                           </button>
                         </div>
                       </div>
