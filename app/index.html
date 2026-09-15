@@ -141,12 +141,11 @@
       }
 
       /* ==========================================================================
-         SISTEMA CASA GILDA (ESTÉTICA EDITORIAL DE LA APP)
+         SISTEMA CASA GILDA (POSTAL 9:16 Y EDIFICIO)
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
-        background: #fdfcfa;
-        border: 1px solid #e2ded0;
+        background: linear-gradient(180deg, #0b0f19 0%, #1e1b4b 40%, #312e81 100%);
         position: relative;
         overflow: hidden;
         width: 100%;
@@ -154,25 +153,32 @@
 
       .star {
         position: absolute;
-        background-color: #d4ccb8;
+        background-color: white;
         border-radius: 50%;
         animation: twinkle 3s infinite ease-in-out alternate;
       }
 
       @keyframes twinkle {
-        0% { opacity: 0.3; transform: scale(0.8); }
-        100% { opacity: 0.8; transform: scale(1.1); }
+        0% { opacity: 0.2; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 4px white; }
       }
 
       .moon {
         position: absolute;
-        top: 8%;
-        right: 12%;
-        width: 45px;
-        height: 45px;
-        background-color: #edeae1;
-        border: 1px solid #d4ccb8;
+        top: 10%;
+        right: 15%;
+        width: 60px;
+        height: 60px;
+        background-color: #fef08a;
         border-radius: 50%;
+        box-shadow: 0 0 20px 5px rgba(254, 240, 138, 0.3);
+      }
+
+      .moon::before {
+        content: ''; position: absolute; top: 15px; left: 15px; width: 12px; height: 12px; border-radius: 50%; background-color: rgba(0,0,0,0.1);
+      }
+      .moon::after {
+        content: ''; position: absolute; bottom: 12px; right: 20px; width: 16px; height: 16px; border-radius: 50%; background-color: rgba(0,0,0,0.1);
       }
 
       .building {
@@ -182,49 +188,59 @@
         transform: translateX(-50%);
         width: 96%;
         height: auto;
-        min-height: 52%;
-        background-color: #ffffff;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
+        min-height: 50%;
+        background-color: #1a1a24;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
         padding: 24px 12px;
         display: flex;
         flex-wrap: wrap-reverse;
         justify-content: center;
         align-content: flex-start;
-        gap: 20px 8px;
-        border-top: 1px solid #e2ded0;
-        border-left: 1px solid #e2ded0;
-        border-right: 1px solid #e2ded0;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.02);
+        gap: 20px 8px; /* Ajustado el espacio vertical para que el texto de varias líneas encaje */
+        border-top: 4px solid #2d2d3d;
+        border-left: 4px solid #2d2d3d;
+        border-right: 4px solid #2d2d3d;
         z-index: 10;
       }
 
+      .building::before {
+        content: '';
+        position: absolute;
+        top: -24px;
+        left: -4px;
+        width: calc(100% + 8px);
+        height: 24px;
+        background-color: #0f0f17;
+        clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
+      }
+
       .window {
-        width: 22px;
-        height: 32px;
-        border-radius: 3px;
+        width: 20px;
+        height: 30px;
+        border-radius: 4px;
         cursor: pointer;
         position: relative;
         transition: all 0.3s ease;
-        border: 1px solid #e2ded0;
+        border: 2px solid #2d2d3d;
       }
 
       .window.light-on {
-        background-color: #fef9e7;
-        border-color: #adae1d;
-        box-shadow: 0 0 8px rgba(173, 174, 29, 0.3), inset 0 0 4px rgba(173, 174, 29, 0.2);
+        background-color: #fef08a;
+        box-shadow: 0 0 12px rgba(254, 240, 138, 0.7), inset 0 0 8px rgba(234, 179, 8, 0.8);
+        border-color: #facc15;
       }
 
       .window.light-off {
-        background-color: #f7f5ef;
-        border-color: #e2ded0;
+        background-color: #334155;
+        box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
       }
 
       .window.window-vacant {
-        background-color: #f7f5ef;
-        border-color: #e2ded0;
+        background-color: #1e293b;
+        border-color: #2d2d3d;
         border-style: dashed;
-        opacity: 0.4;
+        opacity: 0.5;
         cursor: default;
       }
     </style>
@@ -282,12 +298,13 @@
       };
 
       /* ==========================================================================
-         COMPONENTE: POSTAL EDIFICIO EDITORIAL
+         COMPONENTE: POSTAL 9:16 EDIFICIO NOCTURNO
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
 
+        // Aseguramos una estructura base para que el edificio nunca quede vacío
         const MIN_ESTANCIAS = 24; 
         const miembros = useMemo(() => {
           const lista = [...usuarias];
@@ -296,19 +313,20 @@
               nombre: 'Estancia disponible',
               esLibre: true,
               estaLeyendo: false,
-              libroPersonal: 'Sin asignar'
+              libroReal: 'Sin asignar'
             });
           }
           return lista;
         }, [usuarias]);
 
+        // Generamos estrellas aleatorias (memoizadas)
         const stars = useMemo(() => {
           const arr = [];
-          for (let i = 0; i < 30; i++) {
+          for (let i = 0; i < 40; i++) {
             arr.push({
               id: i,
               left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 65}%`,
+              top: `${Math.random() * 70}%`,
               size: `${Math.random() * 2 + 1}px`,
               delay: `${Math.random() * 3}s`
             });
@@ -325,9 +343,9 @@
             </div>
             <div className="moon"></div>
             
-            <div className="absolute top-[10%] w-full text-center z-10 px-4">
-              <h2 className="text-2xl font-serif-title text-[#262624] tracking-wide">Casa gilda</h2>
-              <p className="text-[10px] font-mono-code text-[#73736e] uppercase tracking-widest mt-1">
+            <div className="absolute top-[12%] w-full text-center z-10 px-4">
+              <h2 className="text-3xl font-serif-title text-white tracking-wide" style={{textShadow: '0 2px 4px rgba(0,0,0,0.6)'}}>Casa Gilda</h2>
+              <p className="text-[10px] font-mono-code text-indigo-200 uppercase tracking-widest mt-2" style={{textShadow: '0 1px 2px rgba(0,0,0,0.8)'}}>
                 {activasCount} de {registradasCount} en vela
               </p>
             </div>
@@ -348,17 +366,17 @@
                         if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
                         else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                       }}
-                      className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-1 ring-[#adae1d] scale-105 z-20' : ''}`}
+                      className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
                       title={miembro.nombre || ''}
                     ></div>
                     {!esLibre && (
                       <div className="text-center w-full select-none px-0.5">
-                        <span className={`block text-[7.5px] font-medium leading-tight break-words whitespace-normal ${estaActiva ? 'text-[#262624]' : 'text-[#73736e]'}`}>
+                        <span className={`block text-[7.5px] font-medium leading-tight break-words whitespace-normal ${estaActiva ? 'text-amber-100' : 'text-indigo-200/50'}`}>
                           {miembro.nombre}
                         </span>
                         {estaActiva && (
-                          <span className="block text-[7px] text-[#adae1d] italic font-serif leading-tight mt-0.5 break-words whitespace-normal font-medium">
-                            {miembro.libroPersonal || 'Lectura actual'}
+                          <span className="block text-[7px] text-amber-300/90 italic font-serif leading-tight mt-0.5 break-words whitespace-normal">
+                            {miembro.libroReal}
                           </span>
                         )}
                       </div>
@@ -372,25 +390,26 @@
       }
 
       /* ==========================================================================
-         PESTAÑA: LA CASA
+         PESTAÑA: LA CASA (Reemplaza a "La Habitación Propia")
          ========================================================================== */
-      function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroPersonal }) {
+      function PestañaHabitacionPropia({ usuarias = [], onToggleMiLuz, isReadingNow, onAbrirStory, libroActual }) {
         const [sociaSeleccionada, setSociaSeleccionada] = useState(null);
 
         return (
           <div className="fade-in space-y-4 max-w-md mx-auto px-1 pb-16 w-full">
             <div className="text-center pt-2 space-y-1.5">
               <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#73736e] bg-[#edeae1] px-2.5 py-0.5 rounded-sm inline-block">
-                una habitación propia
+                Una habitación propia
               </span>
-              <h2 className="font-serif-title text-2xl font-normal text-[#262624]">Nuestra casa</h2>
+              <h2 className="font-serif-title text-2xl font-normal text-[#262624]">Nuestra Casa</h2>
               <p className="text-xs text-[#73736e] font-sans max-w-xs mx-auto leading-relaxed">
                 Cada ventana iluminada refleja el refugio íntimo de una socia. Toca una luz para ver quién habita ahí.
               </p>
             </div>
 
             <div className="editorial-card p-4 space-y-3 bg-white flex flex-col items-center">
-              <div className="w-[260px] mx-auto shadow-sm rounded-xl border border-[#e2ded0]">
+              {/* Contenedor del edificio interactivo */}
+              <div className="w-[260px] mx-auto shadow-xl rounded-xl">
                 <EdificioPostal 
                   usuarias={usuarias} 
                   onToggleMiLuz={onToggleMiLuz} 
@@ -408,6 +427,7 @@
               </div>
             </div>
 
+            {/* Modal al seleccionar una socia en una ventana */}
             {sociaSeleccionada && (
               <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card bg-white max-w-xs w-full p-5 space-y-4 relative shadow-lg">
@@ -429,19 +449,19 @@
 
                   <div className="p-3 bg-[#fdfcfa] border border-[#e2ded0] rounded space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-[#73736e]">estado lumínico:</span>
-                      <span className={`font-medium ${sociaSeleccionada.estaLeyendo ? 'text-[#adae1d]' : 'text-[#73736e]'}`}>
-                        {sociaSeleccionada.estaLeyendo ? 'en vela' : 'en silencio'}
+                      <span className="text-[#73736e]">Estado lumínico:</span>
+                      <span className={`font-medium ${sociaSeleccionada.estaLeyendo ? 'text-[#92400e]' : 'text-neutral-500'}`}>
+                        {sociaSeleccionada.estaLeyendo ? 'En vela' : 'En silencio'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#73736e]">obra actual:</span>
+                      <span className="text-[#73736e]">Obra actual:</span>
                       <span className="font-medium text-[#262624] text-right truncate max-w-[150px]">
-                        {sociaSeleccionada.libroPersonal || 'sin especificar'}
+                        {libroActual.titulo}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#73736e]">progreso:</span>
+                      <span className="text-[#73736e]">Progreso:</span>
                       <span className="font-medium text-[#262624]">
                         pág. {sociaSeleccionada.pagina || 0}
                       </span>
@@ -641,11 +661,6 @@
           }
         });
 
-        const [miLibroPersonal, setMiLibroPersonal] = useState(() => {
-          return localStorage.getItem('gilda_mi_libro_personal') || '';
-        });
-        const [editandoLibro, setEditandoLibro] = useState(false);
-
         const [miCiudad, setMiCiudad] = useState(() => {
           return localStorage.getItem('gilda_mi_ciudad') || '';
         });
@@ -692,6 +707,7 @@
         };
 
         useEffect(() => {
+          // RED DE SEGURIDAD: Forzar fin de carga a los 2.5s para evitar pantalla en blanco
           const timerSeguridad = setTimeout(() => {
             setCargando(false);
           }, 2500);
@@ -868,7 +884,6 @@
           localStorage.removeItem('gilda_sesion');
           localStorage.removeItem('gilda_nombre_usuario');
           localStorage.removeItem('gilda_is_reading');
-          localStorage.removeItem('gilda_mi_libro_personal');
           setSesion(null);
           setInputEmail('');
           setErrorLogin('');
@@ -893,14 +908,6 @@
 
           setEditandoNombre(false);
           mostrarToast('Nombre actualizado.');
-        };
-
-        const guardarMiLibroPersonal = () => {
-          const limpio = miLibroPersonal.trim();
-          localStorage.setItem('gilda_mi_libro_personal', limpio);
-          enviarAccion('actualizar_libro_personal', { libroPersonal: limpio });
-          setEditandoLibro(false);
-          mostrarToast('Lectura actual actualizada.');
         };
 
         const toggleLecturaLamp = () => {
@@ -1027,7 +1034,7 @@
             const canvas = await html2canvas(refActiva, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#f7f5ef'
+              backgroundColor: '#111119'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
@@ -1134,11 +1141,11 @@
               ...u,
               nombre: esMio ? (nombreUsuarioPersonalizado || sesion.nombre) : (u.nombre || 'Socia'),
               estaLeyendo: esMio ? isReadingNow : (Number(u.pagina || 0) > 0),
-              libroPersonal: esMio ? (miLibroPersonal || libroActual.titulo) : (u.libroPersonal || libroActual.titulo),
+              libroReal: libroActual.titulo,
               esYo: esMio
             };
           });
-        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, isReadingNow, miLibroPersonal, libroActual]);
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, isReadingNow, libroActual]);
 
         const porcentajeLibro = useMemo(() => {
           const pagTotales = Number(libroActual.paginas_totales || 280);
@@ -1266,40 +1273,43 @@
                   {modoStory === 'ventana' && (
                     <div
                       ref={storyVentanaRef}
-                      className="w-[280px] h-[498px] rounded-2xl relative overflow-hidden bg-[#fdfcfa] postal-ratio flex flex-col border border-[#e2ded0] shadow-2xl"
+                      className="w-[280px] h-[498px] rounded-2xl relative overflow-hidden bg-[#0b0f19] postal-ratio flex flex-col border border-zinc-800 shadow-2xl"
                     >
+                      {/* Fondo Estrellado */}
                       <div id="stars-container-story">
-                        {Array.from({length: 30}).map((_, i) => (
-                           <div key={i} className="star" style={{left: `${Math.random()*100}%`, top: `${Math.random()*65}%`, width: `${Math.random()*2+1}px`, height: `${Math.random()*2+1}px`, animationDelay: `${Math.random()*3}s`}}></div>
+                        {Array.from({length: 40}).map((_, i) => (
+                           <div key={i} className="star" style={{left: `${Math.random()*100}%`, top: `${Math.random()*70}%`, width: `${Math.random()*2+1}px`, height: `${Math.random()*2+1}px`, animationDelay: `${Math.random()*3}s`}}></div>
                         ))}
                       </div>
-                      <div className="moon absolute top-[10%] right-[15%] w-[45px] h-[45px]"></div>
+                      <div className="moon absolute top-[10%] right-[15%] w-[60px] h-[60px]"></div>
 
+                      {/* Header */}
                       <div className="relative z-10 pt-8 px-4 text-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#adae1d] bg-[#edeae1] px-3 py-1 rounded-full border border-[#e2ded0]">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-amber-300 bg-black/40 px-3 py-1 rounded-full border border-amber-800/50 backdrop-blur-sm">
                           Casa Gilda
                         </span>
                       </div>
 
+                      {/* Centro - Ventana Individual */}
                       <div className="relative z-10 flex flex-col items-center justify-center flex-grow mt-4">
-                        <div className={`window ${isReadingNow ? 'light-on' : 'light-off'} scale-[2] ring-2 ring-[#adae1d] shadow-md mb-12`}></div>
+                        <div className={`window ${isReadingNow ? 'light-on' : 'light-off'} scale-[2] ring-4 ring-white/80 shadow-2xl mb-12`}></div>
                         
                         <div className="text-center px-4 w-full">
-                          <h3 className="font-serif-title text-2xl font-bold text-[#262624] leading-tight break-words">
+                          <h3 className="font-serif-title text-2xl font-bold text-white leading-tight break-words">
                             {nombreUsuarioPersonalizado || sesion.nombre}
                           </h3>
                           {isReadingNow ? (
                             <div className="mt-2 space-y-1">
-                              <span className="block text-[10px] font-mono-code text-[#adae1d] uppercase tracking-widest font-semibold">
+                              <span className="block text-[10px] font-mono-code text-amber-500/90 uppercase tracking-widest">
                                 Estancia en vela
                               </span>
-                              <p className="text-[#73736e] italic font-serif text-lg leading-snug break-words">
-                                {miLibroPersonal || libroActual.titulo}
+                              <p className="text-amber-200 italic font-serif text-lg leading-snug break-words">
+                                {libroActual.titulo}
                               </p>
                             </div>
                           ) : (
                             <div className="mt-2 space-y-1">
-                              <span className="block text-[10px] font-mono-code text-[#73736e] uppercase tracking-widest">
+                              <span className="block text-[10px] font-mono-code text-indigo-300/80 uppercase tracking-widest">
                                 Estancia en silencio
                               </span>
                             </div>
@@ -1307,9 +1317,10 @@
                         </div>
                       </div>
 
+                      {/* Footer */}
                       <div className="relative z-10 pb-6 text-center flex flex-col gap-1 items-center">
-                        <span className="font-bold text-[#adae1d] tracking-wider text-xs">@gilda.mailclub</span>
-                        <span className="text-[8px] font-mono-code text-[#73736e] opacity-80">gildaclub.netlify.app</span>
+                        <span className="font-bold text-amber-400 tracking-wider text-xs">@gilda.mailclub</span>
+                        <span className="text-[8px] font-mono-code text-zinc-400 opacity-80">gildaclub.netlify.app</span>
                       </div>
                     </div>
                   )}
@@ -1317,7 +1328,7 @@
                   {modoStory === 'edificio' && (
                     <div
                       ref={storyEdificioRef}
-                      className="w-[280px] h-[498px] flex flex-col items-center justify-center relative overflow-hidden bg-white rounded-2xl shadow-2xl p-0 border border-[#e2ded0]"
+                      className="w-[280px] h-[498px] flex flex-col items-center justify-center relative overflow-hidden bg-white rounded-2xl shadow-2xl p-0 border border-zinc-800"
                     >
                       <EdificioPostal 
                         usuarias={miembrosEdificio} 
@@ -1329,7 +1340,7 @@
                     onClick={descargarStoryInstagram}
                     className="w-full editorial-btn py-2 text-xs font-medium"
                   >
-                    descargar imagen para stories
+                    Descargar imagen para Stories
                   </button>
                 </div>
               </div>
@@ -1411,7 +1422,7 @@
                 <div className="editorial-card p-3 bg-white flex gap-2 items-center fade-in">
                   <input
                     type="text"
-                    placeholder="tu nombre"
+                    placeholder="Tu nombre"
                     value={nombreUsuarioPersonalizado}
                     onChange={(e) =>
                       setNombreUsuarioPersonalizado(e.target.value)
@@ -1454,9 +1465,9 @@
                           />
                           <div className="space-y-2.5 flex-grow w-full">
                             <div className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
-                              <span className="text-[9px] uppercase tracking-wider text-[#adae1d] font-medium font-mono-code">
-                                volumen actual del club
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                              <span className="text-[9px] uppercase tracking-wider text-amber-800 font-medium font-mono-code">
+                                volumen actual
                               </span>
                             </div>
                             <h2 className="font-serif-title text-base font-medium text-[#262624] leading-snug">
@@ -1479,41 +1490,6 @@
                               </div>
                             </div>
                           </div>
-                        </div>
-
-                        {/* Selector de lectura individual para la ventana */}
-                        <div className="pt-3 border-t border-[#e2ded0] space-y-2">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-medium text-[#262624]">Lectura en tu ventana:</span>
-                            <button
-                              onClick={() => setEditandoLibro(!editandoLibro)}
-                              className="text-[#adae1d] hover:underline font-medium"
-                            >
-                              {editandoLibro ? 'cancelar' : 'cambiar obra'}
-                            </button>
-                          </div>
-                          
-                          <p className="text-[11px] text-[#73736e] italic">
-                            Actualmente en tu ventana: <b>{miLibroPersonal || libroActual.titulo}</b>
-                          </p>
-
-                          {editandoLibro && (
-                            <div className="flex gap-2 pt-1 fade-in">
-                              <input
-                                type="text"
-                                placeholder="Ej. Crimen y castigo - Dostoievski"
-                                value={miLibroPersonal}
-                                onChange={(e) => setMiLibroPersonal(e.target.value)}
-                                className="flex-grow editorial-input px-3 py-1.5 text-xs"
-                              />
-                              <button
-                                onClick={guardarMiLibroPersonal}
-                                className="editorial-btn px-3 py-1.5 text-xs shrink-0"
-                              >
-                                guardar
-                              </button>
-                            </div>
-                          )}
                         </div>
 
                         <div className="pt-3 border-t border-[#e2ded0] flex items-center justify-between">
@@ -1543,7 +1519,7 @@
                               onClick={() => setModalStoryAbierto(true)}
                               className="w-full bg-[#fdfcfa] border border-[#adae1d] text-[#adae1d] hover:bg-[#adae1d] hover:text-white py-2 text-xs rounded-sm font-medium transition-all flex items-center justify-center gap-1.5"
                             >
-                              compartir en stories que estás leyendo
+                              Compartir en Stories que estás leyendo
                             </button>
                           </div>
                         )}
@@ -1685,7 +1661,7 @@
                       onToggleMiLuz={toggleLecturaLamp}
                       isReadingNow={isReadingNow}
                       onAbrirStory={() => setModalStoryAbierto(true)}
-                      libroPersonal={miLibroPersonal}
+                      libroActual={libroActual}
                     />
                   )}
 
