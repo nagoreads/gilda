@@ -118,20 +118,25 @@
         }
       }
 
-      /* Estética Lo-Fi Nocturna: Azul noche, morado y gris cálido */
+      /* Estética Lo-Fi Nocturna Ampliada: Cielo estrellado, luna difusa, neblina y brillo cálido */
       .lofi-story-poster {
-        background: linear-gradient(180deg, #1e1b4b 0%, #2e2a47 50%, #1f1d2e 100%);
-        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-        background-size: 18px 18px;
+        background: linear-gradient(180deg, #0b0c1a 0%, #171934 35%, #252347 70%, #191829 100%);
+        background-image: 
+          radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+          radial-gradient(rgba(251, 191, 36, 0.4) 1.5px, transparent 1.5px),
+          radial-gradient(rgba(147, 197, 253, 0.15) 60px, transparent 120px);
+        background-size: 28px 28px, 55px 55px, 200px 200px;
+        background-position: 0 0, 15px 15px, 50px 20px;
         border: 2px solid #4338ca;
         color: #f3f4f6;
+        position: relative;
       }
 
       .lofi-story-window-active {
         background: #fbbf24 !important;
         border-color: #d97706 !important;
         color: #1e1b4b !important;
-        box-shadow: 0 0 16px rgba(251, 191, 36, 0.65);
+        box-shadow: 0 0 18px rgba(251, 191, 36, 0.75), inset 0 0 8px rgba(255, 255, 255, 0.5);
       }
 
       #mapa-gilda {
@@ -743,17 +748,17 @@
 
         const descargarStoryInstagram = async () => {
           if (!storyCardRef.current) return;
-          mostrarToast('Generando story lo-fi nocturna...');
+          mostrarToast('Generando story nocturna ampliada...');
           try {
             const canvas = await html2canvas(storyCardRef.current, {
               scale: 2,
               useCORS: true,
-              backgroundColor: '#1e1b4b'
+              backgroundColor: '#0b0c1a'
             });
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
-            link.download = 'gilda-story-nocturna.png';
+            link.download = 'gilda-story-nocturna-ampliada.png';
             link.click();
             mostrarToast('Story descargada con éxito.');
           } catch (err) {
@@ -966,17 +971,25 @@
                     Vista previa Story Nocturna (9:16)
                   </span>
 
-                  {/* TARJETA STORY LO-FI NOCTURNA (AZUL NOCHE, MORADO Y GRIS CÁLIDO) */}
+                  {/* TARJETA STORY LO-FI CON CIELO ESTRELLADO, LUNA Y SILUETAS DE CIUDAD */}
                   <div
                     ref={storyCardRef}
                     className="lofi-story-poster w-[280px] h-[498px] p-5 rounded-3xl flex flex-col justify-between shadow-2xl relative overflow-hidden text-left"
                   >
-                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#6366f1] via-[#a855f7] to-[#fbbf24]"></div>
+                    {/* Elementos ambientales de fondo: Luna creciente y siluetas distantes */}
+                    <div className="absolute top-4 right-6 w-7 h-7 rounded-full border-t-2 border-amber-200/60 opacity-80 rotate-45 pointer-events-none"></div>
+                    <div className="absolute top-20 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-[#13152d]/40 to-[#1a1b38]/80 pointer-events-none"></div>
+                    <div className="absolute top-28 left-4 right-4 flex justify-between opacity-25 pointer-events-none text-[8px] font-mono text-indigo-300">
+                      <span>▌║█║▌│ 🏙️</span>
+                      <span>neblina suave</span>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.8)] pointer-events-none"></div>
 
                     {/* Cabecera */}
-                    <div className="space-y-1 pt-1">
+                    <div className="space-y-1 pt-1 z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#c7d2fe] bg-[#312e81] px-2 py-0.5 rounded-full font-bold border border-[#4338ca]">
+                        <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#e0e7ff] bg-[#312e81]/80 px-2 py-0.5 rounded-full font-bold border border-[#4338ca]">
                           ✦ club de lectura
                         </span>
                         <span className="text-[9px] font-mono-code text-[#94a3b8]">@gilda.mailclub</span>
@@ -989,8 +1002,8 @@
                       </p>
                     </div>
 
-                    {/* Bloque central estilo fachada nocturna con ventanas encendidas */}
-                    <div className="my-auto py-1 bg-[#1e2235]/80 backdrop-blur-xs p-3 rounded-2xl border border-[#4338ca]/50 shadow-inner space-y-2">
+                    {/* Bloque central del edificio con ventanas de luz activa */}
+                    <div className="my-auto py-1 bg-[#15182e]/85 backdrop-blur-xs p-3 rounded-2xl border border-[#4338ca]/60 shadow-xl z-10 space-y-2">
                       <div className="flex justify-between items-center text-[9px] font-mono-code text-[#94a3b8] px-1">
                         <span>VENTANAS ACTIVAS</span>
                         <span className="text-[#fbbf24] font-bold">{miembrosEdificio.filter(m => m.estaLeyendo).length} en línea</span>
@@ -1002,7 +1015,7 @@
                             className={`p-2.5 rounded-xl text-[9px] border flex flex-col justify-between transition-all ${
                               m.estaLeyendo
                                 ? 'lofi-story-window-active font-semibold shadow-md'
-                                : 'bg-[#26283b] border-[#3b4262] text-[#94a3b8]'
+                                : 'bg-[#1f2238] border-[#313656] text-[#94a3b8]'
                             }`}
                           >
                             <div className="flex justify-between font-mono-code text-[7px] opacity-80">
@@ -1015,11 +1028,11 @@
                       </div>
                     </div>
 
-                    {/* Pie de página con créditos y mención */}
-                    <div className="pt-2 border-t border-[#4338ca]/40 flex flex-col gap-1 text-[9px] text-[#cbd5e1]">
+                    {/* Pie de página con créditos */}
+                    <div className="pt-2 border-t border-[#4338ca]/40 flex flex-col gap-1 text-[9px] text-[#cbd5e1] z-10">
                       <div className="flex justify-between items-center font-medium">
                         <span className="bg-[#312e81] text-[#e0e7ff] px-2 py-0.5 rounded text-[8px] font-mono-code border border-[#4338ca]">
-                          modo nocturno
+                          atardecer / noche
                         </span>
                         <span className="font-bold text-[#fbbf24] tracking-wide">@nagoreads</span>
                       </div>
@@ -1374,9 +1387,12 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      {/* Pestaña habitación con estética azul noche/morada nocturna */}
+                      {/* Pestaña habitación con atmósfera ampliada de cielo estrellado y luna */}
                       <div className="lofi-story-poster w-full rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg">
                         
+                        {/* Luna creciente difusa decorativa */}
+                        <div className="absolute top-4 right-6 w-8 h-8 rounded-full border-t-2 border-amber-200/50 opacity-75 rotate-45 pointer-events-none"></div>
+
                         <div className="text-center z-10 mb-5 space-y-1">
                           <span className="text-[9px] font-semibold uppercase tracking-widest text-[#fbbf24] block">
                             gilda — club de lectura
@@ -1389,7 +1405,7 @@
                           </p>
                         </div>
 
-                        <div className="relative w-full max-w-[280px] bg-[#1e2235] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#4338ca] z-10 shadow-md">
+                        <div className="relative w-full max-w-[280px] bg-[#15182e] rounded-t-2xl p-4 grid grid-cols-2 gap-3 border border-[#4338ca] z-10 shadow-md">
                           <div className="absolute -top-5 right-7 w-2.5 h-4 bg-[#312e81] rounded-t"></div>
 
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
@@ -1401,8 +1417,8 @@
                                 key={i}
                                 className={`p-3 rounded-t-2xl rounded-b border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'lofi-story-window-active text-[#1e1b4b]' : 'bg-[#26283b] border-[#3b4262] text-[#94a3b8]')
-                                    : 'bg-[#1a1c29] border-[#2b2f45] opacity-50'
+                                    ? (estaActiva ? 'lofi-story-window-active text-[#1e1b4b]' : 'bg-[#1f2238] border-[#313656] text-[#94a3b8]')
+                                    : 'bg-[#121424] border-[#20233b] opacity-50'
                                 }`}
                               >
                                 <div className="flex justify-between items-center text-[9px] font-mono tracking-wider opacity-75">
