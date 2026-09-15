@@ -13,7 +13,7 @@
 
     <!-- Tipografía Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
 
@@ -44,65 +44,64 @@
     <style>
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: #f8f9fa;
-        color: #1a1a1a;
+        background-color: #f5f5f3;
+        color: #1c1c1c;
         -webkit-tap-highlight-color: transparent;
       }
 
-      .figma-card {
+      .editorial-card {
         background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        border-radius: 16px;
-        box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e2dc;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         transition: all 0.2s ease;
       }
-      .figma-card:hover {
-        border-color: rgba(173, 174, 29, 0.3);
-        box-shadow: 0 4px 16px -2px rgba(173, 174, 29, 0.08);
+      .editorial-card:hover {
+        border-color: #adae1d;
       }
 
-      .figma-input {
-        background: #fbfbfb;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        color: #1a1a1a;
+      .editorial-input {
+        background: #fafaf8;
+        border: 1px solid #e2e2dc;
+        border-radius: 8px;
+        color: #1c1c1c;
         transition: all 0.2s ease;
       }
-      .figma-input:focus {
+      .editorial-input:focus {
         outline: none;
         background: #ffffff;
         border-color: #adae1d;
-        box-shadow: 0 0 0 3px rgba(173, 174, 29, 0.12);
+        box-shadow: 0 0 0 2px rgba(173, 174, 29, 0.15);
       }
 
-      .figma-btn {
+      .editorial-btn {
         background: #adae1d;
         color: #ffffff;
-        border-radius: 10px;
+        border-radius: 8px;
         font-weight: 500;
         transition: all 0.15s ease;
       }
-      .figma-btn:hover {
+      .editorial-btn:hover {
         background: #959616;
       }
-      .figma-btn:active {
+      .editorial-btn:active {
         transform: scale(0.98);
       }
 
-      .figma-nav {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      .editorial-nav {
+        background: rgba(245, 245, 243, 0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid #e2e2dc;
       }
 
       .fade-in {
-        animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(6px);
+          transform: translateY(4px);
         }
         to {
           opacity: 1;
@@ -110,69 +109,44 @@
         }
       }
 
-      /* =========================================
-         ANIMACIONES EXPERTAS COZY (EDIFICIO)
-         ========================================= */
-
-      @keyframes cozyFlicker {
-        0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-        35% { opacity: 0.88; transform: scale(0.995); filter: brightness(0.94); }
-        70% { opacity: 0.95; transform: scale(1.002); filter: brightness(1.03); }
+      /* Arquitectura de Ventanas Viva */
+      @keyframes windowGlow {
+        0%, 100% { opacity: 1; filter: brightness(1); }
+        50% { opacity: 0.9; filter: brightness(0.96); }
       }
-      .cozy-window-on {
-        animation: cozyFlicker 4s infinite ease-in-out;
-        background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%);
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
-        transition: all 0.5s ease;
+      .window-active {
+        animation: windowGlow 5s infinite ease-in-out;
+        background: #fbf5b7;
+        border-color: #facc15 !important;
+        box-shadow: inset 0 0 12px rgba(250, 204, 21, 0.25);
       }
 
-      @keyframes floatSmoke1 {
-        0% { transform: translateY(0) translateX(0) scale(0.5); opacity: 0.8; }
-        50% { transform: translateY(-14px) translateX(4px) scale(1); opacity: 0.5; }
-        100% { transform: translateY(-28px) translateX(-2px) scale(1.4); opacity: 0; }
+      @keyframes subtleRise {
+        0% { transform: translateY(0) scale(0.6); opacity: 0.5; }
+        100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
       }
-      @keyframes floatSmoke2 {
-        0% { transform: translateY(0) translateX(0) scale(0.5); opacity: 0.7; }
-        50% { transform: translateY(-16px) translateX(-5px) scale(1.1); opacity: 0.4; }
-        100% { transform: translateY(-32px) translateX(3px) scale(1.5); opacity: 0; }
-      }
-      .smoke-puff-1 { animation: floatSmoke1 3.8s infinite ease-out; }
-      .smoke-puff-2 { animation: floatSmoke2 4.6s infinite ease-out 1.8s; }
-
-      @keyframes dustFloat {
-        0% { transform: translateY(0) translateX(0); opacity: 0; }
-        20% { opacity: 0.9; }
-        80% { opacity: 0.9; }
-        100% { transform: translateY(-40px) translateX(15px); opacity: 0; }
-      }
-      .dust-particle {
-        position: absolute;
-        width: 3px;
-        height: 3px;
-        background-color: #d97706;
-        border-radius: 50%;
-        pointer-events: none;
-        animation: dustFloat 5s infinite linear;
+      .smoke-line {
+        animation: subtleRise 4s infinite ease-out;
       }
 
       #mapa-gilda {
         height: 260px;
         width: 100%;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        border: 1px solid #e2e2dc;
         z-index: 1;
       }
 
       ::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
+        width: 3px;
+        height: 3px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 4px;
+        background: #d4d4cd;
+        border-radius: 2px;
       }
     </style>
   </head>
@@ -205,10 +179,10 @@
         'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1794892861&single=true&output=csv';
 
       const FRASES_INICIALES_BOTELLA = [
-        '"Leer no es huir del mundo, sino encontrar una linterna para entenderlo mejor en compañía."',
-        '"Hay libros que nos leen a nosotras antes de que terminemos la primera página."',
-        '"Un café caliente, silencio en la habitación y cien gildas leyendo al mismo tiempo."',
-        '"No te preocupes si vas despacio: las buenas historias merecen degustarse paso a paso."',
+        'Leer no es huir del mundo, sino encontrar una linterna para entenderlo mejor en compañía.',
+        'Hay libros que nos leen a nosotras antes de que terminemos la primera página.',
+        'Un café caliente, silencio en la habitación y cien gildas leyendo al mismo tiempo.',
+        'No te preocupes si vas despacio: las buenas historias merecen degustarse paso a paso.',
       ];
 
       const COORDENADAS_CIUDADES = {
@@ -244,20 +218,20 @@
               src={portada}
               alt={titulo || 'Libro'}
               onError={() => setErrorImg(true)}
-              className={`${sizeClasses} object-cover rounded-lg border border-[#e5e7eb] shrink-0 shadow-sm`}
+              className={`${sizeClasses} object-cover rounded border border-[#e2e2dc] shrink-0`}
             />
           );
         }
 
         return (
           <div
-            className={`${sizeClasses} bg-[#1a1a1a] text-white p-2 rounded-lg border border-[#333] shrink-0 flex flex-col justify-between shadow-sm overflow-hidden text-left relative`}
+            className={`${sizeClasses} bg-[#1c1c1c] text-white p-2 rounded border border-[#333] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}
           >
-            <div className="absolute top-0 right-0 w-2 h-full bg-[#ADAE1D]/30"></div>
-            <span className="font-bold tracking-tight line-clamp-3 leading-tight">
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#adae1d]/40"></div>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight text-[9px]">
               {titulo || 'Sin título'}
             </span>
-            <span className="text-[7px] text-[#ADAE1D] uppercase truncate">
+            <span className="text-[7px] text-[#adae1d] uppercase tracking-wider truncate">
               {autora || 'gilda'}
             </span>
           </div>
@@ -322,17 +296,17 @@
 
               if (coords && markersGroupRef.current) {
                 const marker = L.circleMarker(coords, {
-                  radius: 7,
-                  fillColor: '#ADAE1D',
+                  radius: 6,
+                  fillColor: '#adae1d',
                   color: '#ffffff',
-                  weight: 2,
+                  weight: 1.5,
                   opacity: 1,
-                  fillOpacity: 0.95,
+                  fillOpacity: 0.9,
                 });
                 marker.bindPopup(
-                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1a1a1a; padding:8px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"><b>${
+                  `<div style="font-family:'Inter',sans-serif; background:#ffffff; color:#1c1c1c; padding:8px; border-radius:6px; font-size:11px;"><b>${
                     u.nombre || 'Socia'
-                  }</b><br><span style="font-size:11px; color:#6b7280;">${
+                  }</b><br><span style="color:#666;">${
                     u.ciudad || u.Ciudad || u.ubicacion || u.Ubicación
                   }</span></div>`
                 );
@@ -633,7 +607,7 @@
           enviarAccion('actualizar_nombre', { nuevoNombre: limpio });
 
           setEditandoNombre(false);
-          mostrarToast('Nombre actualizado al instante.');
+          mostrarToast('Nombre actualizado.');
         };
 
         const guardarMiLibroPersonal = () => {
@@ -641,7 +615,7 @@
           localStorage.setItem('gilda_mi_libro', limpio);
           setEditandoMiLibro(false);
           enviarAccion('actualizar_libro', { libro: limpio });
-          mostrarToast('Libro actual actualizado.');
+          mostrarToast('Lectura actual actualizada.');
         };
 
         const toggleLecturaLamp = () => {
@@ -649,7 +623,7 @@
           setIsReadingNow(nuevoEstado);
           localStorage.setItem('gilda_is_reading', JSON.stringify(nuevoEstado));
           enviarAccion('estado_lectura', { leyendo: nuevoEstado });
-          mostrarToast(nuevoEstado ? '💡 Lámpara encendida en tu habitación. ¡Ventana iluminada!' : 'Lámpara apagada.');
+          mostrarToast(nuevoEstado ? 'Habitación iluminada.' : 'Luz apagada.');
         };
 
         const actualizarPagina = (nuevaPag) => {
@@ -667,7 +641,7 @@
           }
 
           enviarAccion('actualizar_pagina', { pagina: pagValida });
-          mostrarToast(`Progreso actualizado: pág. ${pagValida}`);
+          mostrarToast(`Progreso guardado: pág. ${pagValida}`);
         };
 
         const guardarMiCiudad = () => {
@@ -690,7 +664,7 @@
           enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia });
           setTimeout(() => {
             setGuardandoCiudad(false);
-            mostrarToast('Ubicación guardada en el mapa.');
+            mostrarToast('Ubicación guardada.');
           }, 500);
         };
 
@@ -707,9 +681,7 @@
 
           enviarAccion('mensaje_botella', { frase: textoFrase });
           setNuevaFraseBotella('');
-          mostrarToast(
-            '¡Frase guardada en tus tesoros y compartida con el club!'
-          );
+          mostrarToast('Frase guardada en tus tesoros.');
         };
 
         const enviarValoracionLibro = () => {
@@ -740,7 +712,7 @@
           });
 
           setResenaLibro('');
-          mostrarToast('¡Valoración y opinión enviadas con éxito!');
+          mostrarToast('Valoración enviada.');
         };
 
         const enviarChat = (e) => {
@@ -759,7 +731,6 @@
 
           enviarAccion('enviar_chat', { mensaje: textoMsg });
           setNuevoChat('');
-          mostrarToast('Mensaje enviado al chat.');
         };
 
         const frasesBotellaTotales = useMemo(() => {
@@ -791,7 +762,7 @@
               body: JSON.stringify(datosCompletos),
             });
           } catch (err) {
-            console.error('Error al enviar acción a Google Sheets:', err);
+            console.error('Error al enviar acción:', err);
           } finally {
             setTimeout(() => setEnviandoForm(false), 500);
           }
@@ -822,14 +793,6 @@
         }, [lecturas]);
 
         const totalGildas = usuariasClub.length || 1;
-        const gildasLeyendoAhora = useMemo(() => {
-          return (
-            usuariasClub.filter(
-              (u) => Number(u.pagina || u.pagina_actual || 0) > 0
-            ).length || 1
-          );
-        }, [usuariasClub]);
-
         const nombresEnLinea = useMemo(() => {
           const activas = usuariasClub.filter(
             (u) => Number(u.pagina || u.pagina_actual || 0) > 0
@@ -842,7 +805,6 @@
           return lista;
         }, [usuariasClub, sesion]);
 
-        // Construcción y autogestión dinámica de miembros del edificio
         const miembrosEdificio = useMemo(() => {
           const lista = [...usuariasClub];
           const emailActual = sesion?.email?.toLowerCase();
@@ -898,20 +860,20 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f8f9fa]">
-              <div className="figma-card max-w-sm w-full p-8 space-y-6 fade-in">
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f5f5f3]">
+              <div className="editorial-card max-w-sm w-full p-8 space-y-6 fade-in">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ADAE1D]"></span>
-                    <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a]">
+                    <span className="w-2 h-2 rounded-full bg-[#adae1d]"></span>
+                    <h1 className="text-lg font-medium tracking-tight text-[#1c1c1c]">
                       gilda
                     </h1>
                   </div>
-                  <p className="text-xs text-[#6b7280]">Club de lectura</p>
+                  <p className="text-xs text-[#666660]">club de lectura</p>
                 </div>
-                <div className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between text-xs text-[#6b7280]">
-                  <span>Lectoras registradas</span>
-                  <span className="text-[#1a1a1a] font-medium">
+                <div className="bg-[#fafaf8] border border-[#e2e2dc] p-3 rounded-lg flex items-center justify-between text-xs text-[#666660]">
+                  <span>lectoras registradas</span>
+                  <span className="text-[#1c1c1c] font-medium">
                     {totalGildas}
                   </span>
                 </div>
@@ -923,29 +885,29 @@
                     value={inputEmail}
                     onChange={(e) => setInputEmail(e.target.value)}
                     required
-                    className="w-full figma-input px-3.5 py-2.5 text-xs outline-none"
+                    className="w-full editorial-input px-3.5 py-2 text-xs outline-none"
                   />
                   {errorLogin && (
-                    <p className="text-[11px] text-red-500 font-medium">
+                    <p className="text-[11px] text-red-600 font-medium">
                       {errorLogin}
                     </p>
                   )}
                   <button
                     type="submit"
-                    className="w-full figma-btn py-2.5 text-xs font-medium tracking-wide"
+                    className="w-full editorial-btn py-2 text-xs font-medium tracking-wide"
                   >
-                    Entrar al club
+                    entrar al club
                   </button>
                 </form>
 
-                <div className="pt-2 border-t border-[#e5e7eb] text-center">
+                <div className="pt-2 border-t border-[#e2e2dc] text-center">
                   <a
                     href="https://gildaclub.netlify.app"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-[#ADAE1D] font-medium hover:underline"
+                    className="text-xs text-[#adae1d] font-medium hover:underline"
                   >
-                    ¿Quieres registrarte? Haz clic aquí
+                    solicitar registro
                   </a>
                 </div>
               </div>
@@ -954,20 +916,20 @@
         }
 
         return (
-          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f8f9fa]">
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-32 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f5f5f3]">
             {toastMsg && (
-              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1a1a1a] text-white text-xs px-4 py-2.5 rounded-xl shadow-xl fade-in flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#1c1c1c] text-white text-xs px-4 py-2 rounded shadow-lg fade-in flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
                 <span>{toastMsg}</span>
               </div>
             )}
 
             {libroSeleccionadoModal && (
-              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-                <div className="figma-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-2xl">
+              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+                <div className="editorial-card bg-white max-w-sm w-full p-6 space-y-4 relative shadow-xl">
                   <button
                     onClick={() => setLibroSeleccionadoModal(null)}
-                    className="absolute top-4 right-4 text-xs text-[#6b7280] hover:text-[#1a1a1a] bg-[#f9fafb] px-2.5 py-1 rounded-md border border-[#e5e7eb]"
+                    className="absolute top-4 right-4 text-xs text-[#666660] hover:text-[#1c1c1c] bg-[#fafaf8] px-2 py-1 rounded border border-[#e2e2dc]"
                   >
                     cerrar
                   </button>
@@ -979,25 +941,25 @@
                       size="large"
                     />
                     <div className="space-y-1 pt-1">
-                      <span className="text-[11px] text-[#ADAE1D] font-medium block">
-                        Propuesto por {libroSeleccionadoModal.propuestoPor}
+                      <span className="text-[11px] text-[#adae1d] font-medium block">
+                        propuesto por {libroSeleccionadoModal.propuestoPor}
                       </span>
-                      <h3 className="text-base font-bold text-[#1a1a1a] leading-tight">
+                      <h3 className="text-sm font-semibold text-[#1c1c1c] leading-tight">
                         {libroSeleccionadoModal.titulo}
                       </h3>
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs text-[#666660]">
                         {libroSeleccionadoModal.autora || ''}
                       </p>
-                      <span className="text-xs text-[#6b7280] block">
-                        Votos actuales: {libroSeleccionadoModal.votos || 1}
+                      <span className="text-xs text-[#666660] block pt-1">
+                        votos: {libroSeleccionadoModal.votos || 1}
                       </span>
                     </div>
                   </div>
-                  <div className="space-y-1.5 pt-2 border-t border-[#e5e7eb]">
-                    <h4 className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold">
-                      Sinopsis
+                  <div className="space-y-1 pt-2 border-t border-[#e2e2dc]">
+                    <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                      sinopsis
                     </h4>
-                    <p className="text-xs text-[#4b5563] leading-relaxed max-h-48 overflow-y-auto pr-1">
+                    <p className="text-xs text-[#444] leading-relaxed max-h-48 overflow-y-auto pr-1">
                       {libroSeleccionadoModal.sinopsis ||
                         'Sin sinopsis detallada disponible por el momento.'}
                     </p>
@@ -1006,28 +968,28 @@
               </div>
             )}
 
-            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#6b7280]">
+            <div className="w-full flex flex-col gap-2 mb-4 px-1 text-xs text-[#666660]">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
-                  <span className="text-[#1a1a1a] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d]"></span>
+                  <span className="text-[#1c1c1c] font-medium">
                     {nombreUsuarioPersonalizado || sesion.nombre}
                   </span>
-                  <span className="text-[10px] bg-[#e5e7eb] px-2 py-0.5 rounded text-[#4b5563] uppercase font-medium">
+                  <span className="text-[10px] bg-[#e2e2dc] px-1.5 py-0.5 rounded text-[#444] uppercase tracking-wider">
                     {sesion.modalidad}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditandoNombre(!editandoNombre)}
-                    className="text-[#ADAE1D] hover:underline font-medium"
+                    className="text-[#adae1d] hover:underline font-medium"
                   >
-                    {editandoNombre ? 'cancelar' : 'cambiar nombre'}
+                    {editandoNombre ? 'cancelar' : 'editar nombre'}
                   </button>
-                  <span>•</span>
+                  <span>/</span>
                   <button
                     onClick={cerrarSesion}
-                    className="hover:text-[#1a1a1a] transition-colors"
+                    className="hover:text-[#1c1c1c] transition-colors"
                   >
                     salir
                   </button>
@@ -1035,44 +997,42 @@
               </div>
 
               {editandoNombre && (
-                <div className="figma-card p-3 bg-white flex gap-2 items-center fade-in">
+                <div className="editorial-card p-3 bg-white flex gap-2 items-center fade-in">
                   <input
                     type="text"
-                    placeholder="Tu nombre de usuario"
+                    placeholder="Tu nombre"
                     value={nombreUsuarioPersonalizado}
                     onChange={(e) =>
                       setNombreUsuarioPersonalizado(e.target.value)
                     }
-                    className="flex-grow figma-input px-3 py-1.5 text-xs"
+                    className="flex-grow editorial-input px-3 py-1.5 text-xs"
                   />
                   <button
                     onClick={guardarNombrePersonalizado}
-                    className="figma-btn px-3 py-1.5 text-xs shrink-0"
+                    className="editorial-btn px-3 py-1.5 text-xs shrink-0"
                   >
-                    Guardar
+                    guardar
                   </button>
                 </div>
               )}
             </div>
 
             <header className="w-full mb-6 space-y-1">
-              <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold tracking-tight text-[#1a1a1a] flex items-center gap-2">
-                  <span>gilda</span>
-                </h1>
-              </div>
+              <h1 className="text-lg font-semibold tracking-tight text-[#1c1c1c]">
+                gilda
+              </h1>
             </header>
 
             <main className="w-full fade-in space-y-4">
               {cargando ? (
-                <div className="text-center py-24 text-xs text-[#6b7280]">
-                  Cargando club...
+                <div className="text-center py-24 text-xs text-[#666660]">
+                  cargando espacio...
                 </div>
               ) : (
                 <div>
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
-                      <div className="figma-card p-5 space-y-4">
+                      <div className="editorial-card p-5 space-y-4">
                         <div className="flex flex-col sm:flex-row gap-4 items-center">
                           <PortadaLibro
                             titulo={libroActual.titulo}
@@ -1082,26 +1042,26 @@
                           />
                           <div className="space-y-2.5 flex-grow w-full">
                             <div className="flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                              <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold">
-                                Lectura actual
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                              <span className="text-[10px] uppercase tracking-wider text-emerald-700 font-medium">
+                                lectura actual
                               </span>
                             </div>
-                            <h2 className="text-base font-bold text-[#1a1a1a] leading-snug">
+                            <h2 className="text-sm font-semibold text-[#1c1c1c] leading-snug">
                               {libroActual.titulo}
                             </h2>
-                            <p className="text-xs text-[#6b7280]">
+                            <p className="text-xs text-[#666660]">
                               {libroActual.autora}
                             </p>
 
                             <div>
-                              <div className="flex justify-between text-[11px] text-[#6b7280] mb-1">
-                                <span>Progreso</span>
+                              <div className="flex justify-between text-[11px] text-[#666660] mb-1">
+                                <span>progreso</span>
                                 <span>{porcentajeLibro}%</span>
                               </div>
-                              <div className="w-full bg-[#f9fafb] rounded-full h-1.5 border border-[#e5e7eb] overflow-hidden">
+                              <div className="w-full bg-[#fafaf8] rounded-full h-1 border border-[#e2e2dc] overflow-hidden">
                                 <div
-                                  className="bg-[#ADAE1D] h-full transition-all duration-300 rounded-full"
+                                  className="bg-[#adae1d] h-full transition-all duration-300 rounded-full"
                                   style={{ width: `${porcentajeLibro}%` }}
                                 ></div>
                               </div>
@@ -1109,77 +1069,72 @@
                           </div>
                         </div>
 
-                        {/* Configurar el libro que estás leyendo */}
-                        <div className="pt-3 border-t border-[#e5e7eb] space-y-2">
+                        {/* Configurar lectura personal */}
+                        <div className="pt-3 border-t border-[#e2e2dc] space-y-2">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="font-semibold text-[#1a1a1a]">
-                              ¿Qué libro estás leyendo hoy?
+                            <span className="font-medium text-[#1c1c1c]">
+                              ¿Qué libro estás leyendo?
                             </span>
                             <button
                               onClick={() => setEditandoMiLibro(!editandoMiLibro)}
-                              className="text-[#ADAE1D] hover:underline font-medium"
+                              className="text-[#adae1d] hover:underline font-medium"
                             >
-                              {editandoMiLibro ? 'cancelar' : (miLibroActual ? 'cambiar libro' : 'añadir libro')}
+                              {editandoMiLibro ? 'cancelar' : (miLibroActual ? 'cambiar' : 'añadir')}
                             </button>
                           </div>
                           {editandoMiLibro ? (
                             <div className="flex gap-2 items-center fade-in">
                               <input
                                 type="text"
-                                placeholder="Título del libro (ej: Crimen y castigo)"
+                                placeholder="Título del libro"
                                 value={miLibroActual}
                                 onChange={(e) => setMiLibroActual(e.target.value)}
-                                className="flex-grow figma-input px-3 py-1.5 text-xs"
+                                className="flex-grow editorial-input px-3 py-1.5 text-xs"
                               />
                               <button
                                 onClick={guardarMiLibroPersonal}
-                                className="figma-btn px-3 py-1.5 text-xs shrink-0"
+                                className="editorial-btn px-3 py-1.5 text-xs shrink-0"
                               >
-                                Guardar
+                                guardar
                               </button>
                             </div>
                           ) : (
-                            <p className="text-xs text-[#6b7280] italic">
-                              {miLibroActual ? `📖 ${miLibroActual}` : `📖 ${libroActual.titulo} (Lectura del club)`}
+                            <p className="text-xs text-[#666660]">
+                              {miLibroActual ? `actual: ${miLibroActual}` : `actual: ${libroActual.titulo} (club)`}
                             </p>
                           )}
                         </div>
 
-                        {/* Botón de Lámpara de Lectura On/Off */}
-                        <div className="pt-3 border-t border-[#e5e7eb] flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-lg ${isReadingNow ? 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'text-gray-300'}`}>
-                              💡
+                        {/* Estado de Lectura / Lámpara */}
+                        <div className="pt-3 border-t border-[#e2e2dc] flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-medium text-[#1c1c1c] block">
+                              estado de lectura
                             </span>
-                            <div>
-                              <span className="text-xs font-semibold text-[#1a1a1a] block">
-                                Lámpara de lectura
-                              </span>
-                              <span className="text-[10px] text-[#6b7280]">
-                                {isReadingNow ? 'Encendida en tu habitación' : 'Apagada'}
-                              </span>
-                            </div>
+                            <span className="text-[10px] text-[#666660]">
+                              {isReadingNow ? 'luz encendida en tu ventana' : 'luz apagada'}
+                            </span>
                           </div>
                           <button
                             onClick={toggleLecturaLamp}
-                            className={`px-4 py-2 text-xs rounded-xl font-medium transition-all ${
+                            className={`px-3.5 py-1.5 text-xs rounded-lg font-medium transition-all ${
                               isReadingNow
-                                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                                : 'bg-[#f1f3f5] text-[#4b5563] hover:bg-[#e2e8f0] border border-[#e5e7eb]'
+                                ? 'bg-[#1c1c1c] text-white'
+                                : 'bg-[#fafaf8] text-[#444] border border-[#e2e2dc]'
                             }`}
                           >
-                            {isReadingNow ? 'Apagar lámpara' : 'Encender lámpara'}
+                            {isReadingNow ? 'apagar luz' : 'encender luz'}
                           </button>
                         </div>
 
-                        <div className="pt-2 border-t border-[#e5e7eb] flex items-center justify-between gap-2">
-                          <span className="text-xs text-[#6b7280]">
-                            Página:
+                        <div className="pt-2 border-t border-[#e2e2dc] flex items-center justify-between gap-2">
+                          <span className="text-xs text-[#666660]">
+                            página actual:
                           </span>
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => actualizarPagina(miPagina - 5)}
-                              className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                              className="bg-white border border-[#e2e2dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
                             >
                               -5
                             </button>
@@ -1189,17 +1144,17 @@
                               onChange={(e) =>
                                 setMiPagina(Number(e.target.value))
                               }
-                              className="w-12 figma-input py-1 text-center text-xs"
+                              className="w-12 editorial-input py-1 text-center text-xs"
                             />
                             <button
                               onClick={() => actualizarPagina(miPagina + 5)}
-                              className="bg-white border border-[#e5e7eb] text-[#1a1a1a] px-2.5 py-1 rounded-lg text-xs hover:bg-[#f9fafb]"
+                              className="bg-white border border-[#e2e2dc] text-[#1c1c1c] px-2 py-1 rounded text-xs"
                             >
                               +5
                             </button>
                             <button
                               onClick={() => actualizarPagina(miPagina)}
-                              className="figma-btn px-3 py-1 text-xs"
+                              className="editorial-btn px-3 py-1 text-xs"
                             >
                               ok
                             </button>
@@ -1207,37 +1162,35 @@
                         </div>
                       </div>
 
-                      <div className="figma-card p-4 space-y-3">
+                      <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-[#1a1a1a]">
-                            Ubícate :)
+                          <span className="font-medium text-[#1c1c1c]">
+                            ubicación geográfica
                           </span>
-                          <span className="text-[11px] text-[#6b7280]">
-                            Ubicación
-                          </span>
+                          <span className="text-[10px] text-[#666660]">mapa</span>
                         </div>
                         <div className="flex gap-2">
                           <input
                             type="text"
-                            placeholder="Ciudad, País (ej. Bilbao, Buenos Aires...)"
+                            placeholder="Ciudad, País"
                             value={miCiudad}
                             onChange={(e) => setMiCiudad(e.target.value)}
-                            className="flex-grow figma-input px-3 py-2 text-xs"
+                            className="flex-grow editorial-input px-3 py-1.5 text-xs"
                           />
                           <button
                             onClick={guardarMiCiudad}
                             disabled={guardandoCiudad}
-                            className="figma-btn px-4 py-2 text-xs shrink-0"
+                            className="editorial-btn px-3.5 py-1.5 text-xs shrink-0"
                           >
-                            {guardandoCiudad ? '...' : 'Actualizar'}
+                            {guardandoCiudad ? '...' : 'actualizar'}
                           </button>
                         </div>
                       </div>
 
-                      <div className="figma-card p-4 space-y-3">
+                      <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-[#1a1a1a]">
-                            Buzón anónimo de frases
+                          <span className="font-medium text-[#1c1c1c]">
+                            notas y fragmentos
                           </span>
                           <button
                             onClick={() => {
@@ -1248,60 +1201,52 @@
                                     (prev + 1) % frasesBotellaTotales.length
                                 );
                             }}
-                            className="text-xs text-[#6b7280] hover:text-[#1a1a1a]"
+                            className="text-xs text-[#666660] hover:text-[#1c1c1c]"
                           >
-                            {botellaAbierta
-                              ? 'guardar otra'
-                              : 'descubrir frase'}
+                            {botellaAbierta ? 'ocultar' : 'descubrir nota'}
                           </button>
                         </div>
 
-                        <p className="text-xs text-[#6b7280] leading-relaxed">
-                          Guarda aquí tus fragmentos subrayados favoritos para
-                          tenerlos siempre en tu perfil y lánzalos al buzón para
-                          inspirar a otras lectoras con tus libros.
-                        </p>
-
                         {botellaAbierta && (
-                          <div className="p-3.5 bg-[#fcfcea] border border-[#eef2cf] rounded-xl space-y-1.5 fade-in">
-                            <p className="text-xs text-[#4b5563] italic leading-relaxed">
-                              {frasesBotellaTotales[fraseActualBotella]}
+                          <div className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded-lg space-y-1 fade-in">
+                            <p className="text-xs text-[#444] italic leading-relaxed">
+                              "{frasesBotellaTotales[fraseActualBotella]}"
                             </p>
-                            <span className="text-[10px] text-[#8c8d17] block text-right">
-                              — Mensaje anónimo del club
+                            <span className="text-[10px] text-[#888] block text-right font-medium">
+                              — anónimo
                             </span>
                           </div>
                         )}
 
-                        <div className="space-y-2 pt-1 border-t border-[#e5e7eb]">
+                        <div className="space-y-2 pt-1 border-t border-[#e2e2dc]">
                           <textarea
-                            placeholder="Escribe tu frase favorita (Ej: «...» - Título)"
+                            placeholder="Guardar cita o fragmento..."
                             value={nuevaFraseBotella}
                             onChange={(e) =>
                               setNuevaFraseBotella(e.target.value)
                             }
                             rows="2"
-                            className="w-full figma-input p-2.5 text-xs resize-none"
+                            className="w-full editorial-input p-2.5 text-xs resize-none"
                           />
                           <button
                             onClick={guardarFraseBotella}
                             disabled={enviandoForm}
-                            className="w-full figma-btn py-2 text-xs"
+                            className="w-full editorial-btn py-2 text-xs"
                           >
-                            Guardar en mis tesoros
+                            guardar fragmento
                           </button>
                         </div>
 
                         {misCitas.length > 0 && (
-                          <div className="pt-2 border-t border-[#e5e7eb] space-y-2">
-                            <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
-                              Tus tesoros guardados ({misCitas.length})
+                          <div className="pt-2 border-t border-[#e2e2dc] space-y-2">
+                            <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
+                              tus notas guardadas ({misCitas.length})
                             </span>
-                            <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">
+                            <div className="max-h-28 overflow-y-auto space-y-1.5 pr-1">
                               {misCitas.map((cita, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-xs text-[#374151] italic"
+                                  className="p-2.5 bg-white border border-[#e2e2dc] rounded text-xs text-[#444] italic"
                                 >
                                   {cita}
                                 </div>
@@ -1313,83 +1258,62 @@
                     </div>
                   )}
 
-                  {/* PESTAÑA: HABITACION (ATARDECER CÁLIDO LUMINOSO ESTILO CUENTO) */}
+                  {/* PESTAÑA: HABITACION (ARQUITECTURA MINIMALISTA EDITORIAL) */}
                   {seccionApp === 'edificio' && (
                     <div className="space-y-4 fade-in flex flex-col items-center">
-                      <div className="w-full bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fed7aa] rounded-2xl p-6 relative overflow-hidden flex flex-col items-center shadow-xl border border-[#f59e0b]/30">
-                        
-                        {/* Partículas de polvo dorado flotando */}
-                        <div className="dust-particle" style={{ top: '60%', left: '20%', animationDelay: '0s', backgroundColor: '#d97706' }}></div>
-                        <div className="dust-particle" style={{ top: '70%', left: '75%', animationDelay: '2s', backgroundColor: '#d97706' }}></div>
-                        <div className="dust-particle" style={{ top: '40%', left: '50%', animationDelay: '3.5s', backgroundColor: '#d97706' }}></div>
-
-                        {/* Sol radiante de atardecer */}
-                        <div className="absolute top-4 right-6 w-11 h-11 bg-[#fde047] rounded-full shadow-[0_0_25px_rgba(253,224,71,0.8)] opacity-95"></div>
+                      <div className="w-full bg-[#1c1c1c] text-white rounded-xl p-6 relative overflow-hidden flex flex-col items-center shadow-lg border border-[#333]">
                         
                         <div className="text-center z-10 mb-6 space-y-1">
-                          <h2 className="text-sm font-bold text-[#78350f] tracking-wide">
+                          <h2 className="text-xs font-medium uppercase tracking-widest text-[#adae1d]">
                             una habitación propia
                           </h2>
-                          <p className="text-[11px] text-[#92400e]">
-                            Tarde cálida y luminosa, cien gildas leyendo en compañía.
+                          <p className="text-[11px] text-[#999]">
+                            silencio en la noche, {miembrosEdificio.length} lectoras en activo
                           </p>
                         </div>
 
-                        {/* El Edificio de Ventanas Dinámico con ladrillo/terracota cálido y brillante */}
-                        <div className="relative w-full max-w-[280px] bg-[#9a3412] rounded-t-lg p-4 grid grid-cols-2 gap-3.5 shadow-2xl border-t-2 border-[#b45309] z-10">
-                          {/* Chimenea con humo orgánico */}
-                          <div className="absolute -top-7 right-8 w-4 h-6 bg-[#b45309] rounded-t-sm">
-                            <div className="absolute -top-3 left-1 w-2 h-2 bg-amber-200/70 rounded-full smoke-puff-1"></div>
-                            <div className="absolute -top-5 left-1.5 w-2.5 h-2.5 bg-amber-200/60 rounded-full smoke-puff-2"></div>
+                        {/* Fachada Arquitectónica Dinámica */}
+                        <div className="relative w-full max-w-[280px] bg-[#242424] rounded-t p-4 grid grid-cols-2 gap-3 border border-[#333] z-10">
+                          
+                          {/* Detalles estructurales minimalistas */}
+                          <div className="absolute -top-6 right-6 w-3 h-5 bg-[#333] rounded-t">
+                            <div className="absolute -top-2 left-0.5 w-2 h-1 bg-gray-500/50 rounded-full smoke-line"></div>
                           </div>
 
-                          {/* Antena y luz baliza */}
-                          <div className="absolute -top-7 left-10 w-1.5 h-7 bg-[#b45309]"></div>
-                          <div className="absolute -top-8 left-[37px] w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_red] animate-ping"></div>
-
-                          {/* Renderizado dinámico de ventanas: Mínimo 12 ventanas iniciales y se expanden automáticamente */}
                           {Array.from({ length: Math.max(12, Math.ceil(miembrosEdificio.length / 2) * 2) }).map((_, i) => {
                             const miembro = miembrosEdificio[i];
                             const estaActiva = miembro ? miembro.estaLeyendo : false;
-                            const randomDelay = `${(i * 0.6) % 3}s`;
 
                             return (
                               <div
                                 key={i}
-                                style={{ animationDelay: randomDelay }}
-                                className={`p-2.5 rounded-lg border flex flex-col justify-between transition-all duration-500 ${
+                                className={`p-2.5 rounded border flex flex-col justify-between transition-all duration-300 ${
                                   miembro
-                                    ? (estaActiva ? 'cozy-window-on border-amber-300' : 'bg-[#7c2d12] border-[#b45309]')
-                                    : 'bg-[#651c0a] border-[#7c2d12] opacity-80'
+                                    ? (estaActiva ? 'window-active text-stone-900 border-amber-400' : 'bg-[#2a2a2a] border-[#383838] text-stone-300')
+                                    : 'bg-[#1e1e1e] border-[#292929] text-stone-600 opacity-50'
                                 }`}
                               >
-                                <div className="flex justify-between items-center">
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded transition-colors ${
-                                    miembro 
-                                      ? (estaActiva ? 'bg-black/20 text-black' : 'bg-[#9a3412] text-amber-200')
-                                      : 'bg-[#451a03] text-amber-300/75'
-                                  }`}>
-                                    {miembro ? (estaActiva ? 'ON' : 'OFF') : 'LIBRE'}
-                                  </span>
-                                  <span className={`text-[10px] ${miembro && estaActiva ? 'text-black' : 'text-amber-200/75'}`}>🪟</span>
+                                <div className="flex justify-between items-center text-[8px] font-mono tracking-wider">
+                                  <span>{miembro ? (estaActiva ? 'LIT' : 'OFF') : 'VACÍA'}</span>
+                                  <span className={`w-1 h-1 rounded-full ${estaActiva ? 'bg-amber-600' : 'bg-stone-600'}`}></span>
                                 </div>
-                                <div className="pt-1.5 truncate">
+                                <div className="pt-2 truncate">
                                   {miembro ? (
                                     <>
-                                      <span className={`font-bold text-[11px] block truncate transition-colors ${estaActiva ? 'text-black' : 'text-white'}`}>
-                                        {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-75">(tú)</span>}
+                                      <span className="font-medium text-[11px] block truncate">
+                                        {miembro.nombreReal} {miembro.esYo && <span className="text-[8px] opacity-65">(tú)</span>}
                                       </span>
-                                      <span className={`text-[9px] italic block truncate transition-colors ${estaActiva ? 'text-neutral-900 font-semibold' : 'text-amber-100'}`}>
-                                        📖 {miembro.libroReal}
+                                      <span className={`text-[9px] block truncate font-light ${estaActiva ? 'text-stone-800' : 'text-stone-400'}`}>
+                                        {miembro.libroReal}
                                       </span>
                                     </>
                                   ) : (
                                     <>
-                                      <span className="font-bold text-[10px] text-amber-200/75 block truncate">
-                                        Habitación libre
+                                      <span className="font-normal text-[10px] text-stone-600 block truncate">
+                                        disponible
                                       </span>
-                                      <span className="text-[9px] text-amber-300/60 block truncate italic">
-                                        Esperando a una gilda
+                                      <span className="text-[8px] text-stone-700 block truncate">
+                                        habitación 0{i+1}
                                       </span>
                                     </>
                                   )}
@@ -1398,19 +1322,17 @@
                             );
                           })}
                         </div>
-                        {/* Puerta del edificio */}
-                        <div className="w-10 h-12 bg-[#7c2d12] rounded-t-md border-t-2 border-[#b45309] z-10 -mt-1 mx-auto shadow-inner"></div>
+                        {/* Entrada del edificio */}
+                        <div className="w-8 h-10 bg-[#2a2a2a] rounded-t border border-[#383838] z-10 -mt-px mx-auto"></div>
                       </div>
                     </div>
                   )}
 
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-3 fade-in">
-                      <div className="figma-card p-3.5 text-xs flex items-center justify-between text-[#6b7280] bg-white">
-                        <span>Progreso: pág. {miPagina}</span>
-                        <span className="text-[#ADAE1D] font-medium">
-                          Anti-spoilers activo
-                        </span>
+                      <div className="editorial-card p-3 text-xs flex items-center justify-between text-[#666660] bg-white">
+                        <span>progreso: pág. {miPagina}</span>
+                        <span className="text-[#adae1d] font-medium">anti-spoilers activo</span>
                       </div>
 
                       {capitulos.map((cap, i) => {
@@ -1445,40 +1367,36 @@
                         return (
                           <div
                             key={i}
-                            className={`figma-card p-5 space-y-3 ${
-                              !estaDesbloqueado ? 'opacity-50 bg-[#f9fafb]' : ''
+                            className={`editorial-card p-5 space-y-3 ${
+                              !estaDesbloqueado ? 'opacity-40 bg-[#fafaf8]' : ''
                             }`}
                           >
                             {!estaDesbloqueado ? (
-                              <div className="text-center py-3 space-y-1 text-xs text-[#6b7280]">
-                                <p className="font-medium text-[#1a1a1a]">
-                                  Sección bloqueada
-                                </p>
-                                <p className="text-[11px]">
-                                  Se desbloquea en la página {paginaFin}
-                                </p>
+                              <div className="text-center py-3 space-y-1 text-xs text-[#666660]">
+                                <p className="font-medium text-[#1c1c1c]">sección bloqueada</p>
+                                <p className="text-[11px]">se desbloquea en la página {paginaFin}</p>
                               </div>
                             ) : (
                               <div className="space-y-3 fade-in">
-                                <div className="flex justify-between items-center text-[11px] text-[#6b7280]">
-                                  <span>Sección {i + 1}</span>
-                                  <span>Mínimo pág. {paginaFin}</span>
+                                <div className="flex justify-between items-center text-[10px] text-[#666660] uppercase tracking-wider">
+                                  <span>sección {i + 1}</span>
+                                  <span>mínimo pág. {paginaFin}</span>
                                 </div>
-                                <h3 className="text-sm font-bold text-[#1a1a1a]">
+                                <h3 className="text-sm font-semibold text-[#1c1c1c]">
                                   {tituloCap}
                                 </h3>
-                                <p className="text-[#4b5563] text-xs leading-relaxed">
+                                <p className="text-[#444] text-xs leading-relaxed">
                                   {cap.descripcion || cap.texto || ''}
                                 </p>
 
-                                <div className="p-3.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-2">
-                                  <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
-                                    Cápsula del Tiempo
+                                <div className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded space-y-2">
+                                  <span className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold block">
+                                    cápsula del tiempo
                                   </span>
                                   <div className="flex gap-2">
                                     <input
                                       type="text"
-                                      placeholder="Añade una cita memorable..."
+                                      placeholder="Cita memorable..."
                                       value={nuevaCitaCapsula[i] || ''}
                                       onChange={(e) =>
                                         setNuevaCitaCapsula({
@@ -1486,12 +1404,11 @@
                                           [i]: e.target.value,
                                         })
                                       }
-                                      className="flex-grow figma-input px-3 py-1.5 text-xs"
+                                      className="flex-grow editorial-input px-3 py-1.5 text-xs"
                                     />
                                     <button
                                       onClick={() => {
-                                        if (!nuevaCitaCapsula[i]?.trim())
-                                          return;
+                                        if (!nuevaCitaCapsula[i]?.trim()) return;
                                         enviarAccion('capsula_tiempo', {
                                           cita: nuevaCitaCapsula[i],
                                           capitulo: tituloCap,
@@ -1502,16 +1419,16 @@
                                         });
                                         mostrarToast('Cita guardada.');
                                       }}
-                                      className="figma-btn px-3 py-1.5 text-xs"
+                                      className="editorial-btn px-3 py-1.5 text-xs"
                                     >
-                                      Guardar
+                                      guardar
                                     </button>
                                   </div>
                                 </div>
 
-                                <div className="pt-2.5 border-t border-[#e5e7eb] space-y-2.5">
-                                  <h4 className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold">
-                                    Reflexiones
+                                <div className="pt-2 border-t border-[#e2e2dc] space-y-2">
+                                  <h4 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                                    reflexiones
                                   </h4>
                                   {puedeComentarCapitulos && (
                                     <div className="space-y-2">
@@ -1525,13 +1442,12 @@
                                           })
                                         }
                                         rows="2"
-                                        className="w-full figma-input p-3 text-xs resize-none"
+                                        className="w-full editorial-input p-2.5 text-xs resize-none"
                                       />
                                       <button
                                         onClick={() => {
                                           const textoNota = nuevoComentario[i];
-                                          if (!textoNota || !textoNota.trim())
-                                            return;
+                                          if (!textoNota || !textoNota.trim()) return;
                                           const nombreActual =
                                             localStorage.getItem(
                                               'gilda_nombre_usuario'
@@ -1556,24 +1472,24 @@
                                           mostrarToast('Nota publicada.');
                                         }}
                                         disabled={enviandoForm}
-                                        className="figma-btn px-4 py-2 text-xs"
+                                        className="editorial-btn px-3.5 py-1.5 text-xs"
                                       >
-                                        Publicar nota
+                                        publicar nota
                                       </button>
                                     </div>
                                   )}
                                   {notasCapitulo.map((com, idx) => (
                                     <div
                                       key={idx}
-                                      className="p-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-1"
+                                      className="p-3 bg-[#fafaf8] border border-[#e2e2dc] rounded space-y-1"
                                     >
-                                      <div className="flex justify-between text-[11px] text-[#6b7280]">
-                                        <span className="font-semibold text-[#1a1a1a]">
+                                      <div className="flex justify-between text-[10px] text-[#666660]">
+                                        <span className="font-medium text-[#1c1c1c]">
                                           {com.autora}
                                         </span>
                                         <span>{com.fecha}</span>
                                       </div>
-                                      <p className="text-xs text-[#374151]">
+                                      <p className="text-xs text-[#444]">
                                         {com.texto}
                                       </p>
                                     </div>
@@ -1586,102 +1502,63 @@
                       })}
 
                       <div
-                        className={`figma-card p-5 space-y-3 mt-6 ${
-                          !estaDesbloqueadaValoracion
-                            ? 'opacity-50 bg-[#f9fafb]'
-                            : ''
+                        className={`editorial-card p-5 space-y-3 mt-6 ${
+                          !estaDesbloqueadaValoracion ? 'opacity-40 bg-[#fafaf8]' : ''
                         }`}
                       >
                         {!estaDesbloqueadaValoracion ? (
-                          <div className="text-center py-4 space-y-1 text-xs text-[#6b7280]">
-                            <p className="font-medium text-[#1a1a1a]">
-                              Valoración final bloqueada
-                            </p>
-                            <p className="text-[11px]">
-                              Se desbloquea al llegar a la página{' '}
-                              {paginaFinalLibro} (final del libro).
-                            </p>
+                          <div className="text-center py-4 space-y-1 text-xs text-[#666660]">
+                            <p className="font-medium text-[#1c1c1c]">valoración final bloqueada</p>
+                            <p className="text-[11px]">disponible al llegar a la página {paginaFinalLibro}.</p>
                           </div>
                         ) : (
                           <div className="space-y-3 fade-in">
                             <div className="space-y-1">
-                              <span className="text-[11px] text-[#ADAE1D] font-medium block">
-                                Fin de la lectura
+                              <span className="text-[10px] text-[#adae1d] uppercase tracking-wider font-semibold block">
+                                fin de lectura
                               </span>
-                              <h3 className="text-sm font-bold text-[#1a1a1a]">
+                              <h3 className="text-sm font-semibold text-[#1c1c1c]">
                                 Valora "{libroActual.titulo}"
                               </h3>
-                              <p className="text-xs text-[#6b7280]">
-                                Has llegado al final. Deja tu puntuación y
-                                opinión personal.
-                              </p>
                             </div>
 
                             <div className="flex items-center gap-1.5 pt-1">
-                              <span className="text-xs text-[#6b7280] pr-1">
-                                Estrellas:
-                              </span>
+                              <span className="text-xs text-[#666660] pr-1">puntuación:</span>
                               {[1, 2, 3, 4, 5].map((num) => (
                                 <button
                                   key={num}
                                   type="button"
                                   onClick={() => setEstrellasLibro(num)}
-                                  className={`text-lg transition-transform active:scale-95 ${
+                                  className={`text-sm transition-transform active:scale-95 ${
                                     num <= estrellasLibro
-                                      ? 'text-amber-400'
-                                      : 'text-gray-300'
+                                      ? 'text-[#1c1c1c] font-bold'
+                                      : 'text-stone-300'
                                   }`}
                                 >
                                   ★
                                 </button>
                               ))}
-                              <span className="text-xs font-semibold text-[#1a1a1a] pl-2">
+                              <span className="text-xs font-medium text-[#1c1c1c] pl-2">
                                 ({estrellasLibro}/5)
                               </span>
                             </div>
 
                             <div className="space-y-2 pt-1">
                               <textarea
-                                placeholder="Escribe tu opinión general sobre el libro..."
+                                placeholder="Opinión personal..."
                                 value={resenaLibro}
                                 onChange={(e) => setResenaLibro(e.target.value)}
                                 rows="3"
-                                className="w-full figma-input p-3 text-xs resize-none"
+                                className="w-full editorial-input p-3 text-xs resize-none"
                               />
                               <button
                                 onClick={enviarValoracionLibro}
                                 disabled={enviandoForm}
-                                className="w-full figma-btn py-2 text-xs"
+                                className="w-full editorial-btn py-2 text-xs"
                               >
-                                Enviar valoración
+                                enviar valoración
                               </button>
                             </div>
-
-                            {resenasGuardadas.length > 0 && (
-                              <div className="pt-3 border-t border-[#e5e7eb] space-y-2">
-                                <span className="text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold block">
-                                  Tus reseñas guardadas
-                                </span>
-                                <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
-                                  {resenasGuardadas.map((r, i) => (
-                                    <div
-                                      key={i}
-                                      className="p-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl space-y-1 text-xs"
-                                    >
-                                      <div className="flex justify-between font-semibold text-[#1a1a1a]">
-                                        <span>{r.libro}</span>
-                                        <span className="text-amber-500">
-                                          {'★'.repeat(r.estrellas)}
-                                        </span>
-                                      </div>
-                                      <p className="text-[#4b5563] italic">
-                                        "{r.resena}"
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>
@@ -1690,72 +1567,56 @@
 
                   {seccionApp === 'comunidad' && (
                     <div className="space-y-3 fade-in">
-                      <div className="flex bg-[#e5e7eb] p-1 rounded-xl text-xs">
+                      <div className="flex bg-[#e2e2dc] p-1 rounded-lg text-xs">
                         <button
                           onClick={() => setSubTabComunidad('chat')}
-                          className={`flex-1 py-2 rounded-lg transition-all ${
+                          className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'chat'
-                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
-                              : 'text-[#6b7280]'
+                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
+                              : 'text-[#666660]'
                           }`}
                         >
-                          Chat
+                          chat
                         </button>
                         <button
                           onClick={() => setSubTabComunidad('mapa')}
-                          className={`flex-1 py-2 rounded-lg transition-all ${
+                          className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'mapa'
-                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
-                              : 'text-[#6b7280]'
+                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
+                              : 'text-[#666660]'
                           }`}
                         >
-                          Ubícate :)
+                          mapa
                         </button>
                         <button
                           onClick={() => setSubTabComunidad('cafecitos')}
-                          className={`flex-1 py-2 rounded-lg transition-all ${
+                          className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'cafecitos'
-                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
-                              : 'text-[#6b7280]'
+                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
+                              : 'text-[#666660]'
                           }`}
                         >
-                          Café
+                          café
                         </button>
                         <button
                           onClick={() => setSubTabComunidad('gildas')}
-                          className={`flex-1 py-2 rounded-lg transition-all ${
+                          className={`flex-1 py-1.5 rounded transition-all ${
                             subTabComunidad === 'gildas'
-                              ? 'bg-white text-[#1a1a1a] shadow-sm font-medium'
-                              : 'text-[#6b7280]'
+                              ? 'bg-white text-[#1c1c1c] shadow-xs font-medium'
+                              : 'text-[#666660]'
                           }`}
                         >
-                          gildas &lt;3
+                          socias
                         </button>
                       </div>
 
                       {subTabComunidad === 'chat' &&
                         (tieneAccesoChat ? (
-                          <div className="figma-card p-4 h-[400px] flex flex-col justify-between">
-                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e5e7eb] shrink-0">
-                              <div className="flex items-center gap-2.5 overflow-hidden">
-                                <div className="relative flex items-center justify-center shrink-0">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                                  <span className="absolute w-4 h-4 rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
-                                </div>
-                                <div className="overflow-hidden">
-                                  <span className="text-xs font-bold text-[#1a1a1a] block leading-none">
-                                    Chat del club
-                                  </span>
-                                  <span
-                                    className="text-[10px] text-[#6b7280] truncate block max-w-[210px] pt-0.5"
-                                    title={nombresEnLinea.join(', ')}
-                                  >
-                                    {nombresEnLinea.join(', ')}
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="text-[10px] text-[#ADAE1D] font-medium bg-[#fcfcea] px-2 py-0.5 rounded-full border border-[#adae1d]/20 shrink-0">
-                                En línea
+                          <div className="editorial-card p-4 h-[380px] flex flex-col justify-between">
+                            <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-[#e2e2dc] shrink-0 text-xs">
+                              <span className="font-medium text-[#1c1c1c]">conversación en vivo</span>
+                              <span className="text-[10px] text-[#adae1d] bg-[#fafaf8] px-2 py-0.5 rounded border border-[#e2e2dc]">
+                                {nombresEnLinea.length} activas
                               </span>
                             </div>
 
@@ -1775,17 +1636,16 @@
                                       esMio
                                         ? 'items-end ml-auto'
                                         : 'items-start mr-auto'
-                                    } max-w-[85%]`}
+                                    } max-w-[85%]` }
                                   >
-                                    <div className="text-[10px] text-[#6b7280] mb-0.5 px-1 flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                                    <span className="text-[9px] text-[#666660] mb-0.5 px-1">
                                       {nombreUsuario}
-                                    </div>
+                                    </span>
                                     <div
-                                      className={`p-3 rounded-xl border ${
+                                      className={`p-2.5 rounded text-xs ${
                                         esMio
-                                          ? 'bg-[#ADAE1D] text-white border-transparent shadow-sm'
-                                          : 'bg-[#f9fafb] text-[#1a1a1a] border-[#e5e7eb]'
+                                          ? 'bg-[#1c1c1c] text-white'
+                                          : 'bg-[#fafaf8] text-[#1c1c1c] border border-[#e2e2dc]'
                                       }`}
                                     >
                                       {msg.mensaje}
@@ -1796,48 +1656,35 @@
                             </div>
                             <form
                               onSubmit={enviarChat}
-                              className="mt-3 pt-3 border-t border-[#e5e7eb] flex gap-2 shrink-0"
+                              className="mt-3 pt-3 border-t border-[#e2e2dc] flex gap-2 shrink-0"
                             >
                               <input
                                 type="text"
                                 placeholder="Escribe un mensaje..."
                                 value={nuevoChat}
                                 onChange={(e) => setNuevoChat(e.target.value)}
-                                className="flex-grow figma-input px-3 py-2 text-xs"
+                                className="flex-grow editorial-input px-3 py-1.5 text-xs"
                               />
                               <button
                                 type="submit"
-                                className="figma-btn px-4 py-2 text-xs"
+                                className="editorial-btn px-3.5 py-1.5 text-xs"
                               >
-                                Enviar
+                                enviar
                               </button>
                             </form>
                           </div>
                         ) : (
-                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
-                            Acceso reservado a Gilda Absoluta, Virtual y de
-                            Café.
+                          <div className="editorial-card p-6 text-center text-xs text-[#666660]">
+                            Acceso restringido según modalidad.
                           </div>
                         ))}
 
                       {subTabComunidad === 'mapa' && (
-                        <div className="figma-card p-4 space-y-3">
-                          <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
-                            Ubícate :)
+                        <div className="editorial-card p-4 space-y-3">
+                          <h3 className="text-[10px] uppercase tracking-wider text-[#666660] font-semibold">
+                            distribución geográfica
                           </h3>
                           <ComponenteMapa usuarias={usuariasClub} />
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {usuariasClub
-                              .filter((u) => u.ciudad || u.ubicacion || u.Ciudad || u.Ubicación)
-                              .map((u, idx) => (
-                                <span
-                                  key={idx}
-                                  className="bg-[#f9fafb] border border-[#e5e7eb] text-[11px] text-[#4b5563] px-2.5 py-1 rounded-lg"
-                                >
-                                  {u.nombre} ({u.ciudad || u.ubicacion || u.Ciudad || u.Ubicación})
-                                </span>
-                              ))}
-                          </div>
                         </div>
                       )}
 
@@ -1848,13 +1695,13 @@
                               {cafecitos.map((caf, i) => (
                                 <div
                                   key={i}
-                                  className="figma-card p-4 flex justify-between items-center text-xs"
+                                  className="editorial-card p-4 flex justify-between items-center text-xs"
                                 >
                                   <div>
-                                    <h3 className="font-semibold text-[#1a1a1a]">
+                                    <h3 className="font-medium text-[#1c1c1c]">
                                       {caf.titulo}
                                     </h3>
-                                    <p className="text-[11px] text-[#6b7280]">
+                                    <p className="text-[11px] text-[#666660]">
                                       {caf.fecha}
                                     </p>
                                   </div>
@@ -1862,74 +1709,17 @@
                                     href={caf.enlace || '#'}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="figma-btn px-3.5 py-1.5 text-xs"
+                                    className="editorial-btn px-3 py-1 text-xs"
                                   >
-                                    Enlace
+                                    enlace
                                   </a>
                                 </div>
                               ))}
                             </div>
-
-                            <div className="figma-card p-4 space-y-3">
-                              <div className="space-y-1">
-                                <span className="text-[11px] text-[#ADAE1D] font-medium block">
-                                  Votación oficial
-                                </span>
-                                <h3 className="text-sm font-bold text-[#1a1a1a]">
-                                  ¿Qué día y hora prefieres para el cafecito
-                                  virtual con la autora?
-                                </h3>
-                                <p className="text-xs text-[#6b7280]">
-                                  Vota tu opción favorita para fijar el
-                                  encuentro.
-                                </p>
-                              </div>
-
-                              <div className="space-y-2 pt-1">
-                                {opcionesVotacionCafe.map((opcion, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
-                                  >
-                                    <div className="flex items-center gap-2.5">
-                                      <span className="w-2 h-2 rounded-full bg-[#ADAE1D]"></span>
-                                      <span className="font-medium text-[#1a1a1a]">
-                                        {opcion.fecha ||
-                                          opcion.nombre ||
-                                          'Opción de fecha'}
-                                      </span>
-                                    </div>
-                                    <button
-                                      onClick={() => {
-                                        const actualizadas = [
-                                          ...opcionesVotacionCafe,
-                                        ];
-                                        const votosActuales =
-                                          Number(actualizadas[idx].votos || 0) +
-                                          1;
-                                        actualizadas[idx].votos = votosActuales;
-                                        setOpcionesVotacionCafe(actualizadas);
-                                        enviarAccion('voto_cafecito', {
-                                          opcion: opcion.fecha || opcion.nombre,
-                                          nuevosVotos: votosActuales,
-                                        });
-                                        mostrarToast(
-                                          '¡Voto registrado para el cafecito!'
-                                        );
-                                      }}
-                                      className="bg-white border border-[#e5e7eb] text-[#1a1a1a] hover:bg-[#f3f4f6] px-3 py-1.5 text-xs rounded-lg shadow-sm shrink-0 transition-all font-medium"
-                                    >
-                                      Votar ({opcion.votos || 0})
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
                           </div>
                         ) : (
-                          <div className="figma-card p-6 text-center text-xs text-[#6b7280]">
-                            Acceso reservado a Gilda Absoluta, Virtual y de
-                            Café.
+                          <div className="editorial-card p-6 text-center text-xs text-[#666660]">
+                            Acceso restringido según modalidad.
                           </div>
                         ))}
 
@@ -1938,17 +1728,17 @@
                           {usuariasClub.map((u, i) => (
                             <div
                               key={i}
-                              className="figma-card p-3.5 flex justify-between items-center text-xs"
+                              className="editorial-card p-3.5 flex justify-between items-center text-xs"
                             >
                               <div>
-                                <span className="font-semibold text-[#1a1a1a] block">
+                                <span className="font-medium text-[#1c1c1c] block">
                                   {u.nombre || 'Socia'}
                                 </span>
-                                <span className="text-[11px] text-[#6b7280] uppercase">
+                                <span className="text-[10px] text-[#666660] uppercase">
                                   {u.modalidad}
                                 </span>
                               </div>
-                              <span className="text-[11px] text-[#4b5563] bg-[#f9fafb] px-2.5 py-1 rounded-lg border border-[#e5e7eb]">
+                              <span className="text-[11px] text-[#444] bg-[#fafaf8] px-2 py-0.5 rounded border border-[#e2e2dc]">
                                 pág. {u.pagina || '0'}
                               </span>
                             </div>
@@ -1960,23 +1750,20 @@
 
                   {seccionApp === 'biblioteca' && (
                     <div className="space-y-4 fade-in">
-                      <div className="figma-card p-5 space-y-1">
-                        <span className="text-[11px] text-[#ADAE1D] font-medium block">
-                          Archivo
+                      <div className="editorial-card p-5 space-y-1">
+                        <span className="text-[10px] text-[#adae1d] uppercase tracking-wider font-semibold block">
+                          archivo
                         </span>
-                        <h2 className="text-sm font-bold text-[#1a1a1a]">
-                          Historial y votaciones
+                        <h2 className="text-sm font-semibold text-[#1c1c1c]">
+                          historial de lecturas
                         </h2>
-                        <p className="text-xs text-[#6b7280]">
-                          Obras leídas y propuestas para el próximo libro.
-                        </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         {lecturas.map((lec, i) => (
                           <div
                             key={i}
-                            className="figma-card p-3 text-center space-y-2 flex flex-col items-center"
+                            className="editorial-card p-3 text-center space-y-2 flex flex-col items-center"
                           >
                             <PortadaLibro
                               titulo={lec.titulo}
@@ -1985,183 +1772,34 @@
                               size="grid"
                             />
                             <div className="w-full truncate">
-                              <h3 className="text-xs font-semibold text-[#1a1a1a] truncate">
+                              <h3 className="text-xs font-medium text-[#1c1c1c] truncate">
                                 {lec.titulo}
                               </h3>
-                              <p className="text-[11px] text-[#6b7280] truncate">
+                              <p className="text-[10px] text-[#666660] truncate">
                                 {lec.autora}
                               </p>
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      <div className="figma-card p-4 space-y-3">
-                        <h3 className="text-xs uppercase tracking-wider text-[#6b7280] font-semibold">
-                          Propuestas activas
-                        </h3>
-
-                        {puedeProponerLibros && (
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              placeholder="Ej: Las olas - Virginia Woolf"
-                              value={nuevaPropuesta}
-                              onChange={(e) =>
-                                setNuevaPropuesta(e.target.value)
-                              }
-                              className="w-full figma-input px-3 py-2 text-xs"
-                            />
-                            <p className="text-[11px] text-[#6b7280] pl-0.5">
-                              Formato requerido: Título - Autora
-                            </p>
-                            <button
-                              onClick={async () => {
-                                const textoInput = nuevaPropuesta.trim();
-                                if (!textoInput) return;
-
-                                if (!textoInput.includes('-')) {
-                                  mostrarToast(
-                                    'Usa el formato: Título - Autora'
-                                  );
-                                  return;
-                                }
-
-                                const partes = textoInput.split('-');
-                                const tituloLibro = partes[0].trim();
-                                const autoraLibro = partes.slice(1).join('-').trim();
-
-                                mostrarToast('Buscando portada...');
-                                let portadaUrl = '';
-
-                                try {
-                                  const res = await fetch(
-                                    `https://openlibrary.org/search.json?q=${encodeURIComponent(
-                                      tituloLibro + ' ' + autoraLibro
-                                    )}&fields=title,cover_i&limit=1`
-                                  );
-                                  const data = await res.json();
-
-                                  if (
-                                    data.docs &&
-                                    data.docs.length > 0 &&
-                                    data.docs[0].cover_i
-                                  ) {
-                                    portadaUrl = `https://covers.openlibrary.org/b/id/${data.docs[0].cover_i}-M.jpg`;
-                                  }
-                                } catch (err) {
-                                  console.error('Error buscando portada:', err);
-                                }
-
-                                const nombreActual =
-                                  localStorage.getItem(
-                                    'gilda_nombre_usuario'
-                                  ) || sesion.nombre;
-                                
-                                const nuevaObra = {
-                                  titulo: tituloLibro,
-                                  autora: autoraLibro,
-                                  propuestoPor: nombreActual,
-                                  votos: 1,
-                                  portada: portadaUrl,
-                                  sinopsis:
-                                    'Sinopsis pendiente de actualización.',
-                                };
-
-                                const listaActualizada = [nuevaObra, ...propuestas];
-                                setPropuestas(listaActualizada);
-                                localStorage.setItem('gilda_propuestas', JSON.stringify(listaActualizada));
-
-                                enviarAccion('propuesta', {
-                                  titulo: tituloLibro,
-                                  autora: autoraLibro,
-                                  portada: portadaUrl,
-                                  propuestoPor: nombreActual,
-                                });
-                                setNuevaPropuesta('');
-                                mostrarToast('¡Propuesta añadida con éxito!');
-                              }}
-                              disabled={enviandoForm}
-                              className="w-full figma-btn py-2 text-xs"
-                            >
-                              Proponer obra
-                            </button>
-                          </div>
-                        )}
-
-                        <div className="space-y-2.5 pt-1">
-                          {propuestas.map((prop, i) => (
-                            <div
-                              key={i}
-                              className="bg-[#f9fafb] border border-[#e5e7eb] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
-                            >
-                              <div
-                                onClick={() => setLibroSeleccionadoModal(prop)}
-                                className="flex items-center gap-3 cursor-pointer flex-grow hover:opacity-80 transition-opacity"
-                              >
-                                <PortadaLibro
-                                  titulo={prop.titulo}
-                                  autora={prop.autora || prop.propuestoPor}
-                                  portada={prop.portada}
-                                  size="small"
-                                />
-                                <div>
-                                  <span className="font-semibold text-[#1a1a1a] block leading-tight">
-                                    {prop.titulo}
-                                  </span>
-                                  <span className="text-[11px] text-[#6b7280] block">
-                                    {prop.autora || 'Autora desconocida'}
-                                  </span>
-                                  <span className="text-[11px] text-[#6b7280]">
-                                    por {prop.propuestoPor || 'Socia'} •{' '}
-                                    <span className="text-[#ADAE1D] underline">
-                                      sinopsis
-                                    </span>
-                                  </span>
-                                </div>
-                              </div>
-
-                              <button
-                                onClick={() => {
-                                  const actualizadas = [...propuestas];
-                                  const votosActuales =
-                                    Number(actualizadas[i].votos || 0) + 1;
-                                  actualizadas[i].votos = votosActuales;
-                                  setPropuestas(actualizadas);
-                                  localStorage.setItem('gilda_propuestas', JSON.stringify(actualizadas));
-
-                                  enviarAccion('voto', {
-                                    tituloPropuesta: prop.titulo,
-                                    nuevosVotos: votosActuales,
-                                  });
-                                  mostrarToast('¡Voto registrado!');
-                                }}
-                                className="bg-white border border-[#e5e7eb] text-[#1a1a1a] hover:bg-[#f3f4f6] px-3 py-2 text-xs rounded-lg shadow-sm shrink-0 transition-all font-medium"
-                              >
-                                Votar ({prop.votos || 0})
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   )}
 
                   {seccionApp === 'buzon' && (
                     <div className="space-y-3 fade-in">
-                      <div className="figma-card p-5 space-y-3">
-                        <h2 className="text-sm font-bold text-[#1a1a1a]">
-                          Buzón con la creadora
+                      <div className="editorial-card p-5 space-y-3">
+                        <h2 className="text-sm font-semibold text-[#1c1c1c]">
+                          buzón privado
                         </h2>
-                        <p className="text-xs text-[#6b7280]">
-                          Canal directo y privado de sugerencias para el club.
+                        <p className="text-xs text-[#666660]">
+                          Sugerencias y comunicación directa con la administración.
                         </p>
                         <textarea
                           placeholder="Escribe tu mensaje..."
                           value={mensajeFundadora}
                           onChange={(e) => setMensajeFundadora(e.target.value)}
                           rows="4"
-                          className="w-full figma-input p-3 text-xs resize-none"
+                          className="w-full editorial-input p-3 text-xs resize-none"
                         />
                         <button
                           onClick={() => {
@@ -2173,9 +1811,9 @@
                             mostrarToast('Mensaje enviado.');
                           }}
                           disabled={enviandoForm}
-                          className="w-full figma-btn py-2.5 text-xs"
+                          className="w-full editorial-btn py-2 text-xs"
                         >
-                          Enviar mensaje
+                          enviar mensaje
                         </button>
                       </div>
                     </div>
@@ -2184,7 +1822,7 @@
               )}
             </main>
 
-            <nav className="figma-nav fixed bottom-0 left-0 right-0 py-2.5 px-3 flex justify-around items-center max-w-md mx-auto z-50">
+            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-3 flex justify-around items-center max-w-md mx-auto z-50">
               {[
                 { key: 'inicio', label: 'inicio' },
                 { key: 'edificio', label: 'habitacion' },
@@ -2198,10 +1836,10 @@
                   onClick={() =>
                     seccionApp !== tab.key && setSeccionApp(tab.key)
                   }
-                  className={`py-1.5 px-2.5 rounded-xl transition-all text-xs tracking-tight ${
+                  className={`py-1.5 px-2 rounded transition-all text-xs tracking-tight ${
                     seccionApp === tab.key
-                      ? 'text-[#ADAE1D] bg-[#fcfcea] font-semibold'
-                      : 'text-[#6b7280] hover:text-[#1a1a1a]'
+                      ? 'text-[#1c1c1c] font-semibold bg-white shadow-xs'
+                      : 'text-[#666660] hover:text-[#1c1c1c]'
                   }`}
                 >
                   {tab.label}
