@@ -135,10 +135,6 @@
         background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
         border-radius: 50%; box-shadow: 0 0 30px rgba(250, 204, 21, 0.3);
       }
-      .moon::after {
-        content: ''; position: absolute; top: 15%; right: 15%; width: 45px; height: 45px;
-        background: #0f1115; border-radius: 50%;
-      }
       .building {
         position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
         width: 96%; height: auto; min-height: 55%;
@@ -207,7 +203,9 @@
           <div className="postal-ratio w-full h-full">
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
-            <div className="moon"></div>
+            <div className="moon relative overflow-hidden">
+              <div className="absolute top-[15%] right-[15%] w-[45px] h-[45px] bg-[#0f1115] rounded-full"></div>
+            </div>
             <div className="absolute top-[8%] w-full text-center z-10 px-4">
               <h2 className="text-3xl font-serif-title text-white italic">gilda</h2>
               <p className="text-[10px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-1">{activasCount} de {registradasCount} en vela</p>
@@ -552,7 +550,7 @@
           if (!storyRef.current) return;
           mostrarToast('Generando postal...');
           try {
-            const canvas = await html2canvas(storyRef.current, { scale: 3, useCORS: true, backgroundColor: '#0f1115' });
+            const canvas = await html2canvas(storyRef.current, { scale: 4, useCORS: true, backgroundColor: '#0f1115' });
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
             link.download = `gilda-story.png`; link.click();
@@ -662,7 +660,9 @@
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full relative">
                         <div className="story-noise"></div>
-                        <div className="moon" style={{top:'10%', right:'15%'}}></div>
+                        <div className="moon relative overflow-hidden" style={{top:'10%', right:'15%'}}>
+                          <div className="absolute top-[15%] right-[15%] w-[45px] h-[45px] bg-[#0f1115] rounded-full"></div>
+                        </div>
                         <div className="absolute top-10 w-full text-center z-10 px-4">
                           <p className="font-mono-code text-[8px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
                           <h2 className="font-serif-title text-2xl text-white italic">En vela leyendo</h2>
