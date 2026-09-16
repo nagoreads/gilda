@@ -53,7 +53,6 @@
       .font-serif-title { font-family: 'Playfair Display', serif; }
       .font-mono-code { font-family: 'Courier Prime', monospace; }
 
-      /* SISTEMA EDITORIAL MINIMALISTA */
       .editorial-card {
         background: #ffffff;
         border: 1px solid #e5e3dc;
@@ -108,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - POSTAL 9:16 PARA STORIES (Punto 4)
+         CASA GILDA - EDIFICIO Y POSTAL 9:16 (Punto 4 y 5)
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -142,26 +141,26 @@
       }
       .building {
         position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-        width: 90%; height: auto; min-height: 45%;
+        width: 94%; height: auto; min-height: 52%;
         background: linear-gradient(180deg, #181921 0%, #0a0b0e 100%);
         border-top-left-radius: 16px; border-top-right-radius: 16px;
-        padding: 24px 16px;
+        padding: 20px 10px;
         display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
-        gap: 16px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
+        gap: 16px 8px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
       }
       .window {
-        width: 24px; height: 36px; border-radius: 100px 100px 0 0;
+        width: 22px; height: 32px; border-radius: 100px 100px 0 0;
         cursor: pointer; position: relative; transition: all 0.3s ease;
         border: 2px solid #0f1115;
       }
       .window.light-on {
-        background-color: #fef08a; box-shadow: 0 0 15px rgba(254, 240, 138, 0.5); border-color: #0f1115;
+        background-color: #fef08a; box-shadow: 0 0 12px rgba(254, 240, 138, 0.6); border-color: #0f1115;
       }
       .window.light-off {
         background-color: #222430; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
       }
       .window.window-vacant {
-        background-color: #181921; border-color: #2a2c38; opacity: 0.5; cursor: default;
+        background-color: #181921; border-color: #2a2c38; opacity: 0.4; cursor: default;
       }
     </style>
   </head>
@@ -171,7 +170,6 @@
     <script type="text/babel">
       const { useState, useEffect, useMemo, useRef } = React;
 
-      // URLs oficiales de tu Google Sheets
       const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbxW1RW92EAO1ymxs61fKle9BZAE3WoA3t7iw-rd04DZm77G9UTvOvIYRHl8sptSLfuA_Q/exec';
       const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
       const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
@@ -182,16 +180,13 @@
       const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
       const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
       const URL_CSV_FRASES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1794892861&single=true&output=csv';
-      const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1418873752&single=true&output=csv'; // Nueva hoja conectada
+      const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1418873752&single=true&output=csv';
 
       const FRASES_INICIALES = [
         'Leer no es huir del mundo, sino encontrar una linterna para entenderlo mejor en compañía.',
         'Hay libros que nos leen a nosotras antes de que terminemos la primera página.'
       ];
 
-      /* ==========================================================================
-         COMPONENTE: EDIFICIO POSTAL (Punto 4)
-         ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
@@ -199,7 +194,7 @@
         const miembros = useMemo(() => {
           const lista = [...usuarias];
           while (lista.length < MIN_ESTANCIAS) {
-            lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: 'Sin asignar' });
+            lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: '' });
           }
           return lista;
         }, [usuarias]);
@@ -213,16 +208,16 @@
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
             <div className="moon"></div>
-            <div className="absolute top-[10%] w-full text-center z-10 px-4">
+            <div className="absolute top-[8%] w-full text-center z-10 px-4">
               <h2 className="text-3xl font-serif-title text-white italic">gilda</h2>
-              <p className="text-[10px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-2">{activasCount} de {registradasCount} en vela</p>
+              <p className="text-[10px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-1">{activasCount} de {registradasCount} en vela</p>
             </div>
             <div className="building">
               {miembros.map((miembro, i) => {
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
                 return (
-                  <div key={i} className="flex flex-col items-center gap-1.5 w-[50px]">
+                  <div key={i} className="flex flex-col items-center gap-1 w-[58px]">
                     <div
                       onClick={() => {
                         if (esLibre) return;
@@ -232,8 +227,13 @@
                       className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
                     ></div>
                     {!esLibre && (
-                      <div className="text-center w-full px-0.5">
-                        <span className={`block text-[8px] font-medium leading-tight truncate ${estaActiva ? 'text-white' : 'text-gray-500'}`}>{miembro.nombre}</span>
+                      <div className="text-center w-full px-0.5 select-none">
+                        <span className={`block text-[8px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100 font-semibold' : 'text-gray-400'}`}>{miembro.nombre}</span>
+                        {estaActiva && miembro.libroReal && (
+                          <span className="block text-[7px] text-[#ADAE1D] italic truncate leading-none mt-0.5 font-serif" title={miembro.libroReal}>
+                            {miembro.libroReal}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -244,15 +244,11 @@
         );
       }
 
-      /* ==========================================================================
-         COMPONENTE: MAPA INTERACTIVO CON DESGLOSE REGIONAL (Punto 1)
-         ========================================================================== */
       function MapaGilda({ usuarias }) {
         const mapRef = useRef(null);
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
-        // Agrupar usuarias por provincia_region
         const regionesMap = useMemo(() => {
           const map = {};
           usuarias.forEach(u => {
@@ -319,9 +315,6 @@
         );
       }
 
-      /* ==========================================================================
-         COMPONENTE: PORTADA DE LIBRO
-         ========================================================================== */
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : 'w-12 h-16 text-[8px]';
@@ -338,9 +331,6 @@
         );
       }
 
-      /* ==========================================================================
-         APP PRINCIPAL (gilda)
-         ========================================================================== */
       function App() {
         const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
         const [inputEmail, setInputEmail] = useState('');
@@ -384,6 +374,7 @@
 
         const [modalStoryAbierto, setModalStoryAbierto] = useState(false);
         const [modoStory, setModoStory] = useState('ventana');
+        const [sociaSeleccionadaModal, setSociaSeleccionadaModal] = useState(null);
         const storyRef = useRef(null);
 
         const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
@@ -391,12 +382,10 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
-        // Carga estricta de usuarias para validar login
         useEffect(() => {
           parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
         }, []);
 
-        // Carga completa tras iniciar sesión
         useEffect(() => {
           if (sesion) {
             setCargandoDatos(true);
@@ -417,14 +406,18 @@
               if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
               if (socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
             }
-            
-            // Cargar libro personal de la nueva tabla si existe
-            const miLectura = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
-            if (miLectura) setLibroPersonal(miLectura.libro || '');
           }
         }, [sesion, usuariasClub.length]);
 
-        // Envío de acciones al Apps Script
+        useEffect(() => {
+          if (sesion && lecturasPersonales.length > 0) {
+            const miLectura = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
+            if (miLectura && miLectura.libro) {
+              setLibroPersonal(miLectura.libro);
+            }
+          }
+        }, [sesion, lecturasPersonales]);
+
         const enviarAccion = async (action, payload) => {
           try {
             const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
@@ -435,7 +428,6 @@
           } catch (err) { console.error(err); }
         };
 
-        // LOGIN ESTRICTO (Punto 8)
         const iniciarSesion = (e) => {
           e.preventDefault();
           setErrorLogin('');
@@ -465,7 +457,6 @@
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
-        // GEOLOCALIZACIÓN Y PROVINCIA AUTOMÁTICA (Punto 1)
         const guardarMiCiudad = async () => {
           const ciudadLimpia = miCiudad.trim();
           if (!ciudadLimpia) return;
@@ -483,14 +474,25 @@
           }
         };
 
-        // EDITAR LIBRO PERSONAL (Punto 5)
         const guardarLibroPersonal = () => {
-          localStorage.setItem('gilda_libro_personal', libroPersonal);
-          enviarAccion('actualizar_libro_personal', { libro: libroPersonal });
+          const tituloLibro = libroPersonal.trim();
+          if (!tituloLibro) return;
+          localStorage.setItem('gilda_libro_personal', tituloLibro);
+          enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro });
+          
+          setLecturasPersonales(prev => {
+            const idx = prev.findIndex(p => (p.email || '').toLowerCase() === sesion.email.toLowerCase());
+            if (idx >= 0) {
+              const clon = [...prev];
+              clon[idx].libro = tituloLibro;
+              return clon;
+            } else {
+              return [...prev, { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, fecha_inicio: new Date().toLocaleDateString('es-ES') }];
+            }
+          });
           mostrarToast('Lectura actual actualizada en tu ventana.');
         };
 
-        // VOTACIONES (Puntos 6 y 7)
         const toggleVoto = (tipo, obj, lista, setLista) => {
           const listaClon = [...lista];
           const item = listaClon.find(i => (i.titulo || i.fecha) === (obj.titulo || obj.fecha));
@@ -509,7 +511,6 @@
           mostrarToast('Voto actualizado.');
         };
 
-        // HILOS Y REACCIONES (Punto 3)
         const enviarRespuesta = (idPadre, capTitulo) => {
           const txt = respuestaComentario[idPadre];
           if(!txt || !txt.trim()) return;
@@ -530,7 +531,24 @@
           }
         };
 
-        // DESCARGA STORIES (Punto 4)
+        // Función funcional para enviar mensajes al chat
+        const enviarChat = (e) => {
+          e.preventDefault();
+          const textoMsg = nuevoChat.trim();
+          if (!textoMsg) return;
+
+          const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+          const mensajeObj = {
+            usuario: nombreActual,
+            mensaje: textoMsg,
+            fecha: 'Ahora',
+          };
+          setChatMsgs((prev) => [...prev, mensajeObj]);
+          enviarAccion('enviar_chat', { mensaje: textoMsg });
+          setNuevoChat('');
+          mostrarToast('Mensaje enviado.');
+        };
+
         const descargarStory = async () => {
           if (!storyRef.current) return;
           mostrarToast('Generando postal...');
@@ -558,7 +576,6 @@
         const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
         const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
         
-        // CONECTADAS CHAT (Punto 2)
         const usuariasConectadas = useMemo(() => {
           const ahora = new Date().getTime();
           return usuariasClub.filter(u => u.email === sesion?.email || (ahora - Number(u.ultima_actividad || 0)) < 15 * 60 * 1000);
@@ -566,17 +583,26 @@
 
         const miembrosEdificio = useMemo(() => {
           const emailActual = sesion?.email?.toLowerCase();
-          const yo = { nombre: nombreUsuarioPersonalizado || sesion?.nombre, email: emailActual, estaLeyendo: isReadingNow, libroReal: libroPersonal || libroActual.titulo, esYo: true };
-          const resto = usuariasClub.filter(u => u.email?.toLowerCase() !== emailActual).map(u => {
+          const yo = { 
+            nombre: nombreUsuarioPersonalizado || sesion?.nombre, 
+            email: emailActual, 
+            estaLeyendo: isReadingNow, 
+            libroReal: libroPersonal || libroActual.titulo, 
+            esYo: true 
+          };
+          const resto = usuariasClub.filter(u => (u.email || '').toLowerCase() !== emailActual).map(u => {
             const lPers = lecturasPersonales.find(lp => (lp.email || '').toLowerCase() === (u.email || '').toLowerCase());
             return {
-              ...u, nombre: u.nombre || 'Socia', estaLeyendo: Number(u.pagina || 0) > 0, libroReal: lPers?.libro || libroActual.titulo, esYo: false
+              ...u, 
+              nombre: u.nombre || 'Socia', 
+              estaLeyendo: Number(u.pagina || 0) > 0, 
+              libroReal: lPers?.libro || libroActual.titulo, 
+              esYo: false
             };
           });
           return [yo, ...resto];
         }, [usuariasClub, sesion, nombreUsuarioPersonalizado, isReadingNow, libroPersonal, libroActual, lecturasPersonales]);
 
-        // PANTALLA DE LOGIN ESTRICTA (Punto 8)
         if (!sesion) {
           return (
             <div className="min-h-screen flex items-center justify-center px-4 bg-[#ffffee]">
@@ -622,7 +648,6 @@
               </div>
             )}
 
-            {/* MODAL STORIES 9:16 (Punto 4) */}
             {modalStoryAbierto && (
               <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 fade-in">
                 <div className="bg-[#1a1c23] max-w-xs w-full p-4 rounded-2xl flex flex-col items-center">
@@ -643,10 +668,10 @@
                           <p className="font-mono-code text-[8px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
                           <h2 className="font-serif-title text-2xl text-white italic">En vela leyendo</h2>
                         </div>
-                        <div className="absolute bottom-0 w-full h-[60%] flex flex-col items-center justify-end pb-12 z-10">
-                          <div className={`window scale-150 mb-10 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
-                          <h3 className="text-white font-serif-title text-2xl leading-tight">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                          <p className="text-[#ADAE1D] text-[10px] font-mono-code mt-1 px-4 text-center truncate w-full">{libroPersonal || libroActual.titulo}</p>
+                        <div className="absolute bottom-0 w-full h-[60%] flex flex-col items-center justify-end pb-12 z-10 px-4 text-center">
+                          <div className={`window scale-150 mb-8 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
+                          <h3 className="text-white font-serif-title text-xl leading-tight">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                          <p className="text-[#ADAE1D] text-xs font-mono-code mt-1 italic truncate w-full">{libroPersonal || libroActual.titulo}</p>
                         </div>
                         <div className="absolute bottom-4 w-full text-center text-white/40 text-[9px] font-mono-code">@gilda.mailclub</div>
                       </div>
@@ -662,7 +687,23 @@
               </div>
             )}
 
-            {/* HEADER */}
+            {sociaSeleccionadaModal && (
+              <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+                <div className="editorial-card bg-white max-w-xs w-full p-5 space-y-4 relative shadow-xl">
+                  <button onClick={() => setSociaSeleccionadaModal(null)} className="absolute top-3 right-3 text-xs text-gray-400 hover:text-black">cerrar</button>
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-mono-code uppercase tracking-widest text-[#ADAE1D]">estancia en la casa</span>
+                    <h3 className="font-serif-title text-lg">{sociaSeleccionadaModal.nombre}</h3>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded border border-gray-100 space-y-2 text-xs">
+                    <div className="flex justify-between"><span className="text-gray-500">Estado:</span><span className={sociaSeleccionadaModal.estaLeyendo ? 'text-amber-600 font-bold' : 'text-gray-400'}>{sociaSeleccionadaModal.estaLeyendo ? 'En vela' : 'En silencio'}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Lectura:</span><span className="font-medium text-right truncate max-w-[150px]">{sociaSeleccionadaModal.libroReal}</span></div>
+                  </div>
+                  <button onClick={() => setSociaSeleccionadaModal(null)} className="w-full editorial-btn py-2 text-xs">volver a la fachada</button>
+                </div>
+              </div>
+            )}
+
             <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-xl border border-[#e5e3dc] shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#ffffee] flex items-center justify-center font-serif-title text-lg text-[#ADAE1D]">
@@ -691,7 +732,6 @@
                 <div className="text-center py-20 text-xs text-gray-400 font-mono-code animate-pulse">Cargando volúmenes...</div>
               ) : (
                 <>
-                  {/* INICIO */}
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-4">
@@ -721,7 +761,6 @@
                         </div>
                       </div>
 
-                      {/* Tu Estancia y Libro Personal (Punto 5) */}
                       <div className="editorial-card p-5 bg-gradient-to-br from-white to-[#ffffee]">
                         <div className="flex justify-between items-center mb-3">
                           <h3 className="font-serif-title text-sm">Tu Estancia</h3>
@@ -741,7 +780,6 @@
                         </button>
                       </div>
 
-                      {/* Geolocalización y Región (Punto 1) */}
                       <div className="editorial-card p-4">
                         <h3 className="font-serif-title text-sm mb-2">Ubicación geográfica</h3>
                         <div className="flex gap-2">
@@ -750,7 +788,6 @@
                         </div>
                       </div>
 
-                      {/* Botella de citas */}
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center">
                           <h3 className="font-serif-title text-sm">Notas y fragmentos</h3>
@@ -771,7 +808,6 @@
                     </div>
                   )}
 
-                  {/* EDIFICIO */}
                   {seccionApp === 'edificio' && (
                     <div className="editorial-card p-4 flex flex-col items-center">
                       <div className="text-center mb-4">
@@ -779,12 +815,11 @@
                         <p className="text-xs text-gray-500 mt-1">Nuestra casa compartida en vela.</p>
                       </div>
                       <div className="w-full max-w-[280px]">
-                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} />
+                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
                       </div>
                     </div>
                   )}
 
-                  {/* CAPÍTULOS E HILOS (Punto 3) */}
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
@@ -799,7 +834,6 @@
                               <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs">guardar</button>
                             </div>
 
-                            {/* Hilos y Reacciones */}
                             <div className="pt-2">
                               <div className="flex gap-2 mb-4">
                                 <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
@@ -821,7 +855,6 @@
                                         {c.reacciones && <span className="bg-gray-100 text-black px-1.5 rounded">{c.reacciones}</span>}
                                       </div>
                                     </div>
-                                    {/* Respuestas indentadas */}
                                     <div className="pl-6 space-y-2 border-l-2 border-[#ADAE1D]/30 ml-3">
                                       {comentarios.filter(r => r.parent_id === c.id).map(r => (
                                         <div key={r.id} className="bg-gray-50 p-2 rounded text-xs border border-gray-100">
@@ -845,7 +878,6 @@
                     </div>
                   )}
 
-                  {/* COMUNIDAD Y MAPA CON CONTADOR (Puntos 1 y 2) */}
                   {seccionApp === 'comunidad' && (
                     <div className="space-y-4 fade-in">
                       <div className="flex bg-gray-200 p-1 rounded font-mono-code text-[10px] uppercase font-bold text-center">
@@ -854,25 +886,25 @@
                       </div>
                       
                       {subTabComunidad === 'chat' && (
-                        <div className="editorial-card h-[400px] flex flex-col">
-                          <div className="bg-gray-50 p-2.5 border-b border-gray-100 flex items-center justify-between text-xs rounded-t-lg">
+                        <div className="editorial-card h-[400px] flex flex-col justify-between">
+                          <div className="bg-gray-50 p-2.5 border-b border-gray-100 flex items-center justify-between text-xs rounded-t-lg shrink-0">
                             <span className="font-serif-title text-sm">Conversación en vivo</span>
                             <span className="bg-white px-2 py-0.5 rounded border border-gray-200 text-[#ADAE1D] font-bold text-[10px]">
                               {usuariasConectadas.map(u=>u.nombre).join(', ')} aquí
                             </span>
                           </div>
-                          <div className="flex-grow p-3 overflow-y-auto space-y-3">
+                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
                             {chatMsgs.map((m,i)=>(
-                              <div key={i} className={`flex flex-col ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'items-end' : 'items-start'} text-xs`}>
+                              <div key={i} className={`flex flex-col ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'items-end ml-auto' : 'items-start mr-auto'} text-xs max-w-[85%]`}>
                                 <span className="text-[9px] text-gray-400 mb-0.5">{m.usuario}</span>
-                                <div className={`p-2 rounded-lg max-w-[85%] ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'bg-[#262624] text-[#ffffee]' : 'bg-gray-100'}`}>{m.mensaje}</div>
+                                <div className={`p-2 rounded-lg ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'bg-[#262624] text-[#ffffee]' : 'bg-gray-100 text-[#262624]'}`}>{m.mensaje}</div>
                               </div>
                             ))}
                           </div>
-                          <div className="p-2 border-t border-gray-100 flex gap-2">
-                            <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-2 text-xs" placeholder="Escribe un mensaje..." />
-                            <button onClick={()=>{ if(!nuevoChat)return; const n={usuario:nombreUsuarioPersonalizado||sesion.nombre, mensaje:nuevoChat, fecha:'Ahora'}; setChatMsgs([...chatMsgs,n]); enviarAccion('chat',n); setNuevoChat('');}} className="editorial-btn px-3 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
-                          </div>
+                          <form onSubmit={enviarChat} className="p-2.5 border-t border-gray-100 flex gap-2 shrink-0 bg-white rounded-b-lg">
+                            <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                            <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                          </form>
                         </div>
                       )}
 
@@ -888,7 +920,6 @@
                     </div>
                   )}
 
-                  {/* ARCHIVO Y VOTACIONES (Puntos 6 y 7) */}
                   {seccionApp === 'archivo' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5">
@@ -933,7 +964,6 @@
                     </div>
                   )}
 
-                  {/* BUZÓN */}
                   {seccionApp === 'buzon' && (
                     <div className="editorial-card p-5 space-y-3 fade-in">
                       <h2 className="font-serif-title text-base">Buzón privado</h2>
@@ -946,7 +976,6 @@
               )}
             </main>
 
-            {/* Menú de navegación inferior */}
             <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-xl">
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
