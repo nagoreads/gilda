@@ -131,29 +131,31 @@
         100% { opacity: 1; transform: scale(1.2); }
       }
       .moon {
-        background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
-        border-radius: 50%; box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
+        background: #fef08a;
+        border-radius: 50%; 
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
+      /* Fondo plano sólido para evitar errores de renderizado de líneas en html2canvas */
       .building {
         position: absolute; bottom: 0; left: 2%; right: 2%;
         width: 96%; height: auto; min-height: 55%;
-        background: linear-gradient(180deg, #222430 0%, #121318 100%);
+        background-color: #161821;
         border-top-left-radius: 16px; border-top-right-radius: 16px;
         padding: 16px 6px;
         display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
-        gap: 12px 6px; border: 1px solid #3a3d4f; border-bottom: none; z-index: 10;
+        gap: 12px 6px; border: 1px solid #2e3140; border-bottom: none; z-index: 10;
       }
       .window {
         width: 20px; height: 30px; border-radius: 100px 100px 0 0;
-        cursor: pointer; position: relative; transition: all 0.3s ease;
+        cursor: pointer; position: relative;
         border: 2px solid #0f1115;
       }
       .window.light-on {
-        background-color: #fef08a; box-shadow: 0 0 12px rgba(254, 240, 138, 0.6); border-color: #0f1115;
+        background-color: #fef08a; border-color: #0f1115;
       }
       .window.light-off {
-        background-color: #222430; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+        background-color: #222430; border-color: #0f1115;
       }
       .window.window-vacant {
         background-color: #181921; border-color: #2a2c38; opacity: 0.4; cursor: default;
@@ -227,9 +229,9 @@
                     ></div>
                     {!esLibre && (
                       <div className="text-center w-full px-0.5 select-none">
-                        <span className="block text-[7.5px] font-medium leading-tight" style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>{miembro.nombre}</span>
+                        <span className="block text-[8px] font-medium leading-tight" style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>{miembro.nombre}</span>
                         {estaActiva && miembro.libroReal && (
-                          <span className="block text-[6.5px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" style={{whiteSpace: 'nowrap', overflow: 'hidden'}} title={miembro.libroReal}>
+                          <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" style={{whiteSpace: 'nowrap', overflow: 'hidden'}} title={miembro.libroReal}>
                             {miembro.libroReal}
                           </span>
                         )}
@@ -551,10 +553,10 @@
           if (!storyRef.current) return;
           mostrarToast('Generando postal JPG...');
           try {
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             const canvas = await html2canvas(storyRef.current, { 
-              scale: 3, 
+              scale: 2, 
               useCORS: true, 
               backgroundColor: '#0f1115',
               logging: false
