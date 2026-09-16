@@ -107,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - EDIFICIO Y POSTAL 9:16 (LIMPIO PARA NÍTIDEZ DE TEXTO)
+         CASA GILDA - POSTAL 9:16 (FLEXBOX PURO LIBRE DE ERRORES PARA HTML2CANVAS)
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -116,20 +116,11 @@
         overflow: hidden;
         width: 100%;
         border-radius: 16px;
-        letter-spacing: normal !important; /* Evita que html2canvas distorsione las letras */
+        letter-spacing: normal !important;
       }
       .story-noise {
         position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      }
-      .star {
-        position: absolute; background-color: white; border-radius: 50%;
-        animation: twinkle 3s infinite ease-in-out alternate;
-        box-shadow: 0 0 6px rgba(255,255,255,0.8);
-      }
-      @keyframes twinkle {
-        0% { opacity: 0.2; transform: scale(0.8); }
-        100% { opacity: 1; transform: scale(1.2); }
       }
       .moon {
         background: #fef08a;
@@ -137,33 +128,14 @@
         box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
-      .building {
-        position: absolute; bottom: 0; left: 2%; right: 2%;
-        width: 96%; height: auto; min-height: 55%;
-        background-color: #161821;
-        border-top-left-radius: 16px; border-top-right-radius: 16px;
-        padding: 16px 8px;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px 4px;
-        align-content: start;
-        justify-items: center;
-        border: 1px solid #2e3140; border-bottom: none; z-index: 10;
-      }
       .window {
         width: 22px; height: 32px; border-radius: 100px 100px 0 0;
         cursor: pointer; position: relative;
         border: 2px solid #0f1115;
       }
-      .window.light-on {
-        background-color: #fef08a; border-color: #0f1115;
-      }
-      .window.light-off {
-        background-color: #222430; border-color: #0f1115;
-      }
-      .window.window-vacant {
-        background-color: #181921; border-color: #2a2c38; opacity: 0.4; cursor: default;
-      }
+      .window.light-on { background-color: #fef08a; border-color: #0f1115; }
+      .window.light-off { background-color: #222430; border-color: #0f1115; }
+      .window.window-vacant { background-color: #181921; border-color: #2a2c38; opacity: 0.4; cursor: default; }
     </style>
   </head>
   <body>
@@ -201,49 +173,49 @@
           return lista;
         }, [usuarias]);
 
-        const stars = useMemo(() => Array.from({length: 25}).map((_, i) => ({
-          id: i, left: `${Math.random() * 100}%`, top: `${Math.random() * 70}%`, size: `${Math.random() * 2 + 1}px`, delay: `${Math.random() * 3}s`
-        })), []);
-
         return (
-          <div className="postal-ratio w-full h-full relative">
+          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border">
             <div className="story-noise"></div>
-            <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
             
-            <div className="absolute top-4 right-4 moon" style={{width: '44px', height: '44px'}}></div>
-
-            <div className="absolute top-4 left-4 text-left z-10 pr-16">
-              <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
-              <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
+            {/* Cabecera limpia por Flexbox */}
+            <div className="flex justify-between items-start w-full z-10">
+              <div>
+                <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
+                <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
+              </div>
+              <div className="moon" style={{width: '40px', height: '40px'}}></div>
             </div>
 
-            <div className="building">
-              {miembros.map((miembro, i) => {
-                const estaActiva = miembro.estaLeyendo;
-                const esLibre = miembro.esLibre;
-                return (
-                  <div key={i} className="flex flex-col items-center w-full">
-                    <div
-                      onClick={() => {
-                        if (esLibre) return;
-                        if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                        else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                      }}
-                      className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
-                    ></div>
-                    {!esLibre && (
-                      <div className="text-center w-full px-0.5 mt-0.5 select-none">
-                        <span className="block text-[8px] font-medium leading-tight text-gray-300">{miembro.nombre}</span>
-                        {estaActiva && miembro.libroReal && (
-                          <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" title={miembro.libroReal}>
-                            {miembro.libroReal}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            {/* Edificio estructurado con Flexbox Grid nativo seguro para html2canvas */}
+            <div className="w-full bg-[#161821] rounded-t-xl border border-[#2e3140] border-bottom-0 p-3 z-10 mt-auto">
+              <div className="grid grid-cols-4 gap-y-3 gap-x-1 justify-items-center">
+                {miembros.map((miembro, i) => {
+                  const estaActiva = miembro.estaLeyendo;
+                  const esLibre = miembro.esLibre;
+                  return (
+                    <div key={i} className="flex flex-col items-center w-full">
+                      <div
+                        onClick={() => {
+                          if (esLibre) return;
+                          if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                          else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                        }}
+                        className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
+                      ></div>
+                      {!esLibre && (
+                        <div className="text-center w-full px-0.5 mt-0.5 select-none">
+                          <span className="block text-[8px] font-medium leading-tight text-gray-300 truncate">{miembro.nombre}</span>
+                          {estaActiva && miembro.libroReal && (
+                            <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif truncate" title={miembro.libroReal}>
+                              {miembro.libroReal}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         );
@@ -679,21 +651,21 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa 100% responsiva y limpia */}
+                  {/* Vista previa fluida basada en Flexbox nativo seguro */}
                   <div ref={storyRef} className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full relative flex flex-col justify-between p-6 text-center overflow-hidden">
+                      <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden">
                         <div className="story-noise"></div>
                         
-                        <div className="z-10 flex justify-between items-start w-full">
+                        <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
                             <h2 className="font-serif-title text-xl text-white italic">En vela leyendo</h2>
                           </div>
-                          <div className="moon" style={{width: '44px', height: '44px'}}></div>
+                          <div className="moon" style={{width: '40px', height: '40px'}}></div>
                         </div>
 
-                        <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full">
+                        <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
                           <div className={`window scale-125 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
@@ -701,7 +673,7 @@
                           </div>
                         </div>
 
-                        <div className="z-10 pb-2">
+                        <div className="pb-1 z-10">
                           <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
                         </div>
                       </div>
