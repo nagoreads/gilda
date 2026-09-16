@@ -107,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - EDIFICIO Y POSTAL 9:16 (GRID ESTABLE PARA HTML2CANVAS)
+         CASA GILDA - EDIFICIO Y POSTAL 9:16
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -136,7 +136,6 @@
         box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
-      /* Grid CSS plano y sólido para evitar líneas raras y fallos de renderizado */
       .building {
         position: absolute; bottom: 0; left: 2%; right: 2%;
         width: 96%; height: auto; min-height: 55%;
@@ -555,22 +554,27 @@
 
         const descargarStory = async () => {
           if (!storyRef.current) return;
-          mostrarToast('Generando postal JPG...');
+          mostrarToast('Preparando fuentes y postal...');
           try {
-            await new Promise(resolve => setTimeout(resolve, 600));
+            // Esperar a que las Google Fonts estén 100% cargadas en el navegador
+            if (document.fonts && document.fonts.ready) {
+              await document.fonts.ready;
+            }
+            await new Promise(resolve => setTimeout(resolve, 800));
 
             const canvas = await html2canvas(storyRef.current, { 
               scale: 2, 
               useCORS: true, 
               backgroundColor: '#0f1115',
-              logging: false
+              logging: false,
+              letterRendering: true // Soluciona la distorsión y aspecto raro de las letras
             });
 
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/jpeg', 0.95);
             link.download = `gilda-story-${modoStory}.jpg`; 
             link.click();
-            mostrarToast('Postal guardada en JPG.');
+            mostrarToast('Postal guardada perfectamente.');
           } catch(e) { 
             mostrarToast('Error al exportar.'); 
           }
