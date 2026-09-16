@@ -549,14 +549,26 @@
 
         const descargarStory = async () => {
           if (!storyRef.current) return;
-          mostrarToast('Generando postal...');
+          mostrarToast('Generando postal JPG...');
           try {
-            const canvas = await html2canvas(storyRef.current, { scale: 4, useCORS: true, backgroundColor: '#0f1115' });
+            // Esperar un breve momento para asegurar que las fuentes web estén cargadas por completo
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            const canvas = await html2canvas(storyRef.current, { 
+              scale: 3, 
+              useCORS: true, 
+              backgroundColor: '#0f1115',
+              logging: false
+            });
+
             const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = `gilda-story.png`; link.click();
-            mostrarToast('Postal descargada.');
-          } catch(e) { mostrarToast('Error al exportar.'); }
+            link.href = canvas.toDataURL('image/jpeg', 0.95); // Formato JPG de alta calidad
+            link.download = `gilda-story.jpg`; 
+            link.click();
+            mostrarToast('Postal guardada en JPG.');
+          } catch(e) { 
+            mostrarToast('Error al exportar.'); 
+          }
         };
 
         const toggleLecturaLamp = () => {
@@ -662,7 +674,6 @@
                       <div className="w-full h-full relative flex flex-col justify-between p-6 text-center overflow-hidden">
                         <div className="story-noise"></div>
                         
-                        {/* Cabecera estructurada con Flexbox puro para evitar cortes de texto en html2canvas */}
                         <div className="z-10 flex justify-between items-start w-full">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
@@ -671,7 +682,6 @@
                           <div className="moon" style={{width: '44px', height: '44px'}}></div>
                         </div>
 
-                        {/* Centro con diseño flexible seguro */}
                         <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full">
                           <div className={`window scale-125 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
                           <div className="space-y-1.5 w-full px-2">
@@ -680,7 +690,6 @@
                           </div>
                         </div>
 
-                        {/* Pie de página */}
                         <div className="z-10 pb-2">
                           <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
                         </div>
@@ -691,7 +700,7 @@
                   </div>
                   
                   <button onClick={descargarStory} className="mt-5 bg-white text-black font-bold py-2.5 px-6 rounded-full text-xs hover:bg-gray-200 w-full">
-                    Descargar para Stories
+                    Descargar para Stories (JPG)
                   </button>
                 </div>
               </div>
