@@ -132,8 +132,7 @@
       }
       .moon {
         background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
-        border-radius: 50%; box-shadow: 0 0 25px rgba(250, 204, 21, 0.3);
-        overflow: hidden;
+        border-radius: 50%; box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
         position: absolute;
       }
@@ -206,13 +205,10 @@
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
             
-            {/* Luna preciosa con eclipse integrado */}
-            <div className="moon top-4 right-4" style={{width: '52px', height: '52px'}}>
-              <div className="absolute top-[15%] right-[15%] w-[38px] h-[38px] bg-[#0f1115] rounded-full"></div>
-            </div>
+            {/* Luna completamente redonda */}
+            <div className="moon top-4 right-4" style={{width: '48px', height: '48px'}}></div>
 
-            {/* Título alineado a la izquierda sin solaparse */}
-            <div className="absolute top-4 left-4 text-left z-10 pr-16">
+            <div className="absolute top-4 left-4 text-left z-10 pr-16" style={{lineHeight: '1.2'}}>
               <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
               <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
             </div>
@@ -668,28 +664,26 @@
                       <div className="w-full h-full relative flex flex-col justify-between p-5 text-center overflow-hidden">
                         <div className="story-noise"></div>
                         
-                        {/* Luna recuperada */}
-                        <div className="moon top-4 right-4" style={{width: '48px', height: '48px'}}>
-                          <div className="absolute top-[15%] right-[15%] w-[34px] h-[34px] bg-[#0f1115] rounded-full"></div>
+                        {/* Luna totalmente redonda */}
+                        <div className="moon top-4 right-4" style={{width: '44px', height: '44px'}}></div>
+
+                        {/* Cabecera optimizada con line-height seguro para html2canvas */}
+                        <div className="absolute top-4 left-4 text-left z-10 pr-14" style={{lineHeight: '1.4'}}>
+                          <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase pb-0.5">gilda</p>
+                          <h2 className="font-serif-title text-base text-white italic leading-snug">En vela leyendo</h2>
                         </div>
 
-                        {/* Cabecera a la izquierda para evitar cortes y solapamientos */}
-                        <div className="absolute top-4 left-4 text-left z-10 pr-16">
-                          <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
-                          <h2 className="font-serif-title text-lg text-white italic leading-tight">En vela leyendo</h2>
-                        </div>
-
-                        {/* Centro optimizado verticalmente */}
-                        <div className="z-10 flex flex-col items-center justify-center my-auto space-y-3 w-full pt-8">
+                        {/* Centro con espaciado vertical seguro */}
+                        <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full pt-10" style={{lineHeight: '1.4'}}>
                           <div className={`window scale-125 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
-                          <div className="space-y-1 w-full px-2">
-                            <h3 className="text-white font-serif-title text-lg leading-tight truncate">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                            <p className="text-[#ADAE1D] text-[11px] font-mono-code italic line-clamp-2">{libroPersonal || libroActual.titulo}</p>
+                          <div className="space-y-1.5 w-full px-2">
+                            <h3 className="text-white font-serif-title text-lg leading-snug truncate">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                            <p className="text-[#ADAE1D] text-[11px] font-mono-code italic line-clamp-2 leading-relaxed">{libroPersonal || libroActual.titulo}</p>
                           </div>
                         </div>
 
                         {/* Pie */}
-                        <div className="z-10 pb-1">
+                        <div className="z-10 pb-1" style={{lineHeight: '1.4'}}>
                           <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
                         </div>
                       </div>
