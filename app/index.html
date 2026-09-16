@@ -1,859 +1,952 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <!-- PWA: Configuración de vista y tema -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f5ef" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>gilda — club de lectura</title>
-  
-  <!-- PWA: Enlace al manifest -->
-  <link rel="manifest" href="manifest.json" />
+  <head>
+    <meta charset="UTF-8" />
+    <!-- PWA: Configuración de vista y tema -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>gilda — club de lectura</title>
 
-  <!-- PWA: Registro del Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch((err) => console.log('SW fallo:', err));
-      });
-    }
-  </script>
+    <!-- PWA: Enlace al manifest -->
+    <link rel="manifest" href="manifest.json" />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Tipografías (Inter, Playfair Display y Courier Prime) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime&display=swap" rel="stylesheet" />
-
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- React & Babel -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Librerías de datos e imágenes -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- FontAwesome (Para los iconos de reacciones y diseño general) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-  <style>
-    /* ==========================================================
-       ESTÉTICA GENERAL Y TIPOGRAFÍA EDITORIAL
-       ========================================================== */
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background-color: #f7f5ef;
-      color: #262624;
-      -webkit-tap-highlight-color: transparent;
-      letter-spacing: -0.015em;
-      overscroll-behavior-y: none;
-    }
-    .font-serif-title { font-family: 'Playfair Display', serif; }
-    .font-mono-code { font-family: 'Courier Prime', monospace; }
-
-    /* Tarjetas estilo Notion / Are.na */
-    .editorial-card {
-      background: #ffffff;
-      border: 1px solid #e5e3dc;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-      transition: all 0.3s ease;
-    }
-    .editorial-card:hover { border-color: #d1d28c; }
-
-    /* Inputs limpios */
-    .editorial-input {
-      background: #fcfbf9;
-      border: 1px solid #e5e3dc;
-      border-radius: 6px;
-      color: #262624;
-      transition: all 0.2s ease;
-    }
-    .editorial-input:focus {
-      outline: none;
-      background: #ffffff;
-      border-color: #B8BB23;
-      box-shadow: 0 0 0 3px rgba(184, 187, 35, 0.1);
-    }
-
-    /* Botones primarios */
-    .editorial-btn {
-      background: #262624;
-      color: #ffffff;
-      border-radius: 6px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .editorial-btn:hover { background: #B8BB23; }
-    .editorial-btn:active { transform: scale(0.98); }
-
-    /* Botones secundarios */
-    .editorial-btn-secondary {
-      background: transparent;
-      color: #262624;
-      border: 1px solid #e5e3dc;
-      border-radius: 6px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .editorial-btn-secondary:hover { border-color: #B8BB23; color: #B8BB23; background: #fcfbf9; }
-    
-    /* Navegación tipo app nativa iOS */
-    .editorial-nav {
-      background: rgba(247, 245, 239, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(0,0,0,0.05);
-      padding-bottom: env(safe-area-inset-bottom, 12px);
-    }
-
-    /* Microinteracciones */
-    .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Splash screen para la carga inicial */
-    .splash-screen {
-      position: fixed; inset: 0; background-color: #f7f5ef;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; transition: opacity 0.6s ease;
-    }
-
-    #mapa-gilda { height: 300px; width: 100%; border-radius: 8px; z-index: 1; }
-
-    /* ==========================================================
-       NUEVO DISEÑO DE LA POSTAL DE STORIES (9:16)
-       ========================================================== */
-    .story-container {
-      width: 320px;
-      height: 568px; /* Proporción 9:16 estricta para pantallas */
-      position: relative;
-      background: #0f1115; /* Fondo nocturno profundo */
-      overflow: hidden;
-      border-radius: 20px;
-    }
-    
-    /* Ruido de fondo sutil para textura analógica */
-    .story-noise {
-      position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    }
-
-    .story-stars {
-      position: absolute; inset: 0; background: transparent;
-    }
-    .star-dot {
-      position: absolute; background: white; border-radius: 50%;
-      box-shadow: 0 0 6px rgba(255,255,255,0.8);
-      animation: twinkle 4s infinite ease-in-out alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.3; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1.1); }
-    }
-
-    .story-moon {
-      position: absolute; top: 8%; right: 12%; width: 70px; height: 70px;
-      background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
-      border-radius: 50%; box-shadow: 0 0 40px rgba(250, 204, 21, 0.4);
-    }
-    .story-moon::after {
-      content: ''; position: absolute; top: 15%; right: 15%; width: 50px; height: 50px;
-      background: #0f1115; border-radius: 50%;
-    }
-
-    /* Diseño arquitectónico moderno para la postal */
-    .story-architecture {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 55%;
-      background: linear-gradient(180deg, #181921 0%, #0a0b0e 100%);
-      border-top: 1px solid #2a2c38;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-
-    .story-window-main {
-      width: 140px; height: 210px;
-      background: #fef08a;
-      border-radius: 100px 100px 0 0; /* Ventana estilo arco románico (muy elegante) */
-      box-shadow: 0 0 60px rgba(254, 240, 138, 0.4), inset 0 0 30px rgba(234, 179, 8, 0.6);
-      position: relative; overflow: hidden;
-      border: 4px solid #0f1115;
-      margin-bottom: 20px;
-    }
-    /* Parteluz de la ventana */
-    .story-window-main::before {
-      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 4px; height: 100%; background: #0f1115;
-    }
-    .story-window-main::after {
-      content: ''; position: absolute; top: 50%; left: 0;
-      width: 100%; height: 4px; background: #0f1115;
-    }
-
-    /* Modo edificio plano general */
-    .story-building-grid {
-      position: absolute; bottom: 0; left: 5%; width: 90%; height: auto; min-height: 40%;
-      background: #181921;
-      border-radius: 16px 16px 0 0;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px; padding: 24px;
-      border: 1px solid #2a2c38; border-bottom: none;
-    }
-    .story-mini-window {
-      width: 100%; aspect-ratio: 1/1.5; border-radius: 40px 40px 0 0; border: 2px solid #0a0b0e;
-    }
-    .story-mini-window.on { background: #fef08a; box-shadow: 0 0 15px rgba(254, 240, 138, 0.5); }
-    .story-mini-window.off { background: #222430; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
-    
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
-
-    // === URLS DE DATOS (Mantenidas exactamente igual) ===
-    const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbxW1RW92EAO1ymxs61fKle9BZAE3WoA3t7iw-rd04DZm77G9UTvOvIYRHl8sptSLfuA_Q/exec';
-    
-    // Para simplificar, agrupo los URLs. Se asume que el backend actualiza estas hojas.
-    const URLS = {
-      usuarias: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv',
-      capitulos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv',
-      comentarios: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv',
-      cafecitos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv',
-      lecturas: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv',
-      chat: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv',
-      propuestas: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv',
-      votacion_cafe: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv',
-      frases: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1794892861&single=true&output=csv'
-    };
-
-    /* ==========================================================================
-       COMPONENTE: MAPA CON AGRUPACIÓN REGIONAL (Punto 1)
-       ========================================================================== */
-    function MapaGilda({ usuarias }) {
-      const mapRef = useRef(null);
-      const markersRef = useRef(null);
-      const [regionSeleccionada, setRegionSeleccionada] = useState(null);
-
-      useEffect(() => {
-        if (!mapRef.current) {
-          const map = L.map('mapa-gilda', { zoomControl: false }).setView([40, -3], 4);
-          L.control.zoom({ position: 'topright' }).addTo(map);
-          // Mapa estilo minimalista (CartoDB Positron)
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap', maxZoom: 10
-          }).addTo(map);
-          markersRef.current = L.layerGroup().addTo(map);
-          mapRef.current = map;
-        }
-
-        // Agrupar por provincia/país (asumiendo que Nominatim nos rellenó la provincia)
-        const regiones = {};
-        usuarias.forEach(u => {
-          if(!u.ciudad) return;
-          const region = u.provincia_region || u.ciudad; // Fallback a la ciudad
-          if(!regiones[region]) regiones[region] = { coords: null, usuarias: [], ciudadReal: region };
-          regiones[region].usuarias.push(u);
+    <!-- PWA: Registro del Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch((err) => console.log('SW fallo:', err));
         });
+      }
+    </script>
 
-        markersRef.current.clearLayers();
-        
-        // Geocodificación y renderizado de marcadores agrupados
-        Object.keys(regiones).forEach(async (nomRegion) => {
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nomRegion)}&limit=1`);
-            const data = await res.json();
-            if (data && data.length > 0) {
-              const marker = L.circleMarker([data[0].lat, data[0].lon], {
-                radius: 12 + Math.min(regiones[nomRegion].usuarias.length, 10), // Tamaño según usuarias
-                fillColor: '#B8BB23', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8,
-              });
-              
-              // Evento click: Mostrar panel de usuarias de la región
-              marker.on('click', () => {
-                setRegionSeleccionada(regiones[nomRegion]);
-              });
-              
-              // Tooltip flotante con número
-              marker.bindTooltip(`${regiones[nomRegion].usuarias.length} lectoras`, { direction: 'top', className: 'text-xs font-mono font-bold' });
-              markersRef.current.addLayer(marker);
-            }
-          } catch(e) {}
-        });
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-      }, [usuarias]);
+    <!-- Tipografía Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Courier+Prime&display=swap" rel="stylesheet" />
 
-      return (
-        <div className="relative">
-          <div id="mapa-gilda"></div>
-          {regionSeleccionada && (
-            <div className="absolute inset-0 z-[1000] bg-white/95 backdrop-blur-sm p-5 fade-in flex flex-col rounded-lg">
-              <div className="flex justify-between items-center border-b pb-2 mb-3">
-                <h3 className="font-serif-title text-lg font-medium">{regionSeleccionada.ciudadReal}</h3>
-                <button onClick={() => setRegionSeleccionada(null)} className="text-gray-400 hover:text-black"><i className="fa-solid fa-times"></i></button>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">{regionSeleccionada.usuarias.length} lectoras en esta zona:</p>
-              <div className="overflow-y-auto flex-grow space-y-2">
-                {regionSeleccionada.usuarias.map((u, i) => (
-                  <div key={i} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
-                    <span className="font-medium">{u.nombre}</span>
-                    <span className="text-xs text-gray-500 font-mono-code">{u.ciudad}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    /* ==========================================================================
-       APP PRINCIPAL
-       ========================================================================== */
-    function App() {
-      // ESTADOS GENERALES
-      const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
-      const [seccionApp, setSeccionApp] = useState('inicio');
-      const [cargando, setCargando] = useState(true);
-      const [toastMsg, setToastMsg] = useState(null);
-      
-      // ESTADOS DE DATOS
-      const [usuarias, setUsuarias] = useState([]);
-      const [librosPropios, setLibrosPropios] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_lecturas')) || []; } catch { return []; }});
-      const [capitulos, setCapitulos] = useState([]);
-      const [comentarios, setComentarios] = useState([]);
-      const [propuestas, setPropuestas] = useState([]);
-      const [fechasCafe, setFechasCafe] = useState([]);
-      const [chatMsgs, setChatMsgs] = useState([]);
+    <!-- React, ReactDOM y Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-      // ESTADOS DE INTERFAZ
-      const [inputEmail, setInputEmail] = useState('');
-      const [inputPassword, setInputPassword] = useState('');
-      const [modoRegistro, setModoRegistro] = useState(false);
-      const [errorLogin, setErrorLogin] = useState('');
-      const [subTab, setSubTab] = useState('chat');
-      const [modalStory, setModalStory] = useState(false);
-      const [modoStory, setModoStory] = useState('individual'); // individual o edificio
-      
-      // REFERENCIAS
-      const storyRef = useRef(null);
+    <!-- PapaParse y html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-      // FUNCIÓN UTILIDAD: Notificaciones
-      const mostrarToast = (txt) => { setToastMsg(txt); setTimeout(() => setToastMsg(null), 3000); };
-      
-      // FUNCIÓN UTILIDAD: Enviar datos (Simulado al backend Apps Script)
-      const enviarDatos = async (accion, datos) => {
-        console.log("Enviando a Sheets:", accion, datos);
-        // Aquí iría el fetch real a tu GOOGLE_API_URL
-        return true; 
-      };
+    <!-- FontAwesome para iconos sutiles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-      // -------------------------------------------------------------
-      // CARGA INICIAL DE DATOS
-      // -------------------------------------------------------------
-      useEffect(() => {
-        const timerCarga = setTimeout(() => setCargando(false), 2500); // Fallback de carga
-        
-        const cargarCSV = (url) => new Promise(resolve => {
-          Papa.parse(url, { download: true, header: true, complete: (res) => resolve(res.data), error: () => resolve([]) });
-        });
+    <style>
+      /* SISTEMA EDITORIAL MINIMALISTA */
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f7f5ef;
+        color: #262624;
+        -webkit-tap-highlight-color: transparent;
+        letter-spacing: -0.015em;
+        overscroll-behavior-y: none;
+      }
 
-        Promise.all([
-          cargarCSV(URLS.usuarias), cargarCSV(URLS.comentarios), cargarCSV(URLS.propuestas), 
-          cargarCSV(URLS.votacion_cafe), cargarCSV(URLS.chat), cargarCSV(URLS.capitulos)
-        ]).then(results => {
-          setUsuarias(results[0].filter(u => u.email));
-          setComentarios(results[1]);
-          setPropuestas(results[2]);
-          setFechasCafe(results[3]);
-          setChatMsgs(results[4]);
-          setCapitulos(results[5]);
-          clearTimeout(timerCarga);
-          setCargando(false);
-        });
+      .font-serif-title { font-family: 'Playfair Display', serif; }
+      .font-mono-code { font-family: 'Courier Prime', monospace; }
 
-        // Simular ping de presencia cada X minutos
-        const pingInterval = setInterval(() => {
-          if (sesion) {
-            enviarDatos('actualizar_presencia', { email: sesion.email, timestamp: new Date().getTime() });
+      .editorial-card {
+        background: #ffffff;
+        border: 1px solid #e5e3dc;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+      }
+      .editorial-card:hover { border-color: #d1d28c; }
+
+      .editorial-input {
+        background: #fcfbf9;
+        border: 1px solid #e5e3dc;
+        border-radius: 6px;
+        color: #262624;
+        transition: all 0.2s ease;
+      }
+      .editorial-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #B8BB23;
+        box-shadow: 0 0 0 3px rgba(184, 187, 35, 0.1);
+      }
+
+      .editorial-btn {
+        background: #262624;
+        color: #ffffff;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      .editorial-btn:hover { background: #B8BB23; }
+      .editorial-btn:active { transform: scale(0.98); }
+
+      .editorial-nav {
+        background: rgba(247, 245, 239, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid #e5e3dc;
+        padding-bottom: env(safe-area-inset-bottom, 12px);
+      }
+
+      .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      #mapa-gilda { height: 260px; width: 100%; border-radius: 6px; border: 1px solid #e5e3dc; z-index: 1; }
+
+      /* SCROLLBAR INVISIBLE */
+      ::-webkit-scrollbar { width: 3px; height: 3px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
+
+      /* ==========================================================================
+         SISTEMA CASA GILDA (POSTAL 9:16 REDISEÑADA)
+         ========================================================================== */
+      .postal-ratio {
+        aspect-ratio: 9 / 16;
+        background: #0f1115; /* Fondo nocturno profundo */
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        border-radius: 16px;
+      }
+      .story-noise {
+        position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+      .star {
+        position: absolute; background-color: white; border-radius: 50%;
+        animation: twinkle 3s infinite ease-in-out alternate;
+        box-shadow: 0 0 6px rgba(255,255,255,0.8);
+      }
+      @keyframes twinkle {
+        0% { opacity: 0.2; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1.2); }
+      }
+      .moon {
+        position: absolute; top: 8%; right: 12%; width: 60px; height: 60px;
+        background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
+        border-radius: 50%; box-shadow: 0 0 30px rgba(250, 204, 21, 0.3);
+      }
+      .moon::after {
+        content: ''; position: absolute; top: 15%; right: 15%; width: 45px; height: 45px;
+        background: #0f1115; border-radius: 50%;
+      }
+
+      .building {
+        position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+        width: 90%; height: auto; min-height: 45%;
+        background: linear-gradient(180deg, #181921 0%, #0a0b0e 100%);
+        border-top-left-radius: 16px; border-top-right-radius: 16px;
+        padding: 24px 16px;
+        display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
+        gap: 16px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
+      }
+      .window {
+        width: 24px; height: 36px; border-radius: 100px 100px 0 0; /* Ventana románica */
+        cursor: pointer; position: relative; transition: all 0.3s ease;
+        border: 2px solid #0f1115;
+      }
+      .window.light-on {
+        background-color: #fef08a; box-shadow: 0 0 15px rgba(254, 240, 138, 0.5); border-color: #0f1115;
+      }
+      .window.light-off {
+        background-color: #222430; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+      }
+      .window.window-vacant {
+        background-color: #181921; border-color: #2a2c38; opacity: 0.5; cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useMemo, useRef } = React;
+
+      // CONEXIÓN EXACTA A TUS DATOS
+      const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbxW1RW92EAO1ymxs61fKle9BZAE3WoA3t7iw-rd04DZm77G9UTvOvIYRHl8sptSLfuA_Q/exec';
+      const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
+      const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
+      const URL_CSV_COMENTARIOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv';
+      const URL_CSV_CAFECITOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv';
+      const URL_CSV_LECTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv';
+      const URL_CSV_CHAT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv';
+      const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
+      const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
+      const URL_CSV_FRASES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1794892861&single=true&output=csv';
+
+      const FRASES_INICIALES_BOTELLA = [
+        'Leer no es huir del mundo, sino encontrar una linterna para entenderlo mejor en compañía.',
+        'Hay libros que nos leen a nosotras antes de que terminemos la primera página.',
+      ];
+
+      /* ==========================================================================
+         COMPONENTE: EDIFICIO POSTAL (Rediseñado)
+         ========================================================================== */
+      function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
+        const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
+        const registradasCount = usuarias.filter(m => !m.esLibre).length;
+
+        const MIN_ESTANCIAS = 24; 
+        const miembros = useMemo(() => {
+          const lista = [...usuarias];
+          while (lista.length < MIN_ESTANCIAS) {
+            lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: 'Sin asignar' });
           }
-        }, 60000); // 1 minuto
-        return () => clearInterval(pingInterval);
-      }, [sesion]);
+          return lista;
+        }, [usuarias]);
 
-      // -------------------------------------------------------------
-      // LÓGICA DE LOGIN Y CONTRASEÑAS (Punto 8)
-      // -------------------------------------------------------------
-      const procesarLogin = async (e) => {
-        e.preventDefault();
-        setErrorLogin('');
-        const mail = inputEmail.trim().toLowerCase();
-        const pwd = inputPassword.trim();
-        
-        const usuaria = usuarias.find(u => u.email.toLowerCase() === mail);
-        
-        if (!usuaria) return setErrorLogin('Correo no registrado.');
-        
-        // Si no tiene password en la base de datos, lo establecemos
-        if (!usuaria.password || usuaria.password.trim() === '') {
-          if (pwd.length < 4) return setErrorLogin('Crea una contraseña de al menos 4 caracteres.');
-          await enviarDatos('set_password', { email: mail, password: pwd });
-          mostrarToast('Contraseña creada con éxito.');
-        } else {
-          // Si tiene password, debe coincidir
-          if (usuaria.password !== pwd) return setErrorLogin('Contraseña incorrecta.');
-        }
+        const stars = useMemo(() => Array.from({length: 25}).map((_, i) => ({
+          id: i, left: `${Math.random() * 100}%`, top: `${Math.random() * 70}%`, size: `${Math.random() * 2 + 1}px`, delay: `${Math.random() * 3}s`
+        })), []);
 
-        const datosS = { email: mail, nombre: usuaria.nombre, modalidad: usuaria.modalidad };
-        localStorage.setItem('gilda_sesion', JSON.stringify(datosS));
-        setSesion(datosS);
-      };
-
-      // -------------------------------------------------------------
-      // GEOLOCALIZACIÓN AUTOMÁTICA (Punto 1)
-      // -------------------------------------------------------------
-      const actualizarUbicacion = async (ciudadInput) => {
-        if(!ciudadInput) return;
-        mostrarToast('Detectando región...');
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadInput)}&limit=1&addressdetails=1`);
-          const data = await res.json();
-          if(data && data.length > 0) {
-            const address = data[0].address;
-            const region = address.state || address.region || address.province || address.country;
-            await enviarDatos('actualizar_ubicacion', { email: sesion.email, ciudad: ciudadInput, provincia: region });
-            mostrarToast(`Guardado: ${ciudadInput}, ${region}`);
-          } else {
-            mostrarToast('Ubicación guardada.');
-          }
-        } catch(e) {
-          mostrarToast('Error al localizar.');
-        }
-      };
-
-      // -------------------------------------------------------------
-      // SISTEMA DE VOTACIONES (Puntos 6 y 7)
-      // -------------------------------------------------------------
-      const toggleVoto = async (tipo, idElemento, listaElementos, setLista) => {
-        // 'tipo' puede ser 'propuesta' o 'cafe'
-        const listaClonada = [...listaElementos];
-        const index = listaClonada.findIndex(el => (el.titulo || el.fecha) === idElemento);
-        if(index === -1) return;
-        
-        const elemento = listaClonada[index];
-        // votantes es una cadena separada por comas en el sheet: "ana@mail.com,juan@mail.com"
-        let votantesArr = (elemento.votantes || "").split(',').filter(v => v.trim() !== "");
-        
-        if (votantesArr.includes(sesion.email)) {
-          // Retirar voto
-          votantesArr = votantesArr.filter(v => v !== sesion.email);
-          elemento.votos = Math.max(0, Number(elemento.votos || 0) - 1);
-        } else {
-          // Añadir voto
-          votantesArr.push(sesion.email);
-          elemento.votos = Number(elemento.votos || 0) + 1;
-        }
-        
-        elemento.votantes = votantesArr.join(',');
-        setLista(listaClonada);
-        enviarDatos('registrar_voto', { tipo, id: idElemento, email: sesion.email, votantes: elemento.votantes, total: elemento.votos });
-      };
-
-      // -------------------------------------------------------------
-      // HILOS Y REACCIONES EN COMENTARIOS (Punto 3)
-      // -------------------------------------------------------------
-      const reaccionarComentario = (idComentario, emoji) => {
-        const nuevos = [...comentarios];
-        const com = nuevos.find(c => c.id === idComentario);
-        if(com) {
-          let reaccionesStr = com.reacciones || "";
-          // Lógica simplificada: añadir el emoji (en backend se haría parseo por usuario)
-          com.reacciones = reaccionesStr + emoji; 
-          setComentarios(nuevos);
-          enviarDatos('reaccionar', { id: idComentario, reacciones: com.reacciones });
-        }
-      };
-
-      const [inputRespuesta, setInputRespuesta] = useState({});
-      const responderComentario = (idPadre, texto) => {
-        if(!texto.trim()) return;
-        const nuevaNota = {
-          id: Date.now().toString(),
-          parent_id: idPadre,
-          autora: sesion.nombre,
-          texto: texto,
-          fecha: 'Ahora',
-          capitulo: comentarios.find(c=>c.id === idPadre).capitulo
-        };
-        setComentarios([...comentarios, nuevaNota]);
-        setInputRespuesta({...inputRespuesta, [idPadre]: ''});
-        enviarDatos('comentar', nuevaNota);
-      };
-
-      // -------------------------------------------------------------
-      // CHAT Y USUARIAS ACTIVAS (Punto 2)
-      // -------------------------------------------------------------
-      // Calculamos conectadas (actividad en los últimos 15 min)
-      const usuariasConectadas = useMemo(() => {
-        const ahora = new Date().getTime();
-        return usuarias.filter(u => {
-          if(u.email === sesion?.email) return true; // Yo siempre conectada
-          const ts = Number(u.ultima_actividad || 0);
-          return (ahora - ts) < 15 * 60 * 1000; 
-        });
-      }, [usuarias, sesion]);
-
-      // -------------------------------------------------------------
-      // DESCARGA DE HISTORIAS 9:16 (Punto 4)
-      // -------------------------------------------------------------
-      const descargarStory = async () => {
-        if (!storyRef.current) return;
-        mostrarToast('Preparando pieza editorial...');
-        try {
-          const canvas = await html2canvas(storyRef.current, { scale: 3, useCORS: true, backgroundColor: '#0f1115' });
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
-          link.download = `gilda-postal.png`;
-          link.click();
-          mostrarToast('Postal descargada para Stories.');
-        } catch (err) {
-          mostrarToast('Error al exportar.');
-        }
-      };
-
-      // RENDERIZADO SI NO HAY SESIÓN (Login con Password)
-      if (!sesion) {
         return (
-          <div className="min-h-screen flex items-center justify-center px-6 splash-screen">
-            <div className="editorial-card w-full max-w-sm p-10 space-y-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#B8BB23] rounded-bl-full opacity-10"></div>
-              
-              <div className="text-center space-y-2 relative z-10">
-                <h1 className="font-serif-title text-4xl text-[#262624]">gilda</h1>
-                <p className="font-mono-code text-xs text-gray-400 uppercase tracking-[0.2em]">Club Privado</p>
-              </div>
+          <div className="postal-ratio w-full h-full">
+            <div className="story-noise"></div>
+            <div>
+              {stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}
+            </div>
+            <div className="moon"></div>
+            
+            <div className="absolute top-[10%] w-full text-center z-10 px-4">
+              <h2 className="text-3xl font-serif-title text-white italic">Casa Gilda</h2>
+              <p className="text-[10px] font-mono-code text-[#B8BB23] uppercase tracking-widest mt-2">{activasCount} de {registradasCount} en vela</p>
+            </div>
 
-              <form onSubmit={procesarLogin} className="space-y-4 relative z-10">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
-                  <input type="email" required placeholder="tu@correo.com" value={inputEmail} onChange={e=>setInputEmail(e.target.value)} className="w-full editorial-input px-4 py-3 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Contraseña</label>
-                  <input type="password" required placeholder="••••••••" value={inputPassword} onChange={e=>setInputPassword(e.target.value)} className="w-full editorial-input px-4 py-3 text-sm" />
-                </div>
-                {errorLogin && <p className="text-xs text-red-500 font-medium text-center">{errorLogin}</p>}
-                
-                <button type="submit" className="w-full editorial-btn py-3.5 text-sm uppercase tracking-wider mt-2">
-                  acceder al volumen
-                </button>
-              </form>
-              <p className="text-center text-xs text-gray-400 italic">Si es tu primera vez, la contraseña que introduzcas se guardará para siempre.</p>
+            <div className="building">
+              {miembros.map((miembro, i) => {
+                const estaActiva = miembro.estaLeyendo;
+                const esLibre = miembro.esLibre;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1.5 w-[50px]">
+                    <div
+                      onClick={() => {
+                        if (esLibre) return;
+                        if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                        else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                      }}
+                      className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
+                    ></div>
+                    {!esLibre && (
+                      <div className="text-center w-full px-0.5">
+                        <span className={`block text-[8px] font-medium leading-tight truncate ${estaActiva ? 'text-white' : 'text-gray-500'}`}>{miembro.nombre}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
       }
 
-      // VISTA DE LA APP PRINCIPAL
-      return (
-        <div className="min-h-screen flex flex-col items-center pt-8 pb-32 px-5 max-w-md mx-auto relative">
+      /* ==========================================================================
+         COMPONENTE: PORTADA DEL LIBRO
+         ========================================================================== */
+      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
+        const [errorImg, setErrorImg] = useState(false);
+        const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : 'w-12 h-16 text-[8px]';
+
+        if (portada && !errorImg) {
+          return <img src={portada} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-md shrink-0`} />;
+        }
+        return (
+          <div className={`${sizeClasses} bg-[#262624] text-white p-2 rounded shadow-md border border-[#444] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#B8BB23]"></div>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
+            <span className="text-[9px] text-[#B8BB23] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
+          </div>
+        );
+      }
+
+      /* ==========================================================================
+         APP PRINCIPAL
+         ========================================================================== */
+      function App() {
+        // --- 1. ESTADOS DE SESIÓN Y LOGIN ---
+        const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
+        const [inputEmail, setInputEmail] = useState('');
+        const [inputPassword, setInputPassword] = useState('');
+        const [errorLogin, setErrorLogin] = useState('');
+        
+        // --- 2. ESTADOS DE INTERFAZ ---
+        const [seccionApp, setSeccionApp] = useState('inicio');
+        const [subTabComunidad, setSubTabComunidad] = useState('chat');
+        const [cargandoDatos, setCargandoDatos] = useState(false);
+        const [toastMsg, setToastMsg] = useState(null);
+        
+        // --- 3. ESTADOS DE DATOS GLOBALES ---
+        const [usuariasClub, setUsuariasClub] = useState([]);
+        const [capitulos, setCapitulos] = useState([]);
+        const [comentarios, setComentarios] = useState([]);
+        const [cafecitos, setCafecitos] = useState([]);
+        const [lecturas, setLecturas] = useState([]);
+        const [chatMsgs, setChatMsgs] = useState([]);
+        const [propuestas, setPropuestas] = useState([]);
+        const [fechasCafe, setFechasCafe] = useState([]);
+        const [frasesClub, setFrasesClub] = useState([]);
+
+        // --- 4. ESTADOS PERSONALES Y FUNCIONALES (RECUPERADOS TODOS) ---
+        const [miPagina, setMiPagina] = useState(0);
+        const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
+        const [miCiudad, setMiCiudad] = useState(() => localStorage.getItem('gilda_mi_ciudad') || '');
+        const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
+        const [editandoNombre, setEditandoNombre] = useState(false);
+        
+        // Nuevo: Libro personal que lee cada usuaria (Punto 5)
+        const [libroPersonal, setLibroPersonal] = useState(() => localStorage.getItem('gilda_libro_personal') || '');
+
+        const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
+        const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
+        const [botellaAbierta, setBotellaAbierta] = useState(false);
+        const [fraseActualBotella, setFraseActualBotella] = useState(0);
+
+        const [nuevoComentario, setNuevoComentario] = useState({});
+        const [respuestaComentario, setRespuestaComentario] = useState({}); // Para hilos
+        const [nuevaCitaCapsula, setNuevaCitaCapsula] = useState({});
+        const [nuevoChat, setNuevoChat] = useState('');
+        const [nuevaPropuesta, setNuevaPropuesta] = useState('');
+        const [mensajeFundadora, setMensajeFundadora] = useState('');
+
+        const [estrellasLibro, setEstrellasLibro] = useState(5);
+        const [resenaLibro, setResenaLibro] = useState('');
+        const [resenasGuardadas, setResenasGuardadas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_resenas')) || []; } catch { return []; }});
+        
+        // Modal de stories
+        const [modalStoryAbierto, setModalStoryAbierto] = useState(false);
+        const [modoStory, setModoStory] = useState('ventana'); // 'ventana' o 'edificio'
+        const storyRef = useRef(null);
+        const mapRef = useRef(null);
+        const markersGroupRef = useRef(null);
+
+        const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
+
+        const parsearHoja = (url) => new Promise(resolve => {
+          Papa.parse(url, { download: true, header: true, skipEmptyLines: true, complete: (res) => resolve(res.data || []), error: () => resolve([]) });
+        });
+
+        // -------------------------------------------------------------
+        // CARGA INICIAL ESTRICTA (LOGIN vs APP)
+        // -------------------------------------------------------------
+        useEffect(() => {
+          // Primero, cargamos SOLO las usuarias para permitir el login sin sobrecargar la red
+          parsearHoja(URL_CSV_USUARIAS).then(data => {
+            const validas = data.filter(u => (u.email || u.Email || '').trim() !== '');
+            setUsuariasClub(validas);
+          });
+        }, []);
+
+        useEffect(() => {
+          // Solo si hay sesión validada, cargamos el resto del ecosistema de la app
+          if (sesion) {
+            setCargandoDatos(true);
+            Promise.all([
+              parsearHoja(URL_CSV_CAPITULOS),
+              parsearHoja(URL_CSV_COMENTARIOS),
+              parsearHoja(URL_CSV_CAFECITOS),
+              parsearHoja(URL_CSV_LECTURAS),
+              parsearHoja(URL_CSV_CHAT),
+              parsearHoja(URL_CSV_PROPUESTAS),
+              parsearHoja(URL_CSV_VOTACION_CAFE),
+              parsearHoja(URL_CSV_FRASES)
+            ]).then(results => {
+              setCapitulos(results[0]); setComentarios(results[1].reverse()); setCafecitos(results[2]);
+              setLecturas(results[3]); setChatMsgs(results[4]); setPropuestas(results[5]);
+              setFechasCafe(results[6]); setFrasesClub(results[7]);
+              setCargandoDatos(false);
+            });
+
+            // Ajustes iniciales post-login
+            const socia = usuariasClub.find(u => (u.email || '').toLowerCase() === sesion.email.toLowerCase());
+            if (socia) {
+              setMiPagina(Number(socia.pagina || 0));
+              if(!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
+              if(socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
+            }
+          }
+        }, [sesion, usuariasClub.length]);
+
+        // -------------------------------------------------------------
+        // FLUJO DE INICIO DE SESIÓN CON CONTRASEÑA (Punto 8)
+        // -------------------------------------------------------------
+        const iniciarSesion = async (e) => {
+          e.preventDefault();
+          setErrorLogin('');
+          const mail = inputEmail.trim().toLowerCase();
+          const pwd = inputPassword.trim();
+          if (!mail || !pwd) return;
+
+          const socia = usuariasClub.find(u => (u.email || u.Email || '').trim().toLowerCase() === mail);
+          if (!socia) return setErrorLogin('Correo no registrado en el club.');
+          if ((socia.estado || '').toLowerCase() === 'pendiente') return setErrorLogin('Cuenta pendiente de aprobación.');
+
+          // Lógica de validación/creación de contraseña (Simulada para visualización, en real iría a Apps Script)
+          const passwordAlmacenada = socia.password || ''; 
+          if (passwordAlmacenada === '') {
+            // Es su primera vez: creamos la contraseña enviándola al backend
+            if (pwd.length < 4) return setErrorLogin('Crea una contraseña de mínimo 4 caracteres.');
+            enviarAccion('set_password', { password: pwd });
+            mostrarToast('Contraseña establecida con éxito.');
+          } else {
+            // Ya tiene contraseña, verificamos
+            if (passwordAlmacenada !== pwd) return setErrorLogin('Contraseña incorrecta.');
+          }
+
+          const nombreDef = socia.nombre || mail.split('@')[0];
+          const datosSesion = { nombre: nombreDef, email: mail, modalidad: (socia.modalidad || 'gilda').toLowerCase() };
+          localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+          localStorage.setItem('gilda_nombre_usuario', nombreDef);
+          setSesion(datosSesion);
+        };
+
+        const cerrarSesion = () => {
+          localStorage.removeItem('gilda_sesion');
+          setSesion(null); setInputEmail(''); setInputPassword('');
+        };
+
+        // -------------------------------------------------------------
+        // ENVÍO DE DATOS A GOOGLE SHEETS
+        // -------------------------------------------------------------
+        const enviarAccion = async (action, payload) => {
+          try {
+            const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
+            await fetch(GOOGLE_API_URL, {
+              method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action, usuaria: nombreActual, email: sesion?.email, ...payload, fecha: new Date().toLocaleDateString('es-ES') }),
+            });
+          } catch (err) { console.error(err); }
+        };
+
+        // -------------------------------------------------------------
+        // LÓGICAS ORIGINALES RESTAURADAS Y MEJORADAS
+        // -------------------------------------------------------------
+        const toggleLecturaLamp = () => {
+          const nuevo = !isReadingNow; setIsReadingNow(nuevo);
+          localStorage.setItem('gilda_is_reading', JSON.stringify(nuevo));
+          enviarAccion('estado_lectura', { leyendo: nuevo });
+        };
+
+        const actualizarPagina = (nuevaPag) => {
+          const pagValida = Math.max(0, nuevaPag); setMiPagina(pagValida);
+          enviarAccion('actualizar_pagina', { pagina: pagValida });
+          mostrarToast(`Progreso guardado: pág. ${pagValida}`);
+        };
+
+        // Geolocalización Automática (Punto 1)
+        const guardarMiCiudad = async () => {
+          const ciudadLimpia = miCiudad.trim();
+          if (!ciudadLimpia) return;
+          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
           
-          {/* TOAST FLOTANTE */}
-          {toastMsg && (
-            <div className="fixed top-8 z-[999] bg-[#262624] text-white text-xs px-5 py-3 rounded-full shadow-xl fade-in flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-[#B8BB23]"></span>
-              <span className="font-medium tracking-wide">{toastMsg}</span>
-            </div>
-          )}
+          mostrarToast('Ubicando región...');
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
+            const data = await res.json();
+            const provincia = (data && data.length > 0) ? (data[0].address.state || data[0].address.region || ciudadLimpia) : ciudadLimpia;
+            enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia, provincia_region: provincia });
+            mostrarToast('Ubicación y región guardadas.');
+          } catch(e) {
+            enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia, provincia_region: ciudadLimpia });
+            mostrarToast('Ubicación guardada.');
+          }
+        };
 
-          {/* MODAL POSTAL 9:16 (Punto 4) */}
-          {modalStory && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-              <div className="bg-[#1a1c23] rounded-[24px] p-4 flex flex-col items-center shadow-2xl max-h-screen overflow-y-auto">
-                <div className="w-full flex justify-between mb-4">
-                  <div className="flex bg-[#2a2c38] p-1 rounded-lg">
-                    <button onClick={()=>setModoStory('individual')} className={`px-4 py-1 text-xs rounded-md ${modoStory==='individual'?'bg-[#B8BB23] text-black font-bold':'text-white'}`}>Tú</button>
-                    <button onClick={()=>setModoStory('edificio')} className={`px-4 py-1 text-xs rounded-md ${modoStory==='edificio'?'bg-[#B8BB23] text-black font-bold':'text-white'}`}>Edificio</button>
-                  </div>
-                  <button onClick={() => setModalStory(false)} className="text-white text-xl"><i className="fa-solid fa-times"></i></button>
+        // Votaciones actualizadas (Puntos 6 y 7)
+        const toggleVoto = (tipo, obj, lista, setLista) => {
+          const listaClon = [...lista];
+          const item = listaClon.find(i => (i.titulo || i.fecha) === (obj.titulo || obj.fecha));
+          if(!item) return;
+          
+          let votantes = (item.votantes || "").split(',').filter(v => v);
+          if (votantes.includes(sesion.email)) {
+            votantes = votantes.filter(v => v !== sesion.email);
+            item.votos = Math.max(0, Number(item.votos || 0) - 1);
+          } else {
+            votantes.push(sesion.email);
+            item.votos = Number(item.votos || 0) + 1;
+          }
+          item.votantes = votantes.join(',');
+          setLista(listaClon);
+          enviarAccion('votar', { tipo, id: obj.titulo || obj.fecha, votos: item.votos, votantes: item.votantes });
+          mostrarToast('Voto actualizado.');
+        };
+
+        // Hilos y Reacciones en Comentarios (Punto 3)
+        const enviarRespuesta = (idPadre, capTitulo) => {
+          const txt = respuestaComentario[idPadre];
+          if(!txt || !txt.trim()) return;
+          const nuevo = { id: Date.now().toString(), parent_id: idPadre, capitulo: capTitulo, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txt, fecha: 'Ahora' };
+          setComentarios([nuevo, ...comentarios]);
+          setRespuestaComentario({...respuestaComentario, [idPadre]: ''});
+          enviarAccion('comentario', nuevo);
+          mostrarToast('Respuesta enviada.');
+        };
+        const reaccionar = (idComentario, emoji) => {
+          const clon = [...comentarios];
+          const com = clon.find(c => c.id === idComentario);
+          if(com) {
+            com.reacciones = (com.reacciones || "") + emoji;
+            setComentarios(clon);
+            enviarAccion('reaccionar', { id: idComentario, reacciones: com.reacciones });
+          }
+        };
+
+        // Descarga PWA Stories (Punto 4)
+        const descargarStoryInstagram = async () => {
+          if (!storyRef.current) return;
+          mostrarToast('Generando pieza...');
+          try {
+            const canvas = await html2canvas(storyRef.current, { scale: 3, useCORS: true, backgroundColor: '#0f1115' });
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `gilda-story.png`; link.click();
+            mostrarToast('Story exportada.');
+          } catch (err) { mostrarToast('Error al exportar.'); }
+        };
+
+        // --- DERIVADOS GLOBALES ---
+        const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
+        const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
+        
+        // Chat presencias (Punto 2)
+        const usuariasConectadas = useMemo(() => {
+          const ahora = new Date().getTime();
+          return usuariasClub.filter(u => u.email === sesion?.email || (ahora - Number(u.ultima_actividad || 0)) < 15 * 60 * 1000);
+        }, [usuariasClub, sesion]);
+
+        // Miembros para el edificio
+        const miembrosEdificio = useMemo(() => {
+          const emailActual = sesion?.email?.toLowerCase();
+          const yo = { nombre: nombreUsuarioPersonalizado || sesion?.nombre, email: emailActual, estaLeyendo: isReadingNow, libroReal: libroPersonal || libroActual.titulo, esYo: true };
+          const resto = usuariasClub.filter(u => u.email?.toLowerCase() !== emailActual).map(u => ({
+            ...u, nombre: u.nombre || 'Socia', estaLeyendo: Number(u.pagina || 0) > 0, libroReal: u.libro || libroActual.titulo, esYo: false
+          }));
+          return [yo, ...resto];
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, isReadingNow, libroPersonal, libroActual]);
+
+
+        // ============================================================================
+        // RENDERIZADO: PANTALLA DE LOGIN (Si no hay sesión, muro estricto)
+        // ============================================================================
+        if (!sesion) {
+          return (
+            <div className="min-h-screen flex items-center justify-center px-4 bg-[#f7f5ef] splash-screen">
+              <div className="editorial-card max-w-sm w-full p-8 space-y-6 bg-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#B8BB23] rounded-bl-full opacity-10"></div>
+                <div className="space-y-1 relative z-10 text-center">
+                  <h1 className="font-serif-title text-3xl font-medium text-[#262624]">gilda</h1>
+                  <p className="text-xs text-gray-500 font-mono-code uppercase tracking-widest">club de lectura</p>
                 </div>
-
-                {/* CONTENEDOR EXPORTABLE 9:16 */}
-                <div ref={storyRef} className="story-container">
-                  <div className="story-noise"></div>
-                  
-                  {/* Estrellas aleatorias */}
-                  <div className="story-stars">
-                    {[...Array(15)].map((_,i) => (
-                      <div key={i} className="star-dot" style={{ left:`${Math.random()*100}%`, top:`${Math.random()*60}%`, width:`${Math.random()*2+1}px`, height:`${Math.random()*2+1}px`, animationDelay:`${Math.random()*3}s`}}></div>
-                    ))}
-                  </div>
-                  <div className="story-moon"></div>
-
-                  <div className="absolute top-12 w-full text-center z-10 px-6">
-                    <p className="font-mono-code text-[9px] text-[#B8BB23] tracking-[0.3em] uppercase mb-2">Casa Gilda</p>
-                    <h2 className="font-serif-title text-3xl text-white font-medium italic">En vela leyendo</h2>
-                  </div>
-
-                  {modoStory === 'individual' ? (
-                    <div className="absolute bottom-0 w-full h-[55%] flex flex-col items-center justify-end pb-12 z-10">
-                      <div className="story-window-main"></div>
-                      <h3 className="text-white font-serif-title text-2xl mt-4">{sesion.nombre}</h3>
-                      <p className="text-gray-400 text-xs font-mono-code mt-1">{librosPropios[0]?.titulo || "La campana de cristal"}</p>
-                    </div>
-                  ) : (
-                    <div className="story-architecture">
-                      <div className="story-building-grid">
-                        {[...Array(8)].map((_,i) => (
-                          <div key={i} className={`story-mini-window ${Math.random()>0.3 ? 'on':'off'}`}></div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="absolute bottom-6 w-full text-center z-20">
-                    <p className="text-white/50 text-[10px] font-mono-code tracking-widest">@gilda.mailclub</p>
-                  </div>
+                <div className="bg-[#fcfbf9] border border-[#e5e3dc] p-3 rounded text-center text-xs text-gray-500">
+                  <span className="text-black font-medium">{usuariasClub.length}</span> lectoras registradas
                 </div>
-
-                <button onClick={descargarStory} className="mt-5 bg-white text-black font-bold py-3 px-8 rounded-full text-sm flex gap-2 items-center hover:bg-gray-200 transition">
-                  <i className="fa-brands fa-instagram"></i> Compartir en Stories
-                </button>
+                <form onSubmit={iniciarSesion} className="space-y-4 relative z-10">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
+                    <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm outline-none mt-1" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Contraseña</label>
+                    <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm outline-none mt-1" />
+                  </div>
+                  {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
+                  <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
+                    acceder al volumen
+                  </button>
+                </form>
+                <div className="pt-4 border-t border-[#e5e3dc] text-center">
+                  <a href="https://gildaclub.netlify.app" target="_blank" rel="noreferrer" className="text-[11px] text-[#B8BB23] font-medium hover:underline">
+                    solicitar registro de socia
+                  </a>
+                </div>
               </div>
             </div>
-          )}
+          );
+        }
 
-          {/* CABECERA (Perfil) */}
-          <header className="w-full flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm border border-[#e5e3dc]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#f4f2eb] flex items-center justify-center font-serif-title text-xl text-[#B8BB23]">
-                {sesion.nombre.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h2 className="font-semibold text-sm leading-none mb-1">{sesion.nombre}</h2>
-                <span className="text-[10px] bg-[#f4f2eb] px-2 py-0.5 rounded font-mono-code text-gray-600 uppercase">{sesion.modalidad}</span>
-              </div>
-            </div>
-            <button onClick={() => { localStorage.removeItem('gilda_sesion'); window.location.reload(); }} className="text-gray-400 hover:text-black">
-              <i className="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-          </header>
-
-          <main className="w-full flex-grow space-y-6 pb-20 fade-in">
+        // ============================================================================
+        // RENDERIZADO: APLICACIÓN PRINCIPAL
+        // ============================================================================
+        return (
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-24 px-4 sm:px-6 max-w-md mx-auto relative bg-[#f7f5ef]">
             
-            {/* ================= INICIO / EDIFICIO (Puntos 4 y 5) ================= */}
-            {seccionApp === 'inicio' && (
-              <div className="space-y-6">
-                <div className="editorial-card p-6 flex flex-col items-center justify-center bg-gradient-to-br from-white to-[#faf9f5]">
-                  <div className="text-center mb-5">
-                    <span className="font-mono-code text-[10px] text-[#B8BB23] tracking-widest uppercase">Tu ventana</span>
-                    <h2 className="font-serif-title text-2xl mt-1">¿Qué estás leyendo?</h2>
+            {/* Toast System */}
+            {toastMsg && (
+              <div className="fixed top-6 z-50 bg-[#262624] text-white text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#B8BB23]"></span><span>{toastMsg}</span>
+              </div>
+            )}
+
+            {/* Modal Postal 9:16 (Punto 4) */}
+            {modalStoryAbierto && (
+              <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 fade-in">
+                <div className="bg-[#1a1c23] max-w-xs w-full p-4 rounded-2xl flex flex-col items-center">
+                  <div className="w-full flex justify-between items-center mb-4">
+                    <div className="flex bg-[#2a2c38] p-1 rounded-lg">
+                      <button onClick={()=>setModoStory('ventana')} className={`px-3 py-1 text-[10px] rounded-md uppercase font-bold ${modoStory==='ventana'?'bg-[#B8BB23] text-black':'text-white'}`}>Tú</button>
+                      <button onClick={()=>setModoStory('edificio')} className={`px-3 py-1 text-[10px] rounded-md uppercase font-bold ${modoStory==='edificio'?'bg-[#B8BB23] text-black':'text-white'}`}>Edificio</button>
+                    </div>
+                    <button onClick={() => setModalStoryAbierto(false)} className="text-white text-sm bg-gray-700 px-2 py-1 rounded">cerrar</button>
+                  </div>
+
+                  {/* Canvas exportable estricto 9:16 (320x568) */}
+                  <div ref={storyRef} style={{width: '280px', height: '497.7px'}} className="postal-ratio border border-gray-700 shadow-2xl relative">
+                    {modoStory === 'ventana' ? (
+                      <div className="w-full h-full relative">
+                        <div className="story-noise"></div>
+                        <div className="moon" style={{top:'10%', right:'15%'}}></div>
+                        <div className="absolute top-10 w-full text-center z-10 px-4">
+                          <p className="font-mono-code text-[8px] text-[#B8BB23] tracking-[0.3em] uppercase mb-1">Casa Gilda</p>
+                          <h2 className="font-serif-title text-2xl text-white italic">En vela leyendo</h2>
+                        </div>
+                        <div className="absolute bottom-0 w-full h-[60%] flex flex-col items-center justify-end pb-12 z-10">
+                          <div className={`window scale-150 mb-10 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
+                          <h3 className="text-white font-serif-title text-2xl leading-tight">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                          <p className="text-[#B8BB23] text-[10px] font-mono-code mt-1 px-4 text-center truncate w-full">{libroPersonal || libroActual.titulo}</p>
+                        </div>
+                        <div className="absolute bottom-4 w-full text-center text-white/40 text-[9px] font-mono-code">@gilda.mailclub</div>
+                      </div>
+                    ) : (
+                      <EdificioPostal usuarias={miembrosEdificio} />
+                    )}
                   </div>
                   
-                  <input type="text" placeholder="Ej: Las Desheredadas - Ángeles Caso" 
-                    className="w-full editorial-input p-3 text-center mb-4 text-sm font-serif-title italic"
-                    defaultValue={librosPropios[0]?.titulo || ""}
-                    onBlur={(e) => {
-                      if(e.target.value) {
-                        const nuevosLibros = [{ titulo: e.target.value, fecha: new Date().toISOString() }, ...librosPropios];
-                        setLibrosPropios(nuevosLibros);
-                        localStorage.setItem('gilda_mis_lecturas', JSON.stringify(nuevosLibros));
-                        enviarDatos('nuevo_libro_personal', { email: sesion.email, libro: e.target.value });
-                        mostrarToast('Libro actualizado en tu ventana.');
-                      }
-                    }}
-                  />
-                  
-                  <button onClick={() => setModalStory(true)} className="editorial-btn w-full py-3 flex gap-2 justify-center items-center">
-                    <i className="fa-solid fa-camera-retro"></i> Exportar Postal 9:16
+                  <button onClick={descargarStoryInstagram} className="mt-5 bg-white text-black font-bold py-2.5 px-6 rounded-full text-xs hover:bg-gray-200 w-full">
+                    Descargar para Stories
                   </button>
                 </div>
               </div>
             )}
 
-            {/* ================= ARCHIVO / VOTACIONES (Puntos 6 y 7) ================= */}
-            {seccionApp === 'archivo' && (
-              <div className="space-y-6 fade-in">
-                <div className="text-center py-4">
-                  <h1 className="font-serif-title text-3xl">Archivo & Votaciones</h1>
-                  <p className="text-xs text-gray-500 mt-2">Decide el futuro del club.</p>
+            {/* Header Perfil */}
+            <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-xl border border-[#e5e3dc] shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#f4f2eb] flex items-center justify-center font-serif-title text-lg text-[#B8BB23]">
+                  {sesion.nombre.charAt(0).toUpperCase()}
                 </div>
+                <div>
+                  {editandoNombre ? (
+                    <div className="flex gap-2">
+                      <input type="text" value={nombreUsuarioPersonalizado} onChange={e => setNombreUsuarioPersonalizado(e.target.value)} className="editorial-input text-xs px-2 py-1 w-24" />
+                      <button onClick={() => { localStorage.setItem('gilda_nombre_usuario', nombreUsuarioPersonalizado); setEditandoNombre(false); enviarAccion('actualizar_nombre',{nombre: nombreUsuarioPersonalizado}); }} className="text-[#B8BB23] text-xs font-bold">ok</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-semibold text-sm leading-none">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                      <button onClick={() => setEditandoNombre(true)} className="text-gray-400 text-[10px]"><i className="fa-solid fa-pen"></i></button>
+                    </div>
+                  )}
+                  <span className="text-[9px] text-gray-500 uppercase font-mono-code block mt-0.5">{sesion.modalidad}</span>
+                </div>
+              </div>
+              <button onClick={cerrarSesion} className="text-gray-400 hover:text-black"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </header>
 
-                {/* Votación Cafecito */}
-                <div className="editorial-card p-6">
-                  <h3 className="font-mono-code text-[11px] text-[#B8BB23] uppercase mb-4">Próximo Cafecito</h3>
-                  <div className="space-y-3">
-                    {fechasCafe.map((fecha, i) => {
-                      const haVotado = (fecha.votantes || "").includes(sesion.email);
-                      return (
-                        <div key={i} className="flex justify-between items-center border border-[#e5e3dc] p-3 rounded-lg bg-gray-50">
-                          <span className="text-sm font-medium">{fecha.fecha}</span>
-                          <button onClick={() => toggleVoto('cafe', fecha.fecha, fechasCafe, setFechasCafe)} 
-                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${haVotado ? 'bg-[#B8BB23] text-white shadow-md' : 'bg-white text-gray-500 border border-gray-200'}`}>
-                            {haVotado ? `Votado (${fecha.votos})` : `Votar (${fecha.votos || 0})`}
+            <main className="w-full flex-grow space-y-4 fade-in">
+              {cargandoDatos ? (
+                <div className="text-center py-20 text-xs text-gray-400 font-mono-code animate-pulse">Desplegando páginas...</div>
+              ) : (
+                <>
+                  {/* ================= INICIO (RESTAURADO COMPLETO + NUEVOS CAMPOS) ================= */}
+                  {seccionApp === 'inicio' && (
+                    <div className="space-y-4 fade-in">
+                      
+                      {/* Bloque: Volumen Actual del Club (Restaurado) */}
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex gap-4 items-center">
+                          <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+                          <div className="space-y-2 w-full">
+                            <span className="text-[9px] uppercase tracking-wider text-[#B8BB23] font-bold font-mono-code">Lectura del Club</span>
+                            <h2 className="font-serif-title text-base font-medium leading-snug">{libroActual.titulo}</h2>
+                            <p className="text-xs text-gray-500 italic">{libroActual.autora}</p>
+                            <div className="mt-2">
+                              <div className="flex justify-between text-[10px] text-gray-500 mb-1 font-mono-code">
+                                <span>progreso general</span><span>{porcentajeLibro}%</span>
+                              </div>
+                              <div className="w-full bg-gray-100 rounded-full h-1"><div className="bg-[#B8BB23] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bloque: Progreso personal (Restaurado) */}
+                        <div className="pt-3 border-t border-[#e5e3dc] flex items-center justify-between gap-2">
+                          <span className="text-xs text-gray-500">página por la que vas:</span>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => actualizarPagina(miPagina - 5)} className="bg-gray-100 px-2 py-1 rounded text-xs">-5</button>
+                            <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-12 text-center py-1 text-xs font-mono-code" />
+                            <button onClick={() => actualizarPagina(miPagina + 5)} className="bg-gray-100 px-2 py-1 rounded text-xs">+5</button>
+                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2 py-1 text-xs">ok</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bloque: Mi Estancia y Libro Personal (Puntos 4 y 5) */}
+                      <div className="editorial-card p-5 bg-gradient-to-br from-white to-[#fcfbf9]">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-serif-title text-sm">Tu Estancia</h3>
+                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#B8BB23] text-white shadow' : 'bg-gray-100 text-gray-500'}`}>
+                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                           </button>
                         </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Votación Lecturas */}
-                <div className="editorial-card p-6">
-                  <h3 className="font-mono-code text-[11px] text-[#B8BB23] uppercase mb-4">Próxima Lectura</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    {propuestas.map((prop, i) => {
-                      const haVotado = (prop.votantes || "").includes(sesion.email);
-                      return (
-                        <div key={i} className="flex gap-4 p-4 border border-[#e5e3dc] rounded-xl hover:border-[#B8BB23] transition-colors bg-white">
-                          <img src={prop.portada || 'https://via.placeholder.com/60x90?text=Libro'} alt="Portada" className="w-16 h-24 object-cover rounded shadow-sm" />
-                          <div className="flex flex-col justify-between flex-grow">
-                            <div>
-                              <h4 className="font-serif-title font-medium leading-tight">{prop.titulo}</h4>
-                              <p className="text-[10px] text-gray-500 uppercase mt-1">{prop.autora}</p>
-                            </div>
-                            <button onClick={() => toggleVoto('propuesta', prop.titulo, propuestas, setPropuestas)}
-                               className={`self-start mt-2 px-4 py-1 rounded-full text-xs font-bold transition-all ${haVotado ? 'bg-[#B8BB23] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                               {haVotado ? `Retirar voto (${prop.votos})` : `Votar (${prop.votos || 0})`}
-                            </button>
-                          </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] text-gray-500 uppercase font-mono-code">¿Qué libro estás leyendo tú?</label>
+                          <input type="text" placeholder="Ej: El año del pensamiento mágico" value={libroPersonal} 
+                            onChange={(e) => setLibroPersonal(e.target.value)}
+                            onBlur={() => { localStorage.setItem('gilda_libro_personal', libroPersonal); enviarAccion('libro_personal', {libro: libroPersonal}); }}
+                            className="w-full editorial-input p-2.5 text-xs italic" />
                         </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ================= COMUNIDAD / CHAT / MAPA (Puntos 1 y 2) ================= */}
-            {seccionApp === 'comunidad' && (
-              <div className="space-y-4 fade-in">
-                
-                {/* Tabs Comunidad */}
-                <div className="flex bg-[#f4f2eb] p-1 rounded-xl">
-                  <button onClick={() => setSubTab('chat')} className={`flex-1 py-2 text-xs font-medium rounded-lg ${subTab==='chat'?'bg-white shadow-sm':'text-gray-500'}`}>Clubhouse (Chat)</button>
-                  <button onClick={() => setSubTab('mapa')} className={`flex-1 py-2 text-xs font-medium rounded-lg ${subTab==='mapa'?'bg-white shadow-sm':'text-gray-500'}`}>Geografía</button>
-                </div>
-
-                {subTab === 'chat' && (
-                  <div className="editorial-card h-[500px] flex flex-col bg-white">
-                    {/* Indicador de conectadas tipo WhatsApp */}
-                    <div className="p-3 border-b border-[#e5e3dc] bg-gray-50 flex items-center gap-2 rounded-t-lg">
-                      <div className="relative flex">
-                        {usuariasConectadas.slice(0,3).map((u,i) => (
-                           <div key={i} className="w-6 h-6 rounded-full bg-[#B8BB23] text-white flex items-center justify-center text-[10px] font-bold border-2 border-white -ml-2 first:ml-0">
-                             {u.nombre.charAt(0).toUpperCase()}
-                           </div>
-                        ))}
+                        <button onClick={() => setModalStoryAbierto(true)} className="w-full mt-3 border border-[#B8BB23] text-[#B8BB23] hover:bg-[#B8BB23] hover:text-white transition py-2 text-xs rounded font-medium flex justify-center gap-2 items-center">
+                          <i className="fa-brands fa-instagram"></i> Compartir postal en Stories
+                        </button>
                       </div>
-                      <p className="text-[10px] text-gray-500">
-                        {usuariasConectadas.length > 0 
-                          ? `${usuariasConectadas.map(u=>u.nombre).slice(0,2).join(', ')}${usuariasConectadas.length > 2 ? ' y otras ' + (usuariasConectadas.length - 2) : ''} aquí` 
-                          : 'Sala tranquila'}
-                      </p>
-                    </div>
-                    
-                    <div className="flex-grow p-4 overflow-y-auto space-y-4">
-                       {/* Render de mensajes */}
-                       <div className="text-center text-xs text-gray-400 my-4 font-mono-code">Comienza la conversación</div>
-                    </div>
-                  </div>
-                )}
 
-                {subTab === 'mapa' && (
-                  <div className="editorial-card p-4">
-                    <p className="text-xs text-gray-500 mb-4 text-center">Toca los círculos para ver quién lee desde esa región.</p>
-                    <MapaGilda usuarias={usuarias} />
-                  </div>
-                )}
-              </div>
-            )}
+                      {/* Bloque: Geolocalización (Restaurado + Punto 1) */}
+                      <div className="editorial-card p-4">
+                        <h3 className="font-serif-title text-sm mb-2">Ubicación geográfica</h3>
+                        <div className="flex gap-2">
+                          <input type="text" placeholder="Ciudad, País" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
+                          <button onClick={guardarMiCiudad} className="editorial-btn px-4 text-xs">actualizar</button>
+                        </div>
+                      </div>
 
-            {/* ================= CAPÍTULOS / HILOS (Punto 3) ================= */}
-            {seccionApp === 'capitulos' && (
-              <div className="space-y-6 fade-in">
-                {capitulos.map((cap, idx) => (
-                  <div key={idx} className="editorial-card p-6">
-                    <h3 className="font-serif-title text-xl mb-4 border-b border-gray-100 pb-2">{cap.titulo}</h3>
-                    
-                    {/* Render Comentarios y Respuestas Indentadas */}
-                    <div className="space-y-4">
-                      {comentarios.filter(c => c.capitulo === cap.titulo && !c.parent_id).map(comPral => (
-                        <div key={comPral.id} className="space-y-2">
-                          {/* Comentario Principal */}
-                          <div className="bg-[#fcfbf9] p-4 rounded-xl border border-gray-100">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="font-bold text-sm">{comPral.autora}</span>
-                            </div>
-                            <p className="text-sm text-gray-700">{comPral.texto}</p>
+                      {/* Bloque: Botella de citas (Restaurado) */}
+                      <div className="editorial-card p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-serif-title text-sm">Notas y fragmentos</h3>
+                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES_BOTELLA.length); }} className="text-[10px] text-gray-500 hover:text-black uppercase font-mono-code">
+                            {botellaAbierta ? 'ocultar' : 'descubrir cita'}
+                          </button>
+                        </div>
+                        {botellaAbierta && (
+                          <div className="p-3 bg-gray-50 border border-gray-100 rounded text-xs italic font-serif text-gray-600">
+                            "{FRASES_INICIALES_BOTELLA[fraseActualBotella]}"
+                          </div>
+                        )}
+                        <div className="flex gap-2 pt-2 border-t border-gray-100">
+                          <input type="text" placeholder="Guardar un fragmento..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
+                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs">guardar</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ================= EDIFICIO ================= */}
+                  {seccionApp === 'edificio' && (
+                    <div className="editorial-card p-4 flex flex-col items-center">
+                      <div className="text-center mb-4">
+                        <h2 className="font-serif-title text-xl">La Fachada</h2>
+                        <p className="text-xs text-gray-500 mt-1">Nuestra casa compartida.</p>
+                      </div>
+                      <div className="w-full max-w-[280px]">
+                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ================= CAPÍTULOS E HILOS (Restaurado + Punto 3) ================= */}
+                  {seccionApp === 'capitulos' && (
+                    <div className="space-y-4 fade-in">
+                      {capitulos.map((cap, i) => {
+                        const tituloCap = cap.titulo || `Capítulo ${i}`;
+                        return (
+                          <div key={i} className="editorial-card p-5 space-y-4">
+                            <h3 className="font-serif-title text-lg border-b border-gray-100 pb-2">{tituloCap}</h3>
+                            <p className="text-xs text-gray-600">{cap.descripcion}</p>
                             
-                            {/* Barra de acciones (Responder, Reaccionar) */}
-                            <div className="flex gap-4 mt-3 text-[11px] text-gray-500 font-medium">
-                              <button onClick={() => setInputRespuesta({...inputRespuesta, [comPral.id]: inputRespuesta[comPral.id] !== undefined ? undefined : ''})} className="hover:text-black">Responder</button>
-                              <button onClick={() => reaccionarComentario(comPral.id, '❤️')} className="hover:scale-110 transition-transform">❤️</button>
-                              <button onClick={() => reaccionarComentario(comPral.id, '✨')} className="hover:scale-110 transition-transform">✨</button>
-                              {comPral.reacciones && <span className="text-black bg-gray-100 px-2 py-0.5 rounded-full">{comPral.reacciones}</span>}
+                            {/* Cápsula del tiempo (Restaurado) */}
+                            <div className="bg-gray-50 p-3 rounded border border-gray-100 flex gap-2">
+                              <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
+                              <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs">guardar</button>
+                            </div>
+
+                            {/* Hilos estilo Substack */}
+                            <div className="pt-2">
+                              <div className="flex gap-2 mb-4">
+                                <textarea placeholder="Tu reflexión principal..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
+                                <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs">publicar</button>
+                              </div>
+
+                              <div className="space-y-4">
+                                {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
+                                  <div key={c.id} className="space-y-2">
+                                    <div className="bg-white p-3 rounded-lg border border-[#e5e3dc] shadow-sm">
+                                      <div className="flex justify-between mb-1 text-[10px] text-gray-500 font-mono-code">
+                                        <span className="font-bold text-black uppercase">{c.autora}</span><span>{c.fecha}</span>
+                                      </div>
+                                      <p className="text-xs text-gray-800">{c.texto}</p>
+                                      <div className="flex gap-3 mt-2 pt-2 border-t border-gray-50 text-[11px] text-gray-400">
+                                        <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black">Responder</button>
+                                        <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
+                                        <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
+                                        {c.reacciones && <span className="bg-gray-100 text-black px-1.5 rounded">{c.reacciones}</span>}
+                                      </div>
+                                    </div>
+                                    {/* Sub-hilo */}
+                                    <div className="pl-6 space-y-2 border-l-2 border-gray-100 ml-3">
+                                      {comentarios.filter(r => r.parent_id === c.id).map(r => (
+                                        <div key={r.id} className="bg-gray-50 p-2 rounded text-xs">
+                                          <span className="font-bold mr-1">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
+                                        </div>
+                                      ))}
+                                      {respuestaComentario[c.id] !== undefined && (
+                                        <div className="flex gap-2 mt-1">
+                                          <input type="text" placeholder="Respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
+                                          <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px]">ok</button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
+                        )
+                      })}
+                      {/* Valoración final (Restaurado) */}
+                      <div className="editorial-card p-5 mt-6">
+                        <h3 className="font-serif-title text-base mb-2">Valora el volumen</h3>
+                        <div className="flex text-lg gap-1 mb-2">
+                          {[1,2,3,4,5].map(n => <button key={n} onClick={()=>setEstrellasLibro(n)} className={n<=estrellasLibro ? 'text-black' : 'text-gray-300'}>★</button>)}
+                        </div>
+                        <textarea placeholder="Reseña final..." value={resenaLibro} onChange={e=>setResenaLibro(e.target.value)} className="w-full editorial-input p-2 text-xs h-16 resize-none mb-2"></textarea>
+                        <button onClick={()=>{ enviarAccion('valoracion',{estrellas:estrellasLibro, resena:resenaLibro}); mostrarToast('Reseña enviada'); setResenaLibro('');}} className="w-full editorial-btn py-2 text-xs">Enviar reseña</button>
+                      </div>
+                    </div>
+                  )}
 
-                          {/* Respuestas indentadas (Substack style) */}
-                          <div className="pl-8 space-y-2 border-l-2 border-gray-100 ml-4">
-                            {comentarios.filter(c => c.parent_id === comPral.id).map(resp => (
-                              <div key={resp.id} className="bg-white p-3 rounded-lg text-sm border border-gray-50">
-                                <span className="font-bold mr-2 text-[11px] uppercase">{resp.autora}</span>
-                                <span className="text-gray-600">{resp.texto}</span>
+                  {/* ================= COMUNIDAD ================= */}
+                  {seccionApp === 'comunidad' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="flex bg-gray-200 p-1 rounded font-mono-code text-[10px] uppercase font-bold text-center">
+                        <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded ${subTabComunidad==='chat'?'bg-white text-[#B8BB23] shadow':'text-gray-500'}`}>Chat</button>
+                        <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded ${subTabComunidad==='mapa'?'bg-white text-[#B8BB23] shadow':'text-gray-500'}`}>Mapa</button>
+                      </div>
+                      
+                      {subTabComunidad === 'chat' && (
+                        <div className="editorial-card h-[400px] flex flex-col">
+                          <div className="bg-gray-50 p-2 border-b border-gray-100 flex items-center justify-between text-xs rounded-t-lg">
+                            <span className="font-serif-title text-sm">Conversación en vivo</span>
+                            <span className="bg-white px-2 py-0.5 rounded border border-gray-200 text-[#B8BB23] font-bold">
+                              {usuariasConectadas.length} activas
+                            </span>
+                          </div>
+                          <div className="flex-grow p-3 overflow-y-auto space-y-3">
+                            {chatMsgs.map((m,i)=>(
+                              <div key={i} className={`flex flex-col ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'items-end' : 'items-start'} text-xs`}>
+                                <span className="text-[9px] text-gray-400 mb-0.5">{m.usuario}</span>
+                                <div className={`p-2 rounded-lg max-w-[85%] ${m.usuario === (nombreUsuarioPersonalizado||sesion.nombre) ? 'bg-[#262624] text-white' : 'bg-gray-100'}`}>{m.mensaje}</div>
                               </div>
                             ))}
-                            
-                            {/* Input para responder */}
-                            {inputRespuesta[comPral.id] !== undefined && (
-                              <div className="flex gap-2 mt-2">
-                                <input type="text" placeholder="Escribe tu respuesta..." value={inputRespuesta[comPral.id]} onChange={e => setInputRespuesta({...inputRespuesta, [comPral.id]: e.target.value})} className="editorial-input text-xs px-3 py-2 flex-grow" />
-                                <button onClick={() => responderComentario(comPral.id, inputRespuesta[comPral.id])} className="editorial-btn px-3 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
-                              </div>
-                            )}
+                          </div>
+                          <div className="p-2 border-t border-gray-100 flex gap-2">
+                            <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-2 text-xs" placeholder="Mensaje..." />
+                            <button onClick={()=>{ if(!nuevoChat)return; const n={usuario:nombreUsuarioPersonalizado||sesion.nombre, mensaje:nuevoChat, fecha:'Ahora'}; setChatMsgs([...chatMsgs,n]); enviarAccion('chat',n); setNuevoChat('');}} className="editorial-btn px-3 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                           </div>
                         </div>
-                      ))}
+                      )}
+
+                      {subTabComunidad === 'mapa' && (
+                        <div className="editorial-card p-3">
+                          <p className="text-[10px] text-gray-500 text-center mb-2 font-mono-code">Distribución geográfica detectada (por región)</p>
+                          <div id="mapa-gilda"></div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </main>
+                  )}
 
-          {/* NAVEGACIÓN INFERIOR PWA */}
-          <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-6 flex justify-between items-center max-w-md mx-auto z-40 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
-            {[
-              { id: 'inicio', icon: 'fa-house', label: 'Casa' },
-              { id: 'capitulos', icon: 'fa-book-open', label: 'Lectura' },
-              { id: 'comunidad', icon: 'fa-mug-hot', label: 'Club' },
-              { id: 'archivo', icon: 'fa-box-archive', label: 'Archivo' }
-            ].map(tab => (
-              <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1.5 transition-all ${seccionApp === tab.id ? 'text-[#B8BB23]' : 'text-gray-400 hover:text-gray-700'}`}>
-                <i className={`fa-solid ${tab.icon} text-lg`}></i>
-                <span className="text-[9px] font-medium tracking-wide uppercase">{tab.label}</span>
-              </button>
-            ))}
-          </nav>
+                  {/* ================= ARCHIVO (Puntos 6 y 7 Votaciones) ================= */}
+                  {seccionApp === 'archivo' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5">
+                        <h3 className="font-serif-title text-base mb-3">Próximos Cafecitos</h3>
+                        <div className="space-y-2">
+                          {fechasCafe.map((f,i) => {
+                            const votado = (f.votantes||"").includes(sesion.email);
+                            return (
+                              <div key={i} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded border border-gray-100">
+                                <span className="font-medium">{f.fecha}</span>
+                                <button onClick={()=>toggleVoto('cafe', f, fechasCafe, setFechasCafe)} className={`px-3 py-1 rounded font-bold ${votado?'bg-[#B8BB23] text-white':'bg-white text-gray-500 border border-gray-200'}`}>
+                                  {votado ? `Retirar (${f.votos||0})` : `Votar (${f.votos||0})`}
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
 
-        </div>
-      );
-    }
+                      <div className="editorial-card p-5">
+                        <h3 className="font-serif-title text-base mb-3">Votación Lecturas</h3>
+                        <div className="space-y-3">
+                          {propuestas.map((p,i) => {
+                            const votado = (p.votantes||"").includes(sesion.email);
+                            return (
+                              <div key={i} className="flex gap-3 border border-gray-100 p-3 rounded bg-white">
+                                <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                                <div className="flex flex-col justify-between w-full">
+                                  <div>
+                                    <h4 className="font-bold text-xs leading-tight">{p.titulo}</h4>
+                                    <p className="text-[10px] text-gray-500 italic">{p.autora}</p>
+                                  </div>
+                                  <button onClick={()=>toggleVoto('propuesta', p, propuestas, setPropuestas)} className={`self-start mt-2 px-3 py-1 text-[10px] rounded font-bold ${votado?'bg-[#B8BB23] text-white':'bg-gray-100 text-gray-600'}`}>
+                                    {votado ? `Retirar voto (${p.votos||0})` : `Votar (${p.votos||0})`}
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
-</body>
+                  {/* ================= BUZÓN (Restaurado) ================= */}
+                  {seccionApp === 'buzon' && (
+                    <div className="editorial-card p-5 space-y-3 fade-in">
+                      <h2 className="font-serif-title text-base">Buzón privado</h2>
+                      <p className="text-xs text-gray-500">Sugerencias y comunicación con la administración.</p>
+                      <textarea placeholder="Mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
+                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Enviado.');}} className="w-full editorial-btn py-2 text-xs">Enviar mensaje</button>
+                    </div>
+                  )}
+                </>
+              )}
+            </main>
+
+            {/* Menú de navegación inferior */}
+            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-xl">
+              {[
+                { id: 'inicio', icon: 'fa-house', label: 'Casa' },
+                { id: 'edificio', icon: 'fa-building', label: 'Fachada' },
+                { id: 'capitulos', icon: 'fa-book-open', label: 'Lectura' },
+                { id: 'comunidad', icon: 'fa-mug-hot', label: 'Club' },
+                { id: 'archivo', icon: 'fa-box-archive', label: 'Archivo' },
+                { id: 'buzon', icon: 'fa-envelope', label: 'Buzón' }
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#B8BB23]' : 'text-gray-400'}`}>
+                  <i className={`fa-solid ${tab.icon} text-sm`}></i>
+                  <span className="text-[8px] font-medium uppercase font-mono-code">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
 </html>
