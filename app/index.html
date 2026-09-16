@@ -107,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - EDIFICIO Y POSTAL 9:16
+         CASA GILDA - EDIFICIO Y POSTAL 9:16 (GRID ESTABLE PARA HTML2CANVAS)
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -136,15 +136,19 @@
         box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
-      /* Fondo plano sólido para evitar errores de renderizado de líneas en html2canvas */
+      /* Grid CSS plano y sólido para evitar líneas raras y fallos de renderizado */
       .building {
         position: absolute; bottom: 0; left: 2%; right: 2%;
         width: 96%; height: auto; min-height: 55%;
         background-color: #161821;
         border-top-left-radius: 16px; border-top-right-radius: 16px;
-        padding: 16px 6px;
-        display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
-        gap: 12px 6px; border: 1px solid #2e3140; border-bottom: none; z-index: 10;
+        padding: 16px 8px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px 4px;
+        align-content: start;
+        justify-items: center;
+        border: 1px solid #2e3140; border-bottom: none; z-index: 10;
       }
       .window {
         width: 20px; height: 30px; border-radius: 100px 100px 0 0;
@@ -218,7 +222,7 @@
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
                 return (
-                  <div key={i} className="flex flex-col items-center gap-0.5 w-[54px]">
+                  <div key={i} className="flex flex-col items-center w-full">
                     <div
                       onClick={() => {
                         if (esLibre) return;
@@ -228,10 +232,10 @@
                       className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
                     ></div>
                     {!esLibre && (
-                      <div className="text-center w-full px-0.5 select-none">
-                        <span className="block text-[8px] font-medium leading-tight" style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>{miembro.nombre}</span>
+                      <div className="text-center w-full px-0.5 mt-0.5 select-none">
+                        <span className="block text-[8px] font-medium leading-tight text-gray-300">{miembro.nombre}</span>
                         {estaActiva && miembro.libroReal && (
-                          <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" style={{whiteSpace: 'nowrap', overflow: 'hidden'}} title={miembro.libroReal}>
+                          <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" title={miembro.libroReal}>
                             {miembro.libroReal}
                           </span>
                         )}
@@ -553,7 +557,7 @@
           if (!storyRef.current) return;
           mostrarToast('Generando postal JPG...');
           try {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 600));
 
             const canvas = await html2canvas(storyRef.current, { 
               scale: 2, 
