@@ -141,15 +141,15 @@
       }
       .building {
         position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-        width: 94%; height: auto; min-height: 52%;
+        width: 96%; height: auto; min-height: 55%;
         background: linear-gradient(180deg, #181921 0%, #0a0b0e 100%);
         border-top-left-radius: 16px; border-top-right-radius: 16px;
-        padding: 20px 10px;
+        padding: 16px 6px;
         display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
-        gap: 16px 8px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
+        gap: 12px 6px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
       }
       .window {
-        width: 22px; height: 32px; border-radius: 100px 100px 0 0;
+        width: 20px; height: 30px; border-radius: 100px 100px 0 0;
         cursor: pointer; position: relative; transition: all 0.3s ease;
         border: 2px solid #0f1115;
       }
@@ -217,7 +217,7 @@
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
                 return (
-                  <div key={i} className="flex flex-col items-center gap-1 w-[58px]">
+                  <div key={i} className="flex flex-col items-center gap-0.5 w-[54px]">
                     <div
                       onClick={() => {
                         if (esLibre) return;
@@ -228,9 +228,9 @@
                     ></div>
                     {!esLibre && (
                       <div className="text-center w-full px-0.5 select-none">
-                        <span className={`block text-[8px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100 font-semibold' : 'text-gray-400'}`}>{miembro.nombre}</span>
+                        <span className={`block text-[7.5px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100 font-semibold' : 'text-gray-400'}`}>{miembro.nombre}</span>
                         {estaActiva && miembro.libroReal && (
-                          <span className="block text-[7px] text-[#ADAE1D] italic truncate leading-none mt-0.5 font-serif" title={miembro.libroReal}>
+                          <span className="block text-[6.5px] text-[#ADAE1D] italic leading-[1.1] mt-0.5 font-serif line-clamp-2 overflow-hidden" title={miembro.libroReal}>
                             {miembro.libroReal}
                           </span>
                         )}
@@ -531,7 +531,6 @@
           }
         };
 
-        // Función funcional para enviar mensajes al chat
         const enviarChat = (e) => {
           e.preventDefault();
           const textoMsg = nuevoChat.trim();
@@ -671,7 +670,7 @@
                         <div className="absolute bottom-0 w-full h-[60%] flex flex-col items-center justify-end pb-12 z-10 px-4 text-center">
                           <div className={`window scale-150 mb-8 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
                           <h3 className="text-white font-serif-title text-xl leading-tight">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                          <p className="text-[#ADAE1D] text-xs font-mono-code mt-1 italic truncate w-full">{libroPersonal || libroActual.titulo}</p>
+                          <p className="text-[#ADAE1D] text-xs font-mono-code mt-1 italic line-clamp-2 w-full">{libroPersonal || libroActual.titulo}</p>
                         </div>
                         <div className="absolute bottom-4 w-full text-center text-white/40 text-[9px] font-mono-code">@gilda.mailclub</div>
                       </div>
