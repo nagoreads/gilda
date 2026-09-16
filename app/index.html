@@ -135,7 +135,6 @@
         border-radius: 50%; box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
-      /* Sin transforms para evitar errores de renderizado en html2canvas */
       .building {
         position: absolute; bottom: 0; left: 2%; right: 2%;
         width: 96%; height: auto; min-height: 55%;
@@ -227,10 +226,10 @@
                       className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
                     ></div>
                     {!esLibre && (
-                      <div className="text-center w-full px-0.5 select-none overflow-hidden">
-                        <span className={`block text-[7.5px] font-medium leading-tight truncate ${estaActiva ? 'text-amber-100 font-semibold' : 'text-gray-400'}`}>{miembro.nombre}</span>
+                      <div className="text-center w-full px-0.5 select-none">
+                        <span className="block text-[7.5px] font-medium leading-tight" style={{whiteSpace: 'nowrap', overflow: 'hidden'}}>{miembro.nombre}</span>
                         {estaActiva && miembro.libroReal && (
-                          <span className="block text-[6.5px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif truncate" title={miembro.libroReal}>
+                          <span className="block text-[6.5px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" style={{whiteSpace: 'nowrap', overflow: 'hidden'}} title={miembro.libroReal}>
                             {miembro.libroReal}
                           </span>
                         )}
