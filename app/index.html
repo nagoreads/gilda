@@ -107,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - EDIFICIO Y POSTAL 9:16
+         CASA GILDA - EDIFICIO Y POSTAL 9:16 (LIMPIO PARA NÍTIDEZ DE TEXTO)
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -116,6 +116,7 @@
         overflow: hidden;
         width: 100%;
         border-radius: 16px;
+        letter-spacing: normal !important; /* Evita que html2canvas distorsione las letras */
       }
       .story-noise {
         position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
@@ -133,30 +134,29 @@
       .moon {
         background: #fef08a;
         border-radius: 50%; 
-        box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
       }
       .building {
         position: absolute; bottom: 0; left: 2%; right: 2%;
-        width: 96%; height: auto; min-height: 58%;
+        width: 96%; height: auto; min-height: 55%;
         background-color: #161821;
         border-top-left-radius: 16px; border-top-right-radius: 16px;
-        padding: 20px 10px;
+        padding: 16px 8px;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px 6px;
+        gap: 12px 4px;
         align-content: start;
         justify-items: center;
         border: 1px solid #2e3140; border-bottom: none; z-index: 10;
       }
       .window {
-        width: 24px; height: 36px; border-radius: 100px 100px 0 0;
+        width: 22px; height: 32px; border-radius: 100px 100px 0 0;
         cursor: pointer; position: relative;
         border: 2px solid #0f1115;
       }
       .window.light-on {
         background-color: #fef08a; border-color: #0f1115;
-        box-shadow: 0 0 10px rgba(254, 240, 138, 0.5);
       }
       .window.light-off {
         background-color: #222430; border-color: #0f1115;
@@ -210,11 +210,11 @@
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
             
-            <div className="absolute top-5 right-5 moon" style={{width: '52px', height: '52px'}}></div>
+            <div className="absolute top-4 right-4 moon" style={{width: '44px', height: '44px'}}></div>
 
-            <div className="absolute top-5 left-5 text-left z-10 pr-16">
-              <h2 className="text-3xl font-serif-title text-white italic leading-tight">gilda</h2>
-              <p className="text-[10px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-1">{activasCount} de {registradasCount} en vela</p>
+            <div className="absolute top-4 left-4 text-left z-10 pr-16">
+              <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
+              <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
             </div>
 
             <div className="building">
@@ -232,10 +232,10 @@
                       className={`window shrink-0 ${esLibre ? 'window-vacant' : (estaActiva ? 'light-on' : 'light-off')} ${miembro.esYo ? 'ring-2 ring-white scale-110 z-20' : ''}`}
                     ></div>
                     {!esLibre && (
-                      <div className="text-center w-full px-0.5 mt-1 select-none">
-                        <span className="block text-[10px] font-medium leading-tight text-gray-200">{miembro.nombre}</span>
+                      <div className="text-center w-full px-0.5 mt-0.5 select-none">
+                        <span className="block text-[8px] font-medium leading-tight text-gray-300">{miembro.nombre}</span>
                         {estaActiva && miembro.libroReal && (
-                          <span className="block text-[9px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" title={miembro.libroReal}>
+                          <span className="block text-[7px] text-[#ADAE1D] italic leading-tight mt-0.5 font-serif" title={miembro.libroReal}>
                             {miembro.libroReal}
                           </span>
                         )}
@@ -568,7 +568,6 @@
               backgroundColor: '#0f1115',
               logging: false,
               letterRendering: true,
-              // FILTRO CLAVE: Omitimos el filtro SVG de ruido durante la captura para evitar que distorsione las letras
               ignoreElements: (element) => element.classList.contains('story-noise')
             });
 
@@ -671,7 +670,7 @@
 
             {modalStoryAbierto && (
               <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 fade-in">
-                <div className="bg-[#1a1c23] max-w-sm w-full p-4 rounded-2xl flex flex-col items-center">
+                <div className="bg-[#1a1c23] max-w-xs w-full p-4 rounded-2xl flex flex-col items-center">
                   <div className="w-full flex justify-between items-center mb-4">
                     <div className="flex bg-[#2a2c38] p-1 rounded-lg">
                       <button onClick={()=>setModoStory('ventana')} className={`px-3 py-1 text-[10px] rounded-md uppercase font-bold ${modoStory==='ventana'?'bg-[#ADAE1D] text-black':'text-white'}`}>Tú</button>
@@ -680,29 +679,30 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  <div ref={storyRef} style={{width: '340px', height: '604px'}} className="postal-ratio border border-gray-700 shadow-2xl relative">
+                  {/* Vista previa 100% responsiva y limpia */}
+                  <div ref={storyRef} className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full relative flex flex-col justify-between p-7 text-center overflow-hidden">
+                      <div className="w-full h-full relative flex flex-col justify-between p-6 text-center overflow-hidden">
                         <div className="story-noise"></div>
                         
                         <div className="z-10 flex justify-between items-start w-full">
                           <div className="text-left">
-                            <p className="font-mono-code text-[10px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
-                            <h2 className="font-serif-title text-2xl text-white italic">En vela leyendo</h2>
+                            <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
+                            <h2 className="font-serif-title text-xl text-white italic">En vela leyendo</h2>
                           </div>
-                          <div className="moon" style={{width: '50px', height: '50px'}}></div>
+                          <div className="moon" style={{width: '44px', height: '44px'}}></div>
                         </div>
 
                         <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full">
                           <div className={`window scale-125 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
                           <div className="space-y-1.5 w-full px-2">
-                            <h3 className="text-white font-serif-title text-2xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                            <p className="text-[#ADAE1D] text-sm font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
+                            <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
                           </div>
                         </div>
 
                         <div className="z-10 pb-2">
-                          <span className="text-white/40 text-[10px] font-mono-code tracking-wider">@gilda.mailclub</span>
+                          <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
                         </div>
                       </div>
                     ) : (
