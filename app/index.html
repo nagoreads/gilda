@@ -107,7 +107,7 @@
       ::-webkit-scrollbar-thumb { background: #d4ccb8; border-radius: 2px; }
 
       /* ==========================================================================
-         CASA GILDA - EDIFICIO Y POSTAL 9:16 (ALTA RESOLUCIÓN PARA HTML2CANVAS)
+         CASA GILDA - EDIFICIO Y POSTAL 9:16
          ========================================================================== */
       .postal-ratio {
         aspect-ratio: 9 / 16;
@@ -555,7 +555,7 @@
 
         const descargarStory = async () => {
           if (!storyRef.current) return;
-          mostrarToast('Generando postal JPG...');
+          mostrarToast('Generando postal JPG nítida...');
           try {
             if (document.fonts && document.fonts.ready) {
               await document.fonts.ready;
@@ -567,7 +567,9 @@
               useCORS: true, 
               backgroundColor: '#0f1115',
               logging: false,
-              letterRendering: true
+              letterRendering: true,
+              // FILTRO CLAVE: Omitimos el filtro SVG de ruido durante la captura para evitar que distorsione las letras
+              ignoreElements: (element) => element.classList.contains('story-noise')
             });
 
             const link = document.createElement('a');
@@ -678,7 +680,6 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Ancho ampliado a 340px para que las fuentes rendericen con alta nitidez en canvas */}
                   <div ref={storyRef} style={{width: '340px', height: '604px'}} className="postal-ratio border border-gray-700 shadow-2xl relative">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full relative flex flex-col justify-between p-7 text-center overflow-hidden">
