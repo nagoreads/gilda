@@ -134,7 +134,6 @@
         background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
         border-radius: 50%; box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
         flex-shrink: 0;
-        position: absolute;
       }
       .building {
         position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -205,10 +204,9 @@
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
             
-            {/* Luna completamente redonda */}
-            <div className="moon top-4 right-4" style={{width: '48px', height: '48px'}}></div>
+            <div className="absolute top-4 right-4 moon" style={{width: '46px', height: '46px'}}></div>
 
-            <div className="absolute top-4 left-4 text-left z-10 pr-16" style={{lineHeight: '1.2'}}>
+            <div className="absolute top-4 left-4 text-left z-10 pr-16">
               <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
               <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
             </div>
@@ -661,29 +659,29 @@
 
                   <div ref={storyRef} style={{width: '280px', height: '497.7px'}} className="postal-ratio border border-gray-700 shadow-2xl relative">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full relative flex flex-col justify-between p-5 text-center overflow-hidden">
+                      <div className="w-full h-full relative flex flex-col justify-between p-6 text-center overflow-hidden">
                         <div className="story-noise"></div>
                         
-                        {/* Luna totalmente redonda */}
-                        <div className="moon top-4 right-4" style={{width: '44px', height: '44px'}}></div>
-
-                        {/* Cabecera optimizada con line-height seguro para html2canvas */}
-                        <div className="absolute top-4 left-4 text-left z-10 pr-14" style={{lineHeight: '1.4'}}>
-                          <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase pb-0.5">gilda</p>
-                          <h2 className="font-serif-title text-base text-white italic leading-snug">En vela leyendo</h2>
+                        {/* Cabecera estructurada con Flexbox puro para evitar cortes de texto en html2canvas */}
+                        <div className="z-10 flex justify-between items-start w-full">
+                          <div className="text-left">
+                            <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
+                            <h2 className="font-serif-title text-xl text-white italic">En vela leyendo</h2>
+                          </div>
+                          <div className="moon" style={{width: '44px', height: '44px'}}></div>
                         </div>
 
-                        {/* Centro con espaciado vertical seguro */}
-                        <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full pt-10" style={{lineHeight: '1.4'}}>
+                        {/* Centro con diseño flexible seguro */}
+                        <div className="z-10 flex flex-col items-center justify-center my-auto space-y-4 w-full">
                           <div className={`window scale-125 ${isReadingNow ? 'light-on' : 'light-off'}`}></div>
                           <div className="space-y-1.5 w-full px-2">
-                            <h3 className="text-white font-serif-title text-lg leading-snug truncate">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                            <p className="text-[#ADAE1D] text-[11px] font-mono-code italic line-clamp-2 leading-relaxed">{libroPersonal || libroActual.titulo}</p>
+                            <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
                           </div>
                         </div>
 
-                        {/* Pie */}
-                        <div className="z-10 pb-1" style={{lineHeight: '1.4'}}>
+                        {/* Pie de página */}
+                        <div className="z-10 pb-2">
                           <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
                         </div>
                       </div>
