@@ -134,15 +134,16 @@
         position: absolute; top: 8%; right: 12%; width: 60px; height: 60px;
         background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
         border-radius: 50%; box-shadow: 0 0 30px rgba(250, 204, 21, 0.3);
+        overflow: hidden;
       }
       .building {
         position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
         width: 96%; height: auto; min-height: 55%;
-        background: linear-gradient(180deg, #181921 0%, #0a0b0e 100%);
+        background: linear-gradient(180deg, #222430 0%, #121318 100%);
         border-top-left-radius: 16px; border-top-right-radius: 16px;
         padding: 16px 6px;
         display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
-        gap: 12px 6px; border: 1px solid #2a2c38; border-bottom: none; z-index: 10;
+        gap: 12px 6px; border: 1px solid #3a3d4f; border-bottom: none; z-index: 10;
       }
       .window {
         width: 20px; height: 30px; border-radius: 100px 100px 0 0;
@@ -203,7 +204,7 @@
           <div className="postal-ratio w-full h-full">
             <div className="story-noise"></div>
             <div>{stars.map(s => <div key={s.id} className="star" style={{left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay}}></div>)}</div>
-            <div className="moon relative overflow-hidden">
+            <div className="moon">
               <div className="absolute top-[15%] right-[15%] w-[45px] h-[45px] bg-[#0f1115] rounded-full"></div>
             </div>
             <div className="absolute top-[8%] w-full text-center z-10 px-4">
@@ -660,7 +661,7 @@
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full relative">
                         <div className="story-noise"></div>
-                        <div className="moon relative overflow-hidden" style={{top:'10%', right:'15%'}}>
+                        <div className="moon" style={{top:'10%', right:'15%'}}>
                           <div className="absolute top-[15%] right-[15%] w-[45px] h-[45px] bg-[#0f1115] rounded-full"></div>
                         </div>
                         <div className="absolute top-10 w-full text-center z-10 px-4">
