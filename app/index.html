@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Proporción natural sin distorsión)
+         COMPONENTE: EdificioPostal (Alineación milimétrica corregida)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -184,56 +184,58 @@
 
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
               {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
-                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-xl snap-center bg-white border border-[#e5e3dc]">
-                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-auto block z-0" />
-                  
-                  <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                    <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-black/40 text-white px-1.5 py-0.5 rounded inline-block backdrop-blur-xs">
-                      Torre {idxEdificio + 1}
-                    </span>
-                  </div>
+                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-xl bg-white border border-[#e5e3dc] snap-center">
+                  <div className="relative w-full">
+                    <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-auto block z-0" />
+                    
+                    <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                      <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-black/50 text-white px-1.5 py-0.5 rounded backdrop-blur-xs inline-block">
+                        Torre {idxEdificio + 1}
+                      </span>
+                    </div>
 
-                  {/* Cuadrícula adaptada a la proporción natural de la imagen */}
-                  <div className="absolute top-[27%] left-[27%] w-[46%] h-[52%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1.5 gap-y-2 pointer-events-auto">
-                    {miembrosBloque.map((miembro, i) => {
-                      const estaActiva = miembro.estaLeyendo;
-                      const esLibre = miembro.esLibre;
-                      const esPuertaPrincipal = (i === 16);
+                    {/* Cuadrícula sincronizada exactamente con los marcos de la torre */}
+                    <div className="absolute top-[26.5%] left-[26.5%] w-[47%] h-[53%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1 gap-y-1.5 pointer-events-auto">
+                      {miembrosBloque.map((miembro, i) => {
+                        const estaActiva = miembro.estaLeyendo;
+                        const esLibre = miembro.esLibre;
+                        const esPuertaPrincipal = (i === 16);
 
-                      if (esPuertaPrincipal) {
-                        return <div key={i} className="pointer-events-none"></div>;
-                      }
+                        if (esPuertaPrincipal) {
+                          return <div key={i} className="pointer-events-none"></div>;
+                        }
 
-                      return (
-                        <div
-                          key={i}
-                          onClick={() => {
-                            if (esLibre) return;
-                            if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                            else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                          }}
-                          className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
-                        >
-                          <img 
-                            src="ventanatransparente.png" 
-                            alt="Luz ventana" 
-                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
-                          />
+                        return (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              if (esLibre) return;
+                              if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                              else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                            }}
+                            className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
+                          >
+                            <img 
+                              src="ventanatransparente.png" 
+                              alt="Luz ventana" 
+                              className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                            />
 
-                          {!esLibre && (
-                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
-                              <span className="block text-[5px] font-medium leading-tight text-white bg-black/90 px-1 py-0.5 rounded shadow-sm">
-                                {miembro.nombre}{miembro.esYo ? ' *' : ''}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                            {!esLibre && (
+                              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                                <span className="block text-[5px] font-medium leading-tight text-white bg-black/90 px-1 py-0.5 rounded shadow-sm">
+                                  {miembro.nombre}{miembro.esYo ? ' *' : ''}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                  <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
-                    <span className="text-white/80 text-[8px] font-mono-code tracking-wider bg-black/40 px-1 rounded backdrop-blur-xs">@gilda.mailclub</span>
+                    <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
+                      <span className="text-white/80 text-[8px] font-mono-code tracking-wider bg-black/50 px-1 rounded backdrop-blur-xs">@gilda.mailclub</span>
+                    </div>
                   </div>
                 </div>
               ))}
