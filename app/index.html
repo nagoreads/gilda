@@ -138,7 +138,7 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg con mixBlendMode screen)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
@@ -148,13 +148,14 @@
               src="d.svg" 
               alt="Luz de ventana" 
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
+              style={{ mixBlendMode: 'screen' }}
             />
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y b.svg recortado por CSS)
+         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y b.svg con mixBlendMode screen)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -170,7 +171,7 @@
 
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* a.svg: Fondo completo del edificio con ventanas apagadas */}
+            {/* a.svg: Edificio completo base con ventanas apagadas */}
             <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
             
             {/* Cabecera */}
@@ -183,7 +184,7 @@
               </div>
             </div>
 
-            {/* Cuadrícula interactiva superpuesta exactamente sobre el edificio a.svg */}
+            {/* Cuadrícula interactiva superpuesta sobre a.svg */}
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
               <div className="w-[36%] h-[58%] mt-4 grid grid-cols-3 grid-rows-6 gap-1.5 pointer-events-auto">
                 {miembros.map((miembro, i) => {
@@ -207,17 +208,18 @@
                         }}
                         className={`w-full h-full relative rounded overflow-hidden cursor-pointer transition-transform ${miembro.esYo ? 'scale-105 z-25 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                       >
-                        {/* b.svg recortado matemáticamente por CSS para encajar perfectamente en cada ventana */}
+                        {/* b.svg recortado y con mixBlendMode screen para eliminar fondo negro y fundir luz perfecta */}
                         <img 
                           src="b.svg" 
                           alt="Luz ventana edificio" 
-                          className="absolute max-none transition-opacity duration-300"
+                          className="absolute max-none transition-opacity duration-300 pointer-events-none"
                           style={{
                             width: '300%',
                             height: '600%',
                             top: `-${row * 100}%`,
                             left: `-${col * 100}%`,
-                            opacity: estaActiva && !esLibre ? 1 : 0
+                            opacity: estaActiva && !esLibre ? 1 : 0,
+                            mixBlendMode: 'screen'
                           }}
                         />
                       </div>
@@ -638,7 +640,7 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con c.svg y d.svg */}
+                  {/* Vista previa para Stories con c.svg y d.svg fusionadas */}
                   <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative">
@@ -647,6 +649,7 @@
                           src="d.svg" 
                           alt="Luz ventana" 
                           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-0 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
+                          style={{ mixBlendMode: 'screen' }}
                         />
                         
                         <div className="flex justify-between items-start w-full z-10">
@@ -659,7 +662,7 @@
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
                           <div className="w-16 h-20 relative rounded-lg overflow-hidden shadow-2xl">
                             <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
-                            <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} />
+                            <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} style={{ mixBlendMode: 'screen' }} />
                           </div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
@@ -702,7 +705,7 @@
                   <div className="flex justify-center">
                     <div className="w-12 h-16 relative rounded overflow-hidden shadow">
                       <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
-                      <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} />
+                      <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} style={{ mixBlendMode: 'screen' }} />
                     </div>
                   </div>
                   
