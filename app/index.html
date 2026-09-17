@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Sin bordes blancos y con alineación exacta)
+         COMPONENTE: EdificioPostal (Proporción natural sin distorsión)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -184,8 +184,8 @@
 
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
               {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
-                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-xl snap-center aspect-[3/4]">
-                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-full object-fill block z-0" />
+                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-xl snap-center bg-white border border-[#e5e3dc]">
+                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-auto block z-0" />
                   
                   <div className="absolute top-3 left-3 z-20 pointer-events-none">
                     <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-black/40 text-white px-1.5 py-0.5 rounded inline-block backdrop-blur-xs">
@@ -193,7 +193,7 @@
                     </span>
                   </div>
 
-                  {/* Cuadrícula milimétricamente alineada sin bordes blancos */}
+                  {/* Cuadrícula adaptada a la proporción natural de la imagen */}
                   <div className="absolute top-[27%] left-[27%] w-[46%] h-[52%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1.5 gap-y-2 pointer-events-auto">
                     {miembrosBloque.map((miembro, i) => {
                       const estaActiva = miembro.estaLeyendo;
