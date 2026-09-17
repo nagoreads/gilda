@@ -155,7 +155,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y cuadrícula calibrada para d.svg)
+         COMPONENTE: EdificioPostal (Muestra a.svg completo sin recortes y superpone las luces d.svg)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -170,22 +170,22 @@
         }, [usuarias]);
 
         return (
-          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl bg-white border border-[#e5e3dc]">
-            {/* a.svg: Fondo completo del edificio con ventanas apagadas */}
-            <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+          <div className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc]">
+            {/* a.svg: Fondo completo del edificio con dimensiones naturales (sin recortes) */}
+            <img src="a.svg" alt="Edificio gilda" className="w-full h-auto block z-0" />
             
             {/* Cabecera */}
-            <div className="flex justify-between items-start w-full z-20 pt-2 px-1">
+            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
               <div>
-                <h2 className="text-xl font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
-                <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5 font-bold">
+                <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
+                <p className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5 font-bold bg-white/90 px-1 py-0.5 rounded inline-block">
                   {activasCount} de {registradasCount} en vela
                 </p>
               </div>
             </div>
 
-            {/* Cuadrícula CSS calibrada exactamente sobre la fachada del edificio a.svg */}
-            <div className="absolute top-[24%] left-[33%] w-[34%] h-[60%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
+            {/* Cuadrícula CSS calibrada exactamente sobre las ventanas de a.svg */}
+            <div className="absolute top-[26%] left-[32%] w-[36%] h-[58%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
               {miembros.map((miembro, i) => {
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
@@ -215,8 +215,8 @@
 
                     {/* Nombre de la socia */}
                     {!esLibre && (
-                      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
-                        <span className="block text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
+                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                        <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
                           {miembro.nombre}{miembro.esYo ? ' *' : ''}
                         </span>
                       </div>
@@ -226,8 +226,8 @@
               })}
             </div>
 
-            <div className="text-center pb-1 z-20">
-              <span className="text-gray-400 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
+            <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
+              <span className="text-gray-500 text-[8px] font-mono-code tracking-wider bg-white/90 px-1 rounded">@gilda.mailclub</span>
             </div>
           </div>
         );
@@ -635,9 +635,9 @@
                   </div>
 
                   {/* Vista previa para Stories */}
-                  <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
+                  <div className="w-full max-w-[260px] relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#12141c]">
+                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#12141c]">
                         <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
