@@ -638,14 +638,14 @@
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        {/* c.svg completo con fondo unificado para cero bordes extraños */}
-                        <img src="c.svg" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-cover z-0 scale-105" />
+                        {/* c.svg completo con object-contain para que la luna y estrellas se vean enteras sin cortes */}
+                        <img src="c.svg" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-contain z-0" />
                         
                         {/* d.svg como luz de la ventana superpuesta */}
                         <img 
                           src="d.svg" 
                           alt="Luz ventana" 
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 scale-105 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
+                          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 z-10 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
                           style={{ mixBlendMode: 'screen' }}
                         />
 
