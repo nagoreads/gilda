@@ -154,14 +154,13 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Múltiples edificios al lado a medida que crecen las socias)
+         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula ajustada)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
         const MIN_ESTANCIAS = 18; 
 
-        // Agrupamos en bloques de 18 para crear nuevos edificios al lado automáticamente
         const bloquesEdificios = useMemo(() => {
           const lista = [...usuarias];
           while (lista.length < MIN_ESTANCIAS || lista.length % 18 !== 0) {
@@ -183,7 +182,6 @@
               </p>
             </div>
 
-            {/* Contenedor flexible horizontal para ir creando más edificios al lado */}
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
               {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
                 <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] snap-center">
@@ -195,8 +193,8 @@
                     </span>
                   </div>
 
-                  {/* Cuadrícula interactiva con las coordenadas exactas sobre cada edificio */}
-                  <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-0.5 pointer-events-auto">
+                  {/* Cuadrícula ajustada con gap vertical para evitar solapamiento de nombres */}
+                  <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1 gap-y-2.5 pointer-events-auto">
                     {miembrosBloque.map((miembro, i) => {
                       const estaActiva = miembro.estaLeyendo;
                       const esLibre = miembro.esLibre;
@@ -216,15 +214,16 @@
                           }}
                           className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                         >
+                          {/* Luz transparente ajustada con object-cover para ocupar toda la ventana */}
                           <img 
                             src="ventanatransparente.png" 
                             alt="Luz ventana" 
-                            className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
                           />
 
                           {!esLibre && (
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
-                              <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
+                            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                              <span className="block text-[5px] font-medium leading-tight text-white bg-black/90 px-1 py-0.5 rounded shadow-sm">
                                 {miembro.nombre}{miembro.esYo ? ' *' : ''}
                               </span>
                             </div>
@@ -647,7 +646,11 @@
 
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-5 text-center overflow-hidden relative bg-[#2b2f42]">
+                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
+                        <div className="absolute inset-0 z-0 flex items-center justify-center p-4">
+                          <WindowImage isOn={isReadingNow} className="w-full h-full" />
+                        </div>
+
                         <div className="flex justify-between items-start w-full z-20">
                           <div className="text-left bg-black/30 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/10">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
@@ -655,22 +658,15 @@
                           </div>
                         </div>
 
-                        <div className="absolute inset-0 z-0 flex items-center justify-center p-6">
-                          <WindowImage isOn={isReadingNow} className="w-full h-full max-h-[50vh]" />
+                        <div className="my-auto z-20"></div>
+
+                        <div className="space-y-1 w-full px-2 z-20 bg-black/40 backdrop-blur-xs py-3 rounded-xl border border-white/10">
+                          <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                          <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
                         </div>
 
-                        {/* @gilda.mailclub situado exactamente entre la parte de debajo de la ventana y el bloque de texto de la socia */}
-                        <div className="mt-auto z-20 space-y-3">
-                          <div>
-                            <span className="text-white/80 text-[10px] font-mono-code tracking-widest bg-black/40 px-2.5 py-1 rounded-full border border-white/10">
-                              @gilda.mailclub
-                            </span>
-                          </div>
-
-                          <div className="space-y-1 w-full px-3 z-20 bg-black/50 backdrop-blur-xs py-3 rounded-xl border border-white/10">
-                            <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
-                          </div>
+                        <div className="z-20 pt-2">
+                          <span className="text-white/70 text-[9px] font-mono-code tracking-wider bg-black/30 px-2 py-0.5 rounded">@gilda.mailclub</span>
                         </div>
                       </div>
                     ) : (
