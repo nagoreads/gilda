@@ -154,74 +154,91 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Coordenadas ajustadas para edificio.png)
+         COMPONENTE: EdificioPostal (Múltiples edificios al lado a medida que crecen las socias)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
         const MIN_ESTANCIAS = 18; 
-        const miembros = useMemo(() => {
+
+        // Agrupamos en bloques de 18 para crear nuevos edificios al lado automáticamente
+        const bloquesEdificios = useMemo(() => {
           const lista = [...usuarias];
-          while (lista.length < MIN_ESTANCIAS) {
+          while (lista.length < MIN_ESTANCIAS || lista.length % 18 !== 0) {
             lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: '' });
           }
-          return lista;
+          const bloques = [];
+          for (let i = 0; i < lista.length; i += 18) {
+            bloques.push(lista.slice(i, i + 18));
+          }
+          return bloques;
         }, [usuarias]);
 
         return (
-          <div className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc]">
-            <img src="edificio.png" alt="Edificio gilda" className="w-full h-auto block z-0" />
-            
-            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
-              <div>
-                <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
-                <p className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5 font-bold bg-white/90 px-1 py-0.5 rounded inline-block">
-                  {activasCount} de {registradasCount} en vela
-                </p>
-              </div>
+          <div className="w-full space-y-3">
+            <div className="flex justify-between items-center px-1">
+              <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight">La Fachada</h2>
+              <p className="text-[10px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-white px-2 py-1 rounded border border-[#e5e3dc]">
+                {activasCount} de {registradasCount} en vela
+              </p>
             </div>
 
-            {/* Cuadrícula interactiva con las coordenadas exactas de edificio.png */}
-            <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-0.5 pointer-events-auto">
-              {miembros.map((miembro, i) => {
-                const estaActiva = miembro.estaLeyendo;
-                const esLibre = miembro.esLibre;
-                const esPuertaPrincipal = (i === 16);
-
-                if (esPuertaPrincipal) {
-                  return <div key={i} className="pointer-events-none"></div>;
-                }
-
-                return (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      if (esLibre) return;
-                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                    }}
-                    className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
-                  >
-                    <img 
-                      src="ventanatransparente.png" 
-                      alt="Luz ventana" 
-                      className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
-                    />
-
-                    {!esLibre && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
-                        <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
-                          {miembro.nombre}{miembro.esYo ? ' *' : ''}
-                        </span>
-                      </div>
-                    )}
+            {/* Contenedor flexible horizontal para ir creando más edificios al lado */}
+            <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
+              {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
+                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] snap-center">
+                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-auto block z-0" />
+                  
+                  <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                    <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-white/90 px-1.5 py-0.5 rounded inline-block">
+                      Torre {idxEdificio + 1}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
 
-            <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
-              <span className="text-gray-500 text-[8px] font-mono-code tracking-wider bg-white/90 px-1 rounded">@gilda.mailclub</span>
+                  {/* Cuadrícula interactiva con las coordenadas exactas sobre cada edificio */}
+                  <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-0.5 pointer-events-auto">
+                    {miembrosBloque.map((miembro, i) => {
+                      const estaActiva = miembro.estaLeyendo;
+                      const esLibre = miembro.esLibre;
+                      const esPuertaPrincipal = (i === 16);
+
+                      if (esPuertaPrincipal) {
+                        return <div key={i} className="pointer-events-none"></div>;
+                      }
+
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => {
+                            if (esLibre) return;
+                            if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                            else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                          }}
+                          className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
+                        >
+                          <img 
+                            src="ventanatransparente.png" 
+                            alt="Luz ventana" 
+                            className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                          />
+
+                          {!esLibre && (
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                              <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
+                                {miembro.nombre}{miembro.esYo ? ' *' : ''}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
+                    <span className="text-gray-500 text-[8px] font-mono-code tracking-wider bg-white/90 px-1 rounded">@gilda.mailclub</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -630,11 +647,7 @@
 
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        <div className="absolute inset-0 z-0 flex items-center justify-center p-4">
-                          <WindowImage isOn={isReadingNow} className="w-full h-full" />
-                        </div>
-
+                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-5 text-center overflow-hidden relative bg-[#2b2f42]">
                         <div className="flex justify-between items-start w-full z-20">
                           <div className="text-left bg-black/30 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/10">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
@@ -642,15 +655,22 @@
                           </div>
                         </div>
 
-                        <div className="my-auto z-20"></div>
-
-                        <div className="space-y-1 w-full px-2 z-20 bg-black/40 backdrop-blur-xs py-3 rounded-xl border border-white/10">
-                          <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                          <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
+                        <div className="absolute inset-0 z-0 flex items-center justify-center p-6">
+                          <WindowImage isOn={isReadingNow} className="w-full h-full max-h-[50vh]" />
                         </div>
 
-                        <div className="z-20 pt-2">
-                          <span className="text-white/70 text-[9px] font-mono-code tracking-wider bg-black/30 px-2 py-0.5 rounded">@gilda.mailclub</span>
+                        {/* @gilda.mailclub situado exactamente entre la parte de debajo de la ventana y el bloque de texto de la socia */}
+                        <div className="mt-auto z-20 space-y-3">
+                          <div>
+                            <span className="text-white/80 text-[10px] font-mono-code tracking-widest bg-black/40 px-2.5 py-1 rounded-full border border-white/10">
+                              @gilda.mailclub
+                            </span>
+                          </div>
+
+                          <div className="space-y-1 w-full px-3 z-20 bg-black/50 backdrop-blur-xs py-3 rounded-xl border border-white/10">
+                            <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -805,11 +825,7 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="editorial-card p-4 flex flex-col items-center">
-                      <div className="text-center mb-4">
-                        <h2 className="font-serif-title text-xl">La Fachada</h2>
-                        <p className="text-xs text-gray-500 mt-1">Nuestra casa compartida en vela.</p>
-                      </div>
-                      <div className="w-full max-w-[280px]">
+                      <div className="w-full">
                         <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
                       </div>
                     </div>
