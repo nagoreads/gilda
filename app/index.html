@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Usa edificio.png y la cuadrícula individual con ventanatransparente.png)
+         COMPONENTE: EdificioPostal (Coordenadas ajustadas para edificio.png)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -181,8 +181,8 @@
               </div>
             </div>
 
-            {/* Cuadrícula interactiva superpuesta exactamente sobre las ventanas del edificio */}
-            <div className="absolute top-[18%] left-[26%] w-[48%] h-[64%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
+            {/* Cuadrícula interactiva con las coordenadas exactas de edificio.png */}
+            <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-0.5 pointer-events-auto">
               {miembros.map((miembro, i) => {
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
