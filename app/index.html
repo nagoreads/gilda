@@ -138,40 +138,44 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza s'jc 2.png y la luz transparente 4.png)
+         COMPONENTE: WindowImage (Usa la ventana individual 4.png)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
           <div className={`relative overflow-hidden rounded-xl bg-[#2b2f42] flex items-center justify-center ${className}`}>
-            <img src="s'jc 2.png" alt="Ventana de lectura" className="w-full h-full object-cover" />
             <img 
               src="4.png" 
-              alt="Luz de ventana" 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
+              alt="Ventana de lectura" 
+              className={`w-full h-full object-contain transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-20 grayscale'}`} 
             />
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza el edificio y d.svg para luces individuales)
+         COMPONENTE: EdificioPostal (Usa el edificio base y la cuadrícula 2.png)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
-        const MIN_ESTANCIAS = 18; 
-        const miembros = useMemo(() => {
-          const lista = [...usuarias];
-          while (lista.length < MIN_ESTANCIAS) {
-            lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: '' });
-          }
-          return lista;
-        }, [usuarias]);
+        const hayAlguienLeyendo = activasCount > 0;
 
         return (
-          <div className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc]">
+          <div 
+            onClick={() => { if (onToggleMiLuz) onToggleMiLuz(); }}
+            className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] cursor-pointer group"
+          >
+            {/* Imagen base del edificio */}
             <img src="Sin título (Historia de Instagram).png" alt="Edificio gilda" className="w-full h-auto block z-0" />
             
+            {/* Cuadrícula completa de luces 2.png superpuesta de forma milimétrica */}
+            <img 
+              src="2.png" 
+              alt="Luces del edificio" 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${hayAlguienLeyendo ? 'opacity-100 drop-shadow-[0_0_8px_rgba(254,240,138,0.8)]' : 'opacity-10 grayscale brightness-50'}`} 
+            />
+
+            {/* Cabecera superior integrada */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
               <div>
                 <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
@@ -179,45 +183,6 @@
                   {activasCount} de {registradasCount} en vela
                 </p>
               </div>
-            </div>
-
-            <div className="absolute top-[18%] left-[26%] w-[48%] h-[64%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
-              {miembros.map((miembro, i) => {
-                const estaActiva = miembro.estaLeyendo;
-                const esLibre = miembro.esLibre;
-                const esPuertaPrincipal = (i === 16);
-
-                if (esPuertaPrincipal) {
-                  return <div key={i} className="pointer-events-none"></div>;
-                }
-
-                return (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      if (esLibre) return;
-                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                    }}
-                    className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
-                  >
-                    <img 
-                      src="d.svg" 
-                      alt="Luz ventana" 
-                      className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
-                      style={{ mixBlendMode: 'screen' }}
-                    />
-
-                    {!esLibre && (
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
-                        <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
-                          {miembro.nombre}{miembro.esYo ? ' *' : ''}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
             </div>
 
             <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
@@ -628,21 +593,13 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con las ilustraciones 9:16 y transparencia */}
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        {/* Fondo base s'jc 2.png con la luna y estrellas completas */}
-                        <img src="s'jc 2.png" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-cover z-0" />
-                        
-                        {/* Luz transparente 4.png superpuesta */}
-                        <img 
-                          src="4.png" 
-                          alt="Luz ventana" 
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
-                        />
+                        <div className="absolute inset-0 z-0 flex items-center justify-center p-4">
+                          <WindowImage isOn={isReadingNow} className="w-full h-full" />
+                        </div>
 
-                        {/* Cabecera superior */}
                         <div className="flex justify-between items-start w-full z-20">
                           <div className="text-left bg-black/30 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/10">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
@@ -650,22 +607,18 @@
                           </div>
                         </div>
 
-                        {/* Espacio central vacío para dejar respirar a la ventana y la luna */}
                         <div className="my-auto z-20"></div>
 
-                        {/* Texto de la socia y libro colocado exactamente entre la ventana y el pie de página */}
                         <div className="space-y-1 w-full px-2 z-20 bg-black/40 backdrop-blur-xs py-3 rounded-xl border border-white/10">
                           <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
                           <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
                         </div>
 
-                        {/* Pie de página */}
                         <div className="z-20 pt-2">
                           <span className="text-white/70 text-[9px] font-mono-code tracking-wider bg-black/30 px-2 py-0.5 rounded">@gilda.mailclub</span>
                         </div>
                       </div>
                     ) : (
-                      /* Postal con el edificio completo 9:16 */
                       <EdificioPostal usuarias={miembrosEdificio} />
                     )}
                   </div>
@@ -680,7 +633,6 @@
               </div>
             )}
 
-            {/* ====== MODAL POÉTICO PARA VECINAS ====== */}
             {sociaSeleccionadaModal && (
               <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-md flex items-center justify-center p-4 fade-in" onClick={(e) => { if (e.target === e.currentTarget) setSociaSeleccionadaModal(null) }}>
                 <div className="editorial-card bg-white max-w-xs w-full p-8 space-y-6 relative shadow-2xl text-center">
