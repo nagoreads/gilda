@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula ajustada)
+         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula alineada)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -193,8 +193,8 @@
                     </span>
                   </div>
 
-                  {/* Cuadrícula ajustada con gap vertical para evitar solapamiento de nombres */}
-                  <div className="absolute top-[32%] left-[32%] w-[36%] h-[48%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1 gap-y-2.5 pointer-events-auto">
+                  {/* Cuadrícula con coordenadas corregidas para alinear exactamente con las ventanas de edificio.png */}
+                  <div className="absolute top-[28%] left-[26%] w-[48%] h-[53%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1 gap-y-2 pointer-events-auto">
                     {miembrosBloque.map((miembro, i) => {
                       const estaActiva = miembro.estaLeyendo;
                       const esLibre = miembro.esLibre;
@@ -214,7 +214,6 @@
                           }}
                           className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                         >
-                          {/* Luz transparente ajustada con object-cover para ocupar toda la ventana */}
                           <img 
                             src="ventanatransparente.png" 
                             alt="Luz ventana" 
