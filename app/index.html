@@ -402,7 +402,7 @@
           const pwdSheet = socia.password || '';
           if (pwdSheet === '') {
             if (pwd.length < 4) return setErrorLogin('Establece una contraseña de al menos 4 caracteres.');
-            enviarAccion('set_password', { password: pwd });
+            enviarAccion('set_password', { email: mail, password: pwd }); // <--- Modifica esta línea exacta
             mostrarToast('Contraseña registrada con éxito.');
           } else {
             if (pwdSheet !== pwd) return setErrorLogin('Contraseña incorrecta.');
