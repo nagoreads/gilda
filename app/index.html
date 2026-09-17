@@ -382,15 +382,15 @@
         }, [sesion, lecturasPersonales]);
 
         const enviarAccion = async (action, payload) => {
-  try {
-    const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
-    await fetch(GOOGLE_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, usuaria: nombreActual, email: sesion?.email, ...payload, fecha: new Date().toLocaleDateString('es-ES') }),
-    });
-  } catch (err) { console.error(err); }
-};
+          try {
+            const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
+            await fetch(GOOGLE_API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action, usuaria: nombreActual, email: sesion?.email, ...payload, fecha: new Date().toLocaleDateString('es-ES') }),
+            });
+          } catch (err) { console.error(err); }
+        };
 
         const iniciarSesion = (e) => {
           e.preventDefault();
@@ -695,54 +695,76 @@
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
                         const tituloCap = cap.titulo || `Capítulo ${i}`;
+                        const paginaFin = Number(cap.pagina_fin || 0);
+                        const bloqueado = paginaFin > 0 && miPagina < paginaFin;
+
                         return (
                           <div key={i} className="editorial-card p-5 space-y-4">
-                            <h3 className="font-editorial-title text-lg border-b border-gray-100 pb-2">{tituloCap}</h3>
+                            <div className="flex justify-between items-start border-b border-gray-100 pb-2">
+                              <h3 className="font-editorial-title text-lg">{tituloCap}</h3>
+                              {paginaFin > 0 && (
+                                <span className="text-[10px] bg-[#ffffee] border border-[#e2e2da] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2">
+                                  hasta pág. {paginaFin}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-gray-600">{cap.descripcion}</p>
                             
-                            <div className="bg-[#ffffee] p-3 rounded border border-[#e2e2da] flex gap-2">
-                              <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
-                              <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs">guardar</button>
-                            </div>
-
-                            <div className="pt-2">
-                              <div className="flex gap-2 mb-4">
-                                <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
-                                <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs">publicar</button>
+                            {bloqueado ? (
+                              <div className="bg-[#ffffee] p-4 rounded-lg border border-[#e2e2da] text-center space-y-2 my-2">
+                                <i className="fa-solid fa-lock text-[#adae1d] text-base"></i>
+                                <p className="text-xs font-bold text-gray-800">Capítulo protegido contra spoilers</p>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                  Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear el contenido.
+                                </p>
                               </div>
+                            ) : (
+                              <>
+                                <div className="bg-[#ffffee] p-3 rounded border border-[#e2e2da] flex gap-2">
+                                  <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
+                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs">guardar</button>
+                                </div>
 
-                              <div className="space-y-4">
-                                {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
-                                  <div key={c.id} className="space-y-2">
-                                    <div className="bg-[#ffffee] p-3 rounded-lg border border-[#e2e2da] shadow-sm">
-                                      <div className="flex justify-between mb-1 text-[10px] text-gray-500">
-                                        <span className="font-bold text-black uppercase">{c.autora}</span><span>{c.fecha}</span>
-                                      </div>
-                                      <p className="text-xs text-gray-800">{c.texto}</p>
-                                      <div className="flex gap-3 mt-2 pt-2 border-t border-[#e2e2da] text-[11px] text-gray-400">
-                                        <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium">Responder</button>
-                                        <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
-                                        <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
-                                        {c.reacciones && <span className="bg-white text-black px-1.5 rounded">{c.reacciones}</span>}
-                                      </div>
-                                    </div>
-                                    <div className="pl-6 space-y-2 border-l-2 border-[#adae1d] ml-3">
-                                      {comentarios.filter(r => r.parent_id === c.id).map(r => (
-                                        <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#e2e2da]">
-                                          <span className="font-bold mr-1 text-[10px] uppercase">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
-                                        </div>
-                                      ))}
-                                      {respuestaComentario[c.id] !== undefined && (
-                                        <div className="flex gap-2 mt-1">
-                                          <input type="text" placeholder="Tu respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
-                                          <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px]">ok</button>
-                                        </div>
-                                      )}
-                                    </div>
+                                <div className="pt-2">
+                                  <div className="flex gap-2 mb-4">
+                                    <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
+                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs">publicar</button>
                                   </div>
-                                ))}
-                              </div>
-                            </div>
+
+                                  <div className="space-y-4">
+                                    {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
+                                      <div key={c.id} className="space-y-2">
+                                        <div className="bg-[#ffffee] p-3 rounded-lg border border-[#e2e2da] shadow-sm">
+                                          <div className="flex justify-between mb-1 text-[10px] text-gray-500">
+                                            <span className="font-bold text-black uppercase">{c.autora}</span><span>{c.fecha}</span>
+                                          </div>
+                                          <p className="text-xs text-gray-800">{c.texto}</p>
+                                          <div className="flex gap-3 mt-2 pt-2 border-t border-[#e2e2da] text-[11px] text-gray-400">
+                                            <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium">Responder</button>
+                                            <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
+                                            <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
+                                            {c.reacciones && <span className="bg-white text-black px-1.5 rounded">{c.reacciones}</span>}
+                                          </div>
+                                        </div>
+                                        <div className="pl-6 space-y-2 border-l-2 border-[#adae1d] ml-3">
+                                          {comentarios.filter(r => r.parent_id === c.id).map(r => (
+                                            <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#e2e2da]">
+                                              <span className="font-bold mr-1 text-[10px] uppercase">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
+                                            </div>
+                                          ))}
+                                          {respuestaComentario[c.id] !== undefined && (
+                                            <div className="flex gap-2 mt-1">
+                                              <input type="text" placeholder="Tu respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
+                                              <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px]">ok</button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
                         )
                       })}
