@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula alineada con proporción fija)
+         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula alineada con object-contain)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -185,7 +185,8 @@
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
               {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
                 <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] snap-center aspect-[3/4]">
-                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-full object-cover block z-0" />
+                  {/* Cambiado a object-contain para evitar recortes y mantener la alineación exacta */}
+                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-full object-contain block z-0" />
                   
                   <div className="absolute top-3 left-3 z-20 pointer-events-none">
                     <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-white/90 px-1.5 py-0.5 rounded inline-block">
@@ -193,7 +194,7 @@
                     </span>
                   </div>
 
-                  {/* Cuadrícula con proporción fija para alinear de forma absoluta e invariable */}
+                  {/* Cuadrícula alineada de forma consistente */}
                   <div className="absolute top-[27%] left-[27%] w-[46%] h-[52%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1.5 gap-y-2 pointer-events-auto">
                     {miembrosBloque.map((miembro, i) => {
                       const estaActiva = miembro.estaLeyendo;
