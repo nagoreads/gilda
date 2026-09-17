@@ -163,22 +163,24 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE NUEVO: WindowSVG (Reemplaza los antiguos div)
-         ========================================================================== */
-      function WindowSVG({ isOn, isVacant, className = '' }) {
-        const paneColor = isVacant ? '#181921' : (isOn ? '#fef08a' : '#222430');
-        const glow = isOn ? 'drop-shadow(0 0 6px rgba(254, 240, 138, 0.6))' : 'none';
-        
-        return (
-          <svg viewBox="0 0 100 160" className={`transition-transform duration-300 ${className}`} xmlns="http://www.w3.org/2000/svg">
-            {/* Pared exterior */}
-            <path d="M10,60 C10,30 90,30 90,60 L90,150 L10,150 Z" fill="none" stroke="#2e3140" strokeWidth="3"/>
-            {/* Cristales con soporte de iluminación fluida */}
-            <path style={{ filter: glow, transition: 'fill 0.5s ease, filter 0.5s ease' }} fill={paneColor} d="M15,60 C15,35 48,35 48,60 L48,145 L15,145 Z" />
-            <path style={{ filter: glow, transition: 'fill 0.5s ease, filter 0.5s ease' }} fill={paneColor} d="M52,60 C52,35 85,35 85,60 L85,145 L52,145 Z" />
-          </svg>
-        );
-      }
+   COMPONENTE: WindowImage (Usa tu archivo 4.png de forma dinámica)
+   ========================================================================== */
+function WindowImage({ isOn, isVacant, className = '' }) {
+  // Aplicamos filtros de luz profesionales sobre tu PNG (4.png)
+  const filterStyle = isVacant 
+    ? 'opacity-25 grayscale' 
+    : (isOn 
+        ? 'brightness-125 contrast-110 drop-shadow-[0_0_12px_rgba(254,240,138,0.8)]' 
+        : 'brightness-40 opacity-70');
+
+  return (
+    <img 
+      src="4.png" 
+      alt="Ventana de lectura" 
+      className={`transition-all duration-500 object-contain ${filterStyle} ${className}`} 
+    />
+  );
+}
 
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -219,8 +221,8 @@
                         }}
                         className={`cursor-pointer ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
                       >
-                        {/* Integración del componente SVG de Ventana */}
-                        <WindowSVG 
+                        {/* Reemplaza WindowSVG por WindowImage aquí */}
+                        <WindowImage 
                           isOn={estaActiva} 
                           isVacant={esLibre} 
                           className={`w-6 h-auto ${miembro.esYo ? 'drop-shadow-lg' : ''}`} 
@@ -667,7 +669,7 @@
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
                           {/* Integramos el SVG gigante para la story */}
-                          <WindowSVG isOn={isReadingNow} isVacant={false} className="w-16 h-auto drop-shadow-2xl" />
+                          <WindowImage isOn={isReadingNow} isVacant={false} className="w-16 h-auto drop-shadow-2xl" />
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
                             <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
@@ -706,7 +708,7 @@
                   </div>
                   
                   <div className="flex justify-center">
-                    <WindowSVG isOn={sociaSeleccionadaModal.estaLeyendo} isVacant={false} className="w-12 h-auto opacity-80" />
+                    <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} isVacant={false} className="w-12 h-auto opacity-80" />
                   </div>
                   
                   {sociaSeleccionadaModal.estaLeyendo ? (
