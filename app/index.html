@@ -138,26 +138,25 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza tu archivo 4.png)
+         COMPONENTE: WindowImage (Utiliza tus archivos c.jpg y d.jpg)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
-        const filterStyle = isVacant 
-          ? 'opacity-25 grayscale' 
-          : (isOn 
-              ? 'brightness-125 contrast-110 drop-shadow-[0_0_12px_rgba(254,240,138,0.8)]' 
-              : 'brightness-40 opacity-70');
-
         return (
-          <img 
-            src="4.png" 
-            alt="Ventana de lectura" 
-            className={`transition-all duration-500 object-contain ${filterStyle} ${className}`} 
-          />
+          <div className={`relative overflow-hidden rounded-xl ${className}`}>
+            {/* c.jpg: Ventana individual apagada */}
+            <img src="c.jpg" alt="Ventana de lectura" className="w-full h-full object-cover" />
+            {/* d.jpg: Capa transparente de luz para la ventana individual */}
+            <img 
+              src="d.jpg" 
+              alt="Luz de ventana" 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
+            />
+          </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza tu archivo 3.png como fondo completo y 3 columnas)
+         COMPONENTE: EdificioPostal (Utiliza a.jpg como fondo y b.jpg / d.jpg de luz)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -173,8 +172,10 @@
 
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* Fondo con tu ilustración 3.png a pantalla completa */}
-            <img src="3.png" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+            {/* Fondo con tu ilustración a.jpg del edificio completo (ventanas apagadas) */}
+            <img src="a.jpg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+            
+            {/* Capa de luz global opcional b.jpg si se desea matizar el edificio entero, o control por ventana */}
             
             {/* Cabecera */}
             <div className="flex justify-between items-start w-full z-10 pt-2 px-1">
@@ -186,7 +187,7 @@
               </div>
             </div>
 
-            {/* Cuadrícula de ventanas adaptada a 3 columnas sobre el edificio de 3.png */}
+            {/* Cuadrícula de ventanas adaptada a 3 columnas sobre el edificio a.jpg */}
             <div className="z-10 my-auto px-8 py-2">
               <div className="grid grid-cols-3 gap-y-2 gap-x-4 justify-items-center">
                 {miembros.map((miembro, i) => {
@@ -200,13 +201,16 @@
                           if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
                           else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                         }}
-                        className={`cursor-pointer ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
+                        className={`cursor-pointer transition-transform ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
                       >
-                        <WindowImage 
-                          isOn={estaActiva} 
-                          isVacant={esLibre} 
-                          className={`w-7 h-auto ${miembro.esYo ? 'drop-shadow-lg' : ''}`} 
-                        />
+                        {/* Miniatura interactiva de ventana utilizando d.jpg como luz superpuesta */}
+                        <div className="w-7 h-9 relative rounded overflow-hidden shadow-sm bg-black/40">
+                          <img 
+                            src="d.jpg" 
+                            alt="Luz ventana" 
+                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.8)]' : 'opacity-0'}`} 
+                          />
+                        </div>
                       </div>
                       {!esLibre && (
                         <div className="text-center w-full px-0.5 mt-0.5 select-none">
@@ -629,8 +633,13 @@
                   <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative">
-                        {/* Fondo exclusivo con 4.png para la story individual (Tú) */}
-                        <img src="4.png" alt="Ventana gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+                        {/* Fondo exclusivo con c.jpg y d.jpg para la story individual (Tú) */}
+                        <img src="c.jpg" alt="Ventana gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+                        <img 
+                          src="d.jpg" 
+                          alt="Luz ventana" 
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-0 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
+                        />
                         
                         <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
@@ -640,7 +649,10 @@
                         </div>
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
-                          <WindowImage isOn={isReadingNow} isVacant={false} className="w-16 h-auto drop-shadow-2xl" />
+                          <div className="w-16 h-20 relative rounded-lg overflow-hidden shadow-2xl">
+                            <img src="c.jpg" alt="Ventana" className="w-full h-full object-cover" />
+                            <img src="d.jpg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} />
+                          </div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
                             <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
@@ -652,7 +664,7 @@
                         </div>
                       </div>
                     ) : (
-                      /* Aquí se muestra la postal con el edificio completo (3.png) */
+                      /* Postal con el edificio completo (a.jpg) */
                       <EdificioPostal usuarias={miembrosEdificio} />
                     )}
                   </div>
@@ -667,7 +679,7 @@
               </div>
             )}
 
-            {/* ====== MODAL POÉTICO ACTUALIZADO ====== */}
+            {/* ====== MODAL POÉTICO PARA VECINAS ====== */}
             {sociaSeleccionadaModal && (
               <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-md flex items-center justify-center p-4 fade-in" onClick={(e) => { if (e.target === e.currentTarget) setSociaSeleccionadaModal(null) }}>
                 <div className="editorial-card bg-white max-w-xs w-full p-8 space-y-6 relative shadow-2xl text-center">
@@ -680,7 +692,10 @@
                   </div>
                   
                   <div className="flex justify-center">
-                    <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} isVacant={false} className="w-12 h-auto opacity-80" />
+                    <div className="w-12 h-16 relative rounded overflow-hidden shadow">
+                      <img src="c.jpg" alt="Ventana" className="w-full h-full object-cover" />
+                      <img src="d.jpg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} />
+                    </div>
                   </div>
                   
                   {sociaSeleccionadaModal.estaLeyendo ? (
