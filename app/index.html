@@ -138,24 +138,26 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
+         COMPONENTE: WindowVector (Ventana arquitectónica vectorial limpia y elegante)
          ========================================================================== */
-      function WindowImage({ isOn, isVacant, className = '' }) {
+      function WindowVector({ isOn, isVacant, className = '' }) {
         return (
-          <div className={`relative overflow-hidden rounded-xl ${className}`}>
-            <img src="c.svg" alt="Ventana de lectura" className="w-full h-full object-cover" />
-            <img 
-              src="d.svg" 
-              alt="Luz de ventana" 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
-              style={{ mixBlendMode: 'screen' }}
-            />
+          <div className={`relative overflow-hidden rounded-lg bg-[#14161f] border border-gray-700/60 shadow-inner flex flex-col items-center justify-center p-2 ${className}`}>
+            {/* Cielo nocturno estrellado sutil */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0d0f17] to-[#1a1d28]"></div>
+            
+            {/* Marco de ventana arqueado o rectangular editorial */}
+            <div className={`relative z-10 w-full h-full border-2 rounded-t-full transition-all duration-500 flex items-center justify-center ${isOn && !isVacant ? 'border-[#fef08a] bg-[#fef08a]/20 shadow-[0_0_15px_rgba(254,240,138,0.4)]' : 'border-gray-600/40 bg-gray-900/50'} ${isVacant ? 'opacity-30' : ''}`}>
+              {isOn && !isVacant && (
+                <div className="w-2 h-3 bg-[#fef08a] rounded-full blur-[1px] animate-pulse"></div>
+              )}
+            </div>
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Fachada limpia, robusta e impecable con c.svg y d.svg)
+         COMPONENTE: EdificioPostal (Fachada editorial vectorial 100% robusta)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -170,19 +172,19 @@
         }, [usuarias]);
 
         return (
-          <div className="postal-ratio w-full flex flex-col justify-between p-5 bg-[#181a24] text-white rounded-2xl shadow-2xl relative overflow-hidden border border-gray-800">
-            {/* Cabecera */}
-            <div className="flex justify-between items-start z-15">
+          <div className="postal-ratio w-full flex flex-col justify-between p-5 bg-[#0f1117] text-white rounded-2xl shadow-2xl relative overflow-hidden border border-gray-800">
+            {/* Cabecera de la postal */}
+            <div className="flex justify-between items-start z-20">
               <div>
                 <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
                 <h2 className="font-serif-title text-xl italic text-white leading-tight">La Fachada</h2>
               </div>
-              <span className="text-[10px] font-mono-code bg-[#2a2c38] text-[#ADAE1D] px-2.5 py-1 rounded-full border border-gray-700">
+              <span className="text-[10px] font-mono-code bg-[#1f2333] text-[#ADAE1D] px-2.5 py-1 rounded-full border border-gray-700">
                 {activasCount} de {registradasCount} en vela
               </span>
             </div>
 
-            {/* Cuadrícula de ventanas independientes (c.svg + d.svg) sin fallos de desalineación */}
+            {/* Cuadrícula arquitectónica vectorial */}
             <div className="grid grid-cols-3 gap-3 my-auto z-10 px-1">
               {miembros.map((miembro, i) => {
                 const esLibre = miembro.esLibre;
@@ -196,10 +198,10 @@
                       else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                     }}
                   >
-                    <div className={`w-14 h-20 relative rounded-lg overflow-hidden shadow-lg transition-transform ${miembro.esYo ? 'scale-105 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'} ${esLibre ? 'opacity-30' : ''}`}>
-                      <WindowImage isOn={miembro.estaLeyendo} isVacant={esLibre} className="w-full h-full" />
+                    <div className={`w-14 h-20 relative transition-transform ${miembro.esYo ? 'scale-105 ring-2 ring-[#ADAE1D] rounded-xl' : 'hover:scale-105'}`}>
+                      <WindowVector isOn={miembro.estaLeyendo} isVacant={esLibre} className="w-full h-full" />
                     </div>
-                    <span className="block text-[8px] font-medium leading-tight text-white/80 mt-1 truncate max-w-[70px] text-center">
+                    <span className="block text-[8px] font-medium leading-tight text-white/80 mt-1.5 truncate max-w-[70px] text-center">
                       {miembro.nombre}{miembro.esYo ? ' *' : ''}
                     </span>
                   </div>
@@ -207,7 +209,7 @@
               })}
             </div>
 
-            <div className="text-center z-15">
+            <div className="text-center z-20">
               <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
             </div>
           </div>
@@ -618,7 +620,7 @@
                   {/* Vista previa para Stories */}
                   <div className="w-full max-w-[260px] relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#181a24]">
+                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#0f1117]">
                         <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
@@ -628,7 +630,7 @@
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
                           <div className="w-20 h-28 relative rounded-xl overflow-hidden shadow-2xl">
-                            <WindowImage isOn={isReadingNow} className="w-full h-full" />
+                            <WindowVector isOn={isReadingNow} className="w-full h-full" />
                           </div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
@@ -641,7 +643,7 @@
                         </div>
                       </div>
                     ) : (
-                      /* Postal con el edificio completo */
+                      /* Postal con el edificio completo vectorial */
                       <EdificioPostal usuarias={miembrosEdificio} />
                     )}
                   </div>
@@ -670,7 +672,7 @@
                   
                   <div className="flex justify-center">
                     <div className="w-16 h-24 relative rounded-lg overflow-hidden shadow">
-                      <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} className="w-full h-full" />
+                      <WindowVector isOn={sociaSeleccionadaModal.estaLeyendo} className="w-full h-full" />
                     </div>
                   </div>
                   
