@@ -138,7 +138,7 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para ventanas individuales)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
@@ -155,7 +155,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y b.svg recortado por Sprites CSS)
+         COMPONENTE: EdificioPostal (Edificio modular construido con ventanas c.svg + d.svg)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -170,61 +170,44 @@
         }, [usuarias]);
 
         return (
-          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* a.svg: Fondo completo del edificio con ventanas apagadas */}
-            <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
-            
+          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl bg-[#12141c]">
             {/* Cabecera */}
             <div className="flex justify-between items-start w-full z-10 pt-2 px-1">
               <div>
                 <h2 className="text-xl font-serif-title text-white italic leading-tight drop-shadow-md">gilda</h2>
-                <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5 drop-shadow">
+                <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">
                   {activasCount} de {registradasCount} en vela
                 </p>
               </div>
             </div>
 
-            {/* Cuadrícula interactiva superpuesta exactamente sobre el edificio a.svg */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-              <div className="w-[36%] h-[58%] mt-4 grid grid-cols-3 grid-rows-6 gap-1.5 pointer-events-auto">
-                {miembros.map((miembro, i) => {
-                  const estaActiva = miembro.estaLeyendo;
-                  const esLibre = miembro.esLibre;
-                  const row = Math.floor(i / 3);
-                  const col = i % 3;
-                  const esPuerta = (i === 16); // Posición 16 es la puerta principal en la planta baja
-
-                  if (esPuerta) {
-                    return <div key={i} className="pointer-events-none"></div>;
-                  }
-
-                  return (
-                    <div key={i} className="flex flex-col items-center relative group">
-                      <div
-                        onClick={() => {
-                          if (esLibre) return;
-                          if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                          else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                        }}
-                        className={`w-full h-full relative rounded overflow-hidden cursor-pointer transition-transform ${miembro.esYo ? 'scale-105 z-25 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
-                        style={{
-                          backgroundImage: estaActiva && !esLibre ? `url('b.svg')` : 'none',
-                          backgroundSize: '300% 600%',
-                          backgroundPosition: `${(col / 2) * 100}% ${(row / 5) * 100}%`,
-                          mixBlendMode: 'screen'
-                        }}
-                      ></div>
-                      {!esLibre && (
-                        <div className="absolute -bottom-3 text-center w-max px-0.5 select-none pointer-events-none">
-                          <span className="block text-[6px] font-medium leading-tight text-white bg-black/60 px-1 rounded drop-shadow">
-                            {miembro.nombre}{miembro.esYo ? ' *' : ''}
-                          </span>
-                        </div>
-                      )}
+            {/* Cuadrícula arquitectónica de ventanas individuales */}
+            <div className="grid grid-cols-3 gap-3 my-auto px-2 z-10">
+              {miembros.map((miembro, i) => {
+                const esLibre = miembro.esLibre;
+                return (
+                  <div 
+                    key={i} 
+                    className="flex flex-col items-center group cursor-pointer"
+                    onClick={() => {
+                      if (esLibre) return;
+                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                    }}
+                  >
+                    <div className={`w-14 h-20 relative rounded-lg overflow-hidden shadow-md transition-transform ${miembro.esYo ? 'scale-105 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'} ${esLibre ? 'opacity-40' : ''}`}>
+                      <WindowImage isOn={miembro.estaLeyendo} isVacant={esLibre} className="w-full h-full" />
                     </div>
-                  );
-                })}
-              </div>
+                    <span className="block text-[8px] font-medium leading-tight text-white/80 mt-1 truncate max-w-[70px] text-center">
+                      {miembro.nombre}{miembro.esYo ? ' *' : ''}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="text-center pb-1 z-10">
+              <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
             </div>
           </div>
         );
@@ -631,18 +614,10 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con c.svg y d.svg */}
+                  {/* Vista previa para Stories con ventanas modulares c.svg y d.svg */}
                   <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative">
-                        <img src="c.svg" alt="Ventana gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
-                        <img 
-                          src="d.svg" 
-                          alt="Luz ventana" 
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-0 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
-                          style={{ mixBlendMode: 'screen' }}
-                        />
-                        
+                      <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#12141c]">
                         <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
@@ -651,9 +626,8 @@
                         </div>
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
-                          <div className="w-16 h-20 relative rounded-lg overflow-hidden shadow-2xl">
-                            <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
-                            <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} style={{ mixBlendMode: 'screen' }} />
+                          <div className="w-20 h-28 relative rounded-xl overflow-hidden shadow-2xl">
+                            <WindowImage isOn={isReadingNow} className="w-full h-full" />
                           </div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
@@ -666,7 +640,7 @@
                         </div>
                       </div>
                     ) : (
-                      /* Postal con el edificio completo (a.svg) */
+                      /* Postal con el edificio completo modular */
                       <EdificioPostal usuarias={miembrosEdificio} />
                     )}
                   </div>
@@ -694,9 +668,8 @@
                   </div>
                   
                   <div className="flex justify-center">
-                    <div className="w-12 h-16 relative rounded overflow-hidden shadow">
-                      <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
-                      <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} style={{ mixBlendMode: 'screen' }} />
+                    <div className="w-16 h-24 relative rounded-lg overflow-hidden shadow">
+                      <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} className="w-full h-full" />
                     </div>
                   </div>
                   
