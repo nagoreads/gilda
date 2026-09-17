@@ -138,20 +138,23 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Cambia limpiamente entre (2).png y (3).png)
+         COMPONENTE: WindowImage (Utiliza s'jc 2.png y la luz transparente 4.png)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
-        const imagenVentana = (isOn && !isVacant) ? 'Sin título (Historia de Instagram) (3).png' : 'Sin título (Historia de Instagram) (2).png';
         return (
           <div className={`relative overflow-hidden rounded-xl bg-[#2b2f42] flex items-center justify-center ${className}`}>
-            <img src={imagenVentana} alt="Ventana de lectura" className="w-full h-full object-cover" />
-            {isVacant && <div className="absolute inset-0 bg-black/30 backdrop-grayscale"></div>}
+            <img src="s'jc 2.png" alt="Ventana de lectura" className="w-full h-full object-cover" />
+            <img 
+              src="4.png" 
+              alt="Luz de ventana" 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
+            />
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Usa edificio y d.svg para luces individuales)
+         COMPONENTE: EdificioPostal (Utiliza el edificio y d.svg para luces individuales)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -625,15 +628,18 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con las ilustraciones 9:16 */}
+                  {/* Vista previa para Stories con las ilustraciones 9:16 y transparencia */}
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        {/* Imagen 9:16 condicional según si la luz está encendida o apagada */}
+                        {/* Fondo base s'jc 2.png con la luna y estrellas completas */}
+                        <img src="s'jc 2.png" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-cover z-0" />
+                        
+                        {/* Luz transparente 4.png superpuesta */}
                         <img 
-                          src={isReadingNow ? 'Sin título (Historia de Instagram) (3).png' : 'Sin título (Historia de Instagram) (2).png'} 
-                          alt="Ventana de lectura" 
-                          className="absolute inset-0 w-full h-full object-cover z-0" 
+                          src="4.png" 
+                          alt="Luz ventana" 
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
                         />
 
                         {/* Cabecera superior */}
