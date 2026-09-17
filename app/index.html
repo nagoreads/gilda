@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Alineación milimétrica corregida)
+         COMPONENTE: EdificioPostal (Alineación perfecta de marcos y nombres)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -194,8 +194,8 @@
                       </span>
                     </div>
 
-                    {/* Cuadrícula sincronizada exactamente con los marcos de la torre */}
-                    <div className="absolute top-[26.5%] left-[26.5%] w-[47%] h-[53%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1 gap-y-1.5 pointer-events-auto">
+                    {/* Cuadrícula milimétricamente ajustada al tamaño y posición de las ventanas */}
+                    <div className="absolute top-[25%] left-[24%] w-[52%] h-[56%] z-10 grid grid-cols-3 grid-rows-6 gap-x-2 gap-y-2 pointer-events-auto">
                       {miembrosBloque.map((miembro, i) => {
                         const estaActiva = miembro.estaLeyendo;
                         const esLibre = miembro.esLibre;
@@ -213,16 +213,16 @@
                               if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
                               else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                             }}
-                            className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
+                            className={`relative w-full h-full rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                           >
                             <img 
                               src="ventanatransparente.png" 
                               alt="Luz ventana" 
-                              className={`absolute inset-0 w-full h-full object-fill transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                              className={`absolute inset-0 w-full h-full object-cover rounded transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
                             />
 
                             {!esLibre && (
-                              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
                                 <span className="block text-[5px] font-medium leading-tight text-white bg-black/90 px-1 py-0.5 rounded shadow-sm">
                                   {miembro.nombre}{miembro.esYo ? ' *' : ''}
                                 </span>
