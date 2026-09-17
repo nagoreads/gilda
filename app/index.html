@@ -138,24 +138,20 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Usa la nueva ilustración 9:16 de ventana)
+         COMPONENTE: WindowImage (Cambia limpiamente entre (2).png y (3).png)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
+        const imagenVentana = (isOn && !isVacant) ? 'Sin título (Historia de Instagram) (3).png' : 'Sin título (Historia de Instagram) (2).png';
         return (
           <div className={`relative overflow-hidden rounded-xl bg-[#2b2f42] flex items-center justify-center ${className}`}>
-            <img src="Sin título (Historia de Instagram) (2).png" alt="Ventana de lectura" className="w-full h-full object-cover" />
-            <img 
-              src="Sin título (Historia de Instagram) (3).png" 
-              alt="Luz de ventana" 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
-              style={{ mixBlendMode: 'screen' }}
-            />
+            <img src={imagenVentana} alt="Ventana de lectura" className="w-full h-full object-cover" />
+            {isVacant && <div className="absolute inset-0 bg-black/30 backdrop-grayscale"></div>}
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Usa la nueva ilustración 9:16 de edificio)
+         COMPONENTE: EdificioPostal (Usa edificio y d.svg para luces individuales)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -171,10 +167,8 @@
 
         return (
           <div className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc]">
-            {/* Ilustración completa 9:16 del edificio */}
             <img src="Sin título (Historia de Instagram).png" alt="Edificio gilda" className="w-full h-auto block z-0" />
             
-            {/* Cabecera superior integrada */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
               <div>
                 <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
@@ -184,12 +178,11 @@
               </div>
             </div>
 
-            {/* Cuadrícula posicionada milimétricamente sobre las ventanas */}
             <div className="absolute top-[18%] left-[26%] w-[48%] h-[64%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
               {miembros.map((miembro, i) => {
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
-                const esPuertaPrincipal = (i === 16); // Planta baja puerta
+                const esPuertaPrincipal = (i === 16);
 
                 if (esPuertaPrincipal) {
                   return <div key={i} className="pointer-events-none"></div>;
@@ -205,15 +198,13 @@
                     }}
                     className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                   >
-                    {/* Luz individual alineada con la nueva imagen de cuadrícula de luces */}
                     <img 
-                      src="Sin título (Historia de Instagram) (1).png" 
+                      src="d.svg" 
                       alt="Luz ventana" 
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                      className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
                       style={{ mixBlendMode: 'screen' }}
                     />
 
-                    {/* Nombre socia */}
                     {!esLibre && (
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
                         <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
@@ -634,19 +625,15 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con las nuevas ilustraciones 9:16 */}
+                  {/* Vista previa para Stories con las ilustraciones 9:16 */}
                   <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        {/* Ilustración 9:16 de la ventana con luna y estrellas completas */}
-                        <img src="Sin título (Historia de Instagram) (2).png" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-cover z-0" />
-                        
-                        {/* Luz de la ventana superpuesta */}
+                        {/* Imagen 9:16 condicional según si la luz está encendida o apagada */}
                         <img 
-                          src="Sin título (Historia de Instagram) (3).png" 
-                          alt="Luz ventana" 
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
-                          style={{ mixBlendMode: 'screen' }}
+                          src={isReadingNow ? 'Sin título (Historia de Instagram) (3).png' : 'Sin título (Historia de Instagram) (2).png'} 
+                          alt="Ventana de lectura" 
+                          className="absolute inset-0 w-full h-full object-cover z-0" 
                         />
 
                         {/* Cabecera superior */}
