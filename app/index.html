@@ -509,7 +509,12 @@
         
         const usuariasConectadas = useMemo(() => {
           const ah = new Date().getTime();
-          return usuariasClub.filter(u => u.email === sesion?.email || (ah - Number(u.ultima_actividad || 0)) < 15 * 60 * 1000);
+          return usuariasClub.filter(u => {
+            if (u.email === sesion?.email) return true;
+            if (!u.ultima_actividad) return false;
+            const t = new Date(u.ultima_actividad).getTime();
+            return (ah - (isNaN(t) ? 0 : t)) < 15 * 60 * 1000;
+          });
         }, [usuariasClub, sesion]);
 
         const miembrosEdificio = useMemo(() => {
