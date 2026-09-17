@@ -154,26 +154,24 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Usa edificio.png y edificiotransparente.png)
+         COMPONENTE: EdificioPostal (Usa edificio.png y la cuadrícula individual con ventanatransparente.png)
          ========================================================================== */
-      function EdificioPostal({ usuarias, onToggleMiLuz }) {
+      function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
-        const hayAlguienLeyendo = activasCount > 0;
+        const MIN_ESTANCIAS = 18; 
+        const miembros = useMemo(() => {
+          const lista = [...usuarias];
+          while (lista.length < MIN_ESTANCIAS) {
+            lista.push({ nombre: 'Estancia disponible', esLibre: true, estaLeyendo: false, libroReal: '' });
+          }
+          return lista;
+        }, [usuarias]);
 
         return (
-          <div 
-            onClick={() => { if (onToggleMiLuz) onToggleMiLuz(); }}
-            className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] cursor-pointer group"
-          >
+          <div className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc]">
             <img src="edificio.png" alt="Edificio gilda" className="w-full h-auto block z-0" />
             
-            <img 
-              src="edificiotransparente.png" 
-              alt="Luces del edificio" 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${hayAlguienLeyendo ? 'opacity-100 drop-shadow-[0_0_8px_rgba(254,240,138,0.8)]' : 'opacity-10 grayscale brightness-50'}`} 
-            />
-
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
               <div>
                 <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
@@ -181,6 +179,45 @@
                   {activasCount} de {registradasCount} en vela
                 </p>
               </div>
+            </div>
+
+            {/* Cuadrícula interactiva superpuesta exactamente sobre las ventanas del edificio */}
+            <div className="absolute top-[18%] left-[26%] w-[48%] h-[64%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
+              {miembros.map((miembro, i) => {
+                const estaActiva = miembro.estaLeyendo;
+                const esLibre = miembro.esLibre;
+                const esPuertaPrincipal = (i === 16);
+
+                if (esPuertaPrincipal) {
+                  return <div key={i} className="pointer-events-none"></div>;
+                }
+
+                return (
+                  <div
+                    key={i}
+                    onClick={() => {
+                      if (esLibre) return;
+                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                    }}
+                    className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
+                  >
+                    <img 
+                      src="ventanatransparente.png" 
+                      alt="Luz ventana" 
+                      className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                    />
+
+                    {!esLibre && (
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                        <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
+                          {miembro.nombre}{miembro.esYo ? ' *' : ''}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
@@ -773,7 +810,7 @@
                         <p className="text-xs text-gray-500 mt-1">Nuestra casa compartida en vela.</p>
                       </div>
                       <div className="w-full max-w-[280px]">
-                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} />
+                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
                       </div>
                     </div>
                   )}
