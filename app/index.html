@@ -138,24 +138,25 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Usa la ventana individual 4.png)
+         COMPONENTE: WindowImage (Usa ventana.png y ventanatransparente.png)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
           <div className={`relative overflow-hidden rounded-xl bg-[#2b2f42] flex items-center justify-center ${className}`}>
+            <img src="ventana.png" alt="Ventana de lectura" className="w-full h-full object-cover z-0" />
             <img 
-              src="4.png" 
-              alt="Ventana de lectura" 
-              className={`w-full h-full object-contain transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-20 grayscale'}`} 
+              src="ventanatransparente.png" 
+              alt="Luz de ventana" 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
             />
           </div>
         );
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Usa el edificio base y la cuadrícula 2.png)
+         COMPONENTE: EdificioPostal (Usa edificio.png y edificiotransparente.png)
          ========================================================================== */
-      function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
+      function EdificioPostal({ usuarias, onToggleMiLuz }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
         const registradasCount = usuarias.filter(m => !m.esLibre).length;
         const hayAlguienLeyendo = activasCount > 0;
@@ -165,17 +166,14 @@
             onClick={() => { if (onToggleMiLuz) onToggleMiLuz(); }}
             className="w-full relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] cursor-pointer group"
           >
-            {/* Imagen base del edificio */}
-            <img src="Sin título (Historia de Instagram).png" alt="Edificio gilda" className="w-full h-auto block z-0" />
+            <img src="edificio.png" alt="Edificio gilda" className="w-full h-auto block z-0" />
             
-            {/* Cuadrícula completa de luces 2.png superpuesta de forma milimétrica */}
             <img 
-              src="2.png" 
+              src="edificiotransparente.png" 
               alt="Luces del edificio" 
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${hayAlguienLeyendo ? 'opacity-100 drop-shadow-[0_0_8px_rgba(254,240,138,0.8)]' : 'opacity-10 grayscale brightness-50'}`} 
             />
 
-            {/* Cabecera superior integrada */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20 pointer-events-none">
               <div>
                 <h2 className="text-base sm:text-lg font-serif-title text-[#262624] italic leading-tight drop-shadow-sm">gilda</h2>
@@ -775,7 +773,7 @@
                         <p className="text-xs text-gray-500 mt-1">Nuestra casa compartida en vela.</p>
                       </div>
                       <div className="w-full max-w-[280px]">
-                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
+                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} />
                       </div>
                     </div>
                   )}
