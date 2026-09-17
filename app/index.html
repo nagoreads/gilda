@@ -138,7 +138,7 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg con mixBlendMode screen)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
@@ -155,7 +155,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y b.svg con mixBlendMode screen)
+         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y d.svg posicionado por coordenadas absolutas)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -169,13 +169,41 @@
           return lista;
         }, [usuarias]);
 
+        // Coordenadas absolutas exactas (porcentuales) para las 18 ventanas sobre a.svg
+        const coordenadasVentanas = [
+          // Fila 1 (superior)
+          { top: '23.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '23.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
+          { top: '23.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+          // Fila 2
+          { top: '34.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '34.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
+          { top: '34.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+          // Fila 3
+          { top: '45.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '45.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
+          { top: '45.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+          // Fila 4
+          { top: '56.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '56.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
+          { top: '56.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+          // Fila 5
+          { top: '67.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '67.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
+          { top: '67.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+          // Fila 6 (inferior - la posición 16 es la puerta principal)
+          { top: '78.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
+          { top: '78.5%', left: '45.2%', width: '9.5%', height: '7.5%' }, // Puerta / Centro inferior
+          { top: '78.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
+        ];
+
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
             {/* a.svg: Edificio completo base con ventanas apagadas */}
             <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
             
             {/* Cabecera */}
-            <div className="flex justify-between items-start w-full z-10 pt-2 px-1">
+            <div className="flex justify-between items-start w-full z-20 pt-2 px-1">
               <div>
                 <h2 className="text-xl font-serif-title text-white italic leading-tight drop-shadow-md">gilda</h2>
                 <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5 drop-shadow">
@@ -184,56 +212,52 @@
               </div>
             </div>
 
-            {/* Cuadrícula interactiva superpuesta sobre a.svg */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-              <div className="w-[36%] h-[58%] mt-4 grid grid-cols-3 grid-rows-6 gap-1.5 pointer-events-auto">
-                {miembros.map((miembro, i) => {
-                  const estaActiva = miembro.estaLeyendo;
-                  const esLibre = miembro.esLibre;
-                  const row = Math.floor(i / 3);
-                  const col = i % 3;
-                  const esPuerta = (i === 16); // Posición 16 es la puerta principal en la planta baja
+            {/* Capa interactiva de ventanas superpuestas con d.svg */}
+            <div className="absolute inset-0 z-10 pointer-events-none">
+              {miembros.map((miembro, i) => {
+                if (i >= coordenadasVentanas.length) return null;
+                const pos = coordenadasVentanas[i];
+                const estaActiva = miembro.estaLeyendo;
+                const esLibre = miembro.esLibre;
+                const esPuertaPrincipal = (i === 16); // Evitar interactividad en la puerta
 
-                  if (esPuerta) {
-                    return <div key={i} className="pointer-events-none"></div>;
-                  }
+                if (esPuertaPrincipal && esLibre) return null;
 
-                  return (
-                    <div key={i} className="flex flex-col items-center relative group">
-                      <div
-                        onClick={() => {
-                          if (esLibre) return;
-                          if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
-                          else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
-                        }}
-                        className={`w-full h-full relative rounded overflow-hidden cursor-pointer transition-transform ${miembro.esYo ? 'scale-105 z-25 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
-                      >
-                        {/* b.svg recortado y con mixBlendMode screen para eliminar fondo negro y fundir luz perfecta */}
-                        <img 
-                          src="b.svg" 
-                          alt="Luz ventana edificio" 
-                          className="absolute max-none transition-opacity duration-300 pointer-events-none"
-                          style={{
-                            width: '300%',
-                            height: '600%',
-                            top: `-${row * 100}%`,
-                            left: `-${col * 100}%`,
-                            opacity: estaActiva && !esLibre ? 1 : 0,
-                            mixBlendMode: 'screen'
-                          }}
-                        />
+                return (
+                  <div
+                    key={i}
+                    onClick={() => {
+                      if (esLibre || esPuertaPrincipal) return;
+                      if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
+                      else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
+                    }}
+                    className={`absolute pointer-events-auto cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30' : 'hover:scale-105'}`}
+                    style={{
+                      top: pos.top,
+                      left: pos.left,
+                      width: pos.width,
+                      height: pos.height
+                    }}
+                  >
+                    {/* d.svg: Capa transparente de luz para encender la ventana milimétricamente */}
+                    <img 
+                      src="d.svg" 
+                      alt="Luz ventana" 
+                      className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_8px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                      style={{ mixBlendMode: 'screen' }}
+                    />
+
+                    {/* Nombre de la usuaria bajo su ventana */}
+                    {!esLibre && !esPuertaPrincipal && (
+                      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                        <span className="block text-[6px] font-medium leading-tight text-white bg-black/70 px-1 py-0.5 rounded shadow">
+                          {miembro.nombre}{miembro.esYo ? ' *' : ''}
+                        </span>
                       </div>
-                      {!esLibre && (
-                        <div className="absolute -bottom-3 text-center w-max px-0.5 select-none pointer-events-none">
-                          <span className="block text-[6px] font-medium leading-tight text-white bg-black/60 px-1 rounded drop-shadow">
-                            {miembro.nombre}{miembro.esYo ? ' *' : ''}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
