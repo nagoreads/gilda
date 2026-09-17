@@ -382,14 +382,15 @@
         }, [sesion, lecturasPersonales]);
 
         const enviarAccion = async (action, payload) => {
-          try {
-            const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
-            await fetch(GOOGLE_API_URL, {
-              method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action, usuaria: nombreActual, email: sesion?.email, ...payload, fecha: new Date().toLocaleDateString('es-ES') }),
-            });
-          } catch (err) { console.error(err); }
-        };
+  try {
+    const nombreActual = localStorage.getItem('gilda_nombre_usuario') || sesion?.nombre || 'Socia';
+    await fetch(GOOGLE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, usuaria: nombreActual, email: sesion?.email, ...payload, fecha: new Date().toLocaleDateString('es-ES') }),
+    });
+  } catch (err) { console.error(err); }
+};
 
         const iniciarSesion = (e) => {
           e.preventDefault();
