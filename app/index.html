@@ -634,29 +634,38 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories */}
-                  <div className="w-full max-w-[260px] relative overflow-hidden rounded-xl">
+                  {/* Vista previa para Stories: c.svg ocupa toda la pantalla de la postal */}
+                  <div className="w-full max-w-[280px] relative overflow-hidden rounded-xl shadow-2xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
-                        <div className="flex justify-between items-start w-full z-10">
-                          <div className="text-left">
-                            <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
-                            <h2 className="font-serif-title text-xl text-white italic">En vela leyendo</h2>
+                        {/* c.svg como fondo completo de pantalla */}
+                        <img src="c.svg" alt="Fondo ventana" className="absolute inset-0 w-full h-full object-cover z-0" />
+                        
+                        {/* d.svg como luz de la ventana superpuesta */}
+                        <img 
+                          src="d.svg" 
+                          alt="Luz ventana" 
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
+                          style={{ mixBlendMode: 'screen' }}
+                        />
+
+                        {/* Textos y contenido superpuestos con legibilidad */}
+                        <div className="flex justify-between items-start w-full z-20">
+                          <div className="text-left bg-black/30 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/10">
+                            <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-0.5">gilda</p>
+                            <h2 className="font-serif-title text-base text-white italic">En vela leyendo</h2>
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
-                          <div className="w-24 h-36 relative rounded-xl overflow-hidden shadow-2xl">
-                            <WindowImage isOn={isReadingNow} className="w-full h-full" />
-                          </div>
-                          <div className="space-y-1.5 w-full px-2">
-                            <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
-                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2">{libroPersonal || libroActual.titulo}</p>
+                        <div className="flex flex-col items-center justify-center my-auto space-y-2 w-full z-20">
+                          <div className="space-y-1 w-full px-2 bg-black/40 backdrop-blur-xs py-3 rounded-xl border border-white/10">
+                            <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
+                            <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
                           </div>
                         </div>
 
-                        <div className="pb-1 z-10">
-                          <span className="text-white/40 text-[9px] font-mono-code tracking-wider">@gilda.mailclub</span>
+                        <div className="pb-1 z-20">
+                          <span className="text-white/70 text-[9px] font-mono-code tracking-wider bg-black/30 px-2 py-0.5 rounded">@gilda.mailclub</span>
                         </div>
                       </div>
                     ) : (
@@ -688,7 +697,7 @@
                   </div>
                   
                   <div className="flex justify-center">
-                    <div className="w-20 h-28 relative rounded-lg overflow-hidden shadow">
+                    <div className="w-24 h-36 relative rounded-lg overflow-hidden shadow">
                       <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} className="w-full h-full" />
                     </div>
                   </div>
