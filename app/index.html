@@ -138,7 +138,7 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
@@ -155,7 +155,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg íntegro sin recortes y superpone d.svg)
+         COMPONENTE: EdificioPostal (Utiliza a.svg íntegro y d.svg alineado perfectamente)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -185,7 +185,7 @@
             </div>
 
             {/* Cuadrícula posicionada milimétricamente sobre las ventanas de a.svg */}
-            <div className="absolute top-[26%] left-[32%] w-[36%] h-[58%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
+            <div className="absolute top-[18%] left-[26%] w-[48%] h-[64%] z-10 grid grid-cols-3 grid-rows-6 gap-1 pointer-events-auto">
               {miembros.map((miembro, i) => {
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
@@ -215,7 +215,7 @@
 
                     {/* Nombre socia */}
                     {!esLibre && (
-                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
                         <span className="block text-[5px] sm:text-[6px] font-medium leading-tight text-white bg-black/80 px-1 py-0.5 rounded shadow">
                           {miembro.nombre}{miembro.esYo ? ' *' : ''}
                         </span>
@@ -737,14 +737,6 @@
                 <>
                   {seccionApp === 'inicio' && (
                     <div className="space-y-4 fade-in">
-                      {/* Ilustración b.svg incorporada estéticamente aquí */}
-                      <div className="editorial-card overflow-hidden p-0 relative">
-                        <img src="b.svg" alt="Ilustración gilda" className="w-full h-32 object-cover opacity-90" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                          <p className="text-white font-serif-title italic text-sm">"Un refugio cálido para las lectoras en vela."</p>
-                        </div>
-                      </div>
-
                       <div className="editorial-card p-5 space-y-4">
                         <div className="flex gap-4 items-center">
                           <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
