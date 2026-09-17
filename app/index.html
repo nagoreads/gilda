@@ -138,16 +138,16 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza tus archivos c.jpg y d.jpg)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
           <div className={`relative overflow-hidden rounded-xl ${className}`}>
-            {/* c.jpg: Ventana individual apagada */}
-            <img src="c.jpg" alt="Ventana de lectura" className="w-full h-full object-cover" />
-            {/* d.jpg: Capa transparente de luz para la ventana individual */}
+            {/* c.svg: Ventana individual apagada */}
+            <img src="c.svg" alt="Ventana de lectura" className="w-full h-full object-cover" />
+            {/* d.svg: Capa transparente de luz para la ventana individual */}
             <img 
-              src="d.jpg" 
+              src="d.svg" 
               alt="Luz de ventana" 
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
             />
@@ -156,7 +156,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.jpg como fondo y b.jpg / d.jpg de luz)
+         COMPONENTE: EdificioPostal (Utiliza a.svg como fondo y d.svg para ventanas)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -172,10 +172,8 @@
 
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* Fondo con tu ilustración a.jpg del edificio completo (ventanas apagadas) */}
-            <img src="a.jpg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
-            
-            {/* Capa de luz global opcional b.jpg si se desea matizar el edificio entero, o control por ventana */}
+            {/* Fondo con a.svg (Edificio completo con ventanas apagadas) */}
+            <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
             
             {/* Cabecera */}
             <div className="flex justify-between items-start w-full z-10 pt-2 px-1">
@@ -187,7 +185,7 @@
               </div>
             </div>
 
-            {/* Cuadrícula de ventanas adaptada a 3 columnas sobre el edificio a.jpg */}
+            {/* Cuadrícula de ventanas adaptada a 3 columnas sobre a.svg */}
             <div className="z-10 my-auto px-8 py-2">
               <div className="grid grid-cols-3 gap-y-2 gap-x-4 justify-items-center">
                 {miembros.map((miembro, i) => {
@@ -203,10 +201,11 @@
                         }}
                         className={`cursor-pointer transition-transform ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
                       >
-                        {/* Miniatura interactiva de ventana utilizando d.jpg como luz superpuesta */}
+                        {/* Miniatura de ventana sobre el edificio usando c.svg y d.svg */}
                         <div className="w-7 h-9 relative rounded overflow-hidden shadow-sm bg-black/40">
+                          <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
                           <img 
-                            src="d.jpg" 
+                            src="d.svg" 
                             alt="Luz ventana" 
                             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.8)]' : 'opacity-0'}`} 
                           />
@@ -629,14 +628,13 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories */}
+                  {/* Vista previa para Stories con c.svg y d.svg */}
                   <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative">
-                        {/* Fondo exclusivo con c.jpg y d.jpg para la story individual (Tú) */}
-                        <img src="c.jpg" alt="Ventana gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+                        <img src="c.svg" alt="Ventana gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
                         <img 
-                          src="d.jpg" 
+                          src="d.svg" 
                           alt="Luz ventana" 
                           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-0 ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} 
                         />
@@ -650,8 +648,8 @@
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
                           <div className="w-16 h-20 relative rounded-lg overflow-hidden shadow-2xl">
-                            <img src="c.jpg" alt="Ventana" className="w-full h-full object-cover" />
-                            <img src="d.jpg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} />
+                            <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
+                            <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isReadingNow ? 'opacity-100' : 'opacity-0'}`} />
                           </div>
                           <div className="space-y-1.5 w-full px-2">
                             <h3 className="text-white font-serif-title text-xl leading-normal">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
@@ -664,7 +662,7 @@
                         </div>
                       </div>
                     ) : (
-                      /* Postal con el edificio completo (a.jpg) */
+                      /* Postal con el edificio completo (a.svg) */
                       <EdificioPostal usuarias={miembrosEdificio} />
                     )}
                   </div>
@@ -693,8 +691,8 @@
                   
                   <div className="flex justify-center">
                     <div className="w-12 h-16 relative rounded overflow-hidden shadow">
-                      <img src="c.jpg" alt="Ventana" className="w-full h-full object-cover" />
-                      <img src="d.jpg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} />
+                      <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
+                      <img src="d.svg" alt="Luz" className={`absolute inset-0 w-full h-full object-cover ${sociaSeleccionadaModal.estaLeyendo ? 'opacity-100' : 'opacity-0'}`} />
                     </div>
                   </div>
                   
