@@ -155,7 +155,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y d.svg posicionado por coordenadas absolutas)
+         COMPONENTE: EdificioPostal (Cuadrícula CSS unificada sobre a.svg)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -169,37 +169,9 @@
           return lista;
         }, [usuarias]);
 
-        // Coordenadas absolutas exactas (porcentuales) para las 18 ventanas sobre a.svg
-        const coordenadasVentanas = [
-          // Fila 1 (superior)
-          { top: '23.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '23.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
-          { top: '23.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-          // Fila 2
-          { top: '34.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '34.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
-          { top: '34.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-          // Fila 3
-          { top: '45.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '45.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
-          { top: '45.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-          // Fila 4
-          { top: '56.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '56.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
-          { top: '56.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-          // Fila 5
-          { top: '67.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '67.5%', left: '45.2%', width: '9.5%', height: '7.5%' },
-          { top: '67.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-          // Fila 6 (inferior - la posición 16 es la puerta principal)
-          { top: '78.5%', left: '33.5%', width: '9.5%', height: '7.5%' },
-          { top: '78.5%', left: '45.2%', width: '9.5%', height: '7.5%' }, // Puerta / Centro inferior
-          { top: '78.5%', left: '57.0%', width: '9.5%', height: '7.5%' },
-        ];
-
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* a.svg: Edificio completo base con ventanas apagadas */}
+            {/* a.svg: Fondo completo del edificio con ventanas apagadas */}
             <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
             
             {/* Cabecera */}
@@ -212,43 +184,37 @@
               </div>
             </div>
 
-            {/* Capa interactiva de ventanas superpuestas con d.svg */}
-            <div className="absolute inset-0 z-10 pointer-events-none">
+            {/* Cuadrícula CSS exacta superpuesta sobre la zona de ventanas del edificio */}
+            <div className="absolute top-[22%] left-[32%] w-[36%] h-[63%] z-10 grid grid-cols-3 grid-rows-6 gap-1.5 pointer-events-auto">
               {miembros.map((miembro, i) => {
-                if (i >= coordenadasVentanas.length) return null;
-                const pos = coordenadasVentanas[i];
                 const estaActiva = miembro.estaLeyendo;
                 const esLibre = miembro.esLibre;
-                const esPuertaPrincipal = (i === 16); // Evitar interactividad en la puerta
+                const esPuertaPrincipal = (i === 16); // Posición 16 es la puerta en la planta baja
 
-                if (esPuertaPrincipal && esLibre) return null;
+                if (esPuertaPrincipal) {
+                  return <div key={i} className="pointer-events-none"></div>;
+                }
 
                 return (
                   <div
                     key={i}
                     onClick={() => {
-                      if (esLibre || esPuertaPrincipal) return;
+                      if (esLibre) return;
                       if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
                       else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                     }}
-                    className={`absolute pointer-events-auto cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30' : 'hover:scale-105'}`}
-                    style={{
-                      top: pos.top,
-                      left: pos.left,
-                      width: pos.width,
-                      height: pos.height
-                    }}
+                    className={`relative rounded flex items-center justify-center cursor-pointer transition-transform group ${miembro.esYo ? 'scale-110 z-30 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                   >
-                    {/* d.svg: Capa transparente de luz para encender la ventana milimétricamente */}
+                    {/* d.svg: Luz individual perfectamente alineada en la celda */}
                     <img 
                       src="d.svg" 
                       alt="Luz ventana" 
-                      className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_8px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
+                      className={`w-full h-full object-contain transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.9)]' : 'opacity-0'}`} 
                       style={{ mixBlendMode: 'screen' }}
                     />
 
-                    {/* Nombre de la usuaria bajo su ventana */}
-                    {!esLibre && !esPuertaPrincipal && (
+                    {/* Nombre de la socia */}
+                    {!esLibre && (
                       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-center w-max select-none pointer-events-none z-30">
                         <span className="block text-[6px] font-medium leading-tight text-white bg-black/70 px-1 py-0.5 rounded shadow">
                           {miembro.nombre}{miembro.esYo ? ' *' : ''}
@@ -664,7 +630,7 @@
                     <button onClick={() => setModalStoryAbierto(false)} className="text-white text-xs bg-gray-700 px-2.5 py-1 rounded">cerrar</button>
                   </div>
 
-                  {/* Vista previa para Stories con c.svg y d.svg fusionadas */}
+                  {/* Vista previa para Stories */}
                   <div className="w-full max-w-[260px] postal-ratio border border-gray-700 shadow-2xl relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
                       <div className="w-full h-full flex flex-col justify-between p-6 text-center overflow-hidden relative">
