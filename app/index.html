@@ -195,18 +195,21 @@ function WindowImage({ isOn, isVacant, className = '' }) {
         }, [usuarias]);
 
         return (
-          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border">
-            <div className="story-noise"></div>
+          <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden">
+            {/* Fondo con tu ilustración 3.png */}
+            <img src="3.png" alt="Fachada gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
+            <div className="absolute inset-0 bg-black/15 z-0"></div> {/* Sutil velo para mejorar legibilidad */}
             
+            {/* Cabecera de la postal */}
             <div className="flex justify-between items-start w-full z-10">
               <div>
                 <h2 className="text-2xl font-serif-title text-white italic leading-tight">gilda</h2>
                 <p className="text-[9px] font-mono-code text-[#ADAE1D] uppercase tracking-widest mt-0.5">{activasCount} de {registradasCount} en vela</p>
               </div>
-              <div className="moon" style={{width: '40px', height: '40px'}}></div>
             </div>
 
-            <div className="w-full bg-[#161821] rounded-t-xl border border-[#2e3140] border-bottom-0 p-3 z-10 mt-auto">
+            {/* Cuadrícula de ventanas sobre el edificio */}
+            <div className="w-full bg-[#161821]/85 backdrop-blur-md rounded-t-xl border border-[#2e3140] p-3 z-10 mt-auto shadow-2xl">
               <div className="grid grid-cols-4 gap-y-3 gap-x-1 justify-items-center">
                 {miembros.map((miembro, i) => {
                   const estaActiva = miembro.estaLeyendo;
@@ -221,7 +224,6 @@ function WindowImage({ isOn, isVacant, className = '' }) {
                         }}
                         className={`cursor-pointer ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
                       >
-                        {/* Reemplaza WindowSVG por WindowImage aquí */}
                         <WindowImage 
                           isOn={estaActiva} 
                           isVacant={esLibre} 
