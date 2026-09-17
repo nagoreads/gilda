@@ -138,16 +138,16 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
+         COMPONENTE: WindowImage (Muestra c.svg completo con la luna y las estrellas sin recortar)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
-          <div className={`relative overflow-hidden rounded-xl ${className}`}>
-            <img src="c.svg" alt="Ventana de lectura" className="w-full h-full object-cover" />
+          <div className={`relative overflow-hidden rounded-xl bg-[#2b2f42] flex items-center justify-center ${className}`}>
+            <img src="c.svg" alt="Ventana de lectura" className="w-full h-full object-contain" />
             <img 
               src="d.svg" 
               alt="Luz de ventana" 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
+              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${isOn && !isVacant ? 'opacity-100' : 'opacity-0'} ${isVacant ? 'opacity-20 grayscale' : ''}`} 
               style={{ mixBlendMode: 'screen' }}
             />
           </div>
@@ -552,8 +552,8 @@
         const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
         
         const usuariasConectadas = useMemo(() => {
-          const ahora = new Date().getTime();
-          return usuariasClub.filter(u => u.email === sesion?.email || (ahora - Number(u.ultima_actividad || 0)) < 15 * 60 * 1000);
+          const ah = new Date().getTime();
+          return usuariasClub.filter(u => u.email === sesion?.email || (ah - Number(u.ultima_actividad || 0)) < 15 * 60 * 1000);
         }, [usuariasClub, sesion]);
 
         const miembrosEdificio = useMemo(() => {
@@ -637,7 +637,7 @@
                   {/* Vista previa para Stories */}
                   <div className="w-full max-w-[260px] relative overflow-hidden rounded-xl">
                     {modoStory === 'ventana' ? (
-                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#12141c]">
+                      <div className="w-full h-full postal-ratio flex flex-col justify-between p-6 text-center overflow-hidden relative bg-[#2b2f42]">
                         <div className="flex justify-between items-start w-full z-10">
                           <div className="text-left">
                             <p className="font-mono-code text-[9px] text-[#ADAE1D] tracking-[0.3em] uppercase mb-1">gilda</p>
@@ -646,7 +646,7 @@
                         </div>
 
                         <div className="flex flex-col items-center justify-center my-auto space-y-4 w-full z-10">
-                          <div className="w-20 h-28 relative rounded-xl overflow-hidden shadow-2xl">
+                          <div className="w-24 h-36 relative rounded-xl overflow-hidden shadow-2xl">
                             <WindowImage isOn={isReadingNow} className="w-full h-full" />
                           </div>
                           <div className="space-y-1.5 w-full px-2">
@@ -688,7 +688,7 @@
                   </div>
                   
                   <div className="flex justify-center">
-                    <div className="w-16 h-24 relative rounded-lg overflow-hidden shadow">
+                    <div className="w-20 h-28 relative rounded-lg overflow-hidden shadow">
                       <WindowImage isOn={sociaSeleccionadaModal.estaLeyendo} className="w-full h-full" />
                     </div>
                   </div>
