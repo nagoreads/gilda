@@ -154,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Múltiples edificios al lado y cuadrícula alineada con object-contain)
+         COMPONENTE: EdificioPostal (Sin bordes blancos y con alineación exacta)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -184,17 +184,16 @@
 
             <div className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x">
               {bloquesEdificios.map((miembrosBloque, idxEdificio) => (
-                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-2xl bg-white border border-[#e5e3dc] snap-center aspect-[3/4]">
-                  {/* Cambiado a object-contain para evitar recortes y mantener la alineación exacta */}
-                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-full object-contain block z-0" />
+                <div key={idxEdificio} className="w-[280px] shrink-0 relative rounded-xl overflow-hidden shadow-xl snap-center aspect-[3/4]">
+                  <img src="edificio.png" alt={`Edificio gilda ${idxEdificio + 1}`} className="w-full h-full object-fill block z-0" />
                   
                   <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                    <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-white/90 px-1.5 py-0.5 rounded inline-block">
+                    <span className="text-[8px] font-mono-code text-[#ADAE1D] uppercase tracking-widest font-bold bg-black/40 text-white px-1.5 py-0.5 rounded inline-block backdrop-blur-xs">
                       Torre {idxEdificio + 1}
                     </span>
                   </div>
 
-                  {/* Cuadrícula alineada de forma consistente */}
+                  {/* Cuadrícula milimétricamente alineada sin bordes blancos */}
                   <div className="absolute top-[27%] left-[27%] w-[46%] h-[52%] z-10 grid grid-cols-3 grid-rows-6 gap-x-1.5 gap-y-2 pointer-events-auto">
                     {miembrosBloque.map((miembro, i) => {
                       const estaActiva = miembro.estaLeyendo;
@@ -234,7 +233,7 @@
                   </div>
 
                   <div className="absolute bottom-2 right-3 z-20 pointer-events-none">
-                    <span className="text-gray-500 text-[8px] font-mono-code tracking-wider bg-white/90 px-1 rounded">@gilda.mailclub</span>
+                    <span className="text-white/80 text-[8px] font-mono-code tracking-wider bg-black/40 px-1 rounded backdrop-blur-xs">@gilda.mailclub</span>
                   </div>
                 </div>
               ))}
@@ -660,7 +659,6 @@
 
                         <div className="my-auto z-20"></div>
 
-                        {/* @gilda.mailclub situado exactamente entre la parte de debajo de la ventana y el bloque de texto de la socia */}
                         <div className="space-y-1 w-full px-2 z-20 bg-black/40 backdrop-blur-xs py-3 rounded-xl border border-white/10">
                           <h3 className="text-white font-serif-title text-xl leading-normal drop-shadow">{nombreUsuarioPersonalizado || sesion.nombre}</h3>
                           <p className="text-[#ADAE1D] text-xs font-mono-code italic px-2 drop-shadow">{libroPersonal || libroActual.titulo}</p>
@@ -821,10 +819,8 @@
                   )}
 
                   {seccionApp === 'edificio' && (
-                    <div className="editorial-card p-4 flex flex-col items-center">
-                      <div className="w-full">
-                        <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
-                      </div>
+                    <div className="w-full flex flex-col items-center">
+                      <EdificioPostal usuarias={miembrosEdificio} onToggleMiLuz={toggleLecturaLamp} setSociaSeleccionada={setSociaSeleccionadaModal} />
                     </div>
                   )}
 
