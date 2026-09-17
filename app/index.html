@@ -138,14 +138,12 @@
       ];
 
       /* ==========================================================================
-         COMPONENTE: WindowImage (Utiliza c.svg y d.svg)
+         COMPONENTE: WindowImage (Utiliza c.svg y d.svg para vistas individuales)
          ========================================================================== */
       function WindowImage({ isOn, isVacant, className = '' }) {
         return (
           <div className={`relative overflow-hidden rounded-xl ${className}`}>
-            {/* c.svg: Ventana individual apagada */}
             <img src="c.svg" alt="Ventana de lectura" className="w-full h-full object-cover" />
-            {/* d.svg: Capa transparente de luz para la ventana individual */}
             <img 
               src="d.svg" 
               alt="Luz de ventana" 
@@ -156,7 +154,7 @@
       }
 
       /* ==========================================================================
-         COMPONENTE: EdificioPostal (Utiliza a.svg como fondo y d.svg para ventanas)
+         COMPONENTE: EdificioPostal (Utiliza a.svg de fondo y b.svg recortado por CSS)
          ========================================================================== */
       function EdificioPostal({ usuarias, onToggleMiLuz, setSociaSeleccionada }) {
         const activasCount = usuarias.filter(m => !m.esLibre && m.estaLeyendo).length;
@@ -172,7 +170,7 @@
 
         return (
           <div className="postal-ratio w-full h-full flex flex-col justify-between p-4 box-border relative overflow-hidden rounded-xl shadow-2xl">
-            {/* Fondo con a.svg (Edificio completo con ventanas apagadas) */}
+            {/* a.svg: Fondo completo del edificio con ventanas apagadas */}
             <img src="a.svg" alt="Edificio gilda" className="absolute inset-0 w-full h-full object-cover z-0" />
             
             {/* Cabecera */}
@@ -185,35 +183,47 @@
               </div>
             </div>
 
-            {/* Cuadrícula de ventanas adaptada a 3 columnas sobre a.svg */}
-            <div className="z-10 my-auto px-8 py-2">
-              <div className="grid grid-cols-3 gap-y-2 gap-x-4 justify-items-center">
+            {/* Cuadrícula interactiva superpuesta exactamente sobre el edificio a.svg */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <div className="w-[36%] h-[58%] mt-4 grid grid-cols-3 grid-rows-6 gap-1.5 pointer-events-auto">
                 {miembros.map((miembro, i) => {
                   const estaActiva = miembro.estaLeyendo;
                   const esLibre = miembro.esLibre;
+                  const row = Math.floor(i / 3);
+                  const col = i % 3;
+                  const esPuerta = (i === 16); // Posición 16 es la puerta principal en la planta baja
+
+                  if (esPuerta) {
+                    return <div key={i} className="pointer-events-none"></div>;
+                  }
+
                   return (
-                    <div key={i} className="flex flex-col items-center w-full group">
+                    <div key={i} className="flex flex-col items-center relative group">
                       <div
                         onClick={() => {
                           if (esLibre) return;
                           if (miembro.esYo && onToggleMiLuz) onToggleMiLuz();
                           else if (setSociaSeleccionada) setSociaSeleccionada(miembro);
                         }}
-                        className={`cursor-pointer transition-transform ${miembro.esYo ? 'scale-110 z-20' : 'hover:-translate-y-1'}`}
+                        className={`w-full h-full relative rounded overflow-hidden cursor-pointer transition-transform ${miembro.esYo ? 'scale-105 z-25 ring-2 ring-[#ADAE1D]' : 'hover:scale-105'}`}
                       >
-                        {/* Miniatura de ventana sobre el edificio usando c.svg y d.svg */}
-                        <div className="w-7 h-9 relative rounded overflow-hidden shadow-sm bg-black/40">
-                          <img src="c.svg" alt="Ventana" className="w-full h-full object-cover" />
-                          <img 
-                            src="d.svg" 
-                            alt="Luz ventana" 
-                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${estaActiva && !esLibre ? 'opacity-100 drop-shadow-[0_0_6px_rgba(254,240,138,0.8)]' : 'opacity-0'}`} 
-                          />
-                        </div>
+                        {/* b.svg recortado matemáticamente por CSS para encajar perfectamente en cada ventana */}
+                        <img 
+                          src="b.svg" 
+                          alt="Luz ventana edificio" 
+                          className="absolute max-none transition-opacity duration-300"
+                          style={{
+                            width: '300%',
+                            height: '600%',
+                            top: `-${row * 100}%`,
+                            left: `-${col * 100}%`,
+                            opacity: estaActiva && !esLibre ? 1 : 0
+                          }}
+                        />
                       </div>
                       {!esLibre && (
-                        <div className="text-center w-full px-0.5 mt-0.5 select-none">
-                          <span className={`block text-[7px] font-medium leading-tight truncate text-white drop-shadow`}>
+                        <div className="absolute -bottom-3 text-center w-max px-0.5 select-none pointer-events-none">
+                          <span className="block text-[6px] font-medium leading-tight text-white bg-black/60 px-1 rounded drop-shadow">
                             {miembro.nombre}{miembro.esYo ? ' *' : ''}
                           </span>
                         </div>
