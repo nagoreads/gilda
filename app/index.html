@@ -280,12 +280,44 @@
         );
       }
 
+      // Componente PortadaLibro mejorado con búsqueda automática cuando falta la portada
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
+        const [imgUrl, setImgUrl] = useState(portada || '');
         const [errorImg, setErrorImg] = useState(false);
+
+        useEffect(() => {
+          setImgUrl(portada || '');
+          setErrorImg(false);
+
+          if ((!portada || portada.trim() === '') && titulo && titulo.trim().length > 1) {
+            let cancelado = false;
+            const query = encodeURIComponent(titulo.trim());
+            
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
+              .then(res => res.json())
+              .then(data => {
+                if (!cancelado && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
+                  setImgUrl(data.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'));
+                } else if (!cancelado) {
+                  return fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`)
+                    .then(r => r.json())
+                    .then(dataOL => {
+                      if (!cancelado && dataOL.docs && dataOL.docs[0]?.cover_i) {
+                        setImgUrl(`https://covers.openlibrary.org/b/id/${dataOL.docs[0].cover_i}-M.jpg`);
+                      }
+                    });
+                }
+              })
+              .catch(() => {});
+
+            return () => { cancelado = true; };
+          }
+        }, [titulo, portada]);
+
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        if (portada && !errorImg) {
-          return <img src={portada} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-md shrink-0`} />;
+        if (imgUrl && !errorImg) {
+          return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-md shrink-0`} />;
         }
         return (
           <div className={`${sizeClasses} bg-[#1a1a1a] text-[#ffffee] p-1.5 rounded shadow-md border border-[#444] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
@@ -337,7 +369,7 @@
               
               const pagLibro = (Number(u.pagina || 0) > 0)
                 ? u.pagina
-                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? u.misLecturasPersonales[0].pagina : 0);
+                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? (u.misLecturasPersonales[0].pagina || u.misLecturasPersonales[0].paginas) : 0);
 
               const texto = `${(u.nombre || '').toLowerCase()} - ${tituloLibro || 'lectura'} - pag. ${pagLibro || 0}`;
 
@@ -430,14 +462,14 @@
                   </button>
                 </div>
 
-                {/* Lecturas Personales */}
+                {/* Lecturas Personales con autocompletado automático de carátula */}
                 {misLibrosPersonales.map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da] shadow-xs">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
                       <div className="text-xs text-[#1a1a1a] overflow-hidden">
                         <p className="font-bold truncate">{item.libro}</p>
-                        <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || 0}</b></p>
+                        <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                       </div>
                     </div>
                     <button 
@@ -708,6 +740,7 @@
           
           if (idx > -1) {
             clon[idx].pagina = pag;
+            clon[idx].paginas = pag;
             clon[idx].estado = estadoOpt;
             if (autoraOpt) clon[idx].autora = autoraOpt;
             if (portadaOpt) clon[idx].portada = portadaOpt;
@@ -717,6 +750,7 @@
               nombre: nombreUsuarioPersonalizado || sesion.nombre, 
               libro: tituloLibro, 
               pagina: pag,
+              paginas: pag,
               estado: estadoOpt,
               autora: autoraOpt,
               portada: portadaOpt
@@ -744,7 +778,7 @@
 
         const cambiarEstadoLibro = (libro, nuevoEstado) => {
           const item = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === libro.libro.toLowerCase());
-          guardarLibroPersonal(libro.libro, item ? item.pagina : 0, nuevoEstado, libro.autora || '', libro.portada || '');
+          guardarLibroPersonal(libro.libro, item ? (item.pagina || item.paginas || 0) : 0, nuevoEstado, libro.autora || '', libro.portada || '');
         };
 
         const enviarRespuesta = (idPadre, capTitulo) => {
@@ -1048,7 +1082,7 @@
                                     <p className="font-bold text-[#1a1a1a] truncate">{item.libro}</p>
                                     <p className="text-[10px] text-gray-500 italic truncate">{item.autora || 'Autora no especificada'}</p>
                                     {item.estado === 'leyendo' && (
-                                      <p className="text-[10px] text-[#adae1d] font-bold mt-1">Página {item.pagina || 0}</p>
+                                      <p className="text-[10px] text-[#adae1d] font-bold mt-1">Página {item.pagina || item.paginas || 0}</p>
                                     )}
                                   </div>
                                 </div>
@@ -1058,7 +1092,7 @@
                                     <div className="flex items-center gap-1 mb-1">
                                       <input 
                                         type="number" 
-                                        defaultValue={item.pagina || 0} 
+                                        defaultValue={item.pagina || item.paginas || 0} 
                                         onBlur={(e) => guardarLibroPersonal(item.libro, e.target.value, 'leyendo', item.autora, item.portada)} 
                                         className="editorial-input w-12 text-center py-0.5 text-[11px]" 
                                       />
