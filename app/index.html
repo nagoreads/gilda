@@ -240,15 +240,16 @@
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-x-4 gap-y-8 w-full max-w-[180px] mx-auto mb-10">
+            <div className="grid grid-cols-3 gap-x-6 gap-y-8 w-full max-w-[220px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
                 const tieneNovedad = usuaria.tieneNovedad;
                 const seleccionada = usuariaActivaIndice === indice;
                 const esNotificacionActiva = notificacionActual && notificacionActual.id === usuaria.email;
+                const nombreMostrar = (usuaria.nombre || 'Socia').split(' ')[0].toLowerCase();
 
                 return (
-                  <div key={indice} className="relative flex justify-center items-center">
+                  <div key={indice} className="relative flex flex-col items-center">
                     <div
                       onClick={() => setUsuariaActivaIndice(indice)}
                       className={`w-[32px] h-[44px] rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-105 relative ${
@@ -257,6 +258,9 @@
                         esNotificacionActiva ? 'ring-2 ring-[#fffa8d] scale-110 z-20' : ''
                       } ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
                     ></div>
+                    <span className="text-[10px] text-white/90 font-medium tracking-tight mt-1.5 truncate max-w-[60px] text-center">
+                      {nombreMostrar}
+                    </span>
                   </div>
                 );
               })}
