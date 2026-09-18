@@ -142,11 +142,11 @@
 
       function EdificioClub({ usuarias, libroActual }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
-        const listaUsuarias = usuarias.length > 0 ? usuarias : [
-          { nombre: "nagore", pagina: 20, estaLeyendo: true, libroPersonal: "qatar" }
-        ];
+        const listaUsuarias = usuarias.length > 0 ? usuarias : [];
+        const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0] || {};
 
-        const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0];
+        const libroPersonalNombre = usuariaActiva.libroPersonal || libroActual.titulo;
+        const paginaPersonal = usuariaActiva.paginaPersonal !== undefined ? usuariaActiva.paginaPersonal : usuariaActiva.pagina;
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2">
@@ -181,20 +181,18 @@
             <div className="editorial-card w-full max-w-max min-w-[280px] p-5 flex flex-col gap-3 fade-in bg-white text-[#1a1a1a] border border-[#1a1a1a]">
               <div className="flex justify-between items-center w-full border-b border-[#f1f0ea] pb-2 gap-5">
                 <span className="font-editorial-title text-sm font-medium whitespace-nowrap">
-                  la habitación propia de {(usuariaActiva.nombre || '').toLowerCase()}
+                  la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
                 </span>
                 <span className="text-[10px] tracking-[0.5px] text-[#adae1d] font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
               <div className="flex items-center gap-3 bg-[#ffffee] p-[10px_14px] rounded-[10px] border border-[#e2e2da]">
-                <div className={`w-[10px] h-[24px] rounded-[2px] shrink-0 ${!usuariaActiva.estaLeyendo || usuariaActiva.pagina === 0 ? 'bg-[#d4d4d4]' : 'bg-[#adae1d]'}`}></div>
+                <div className={`w-[10px] h-[24px] rounded-[2px] shrink-0 ${!usuariaActiva.estaLeyendo || paginaPersonal === 0 ? 'bg-[#d4d4d4]' : 'bg-[#adae1d]'}`}></div>
                 <div className="text-[13px] text-[#242424] leading-[1.4] whitespace-nowrap">
-                  {!usuariaActiva.estaLeyendo || usuariaActiva.pagina === 0 ? (
-                    <>esperando en el umbral de <i>{usuariaActiva.libroPersonal || libroActual.titulo}</i>.</>
-                  ) : usuariaActiva.pagina >= (libroActual.paginas_totales || 280) ? (
-                    <>ha cerrado las páginas de <i>{usuariaActiva.libroPersonal || libroActual.titulo}</i>.</>
+                  {!usuariaActiva.estaLeyendo || paginaPersonal === 0 ? (
+                    <>esperando en el umbral de <i>{libroPersonalNombre}</i>.</>
                   ) : (
-                    <>leyendo la página <b>{usuariaActiva.pagina}</b> de <i>{usuariaActiva.libroPersonal || libroActual.titulo}</i>.</>
+                    <>leyendo la página <b>{paginaPersonal}</b> de <i>{libroPersonalNombre}</i>.</>
                   )}
                 </div>
               </div>
@@ -651,19 +649,48 @@
                         </div>
                       </div>
 
-                      <div className="editorial-card p-5">
-                        <div className="flex justify-between items-center mb-3">
-                          <h3 className="font-editorial-title text-sm">Tu Estancia</h3>
+                      {/* Tu Estancia — Estilo Goodreads */}
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                          <h3 className="font-editorial-title text-base">Mi Estantería Personal</h3>
                           <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#adae1d] text-black shadow' : 'bg-gray-100 text-gray-500'}`}>
                             {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                           </button>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] text-gray-500 uppercase">¿Qué libro estás leyendo?</label>
+
+                        {/* Formulario para añadir nueva lectura personal */}
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!libroPersonal.trim()) return;
+                          guardarLibroPersonal();
+                        }} className="space-y-2 bg-[#ffffee] p-3 rounded border border-[#e2e2da]">
+                          <span className="text-[10px] uppercase font-bold text-gray-500">Añadir libro a mi estantería</span>
+                          <input type="text" placeholder="Título del libro..." value={libroPersonal} onChange={(e) => setLibroPersonal(e.target.value)} required className="w-full editorial-input p-2 text-xs italic" />
                           <div className="flex gap-2">
-                            <input type="text" placeholder="Ej: La campana de cristal" value={libroPersonal} onChange={(e) => setLibroPersonal(e.target.value)} className="w-full editorial-input p-2.5 text-xs italic" />
-                            <button onClick={guardarLibroPersonal} className="editorial-btn px-3 text-xs shrink-0">guardar</button>
+                            <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
+                            <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs">Añadir / Guardar</button>
                           </div>
+                        </form>
+
+                        {/* Lista de lecturas personales de la socia */}
+                        <div className="space-y-2 pt-1">
+                          <span className="text-[10px] text-gray-400 uppercase font-bold">Mis lecturas actuales</span>
+                          {lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-2.5 bg-white rounded border border-[#e2e2da] text-xs">
+                              <div>
+                                <p className="font-bold italic">{item.libro}</p>
+                                <p className="text-[10px] text-gray-500">Página {item.pagina || 0}</p>
+                              </div>
+                              <button onClick={() => {
+                                setLibroPersonal(item.libro);
+                                setPaginaPersonalInput(item.pagina || 0);
+                                enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: item.libro, pagina: item.pagina || 0 });
+                                mostrarToast(`Seleccionado: ${item.libro}`);
+                              }} className="text-[10px] bg-[#ffffee] border border-[#e2e2da] px-2 py-1 rounded font-bold text-[#adae1d]">
+                                Seleccionar
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
