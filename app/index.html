@@ -316,6 +316,7 @@
         const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
         const [editandoNombre, setEditandoNombre] = useState(false);
         const [libroPersonal, setLibroPersonal] = useState('');
+        const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
 
         const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
         const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
@@ -383,6 +384,7 @@
             const interval = setInterval(() => {
               parsearHoja(URL_CSV_CHAT).then(data => setChatMsgs(data));
               parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
+              parsearHoja(URL_CSV_LECTURAS_PERSONALES).then(data => setLecturasPersonales(data));
             }, 10000);
 
             return () => clearInterval(interval);
@@ -403,7 +405,10 @@
         useEffect(() => {
           if (sesion && lecturasPersonales.length > 0) {
             const miLectura = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
-            if (miLectura && miLectura.libro) setLibroPersonal(miLectura.libro);
+            if (miLectura && miLectura.libro) {
+              setLibroPersonal(miLectura.libro);
+              if (miLectura.pagina !== undefined) setPaginaPersonalInput(miLectura.pagina);
+            }
           }
         }, [sesion, lecturasPersonales]);
 
@@ -467,9 +472,19 @@
         const guardarLibroPersonal = () => {
           const tituloLibro = libroPersonal.trim();
           if (!tituloLibro) return;
-          localStorage.setItem('gilda_libro_personal', tituloLibro);
-          enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro });
-          mostrarToast('Lectura actual actualizada.');
+          const pag = Number(paginaPersonalInput) || 0;
+
+          const clon = [...lecturasPersonales];
+          const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+          if (idx > -1) {
+            clon[idx].pagina = pag;
+          } else {
+            clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
+          }
+          setLecturasPersonales(clon);
+
+          enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
+          mostrarToast('Lectura guardada.');
         };
 
         const enviarRespuesta = (idPadre, capTitulo) => {
@@ -539,11 +554,12 @@
               ...u,
               nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
               pagina: esYo ? miPagina : Number(u.pagina || 0),
+              paginaPersonal: recPersonal?.pagina !== undefined ? Number(recPersonal.pagina) : (esYo ? Number(paginaPersonalInput || 0) : Number(u.pagina || 0)),
               estaLeyendo: esYo ? isReadingNow : Number(u.pagina || 0) > 0,
               libroPersonal: recPersonal?.libro || (esYo ? libroPersonal : '') || libroActual.titulo
             };
           });
-        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, libroPersonal, lecturasPersonales, libroActual]);
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, libroPersonal, paginaPersonalInput, lecturasPersonales, libroActual]);
 
         if (!sesion) {
           return (
