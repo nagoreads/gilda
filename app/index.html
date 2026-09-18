@@ -145,21 +145,22 @@
         const listaUsuarias = usuarias.length > 0 ? usuarias : [];
         const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0] || {};
 
-        const libroPersonalNombre = usuariaActiva.libroPersonal || libroActual.titulo;
-        const paginaPersonal = usuariaActiva.paginaPersonal !== undefined ? usuariaActiva.paginaPersonal : usuariaActiva.pagina;
+        const tieneProgresoClub = Number(usuariaActiva.pagina || 0) > 0;
+        const misLibrosPersonales = usuariaActiva.misLecturasPersonales || [];
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2">
             <h2 className="text-[28px] font-editorial-title font-medium text-center mb-2.5 text-white">casa gilda</h2>
             <p className="text-[13px] text-white/80 text-center mb-10 leading-relaxed">
-              Selecciona una ventana para ver su estado actual.
+              Selecciona una ventana para ver sus lecturas actuales.
             </p>
 
             <div className="grid grid-cols-3 gap-4 w-full max-w-[160px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
                 const seleccionada = usuariaActivaIndice === indice;
-                const textoProgreso = usuaria.pagina > 0 && estaLeyendo ? `pág. ${usuaria.pagina}` : "en pausa";
+                const totalLecturas = (Number(usuaria.pagina || 0) > 0 ? 1 : 0) + (usuaria.misLecturasPersonales ? usuaria.misLecturasPersonales.length : 0);
+                const textoBurbuja = totalLecturas > 0 ? `${totalLecturas} lectura(s) activa(s)` : "en pausa";
 
                 return (
                   <div key={indice} className="relative flex justify-center group">
@@ -171,14 +172,14 @@
                     ></div>
 
                     <div className="absolute bottom-[140%] left-1/2 -translate-x-1/2 bg-[#1a1a1a] text-white px-2.5 py-1 rounded-[2px] text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                      <b>{(usuaria.nombre || '').toLowerCase()}</b>: {textoProgreso}
+                      <b>{(usuaria.nombre || '').toLowerCase()}</b>: {textoBurbuja}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            <div className="editorial-card w-full max-w-max min-w-[280px] p-5 flex flex-col gap-3 fade-in bg-white text-[#1a1a1a] border border-[#1a1a1a]">
+            <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-3 fade-in bg-white text-[#1a1a1a] border border-[#1a1a1a]">
               <div className="flex justify-between items-center w-full border-b border-[#f1f0ea] pb-2 gap-5">
                 <span className="font-editorial-title text-sm font-medium whitespace-nowrap">
                   la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
@@ -186,15 +187,30 @@
                 <span className="text-[10px] tracking-[0.5px] text-[#adae1d] font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
-              <div className="flex items-center gap-3 bg-[#ffffee] p-[10px_14px] rounded-[10px] border border-[#e2e2da]">
-                <div className={`w-[10px] h-[24px] rounded-[2px] shrink-0 ${!usuariaActiva.estaLeyendo || paginaPersonal === 0 ? 'bg-[#d4d4d4]' : 'bg-[#adae1d]'}`}></div>
-                <div className="text-[13px] text-[#242424] leading-[1.4] whitespace-nowrap">
-                  {!usuariaActiva.estaLeyendo || paginaPersonal === 0 ? (
-                    <>esperando en el umbral de <i>{libroPersonalNombre}</i>.</>
-                  ) : (
-                    <>leyendo la página <b>{paginaPersonal}</b> de <i>{libroPersonalNombre}</i>.</>
-                  )}
+              <div className="space-y-2">
+                {/* 1. Lectura del Club de Lectura */}
+                <div className="flex items-center gap-3 bg-[#ffffee] p-2.5 rounded-lg border border-[#e2e2da]">
+                  <div className={`w-[8px] h-[20px] rounded-[2px] shrink-0 ${tieneProgresoClub ? 'bg-[#adae1d]' : 'bg-gray-300'}`}></div>
+                  <div className="text-[12px] text-[#242424] leading-snug">
+                    <span className="text-[9px] uppercase font-bold text-[#adae1d] block">Club de lectura</span>
+                    {tieneProgresoClub ? (
+                      <>leyendo la pág. <b>{usuariaActiva.pagina}</b> de <i>{libroActual.titulo}</i>.</>
+                    ) : (
+                      <>esperando en el umbral de <i>{libroActual.titulo}</i>.</>
+                    )}
+                  </div>
                 </div>
+
+                {/* 2. Lecturas Personales Paralelas */}
+                {misLibrosPersonales.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-[#e2e2da]">
+                    <div className="w-[8px] h-[20px] rounded-[2px] shrink-0 bg-[#adae1d]"></div>
+                    <div className="text-[12px] text-[#242424] leading-snug">
+                      <span className="text-[9px] uppercase font-bold text-gray-400 block">Lectura personal</span>
+                      leyendo la pág. <b>{item.pagina || 0}</b> de <i>{item.libro}</i>.
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -402,16 +418,6 @@
           }
         }, [sesion, usuariasClub.length]);
 
-        useEffect(() => {
-          if (sesion && lecturasPersonales.length > 0) {
-            const miLectura = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
-            if (miLectura && miLectura.libro) {
-              setLibroPersonal(miLectura.libro);
-              if (miLectura.pagina !== undefined) setPaginaPersonalInput(miLectura.pagina);
-            }
-          }
-        }, [sesion, lecturasPersonales]);
-
         const enviarAccion = async (action, payload) => {
           try {
             const nombreActual = nombreUsuarioPersonalizado || sesion?.nombre || 'Socia';
@@ -469,10 +475,10 @@
           }
         };
 
-        const guardarLibroPersonal = () => {
-          const tituloLibro = libroPersonal.trim();
+        const guardarLibroPersonal = (tituloOpt, pagOpt) => {
+          const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
-          const pag = Number(paginaPersonalInput) || 0;
+          const pag = Number(pagOpt !== undefined ? pagOpt : paginaPersonalInput) || 0;
 
           const clon = [...lecturasPersonales];
           const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
@@ -482,9 +488,11 @@
             clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
           }
           setLecturasPersonales(clon);
+          setLibroPersonal('');
+          setPaginaPersonalInput('');
 
           enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
-          mostrarToast('Lectura guardada.');
+          mostrarToast(`Guardado: ${tituloLibro}`);
         };
 
         const enviarRespuesta = (idPadre, capTitulo) => {
@@ -548,18 +556,17 @@
           return usuariasClub.map(u => {
             const emailU = (u.email || '').toLowerCase().trim();
             const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
-            const recPersonal = lecturasPersonales.find(l => (l.email || '').toLowerCase().trim() === emailU);
+            const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU);
             
             return {
               ...u,
               nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
               pagina: esYo ? miPagina : Number(u.pagina || 0),
-              paginaPersonal: recPersonal?.pagina !== undefined ? Number(recPersonal.pagina) : (esYo ? Number(paginaPersonalInput || 0) : Number(u.pagina || 0)),
-              estaLeyendo: esYo ? isReadingNow : Number(u.pagina || 0) > 0,
-              libroPersonal: recPersonal?.libro || (esYo ? libroPersonal : '') || libroActual.titulo
+              estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
+              misLecturasPersonales: misPersonales
             };
           });
-        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, libroPersonal, paginaPersonalInput, lecturasPersonales, libroActual]);
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, lecturasPersonales]);
 
         if (!sesion) {
           return (
@@ -691,22 +698,22 @@
                         {/* Lista de lecturas personales de la socia */}
                         <div className="space-y-2 pt-1">
                           <span className="text-[10px] text-gray-400 uppercase font-bold">Mis lecturas actuales</span>
-                          {lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center p-2.5 bg-white rounded border border-[#e2e2da] text-xs">
-                              <div>
-                                <p className="font-bold italic">{item.libro}</p>
-                                <p className="text-[10px] text-gray-500">Página {item.pagina || 0}</p>
+                          {lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).length === 0 ? (
+                            <p className="text-xs text-gray-400 italic">No has añadido libros personales todavía.</p>
+                          ) : (
+                            lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).map((item, idx) => (
+                              <div key={idx} className="flex justify-between items-center p-2.5 bg-white rounded border border-[#e2e2da] text-xs">
+                                <div>
+                                  <p className="font-bold italic">{item.libro}</p>
+                                  <p className="text-[10px] text-gray-500">Página {item.pagina || 0}</p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <input type="number" defaultValue={item.pagina || 0} onBlur={(e) => guardarLibroPersonal(item.libro, e.target.value)} className="editorial-input w-12 text-center py-1 text-[11px]" />
+                                  <span className="text-[10px] text-gray-400">pág.</span>
+                                </div>
                               </div>
-                              <button onClick={() => {
-                                setLibroPersonal(item.libro);
-                                setPaginaPersonalInput(item.pagina || 0);
-                                enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: item.libro, pagina: item.pagina || 0 });
-                                mostrarToast(`Seleccionado: ${item.libro}`);
-                              }} className="text-[10px] bg-[#ffffee] border border-[#e2e2da] px-2 py-1 rounded font-bold text-[#adae1d]">
-                                Seleccionar
-                              </button>
-                            </div>
-                          ))}
+                            ))
+                          )}
                         </div>
                       </div>
 
@@ -979,7 +986,7 @@
                                     setPropuestas(clon);
                                     enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email });
                                     mostrarToast('Voto actualizado.');
-                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded font-bold transition-all ${votado ? 'bg-[#adae1d] text-black' : 'bg-white text-gray-600 border border-[#e2e2da]'}`}>
+                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded font-bold transition-all ${votado ? 'bg-[#adae1d] text-black' : 'bg-white text-[#1a1a1a] border border-[#e2e2da]'}`}>
                                     {votado ? `Votado (${p.votos||0})` : `Votar (${p.votos||0})`}
                                   </button>
                                 </div>
