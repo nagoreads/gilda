@@ -280,7 +280,23 @@
         );
       }
 
-      function EdificioClub({ usuarias, libroActual }) {
+      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
+        const [errorImg, setErrorImg] = useState(false);
+        const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
+
+        if (portada && !errorImg) {
+          return <img src={portada} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-md shrink-0`} />;
+        }
+        return (
+          <div className={`${sizeClasses} bg-[#1a1a1a] text-[#ffffee] p-1.5 rounded shadow-md border border-[#444] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#adae1d]"></div>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
+            <span className="text-[8px] text-[#adae1d] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
+          </div>
+        );
+      }
+
+      function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
         const [notificacionActual, setNotificacionActual] = useState(null);
         const colaNotificaciones = useRef([]);
@@ -386,36 +402,51 @@
               })}
             </div>
 
-            <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-3 fade-in bg-white text-[#1a1a1a] border border-[#1a1a1a]">
-              <div className="flex justify-between items-center w-full border-b border-[#f1f0ea] pb-2 gap-5">
-                <span className="font-editorial-title text-sm font-medium whitespace-nowrap">
+            {/* Habitación con diseño unificado en #ffffee sin marcas verdes */}
+            <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in bg-[#ffffee] text-[#1a1a1a] border border-[#1a1a1a]">
+              <div className="flex justify-between items-center w-full border-b border-[#e2e2da] pb-2.5 gap-2">
+                <span className="font-editorial-title text-base font-medium">
                   la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
                 </span>
                 <span className="text-[10px] tracking-[0.5px] text-[#adae1d] font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
-              <div className="space-y-2">
-                {/* 1. Lectura del Club de Lectura */}
-                <div className="flex items-center gap-3 bg-[#ffffee] p-2.5 rounded-lg border border-[#e2e2da]">
-                  <div className={`w-[8px] h-[20px] rounded-[2px] shrink-0 ${tieneProgresoClub ? 'bg-[#adae1d]' : 'bg-gray-300'}`}></div>
-                  <div className="text-[12px] text-[#242424] leading-snug">
-                    <span className="text-[9px] uppercase font-bold text-[#adae1d] block">Club de lectura</span>
-                    {tieneProgresoClub ? (
-                      <>leyendo la pág. <b>{usuariaActiva.pagina}</b> de <i>{libroActual.titulo}</i>.</>
-                    ) : (
-                      <>esperando en el umbral de <i>{libroActual.titulo}</i>.</>
-                    )}
+              <div className="space-y-3">
+                {/* Lectura del Club */}
+                <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da] shadow-xs">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
+                    <div className="text-xs text-[#1a1a1a] overflow-hidden">
+                      <p className="font-bold truncate">{libroActual.titulo}</p>
+                      <p className="text-[11px] text-gray-500">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+                    </div>
                   </div>
+                  <button 
+                    onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)}
+                    className="shrink-0 bg-[#ffffee] text-[#1a1a1a] border border-[#1a1a1a] hover:bg-[#adae1d] px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
+                    title="Añadir a mi estantería"
+                  >
+                    <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
+                  </button>
                 </div>
 
-                {/* 2. Lecturas Personales Paralelas */}
+                {/* Lecturas Personales */}
                 {misLibrosPersonales.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-[#e2e2da]">
-                    <div className="w-[8px] h-[20px] rounded-[2px] shrink-0 bg-[#adae1d]"></div>
-                    <div className="text-[12px] text-[#242424] leading-snug">
-                      <span className="text-[9px] uppercase font-bold text-gray-400 block">Lectura personal</span>
-                      leyendo la pág. <b>{item.pagina || 0}</b> de <i>{item.libro}</i>.
+                  <div key={idx} className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da] shadow-xs">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
+                      <div className="text-xs text-[#1a1a1a] overflow-hidden">
+                        <p className="font-bold truncate">{item.libro}</p>
+                        <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || 0}</b></p>
+                      </div>
                     </div>
+                    <button 
+                      onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')}
+                      className="shrink-0 bg-[#ffffee] text-[#1a1a1a] border border-[#1a1a1a] hover:bg-[#adae1d] px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
+                      title="Añadir a mi estantería"
+                    >
+                      <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
+                    </button>
                   </div>
                 ))}
               </div>
@@ -495,22 +526,6 @@
         );
       }
 
-      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
-        const [errorImg, setErrorImg] = useState(false);
-        const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : 'w-12 h-16 text-[8px]';
-
-        if (portada && !errorImg) {
-          return <img src={portada} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-md shrink-0`} />;
-        }
-        return (
-          <div className={`${sizeClasses} bg-[#1a1a1a] text-[#ffffee] p-2 rounded shadow-md border border-[#444] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
-            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#adae1d]"></div>
-            <span className="font-medium tracking-tight line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
-            <span className="text-[9px] text-[#adae1d] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
-          </div>
-        );
-      }
-
       function App() {
         const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
         const [inputEmail, setInputEmail] = useState('');
@@ -519,6 +534,7 @@
         
         const [seccionApp, setSeccionApp] = useState('inicio');
         const [subTabComunidad, setSubTabComunidad] = useState('chat');
+        const [tabEstanteria, setTabEstanteria] = useState('leyendo'); // leyendo | want_to_read | leidos
         const [cargandoDatos, setCargandoDatos] = useState(false);
         const [toastMsg, setToastMsg] = useState(null);
         
@@ -682,24 +698,53 @@
           }
         };
 
-        const guardarLibroPersonal = (tituloOpt, pagOpt) => {
+        const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
           const pag = Number(pagOpt !== undefined ? pagOpt : paginaPersonalInput) || 0;
 
           const clon = [...lecturasPersonales];
           const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+          
           if (idx > -1) {
             clon[idx].pagina = pag;
+            clon[idx].estado = estadoOpt;
+            if (autoraOpt) clon[idx].autora = autoraOpt;
+            if (portadaOpt) clon[idx].portada = portadaOpt;
           } else {
-            clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
+            clon.push({ 
+              email: sesion.email, 
+              nombre: nombreUsuarioPersonalizado || sesion.nombre, 
+              libro: tituloLibro, 
+              pagina: pag,
+              estado: estadoOpt,
+              autora: autoraOpt,
+              portada: portadaOpt
+            });
           }
           setLecturasPersonales(clon);
           setLibroPersonal('');
           setPaginaPersonalInput('');
 
-          enviarAccion('actualizar_libro_personal', { email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pag });
-          mostrarToast(`Guardado: ${tituloLibro}`);
+          enviarAccion('actualizar_libro_personal', { 
+            email: sesion.email, 
+            nombre: nombreUsuarioPersonalizado || sesion.nombre, 
+            libro: tituloLibro, 
+            pagina: pag,
+            estado: estadoOpt,
+            autora: autoraOpt,
+            portada: portadaOpt
+          });
+          mostrarToast(`Guardado en mi habitación: ${tituloLibro}`);
+        };
+
+        const agregarAWantToReadDirecto = (titulo, autora = '', portada = '') => {
+          guardarLibroPersonal(titulo, 0, 'want_to_read', autora, portada);
+        };
+
+        const cambiarEstadoLibro = (libro, nuevoEstado) => {
+          const item = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === libro.libro.toLowerCase());
+          guardarLibroPersonal(libro.libro, item ? item.pagina : 0, nuevoEstado, libro.autora || '', libro.portada || '');
         };
 
         const enviarRespuesta = (idPadre, capTitulo) => {
@@ -759,14 +804,24 @@
           });
         }, [usuariasClub, sesion]);
 
+        const misLibrosFiltrados = useMemo(() => {
+          if (!sesion) return [];
+          return lecturasPersonales.filter(l => 
+            (l.email || '').toLowerCase() === sesion.email.toLowerCase() && 
+            (l.estado || 'leyendo') === tabEstanteria
+          );
+        }, [lecturasPersonales, sesion, tabEstanteria]);
+
         const miembrosEdificio = useMemo(() => {
           const ah = new Date().getTime();
           return usuariasClub.map(u => {
             const emailU = (u.email || '').toLowerCase().trim();
             const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
-            const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU);
+            const misPersonales = lecturasPersonales.filter(l => 
+              (l.email || '').toLowerCase().trim() === emailU && 
+              (l.estado || 'leyendo') === 'leyendo'
+            );
             
-            // Detecta si la usuaria actualizó actividad recientemente
             let tieneNovedad = false;
             if (u.ultima_actividad) {
               const t = new Date(u.ultima_actividad).getTime();
@@ -890,60 +945,6 @@
                         </div>
                       </div>
 
-                      {/* Tu Estancia — Estilo Goodreads con Buscador Predictivo */}
-                      <div className="editorial-card p-5 space-y-4">
-                        <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                          <h3 className="font-editorial-title text-base">Mi Estantería Personal</h3>
-                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#adae1d] text-black shadow' : 'bg-gray-100 text-gray-500'}`}>
-                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
-                          </button>
-                        </div>
-
-                        {/* Formulario para añadir nueva lectura personal con autocompletado */}
-                        <form onSubmit={(e) => {
-                          e.preventDefault();
-                          if (!libroPersonal.trim()) return;
-                          guardarLibroPersonal();
-                        }} className="space-y-2 bg-[#ffffee] p-3 rounded border border-[#e2e2da]">
-                          <span className="text-[10px] uppercase font-bold text-gray-500">Añadir libro a mi estantería</span>
-                          
-                          <BuscadorLibros
-                            placeholder="Busca por título o autora..."
-                            valor={libroPersonal}
-                            setValor={setLibroPersonal}
-                            onSelectLibro={(libroSel) => {
-                              setLibroPersonal(libroSel.titulo);
-                            }}
-                          />
-
-                          <div className="flex gap-2">
-                            <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
-                            <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs">Añadir / Guardar</button>
-                          </div>
-                        </form>
-
-                        {/* Lista de lecturas personales de la socia */}
-                        <div className="space-y-2 pt-1">
-                          <span className="text-[10px] text-gray-400 uppercase font-bold">Mis lecturas actuales</span>
-                          {lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).length === 0 ? (
-                            <p className="text-xs text-gray-400 italic">No has añadido libros personales todavía.</p>
-                          ) : (
-                            lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()).map((item, idx) => (
-                              <div key={idx} className="flex justify-between items-center p-2.5 bg-white rounded border border-[#e2e2da] text-xs">
-                                <div>
-                                  <p className="font-bold italic">{item.libro}</p>
-                                  <p className="text-[10px] text-gray-500">Página {item.pagina || 0}</p>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <input type="number" defaultValue={item.pagina || 0} onBlur={(e) => guardarLibroPersonal(item.libro, e.target.value)} className="editorial-input w-12 text-center py-1 text-[11px]" />
-                                  <span className="text-[10px] text-gray-400">pág.</span>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-
                       <div className="editorial-card p-4">
                         <h3 className="font-editorial-title text-sm mb-2">Ubicación geográfica</h3>
                         <div className="flex gap-2">
@@ -974,7 +975,112 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="w-full flex justify-center">
-                      <EdificioClub usuarias={miembrosEdificio} libroActual={libroActual} />
+                      <EdificioClub 
+                        usuarias={miembrosEdificio} 
+                        libroActual={libroActual} 
+                        onAddWantToRead={agregarAWantToReadDirecto}
+                      />
+                    </div>
+                  )}
+
+                  {/* NUEVA SECCIÓN: MI HABITACIÓN (Estanterías estilo Goodreads) */}
+                  {seccionApp === 'habitacion' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex justify-between items-center border-b border-gray-100 pb-2.5">
+                          <h3 className="font-editorial-title text-lg">Mi Estantería Personal</h3>
+                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#adae1d] text-black shadow' : 'bg-gray-100 text-gray-500'}`}>
+                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
+                          </button>
+                        </div>
+
+                        {/* Buscador de libros con autocompletado */}
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!libroPersonal.trim()) return;
+                          guardarLibroPersonal(undefined, undefined, tabEstanteria);
+                        }} className="space-y-2 bg-[#ffffee] p-3.5 rounded-xl border border-[#e2e2da]">
+                          <span className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Añadir libro a esta estantería</span>
+                          
+                          <BuscadorLibros
+                            placeholder="Busca por título o autora..."
+                            valor={libroPersonal}
+                            setValor={setLibroPersonal}
+                            onSelectLibro={(libroSel) => {
+                              setLibroPersonal(libroSel.titulo);
+                              guardarLibroPersonal(libroSel.titulo, 0, tabEstanteria, libroSel.autora, libroSel.portada);
+                            }}
+                          />
+
+                          {tabEstanteria === 'leyendo' && (
+                            <div className="flex gap-2 pt-1">
+                              <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
+                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs">Guardar</button>
+                            </div>
+                          )}
+                        </form>
+
+                        {/* Control del Pestañas de Estanterías */}
+                        <div className="flex bg-gray-100 p-1 rounded-xl text-[11px] font-bold text-center border border-gray-200">
+                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#1a1a1a] text-[#ffffee] shadow-xs' : 'text-gray-500'}`}>
+                            Leyendo
+                          </button>
+                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#1a1a1a] text-[#ffffee] shadow-xs' : 'text-gray-500'}`}>
+                            Quiero leer
+                          </button>
+                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#1a1a1a] text-[#ffffee] shadow-xs' : 'text-gray-500'}`}>
+                            Leídos
+                          </button>
+                        </div>
+
+                        {/* Libros en la estantería actual */}
+                        <div className="space-y-3 pt-1">
+                          {misLibrosFiltrados.length === 0 ? (
+                            <div className="text-center py-8 bg-[#ffffee] rounded-xl border border-[#e2e2da]">
+                              <p className="text-xs text-gray-500 italic">No tienes libros en esta estantería todavía.</p>
+                            </div>
+                          ) : (
+                            misLibrosFiltrados.map((item, idx) => (
+                              <div key={idx} className="flex gap-3 items-center justify-between p-3 bg-white rounded-xl border border-[#e2e2da] shadow-xs">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                  <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
+                                  <div className="overflow-hidden text-xs">
+                                    <p className="font-bold text-[#1a1a1a] truncate">{item.libro}</p>
+                                    <p className="text-[10px] text-gray-500 italic truncate">{item.autora || 'Autora no especificada'}</p>
+                                    {item.estado === 'leyendo' && (
+                                      <p className="text-[10px] text-[#adae1d] font-bold mt-1">Página {item.pagina || 0}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col items-end gap-1 shrink-0">
+                                  {tabEstanteria === 'leyendo' && (
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <input 
+                                        type="number" 
+                                        defaultValue={item.pagina || 0} 
+                                        onBlur={(e) => guardarLibroPersonal(item.libro, e.target.value, 'leyendo', item.autora, item.portada)} 
+                                        className="editorial-input w-12 text-center py-0.5 text-[11px]" 
+                                      />
+                                      <span className="text-[10px] text-gray-400">pág.</span>
+                                    </div>
+                                  )}
+
+                                  <select 
+                                    value={item.estado || 'leyendo'} 
+                                    onChange={(e) => cambiarEstadoLibro(item, e.target.value)}
+                                    className="editorial-input text-[10px] px-2 py-1 rounded bg-[#ffffee]"
+                                  >
+                                    <option value="leyendo">Leyendo</option>
+                                    <option value="want_to_read">Quiero leer</option>
+                                    <option value="leidos">Leído</option>
+                                  </select>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -1252,14 +1358,15 @@
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
                 { id: 'edificio', icon: 'fa-building', label: 'casa' },
+                { id: 'habitacion', icon: 'fa-bookmark', label: 'mi habitación' },
                 { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
                 { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
                 { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
                 { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
               ].map(tab => (
-                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#1a1a1a] font-bold bg-white px-2.5 py-1 rounded shadow-xs' : 'text-white/60 hover:text-white'}`}>
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#1a1a1a] font-bold bg-white px-2 py-1 rounded shadow-xs' : 'text-white/60 hover:text-white'}`}>
                   <i className={`fa-solid ${tab.icon} text-sm`}></i>
-                  <span className="text-[8px] font-medium uppercase">{tab.label}</span>
+                  <span className="text-[7.5px] font-medium uppercase">{tab.label}</span>
                 </button>
               ))}
             </nav>
