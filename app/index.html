@@ -440,17 +440,17 @@
                 <span className="font-editorial-title text-base font-medium">
                   la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
                 </span>
-                <span className="text-[10px] tracking-[0.5px] text-[#adae1d] font-bold whitespace-nowrap">@gilda.mailclub</span>
+                <span className="text-[10px] tracking-[0.5px] text-[#1a1a1a] font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
               <div className="space-y-3">
                 {/* Lectura del Club */}
-                <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da] shadow-xs">
+                <div className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e2e2da]">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
                     <div className="text-xs text-[#1a1a1a] overflow-hidden">
                       <p className="font-bold truncate">{libroActual.titulo}</p>
-                      <p className="text-[11px] text-gray-500">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+                      <p className="text-[11px] text-gray-600">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                     </div>
                   </div>
                   <button 
@@ -464,12 +464,12 @@
 
                 {/* Lecturas Personales con autocompletado automático de carátula */}
                 {misLibrosPersonales.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da] shadow-xs">
+                  <div key={idx} className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e2e2da]">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
                       <div className="text-xs text-[#1a1a1a] overflow-hidden">
                         <p className="font-bold truncate">{item.libro}</p>
-                        <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
+                        <p className="text-[11px] text-gray-600">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                       </div>
                     </div>
                     <button 
@@ -1017,7 +1017,6 @@
                     </div>
                   )}
 
-                  {/* NUEVA SECCIÓN: MI HABITACIÓN (Estanterías estilo Goodreads) */}
                   {seccionApp === 'habitacion' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-4">
