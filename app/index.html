@@ -160,6 +160,126 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
+      // Componente del Buscador Predictivo Multi-API
+      function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
+        const [sugerencias, setSugerencias] = useState([]);
+        const [buscando, setBuscando] = useState(false);
+        const [mostrarDropdown, setMostrarDropdown] = useState(false);
+
+        useEffect(() => {
+          if (!valor || valor.trim().length < 3) {
+            setSugerencias([]);
+            setMostrarDropdown(false);
+            return;
+          }
+
+          const timer = setTimeout(async () => {
+            setBuscando(true);
+            try {
+              const query = encodeURIComponent(valor.trim());
+              
+              const [resGoogle, resOpenLib] = await Promise.allSettled([
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&langRestrict=es`),
+                fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
+              ]);
+
+              let listaCombinada = [];
+
+              if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
+                const dataG = await resGoogle.value.json();
+                if (dataG.items) {
+                  dataG.items.forEach(item => {
+                    const info = item.volumeInfo || {};
+                    listaCombinada.push({
+                      titulo: info.title || '',
+                      autora: info.authors ? info.authors.join(', ') : 'Autora desconocida',
+                      portada: info.imageLinks?.thumbnail?.replace('http:', 'https:') || ''
+                    });
+                  });
+                }
+              }
+
+              if (resOpenLib.status === 'fulfilled' && resOpenLib.value.ok) {
+                const dataOL = await resOpenLib.value.json();
+                if (dataOL.docs) {
+                  dataOL.docs.forEach(doc => {
+                    listaCombinada.push({
+                      titulo: doc.title || '',
+                      autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida',
+                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : ''
+                    });
+                  });
+                }
+              }
+
+              const unicos = [];
+              const titulosVistos = new Set();
+              listaCombinada.forEach(item => {
+                const tLimpio = item.titulo.toLowerCase().trim();
+                if (tLimpio && !titulosVistos.has(tLimpio)) {
+                  titulosVistos.add(tLimpio);
+                  unicos.push(item);
+                }
+              });
+
+              setSugerencias(unicos.slice(0, 6));
+              setMostrarDropdown(unicos.length > 0);
+            } catch (err) {
+              console.error("Error al consultar APIs de libros:", err);
+            } finally {
+              setBuscando(false);
+            }
+          }, 350);
+
+          return () => clearTimeout(timer);
+        }, [valor]);
+
+        return (
+          <div className="relative w-full">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder={placeholder}
+                value={valor}
+                onChange={(e) => {
+                  setValor(e.target.value);
+                  setMostrarDropdown(true);
+                }}
+                className="w-full editorial-input p-2.5 text-xs italic pr-8"
+              />
+              {buscando && (
+                <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#adae1d]"></i>
+              )}
+            </div>
+
+            {mostrarDropdown && sugerencias.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 bg-white border border-[#1a1a1a] rounded-b-lg shadow-xl max-h-56 overflow-y-auto mt-1">
+                {sugerencias.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      onSelectLibro(item);
+                      setMostrarDropdown(false);
+                    }}
+                    className="flex items-center gap-2.5 p-2 hover:bg-[#ffffee] cursor-pointer border-b border-[#f1f0ea] last:border-0 text-left"
+                  >
+                    {item.portada ? (
+                      <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" />
+                    ) : (
+                      <div className="w-7 h-10 bg-gray-100 rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-gray-200">Sin foto</div>
+                    )}
+                    <div className="overflow-hidden">
+                      <p className="text-xs font-bold text-[#1a1a1a] truncate leading-tight">{item.titulo}</p>
+                      <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
       function EdificioClub({ usuarias, libroActual }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
         const [notificacionActual, setNotificacionActual] = useState(null);
@@ -770,7 +890,7 @@
                         </div>
                       </div>
 
-                      {/* Tu Estancia — Estilo Goodreads */}
+                      {/* Tu Estancia — Estilo Goodreads con Buscador Predictivo */}
                       <div className="editorial-card p-5 space-y-4">
                         <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                           <h3 className="font-editorial-title text-base">Mi Estantería Personal</h3>
@@ -779,14 +899,23 @@
                           </button>
                         </div>
 
-                        {/* Formulario para añadir nueva lectura personal */}
+                        {/* Formulario para añadir nueva lectura personal con autocompletado */}
                         <form onSubmit={(e) => {
                           e.preventDefault();
                           if (!libroPersonal.trim()) return;
                           guardarLibroPersonal();
                         }} className="space-y-2 bg-[#ffffee] p-3 rounded border border-[#e2e2da]">
                           <span className="text-[10px] uppercase font-bold text-gray-500">Añadir libro a mi estantería</span>
-                          <input type="text" placeholder="Título del libro..." value={libroPersonal} onChange={(e) => setLibroPersonal(e.target.value)} required className="w-full editorial-input p-2 text-xs italic" />
+                          
+                          <BuscadorLibros
+                            placeholder="Busca por título o autora..."
+                            valor={libroPersonal}
+                            setValor={setLibroPersonal}
+                            onSelectLibro={(libroSel) => {
+                              setLibroPersonal(libroSel.titulo);
+                            }}
+                          />
+
                           <div className="flex gap-2">
                             <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
                             <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs">Añadir / Guardar</button>
@@ -1013,9 +1142,20 @@
                           setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
                           mostrarToast('Propuesta añadida.');
                         }} className="space-y-2">
-                          <input type="text" placeholder="Título del libro..." value={nuevaPropuestaTitulo || ''} onChange={e=>setNuevaPropuestaTitulo(e.target.value)} required className="w-full editorial-input p-2.5 text-xs" />
+                          
+                          <BuscadorLibros
+                            placeholder="Título del libro o autora..."
+                            valor={nuevaPropuestaTitulo}
+                            setValor={setNuevaPropuestaTitulo}
+                            onSelectLibro={(libroSel) => {
+                              setNuevaPropuestaTitulo(libroSel.titulo);
+                              setNuevaPropuestaAutora(libroSel.autora);
+                              setNuevaPropuestaPortada(libroSel.portada);
+                            }}
+                          />
+
                           <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                          <input type="url" placeholder="URL de la portada (opcional)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+                          <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
                           <button type="submit" className="w-full editorial-btn py-2 text-xs font-medium">Añadir propuesta</button>
                         </form>
                       </div>
