@@ -108,6 +108,26 @@
         to { opacity: 1; transform: scale(1); }
       }
 
+      /* Resplandor suave en la ventana si hay novedad */
+      @keyframes windowGlow {
+        0%, 100% { box-shadow: 0 0 4px #fffa8d; transform: scale(1); }
+        50% { box-shadow: 0 0 10px #ffffaa; transform: scale(1.03); }
+      }
+      .ventana-novedad {
+        animation: windowGlow 2s infinite ease-in-out;
+      }
+
+      /* Animación de entrada y desvanecimiento para la etiqueta simple */
+      @keyframes floatBannerSimple {
+        0% { opacity: 0; transform: translate(-50%, 4px); }
+        15% { opacity: 1; transform: translate(-50%, 0); }
+        85% { opacity: 1; transform: translate(-50%, 0); }
+        100% { opacity: 0; transform: translate(-50%, -4px); }
+      }
+      .notificacion-flotante-simple {
+        animation: floatBannerSimple 8s ease-in-out forwards;
+      }
+
       #mapa-gilda { height: 280px; width: 100%; border-radius: 6px; border: 1px solid #e2e2da; z-index: 1; }
 
       ::-webkit-scrollbar { width: 3px; height: 3px; }
@@ -155,25 +175,39 @@
               Selecciona una ventana para ver sus lecturas actuales.
             </p>
 
-            <div className="grid grid-cols-3 gap-4 w-full max-w-[160px] mx-auto mb-10">
+            <div className="grid grid-cols-3 gap-x-4 gap-y-12 w-full max-w-[180px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
+                const tieneNovedad = usuaria.tieneNovedad;
                 const seleccionada = usuariaActivaIndice === indice;
-                const totalLecturas = (Number(usuaria.pagina || 0) > 0 ? 1 : 0) + (usuaria.misLecturasPersonales ? usuaria.misLecturasPersonales.length : 0);
-                const textoBurbuja = totalLecturas > 0 ? `${totalLecturas} lectura(s) activa(s)` : "en pausa";
+
+                // Formato simple: "nombre - libro - pag. X"
+                const tituloLibro = (Number(usuaria.pagina || 0) > 0) 
+                  ? libroActual.titulo 
+                  : (usuaria.misLecturasPersonales && usuaria.misLecturasPersonales.length > 0 ? usuaria.misLecturasPersonales[0].libro : '');
+                
+                const pagLibro = (Number(usuaria.pagina || 0) > 0)
+                  ? usuaria.pagina
+                  : (usuaria.misLecturasPersonales && usuaria.misLecturasPersonales.length > 0 ? usuaria.misLecturasPersonales[0].pagina : 0);
+
+                const textoSencillo = `${(usuaria.nombre || '').toLowerCase()} - ${tituloLibro || 'lectura'} - pag. ${pagLibro || 0}`;
 
                 return (
-                  <div key={indice} className="relative flex justify-center group">
+                  <div key={indice} className="relative flex justify-center items-center">
+                    
+                    {/* Etiqueta visible flotante directa y sencilla (sin hover/clic) */}
+                    {tieneNovedad && (
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1a1a1a] text-[#ffffee] border border-[#adae1d] px-2 py-0.5 rounded shadow text-[9px] font-medium whitespace-nowrap pointer-events-none z-30 notificacion-flotante-simple">
+                        {textoSencillo}
+                      </div>
+                    )}
+
                     <div
                       onClick={() => setUsuariaActivaIndice(indice)}
-                      className={`w-[32px] h-[44px] rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      className={`w-[32px] h-[44px] rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-105 relative ${
                         estaLeyendo ? 'bg-[#ffffee] shadow-[0_4px_12px_rgba(255,255,238,0.2)]' : 'bg-[#8e9014]'
-                      } ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
+                      } ${tieneNovedad ? 'ventana-novedad' : ''} ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
                     ></div>
-
-                    <div className="absolute bottom-[140%] left-1/2 -translate-x-1/2 bg-[#1a1a1a] text-white px-2.5 py-1 rounded-[2px] text-[10px] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                      <b>{(usuaria.nombre || '').toLowerCase()}</b>: {textoBurbuja}
-                    </div>
                   </div>
                 );
               })}
@@ -553,17 +587,28 @@
         }, [usuariasClub, sesion]);
 
         const miembrosEdificio = useMemo(() => {
+          const ah = new Date().getTime();
           return usuariasClub.map(u => {
             const emailU = (u.email || '').toLowerCase().trim();
             const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
             const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU);
             
+            // Detecta si la usuaria actualizó actividad recientemente
+            let tieneNovedad = false;
+            if (u.ultima_actividad) {
+              const t = new Date(u.ultima_actividad).getTime();
+              if (!isNaN(t) && (ah - t) < 24 * 60 * 60 * 1000) {
+                tieneNovedad = true;
+              }
+            }
+
             return {
               ...u,
               nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
-              misLecturasPersonales: misPersonales
+              misLecturasPersonales: misPersonales,
+              tieneNovedad: tieneNovedad
             };
           });
         }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, lecturasPersonales]);
