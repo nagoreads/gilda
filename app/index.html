@@ -117,15 +117,15 @@
         animation: windowGlow 2s infinite ease-in-out;
       }
 
-      /* Animación de entrada y desvanecimiento para la etiqueta simple */
-      @keyframes floatBannerSimple {
-        0% { opacity: 0; transform: translate(-50%, 4px); }
-        15% { opacity: 1; transform: translate(-50%, 0); }
-        85% { opacity: 1; transform: translate(-50%, 0); }
-        100% { opacity: 0; transform: translate(-50%, -4px); }
+      /* Animación de entrada y desvanecimiento para la notificación en cola */
+      @keyframes floatBannerQueue {
+        0% { opacity: 0; transform: translateY(-4px); }
+        12% { opacity: 1; transform: translateY(0); }
+        88% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-4px); }
       }
-      .notificacion-flotante-simple {
-        animation: floatBannerSimple 8s ease-in-out forwards;
+      .notificacion-secuencial {
+        animation: floatBannerQueue 4.5s ease-in-out forwards;
       }
 
       #mapa-gilda { height: 280px; width: 100%; border-radius: 6px; border: 1px solid #e2e2da; z-index: 1; }
@@ -162,51 +162,100 @@
 
       function EdificioClub({ usuarias, libroActual }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
+        const [notificacionActual, setNotificacionActual] = useState(null);
+        const colaNotificaciones = useRef([]);
+        const estaProcesando = useRef(false);
+
         const listaUsuarias = usuarias.length > 0 ? usuarias : [];
         const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0] || {};
 
         const tieneProgresoClub = Number(usuariaActiva.pagina || 0) > 0;
         const misLibrosPersonales = usuariaActiva.misLecturasPersonales || [];
 
+        // Lógica de cola de notificaciones secuencial
+        const procesarSiguienteNotificacion = () => {
+          if (colaNotificaciones.current.length === 0) {
+            estaProcesando.current = false;
+            setNotificacionActual(null);
+            return;
+          }
+          estaProcesando.current = true;
+          const siguiente = colaNotificaciones.current.shift();
+          setNotificacionActual(siguiente);
+
+          setTimeout(() => {
+            setNotificacionActual(null);
+            setTimeout(() => {
+              procesarSiguienteNotificacion();
+            }, 400);
+          }, 4500);
+        };
+
+        useEffect(() => {
+          const nuevas = [];
+          listaUsuarias.forEach((u, i) => {
+            if (u.tieneNovedad) {
+              const tituloLibro = (Number(u.pagina || 0) > 0) 
+                ? libroActual.titulo 
+                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? u.misLecturasPersonales[0].libro : '');
+              
+              const pagLibro = (Number(u.pagina || 0) > 0)
+                ? u.pagina
+                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? u.misLecturasPersonales[0].pagina : 0);
+
+              const texto = `${(u.nombre || '').toLowerCase()} - ${tituloLibro || 'lectura'} - pag. ${pagLibro || 0}`;
+
+              if (!colaNotificaciones.current.some(n => n.id === u.email) && (!notificacionActual || notificacionActual.id !== u.email)) {
+                nuevas.push({ id: u.email, texto, indice: i });
+              }
+            }
+          });
+
+          if (nuevas.length > 0) {
+            colaNotificaciones.current = [...colaNotificaciones.current, ...nuevas];
+            if (!estaProcesando.current) {
+              procesarSiguienteNotificacion();
+            }
+          }
+        }, [listaUsuarias, libroActual]);
+
         return (
-          <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2">
-            <h2 className="text-[28px] font-editorial-title font-medium text-center mb-2.5 text-white">casa gilda</h2>
-            <p className="text-[13px] text-white/80 text-center mb-10 leading-relaxed">
+          <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
+            <h2 className="text-[28px] font-editorial-title font-medium text-center mb-1 text-white">casa gilda</h2>
+            <p className="text-[13px] text-white/80 text-center mb-4 leading-relaxed">
               Selecciona una ventana para ver sus lecturas actuales.
             </p>
 
-            <div className="grid grid-cols-3 gap-x-4 gap-y-12 w-full max-w-[180px] mx-auto mb-10">
+            {/* Banner único de notificaciones que nunca se solapa */}
+            <div className="h-8 mb-4 flex items-center justify-center">
+              {notificacionActual && (
+                <div 
+                  key={notificacionActual.id + notificacionActual.texto}
+                  onClick={() => setUsuariaActivaIndice(notificacionActual.indice)}
+                  className="bg-[#1a1a1a] text-[#ffffee] border border-[#adae1d] px-3 py-1 rounded-full shadow-lg text-[10px] font-medium tracking-wide notificacion-secuencial cursor-pointer flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d] animate-pulse"></span>
+                  <span>{notificacionActual.texto}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-3 gap-x-4 gap-y-8 w-full max-w-[180px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
                 const tieneNovedad = usuaria.tieneNovedad;
                 const seleccionada = usuariaActivaIndice === indice;
-
-                // Formato simple: "nombre - libro - pag. X"
-                const tituloLibro = (Number(usuaria.pagina || 0) > 0) 
-                  ? libroActual.titulo 
-                  : (usuaria.misLecturasPersonales && usuaria.misLecturasPersonales.length > 0 ? usuaria.misLecturasPersonales[0].libro : '');
-                
-                const pagLibro = (Number(usuaria.pagina || 0) > 0)
-                  ? usuaria.pagina
-                  : (usuaria.misLecturasPersonales && usuaria.misLecturasPersonales.length > 0 ? usuaria.misLecturasPersonales[0].pagina : 0);
-
-                const textoSencillo = `${(usuaria.nombre || '').toLowerCase()} - ${tituloLibro || 'lectura'} - pag. ${pagLibro || 0}`;
+                const esNotificacionActiva = notificacionActual && notificacionActual.id === usuaria.email;
 
                 return (
                   <div key={indice} className="relative flex justify-center items-center">
-                    
-                    {/* Etiqueta visible flotante directa y sencilla (sin hover/clic) */}
-                    {tieneNovedad && (
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1a1a1a] text-[#ffffee] border border-[#adae1d] px-2 py-0.5 rounded shadow text-[9px] font-medium whitespace-nowrap pointer-events-none z-30 notificacion-flotante-simple">
-                        {textoSencillo}
-                      </div>
-                    )}
-
                     <div
                       onClick={() => setUsuariaActivaIndice(indice)}
                       className={`w-[32px] h-[44px] rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-105 relative ${
                         estaLeyendo ? 'bg-[#ffffee] shadow-[0_4px_12px_rgba(255,255,238,0.2)]' : 'bg-[#8e9014]'
-                      } ${tieneNovedad ? 'ventana-novedad' : ''} ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
+                      } ${tieneNovedad ? 'ventana-novedad' : ''} ${
+                        esNotificacionActiva ? 'ring-2 ring-[#fffa8d] scale-110 z-20' : ''
+                      } ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
                     ></div>
                   </div>
                 );
