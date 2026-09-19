@@ -919,37 +919,39 @@
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
-        const guardarMiCiudad = async () => {
-          const ciudadLimpia = miCiudad.trim();
-          if (!ciudadLimpia) return;
-          
-          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
-          mostrarToast('Buscando localidad...');
-          
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
-            const data = await res.json();
-            let provinciaDetectada = ciudadLimpia;
-            
-            if (data && data.length > 0 && data[0].address) {
-              const addr = data[0].address;
-              provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
-            }
-            
-            enviarAccion('actualizar_ubicacion', { 
-              ciudad: ciudadLimpia, 
-              provincia_region: provinciaDetectada 
-            });
-            
-            mostrarToast(`Ubicación guardada: ${ciudadLimpia} (${provinciaDetectada})`);
-          } catch(e) {
-            enviarAccion('actualizar_ubicacion', { 
-              ciudad: ciudadLimpia, 
-              provincia_region: ciudadLimpia 
-            });
-            mostrarToast('Ubicación guardada.');
-          }
-        };
+        // Función para unificar provincias e islas en su Comunidad Autónoma correspondiente
+function normalizarComunidad(nombre) {
+  if (!nombre) return 'Sin especificar';
+  const n = nombre.toLowerCase().trim();
+
+  // País Vasco
+  if (n.includes('gipuzkoa') || n.includes('guipúzcoa') || n.includes('bizkaia') || n.includes('vizcaya') || n.includes('araba') || n.includes('álava') || n.includes('alava') || n.includes('país vasco') || n.includes('euskadi')) {
+    return 'País Vasco';
+  }
+  // Cataluña
+  if (n.includes('barcelona') || n.includes('girona') || n.includes('gerona') || n.includes('lleida') || n.includes('lérida') || n.includes('tarragona') || n.includes('catalunya') || n.includes('cataluña')) {
+    return 'Cataluña';
+  }
+  // Madrid
+  if (n.includes('madrid')) {
+    return 'Comunidad de Madrid';
+  }
+  // Andalucía
+  if (n.includes('sevilla') || n.includes('málaga') || n.includes('malaga') || n.includes('cadiz') || n.includes('cádiz') || n.includes('granada') || n.includes('cordoba') || n.includes('córdoba') || n.includes('almería') || n.includes('almeria') || n.includes('huelva') || n.includes('jaén') || n.includes('jaen') || n.includes('andalucía') || n.includes('andalucia')) {
+    return 'Andalucía';
+  }
+  // Galicia
+  if (n.includes('coruña') || n.includes('lugo') || n.includes('ourense') || n.includes('orense') || n.includes('pontevedra') || n.includes('galicia')) {
+    return 'Galicia';
+  }
+  // Comunidad Valenciana
+  if (n.includes('valència') || n.includes('valencia') || n.includes('alacant') || n.includes('alicante') || n.includes('castelló') || n.includes('castellón') || n.includes('comunitat valenciana')) {
+    return 'Comunidad Valenciana';
+  }
+
+  // Si no coincide con las reglas anteriores, devuelve el nombre capitalizado
+  return nombre;
+}
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
