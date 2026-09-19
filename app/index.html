@@ -154,6 +154,16 @@
       const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
       const URL_CSV_BUZON = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=899582953&single=true&output=csv';
 
+      // Enlaces de suscripción/pago de Stripe para cada modalidad de pago
+      const ENLACES_STRIPE = {
+        satelite: 'https://buy.stripe.com/test_satelite',
+        cafe: 'https://buy.stripe.com/test_cafe',
+        nube: 'https://buy.stripe.com/test_nube',
+        virtual: 'https://buy.stripe.com/test_virtual',
+        papel: 'https://buy.stripe.com/test_papel',
+        absoluta: 'https://buy.stripe.com/test_absoluta'
+      };
+
       const FRASES_INICIALES = [
         "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
         "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
@@ -564,6 +574,14 @@
         const [inputPassword, setInputPassword] = useState('');
         const [errorLogin, setErrorLogin] = useState('');
         
+        // Estado del formulario de registro incorporado
+        const [modoRegistro, setModoRegistro] = useState(false);
+        const [regNombre, setRegNombre] = useState('');
+        const [regEmail, setRegEmail] = useState('');
+        const [regCiudad, setRegCiudad] = useState('');
+        const [regModalidad, setRegModalidad] = useState('cotilla'); // cotilla | satelite | cafe | nube | virtual | papel | absoluta
+        const [regNivel, setRegNivel] = useState('3'); // '3' (3 meses) | '1' (mensual)
+        
         const [seccionApp, setSeccionApp] = useState('inicio');
         const [subTabComunidad, setSubTabComunidad] = useState('chat');
         const [tabEstanteria, setTabEstanteria] = useState('leyendo'); // leyendo | want_to_read | leidos
@@ -709,6 +727,48 @@
           localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
           localStorage.setItem('gilda_nombre_usuario', nombreDef);
           setSesion(datosSesion);
+        };
+
+        const registrarse = (e) => {
+          e.preventDefault();
+          setErrorLogin('');
+          const mail = regEmail.trim().toLowerCase();
+          const nom = regNombre.trim();
+          const ciu = regCiudad.trim();
+
+          if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
+
+          // Si selecciona modalidad Gratuita (gilda cotilla)
+          if (regModalidad === 'cotilla') {
+            const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
+            if (sociaExistente) {
+              return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
+            }
+
+            // Registrar en Google Sheets y dar acceso directo a la app
+            enviarAccion('registro_cotilla', {
+              nombre: nom,
+              email: mail,
+              ciudad: ciu,
+              modalidad: 'gilda cotilla'
+            });
+
+            const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
+            localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+            localStorage.setItem('gilda_nombre_usuario', nom);
+            if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
+            
+            setSesion(datosSesion);
+            mostrarToast('¡Bienvenida a Casa Gilda!');
+          } else {
+            // Modalidades de Pago -> Redirigir a la pasarela de Stripe correspondiente
+            const urlStripe = ENLACES_STRIPE[regModalidad];
+            if (urlStripe) {
+              window.location.href = urlStripe;
+            } else {
+              setErrorLogin('Modalidad de pago seleccionada no válida.');
+            }
+          }
         };
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
@@ -877,36 +937,124 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 w-full">
+            <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
               <div className="editorial-card max-w-sm w-full p-8 space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#adae1d] rounded-bl-full opacity-10"></div>
+                
                 <div className="space-y-1 relative z-10 text-center">
                   <h1 className="font-modern-title text-4xl text-[#1a1a1a]">gilda</h1>
                 </div>
+
                 <div className="bg-[#ffffee] border border-[#e2e2da] p-3 rounded text-center text-xs text-gray-600">
                   <span className="text-black font-bold">{usuariasClub.length}</span> lectoras
                 </div>
-                <form onSubmit={iniciarSesion} className="space-y-4 relative z-10">
-                  <div>
-                    <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
-                    <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Contraseña</label>
-                    <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
-                  </div>
-                  {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
-                  <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
-                    Iniciar sesión
-                  </button>
-                </form>
+
+                {!modoRegistro ? (
+                  /* Formulario de Iniciar Sesión */
+                  <form onSubmit={iniciarSesion} className="space-y-4 relative z-10">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
+                      <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Contraseña</label>
+                      <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
+                    </div>
+                    {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
+                      Iniciar sesión
+                    </button>
+                  </form>
+                ) : (
+                  /* Formulario de Registro con Niveles y Modalidades */
+                  <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Nombre o Apodo</label>
+                      <input type="text" placeholder="Tu nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
+                      <input type="email" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Ciudad / Ubicación (Opcional)</label>
+                      <input type="text" placeholder="Ej. Eibar, Madrid..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                    </div>
+
+                    {/* Selector de Nivel (Suscripción) */}
+                    <div className="pt-2 border-t border-gray-100">
+                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">Elige tu nivel de compromiso</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setRegNivel('3')}
+                          className={`p-2 rounded-lg text-left border transition-all ${regNivel === '3' ? 'border-[#1a1a1a] bg-[#ffffee] ring-1 ring-[#1a1a1a]' : 'border-gray-200 bg-white'}`}
+                        >
+                          <span className="text-[11px] font-bold block text-[#1a1a1a]">Nivel 3 meses</span>
+                          <span className="text-[9px] text-gray-500 block leading-tight">Descuento trimestral en modalidades de pago</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRegNivel('1')}
+                          className={`p-2 rounded-lg text-left border transition-all ${regNivel === '1' ? 'border-[#1a1a1a] bg-[#ffffee] ring-1 ring-[#1a1a1a]' : 'border-gray-200 bg-white'}`}
+                        >
+                          <span className="text-[11px] font-bold block text-[#1a1a1a]">Nivel 1 mes</span>
+                          <span className="text-[9px] text-gray-500 block leading-tight">Pago mensual estándar</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Selector de Modalidad */}
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">Modalidad de Gilda</label>
+                      <select 
+                        value={regModalidad} 
+                        onChange={(e) => setRegModalidad(e.target.value)}
+                        className="w-full editorial-input p-2 text-xs bg-white font-medium text-[#1a1a1a]"
+                      >
+                        <option value="cotilla">Gilda Cotilla — 0 €/mes</option>
+                        
+                        {regNivel === '3' ? (
+                          <>
+                            <option value="satelite">Gilda Satélite — 25 € / 3 meses (8,33 €/mes)</option>
+                            <option value="cafe">Gilda de Café — 45 € / 3 meses (15 €/mes)</option>
+                            <option value="nube">Gilda de Nube — 50 € / 3 meses (16,66 €/mes)</option>
+                            <option value="virtual">Gilda Virtual — 70 € / 3 meses (23,33 €/mes)</option>
+                            <option value="papel">Gilda de Papel — 90 € / 3 meses (30 €/mes)</option>
+                            <option value="absoluta">Gilda Absoluta — 115 € / 3 meses (38,33 €/mes)</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="satelite">Gilda Satélite — 10 € / mes</option>
+                            <option value="cafe">Gilda de Café — 18 € / mes</option>
+                            <option value="nube">Gilda de Nube — 20 € / mes</option>
+                            <option value="virtual">Gilda Virtual — 28 € / mes</option>
+                            <option value="papel">Gilda de Papel — 35 € / mes</option>
+                            <option value="absoluta">Gilda Absoluta — 45 € / mes</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+
+                    {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
+
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
+                      {regModalidad === 'cotilla' ? 'Crear cuenta gratuita' : 'Ir al pago en Stripe'}
+                    </button>
+                  </form>
+                )}
+
                 <div className="pt-4 border-t border-gray-100 text-center space-y-2">
                   <p className="text-[11px] text-gray-500 leading-relaxed px-1">
-                    por si no lo sabes, hay distintas modalidades de gilda, así que seguro que encuentras la tuya en el siguiente botón:
+                    {modoRegistro ? '¿Ya tienes una cuenta registrada?' : 'por si no lo sabes, hay distintas modalidades de gilda, así que seguro que encuentras la tuya en el siguiente botón:'}
                   </p>
-                  <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noreferrer" className="inline-block text-[11px] text-[#adae1d] font-bold hover:underline">
-                    quiero registrarme :)
-                  </a>
+                  <button 
+                    type="button"
+                    onClick={() => { setModoRegistro(!modoRegistro); setErrorLogin(''); }} 
+                    className="inline-block text-[11px] text-[#adae1d] font-bold hover:underline bg-transparent border-0 cursor-pointer"
+                  >
+                    {modoRegistro ? 'iniciar sesión con mi correo' : 'quiero registrarme :)'}
+                  </button>
                 </div>
               </div>
             </div>
