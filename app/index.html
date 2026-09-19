@@ -154,7 +154,7 @@
       const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
       const URL_CSV_BUZON = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=899582953&single=true&output=csv';
 
-      // Enlaces de suscripción/pago de Stripe para cada modalidad de pago
+      // Enlace único de Stripe por cada modalidad
       const ENLACES_STRIPE = {
         satelite: 'https://buy.stripe.com/test_satelite',
         cafe: 'https://buy.stripe.com/test_cafe',
@@ -580,7 +580,6 @@
         const [regEmail, setRegEmail] = useState('');
         const [regCiudad, setRegCiudad] = useState('');
         const [regModalidad, setRegModalidad] = useState('cotilla'); // cotilla | satelite | cafe | nube | virtual | papel | absoluta
-        const [regNivel, setRegNivel] = useState('3'); // '3' (3 meses) | '1' (mensual)
         
         const [seccionApp, setSeccionApp] = useState('inicio');
         const [subTabComunidad, setSubTabComunidad] = useState('chat');
@@ -966,11 +965,11 @@
                     </button>
                   </form>
                 ) : (
-                  /* Formulario de Registro con Niveles y Modalidades */
-                  <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in">
+                  /* Formulario de Registro */
+                  <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in text-left">
                     <div>
                       <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Nombre o Apodo</label>
-                      <input type="text" placeholder="Tu nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                      <input type="text" placeholder="tu nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
                     <div>
                       <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
@@ -978,63 +977,35 @@
                     </div>
                     <div>
                       <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Ciudad / Ubicación (Opcional)</label>
-                      <input type="text" placeholder="Ej. Eibar, Madrid..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
-                    </div>
-
-                    {/* Selector de Nivel (Suscripción) */}
-                    <div className="pt-2 border-t border-gray-100">
-                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">Elige tu nivel de compromiso</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setRegNivel('3')}
-                          className={`p-2 rounded-lg text-left border transition-all ${regNivel === '3' ? 'border-[#1a1a1a] bg-[#ffffee] ring-1 ring-[#1a1a1a]' : 'border-gray-200 bg-white'}`}
-                        >
-                          <span className="text-[11px] font-bold block text-[#1a1a1a]">Nivel 3 meses</span>
-                          <span className="text-[9px] text-gray-500 block leading-tight">Descuento trimestral en modalidades de pago</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRegNivel('1')}
-                          className={`p-2 rounded-lg text-left border transition-all ${regNivel === '1' ? 'border-[#1a1a1a] bg-[#ffffee] ring-1 ring-[#1a1a1a]' : 'border-gray-200 bg-white'}`}
-                        >
-                          <span className="text-[11px] font-bold block text-[#1a1a1a]">Nivel 1 mes</span>
-                          <span className="text-[9px] text-gray-500 block leading-tight">Pago mensual estándar</span>
-                        </button>
-                      </div>
+                      <input type="text" placeholder="ej. eibar, madrid..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
 
                     {/* Selector de Modalidad */}
                     <div>
-                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">Modalidad de Gilda</label>
+                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">modalidad de gilda</label>
                       <select 
                         value={regModalidad} 
                         onChange={(e) => setRegModalidad(e.target.value)}
                         className="w-full editorial-input p-2 text-xs bg-white font-medium text-[#1a1a1a]"
                       >
-                        <option value="cotilla">Gilda Cotilla — 0 €/mes</option>
-                        
-                        {regNivel === '3' ? (
-                          <>
-                            <option value="satelite">Gilda Satélite — 25 € / 3 meses (8,33 €/mes)</option>
-                            <option value="cafe">Gilda de Café — 45 € / 3 meses (15 €/mes)</option>
-                            <option value="nube">Gilda de Nube — 50 € / 3 meses (16,66 €/mes)</option>
-                            <option value="virtual">Gilda Virtual — 70 € / 3 meses (23,33 €/mes)</option>
-                            <option value="papel">Gilda de Papel — 90 € / 3 meses (30 €/mes)</option>
-                            <option value="absoluta">Gilda Absoluta — 115 € / 3 meses (38,33 €/mes)</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value="satelite">Gilda Satélite — 10 € / mes</option>
-                            <option value="cafe">Gilda de Café — 18 € / mes</option>
-                            <option value="nube">Gilda de Nube — 20 € / mes</option>
-                            <option value="virtual">Gilda Virtual — 28 € / mes</option>
-                            <option value="papel">Gilda de Papel — 35 € / mes</option>
-                            <option value="absoluta">Gilda Absoluta — 45 € / mes</option>
-                          </>
-                        )}
+                        <optgroup label="asomarme un ratito">
+                          <option value="cotilla">gilda cotilla (gratis)</option>
+                        </optgroup>
+                        <optgroup label="desde dentro">
+                          <option value="satelite">gilda satélite (1 €/mes)</option>
+                          <option value="cafe">gilda de café (5 €/mes)</option>
+                          <option value="nube">gilda de nube (5 €/mes)</option>
+                          <option value="virtual">gilda virtual (8 €/mes)</option>
+                          <option value="papel">gilda de papel (10 €/mes)</option>
+                          <option value="absoluta">gilda absoluta (12 €/mes)</option>
+                        </optgroup>
                       </select>
                     </div>
+
+                    {/* Nota aclaratoria sobre cancelación o pausa */}
+                    <p className="text-[10px] text-gray-500 italic bg-[#ffffee] p-2.5 rounded border border-[#e2e2da] leading-normal text-left">
+                      puedes cancelar tu suscripción cuando quieras, o incluso pausarla durante algún mes si no vas a poder hacer uso de gilda por cualquier cosa que te surja.
+                    </p>
 
                     {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
 
@@ -1201,7 +1172,7 @@
                           )}
                         </form>
 
-                        {/* Control del Pestañas de Estanterías */}
+                        {/* Control de Pestañas de Estanterías */}
                         <div className="flex bg-gray-100 p-1 rounded-xl text-[11px] font-bold text-center border border-gray-200">
                           <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#1a1a1a] text-[#ffffee] shadow-xs' : 'text-gray-500'}`}>
                             Leyendo
@@ -1545,7 +1516,7 @@
                 { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
                 { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
               ].map(tab => (
-                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#1a1a1a] font-bold bg-white px-2 py-1 rounded shadow-xs' : 'text-white/60 hover:text-white'}`}>
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#1a1a1a] font-bold bg-[#ffffee] px-2 py-1 rounded shadow-xs' : 'text-white/60 hover:text-white'}`}>
                   <i className={`fa-solid ${tab.icon} text-sm`}></i>
                   <span className="text-[7.5px] font-medium uppercase">{tab.label}</span>
                 </button>
