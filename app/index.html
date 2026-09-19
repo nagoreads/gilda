@@ -813,56 +813,60 @@
         };
 
         const registrarse = async (e) => {
-          e.preventDefault();
-          setErrorLogin('');
-          const mail = regEmail.trim().toLowerCase();
-          const nom = regNombre.trim();
-          const ciu = regCiudad.trim();
+  e.preventDefault();
+  setErrorLogin('');
+  const mail = regEmail.trim().toLowerCase();
+  const nom = regNombre.trim();
+  const ciu = regCiudad.trim();
 
-          if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
+  if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
 
-          if (regModalidad === 'cotilla') {
-            const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
-            if (sociaExistente) {
-              return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
-            }
+  if (regModalidad === 'cotilla') {
+    const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
+    if (sociaExistente) {
+      return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
+    }
 
-            let provinciaDetectada = ciu;
-            if (ciu) {
-              try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciu)}&limit=1&addressdetails=1`);
-                const data = await res.json();
-                if (data && data.length > 0 && data[0].address) {
-                  const addr = data[0].address;
-                  provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciu;
-                }
-              } catch (e) {}
-            }
+    // Detección automática de la Provincia / Región según el municipio
+    let provinciaDetectada = ciu;
+    if (ciu) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciu)}&limit=1&addressdetails=1`);
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].address) {
+          const addr = data[0].address;
+          // Asigna provincia, o en su defecto región o estado
+          provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciu;
+        }
+      } catch (e) {
+        console.error("Error al detectar provincia:", e);
+      }
+    }
 
-            enviarAccion('registro_cotilla', {
-              nombre: nom,
-              email: mail,
-              ciudad: ciu,
-              provincia_region: provinciaDetectada,
-              modalidad: 'gilda cotilla'
-            });
+    enviarAccion('registro_cotilla', {
+      nombre: nom,
+      email: mail,
+      ciudad: ciu,
+      provincia_region: provinciaDetectada,
+      modalidad: 'gilda cotilla'
+    });
 
-            const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
-            localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-            localStorage.setItem('gilda_nombre_usuario', nom);
-            if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
-            
-            setSesion(datosSesion);
-            mostrarToast('¡Bienvenida a Casa Gilda!');
-          } else {
-            const urlStripe = ENLACES_STRIPE[regModalidad];
-            if (urlStripe) {
-              window.location.href = urlStripe;
-            } else {
-              setErrorLogin('Modalidad de pago seleccionada no válida.');
-            }
-          }
-        };
+    const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
+    localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+    localStorage.setItem('gilda_nombre_usuario', nom);
+    if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
+    
+    setSesion(datosSesion);
+    mostrarToast('¡Bienvenida a Casa Gilda!');
+  } else {
+    const urlStripe = ENLACES_STRIPE[regModalidad];
+    if (urlStripe) {
+      window.location.href = urlStripe;
+    } else {
+      setErrorLogin('Modalidad de pago seleccionada no válida.');
+    }
+  }
+};
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
