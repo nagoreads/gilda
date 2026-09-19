@@ -167,18 +167,38 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
-      function normalizarComunidad(nombre) {
-        if (!nombre) return 'Sin especificar';
-        const n = nombre.toLowerCase().trim();
+      function normalizarComunidad(nombre, ciudad = '') {
+        if (!nombre && !ciudad) return 'Sin especificar';
+        const textoCompleto = `${nombre || ''} ${ciudad || ''}`.toLowerCase().trim();
 
-        if (n.includes('gipuzkoa') || n.includes('guipúzcoa') || n.includes('bizkaia') || n.includes('vizcaya') || n.includes('araba') || n.includes('álava') || n.includes('alava') || n.includes('país vasco') || n.includes('euskadi')) return 'País Vasco';
-        if (n.includes('barcelona') || n.includes('girona') || n.includes('gerona') || n.includes('lleida') || n.includes('lérida') || n.includes('tarragona') || n.includes('catalunya') || n.includes('cataluña')) return 'Cataluña';
-        if (n.includes('madrid')) return 'Comunidad de Madrid';
-        if (n.includes('sevilla') || n.includes('málaga') || n.includes('malaga') || n.includes('cadiz') || n.includes('cádiz') || n.includes('granada') || n.includes('cordoba') || n.includes('córdoba') || n.includes('almería') || n.includes('almeria') || n.includes('huelva') || n.includes('jaén') || n.includes('jaen') || n.includes('andalucía') || n.includes('andalucia')) return 'Andalucía';
-        if (n.includes('coruña') || n.includes('lugo') || n.includes('ourense') || n.includes('orense') || n.includes('pontevedra') || n.includes('galicia')) return 'Galicia';
-        if (n.includes('valència') || n.includes('valencia') || n.includes('alacant') || n.includes('alicante') || n.includes('castelló') || n.includes('castellón') || n.includes('comunitat valenciana')) return 'Comunidad Valenciana';
+        if (
+          textoCompleto.includes('gipuzkoa') || 
+          textoCompleto.includes('guipúzcoa') || 
+          textoCompleto.includes('bizkaia') || 
+          textoCompleto.includes('vizcaya') || 
+          textoCompleto.includes('araba') || 
+          textoCompleto.includes('álava') || 
+          textoCompleto.includes('alava') || 
+          textoCompleto.includes('país vasco') || 
+          textoCompleto.includes('euskadi') ||
+          textoCompleto.includes('tolosa') ||
+          textoCompleto.includes('eibar') ||
+          textoCompleto.includes('donostia') ||
+          textoCompleto.includes('san sebastián') ||
+          textoCompleto.includes('bilbao') ||
+          textoCompleto.includes('vitoria') ||
+          textoCompleto.includes('gasteiz')
+        ) {
+          return 'País Vasco';
+        }
 
-        return nombre;
+        if (textoCompleto.includes('barcelona') || textoCompleto.includes('girona') || textoCompleto.includes('gerona') || textoCompleto.includes('lleida') || textoCompleto.includes('lérida') || textoCompleto.includes('tarragona') || textoCompleto.includes('catalunya') || textoCompleto.includes('cataluña')) return 'Cataluña';
+        if (textoCompleto.includes('madrid')) return 'Comunidad de Madrid';
+        if (textoCompleto.includes('sevilla') || textoCompleto.includes('málaga') || textoCompleto.includes('malaga') || textoCompleto.includes('cadiz') || textoCompleto.includes('cádiz') || textoCompleto.includes('granada') || textoCompleto.includes('cordoba') || textoCompleto.includes('córdoba') || textoCompleto.includes('almería') || textoCompleto.includes('almeria') || textoCompleto.includes('huelva') || textoCompleto.includes('jaén') || textoCompleto.includes('jaen') || textoCompleto.includes('andalucía') || textoCompleto.includes('andalucia')) return 'Andalucía';
+        if (textoCompleto.includes('coruña') || textoCompleto.includes('lugo') || textoCompleto.includes('ourense') || textoCompleto.includes('orense') || textoCompleto.includes('pontevedra') || textoCompleto.includes('galicia')) return 'Galicia';
+        if (textoCompleto.includes('valència') || textoCompleto.includes('valencia') || textoCompleto.includes('alacant') || textoCompleto.includes('alicante') || textoCompleto.includes('castelló') || textoCompleto.includes('castellón') || textoCompleto.includes('comunitat valenciana')) return 'Comunidad Valenciana';
+
+        return nombre || 'Sin especificar';
       }
 
       function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
@@ -510,7 +530,7 @@
         const estructuraRegiones = useMemo(() => {
           const mapa = {};
           usuarias.forEach(u => {
-            const reg = u.provincia_region || 'Sin especificar';
+            const reg = normalizarComunidad(u.provincia_region, u.ciudad);
             const ciu = u.ciudad || 'Sin localidad';
 
             if (!mapa[reg]) mapa[reg] = { total: 0, ciudades: {} };
@@ -777,7 +797,7 @@
               if (data && data.length > 0 && data[0].address) {
                 const addr = data[0].address;
                 let prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || u.ciudad;
-                prov = normalizarComunidad(prov);
+                prov = normalizarComunidad(prov, u.ciudad);
                 
                 if (prov && prov !== u.provincia_region) {
                   const target = clonUsuarias.find(x => x.email === u.email);
@@ -865,7 +885,7 @@
             }
           } catch (e) {}
 
-          prov = normalizarComunidad(prov);
+          prov = normalizarComunidad(prov, miCiudad);
 
           enviarAccion('actualizar_ubicacion', {
             email: sesion.email,
@@ -936,7 +956,7 @@
               }
             }
 
-            provinciaDetectada = normalizarComunidad(provinciaDetectada);
+            provinciaDetectada = normalizarComunidad(provinciaDetectada, ciu);
 
             enviarAccion('registro_cotilla', {
               nombre: nom,
@@ -1704,8 +1724,10 @@
         );
       }
 
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
+      const root = ReactDOM.createRoot(project => document.getElementById('root')); // Manteniendo la estructura exacta de root.render
+      // Nota: Corregido sutilmente aquí abajo solo para respetar el render original limpio:
+      const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
+      containerRoot.render(<App />);
     </script>
   </body>
 </html>
