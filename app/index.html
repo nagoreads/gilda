@@ -496,36 +496,48 @@
   const mapRef = useRef(null);
   const markersGroupRef = useRef(null);
   const [regionSeleccionada, setRegionSeleccionada] = useState(null);
+  const [regionAbierta, setRegionAbierta] = useState(null);
 
-  // 1. Agrupación por PROVINCIA/REGION (Solo para el contador y lista de abajo)
-  const regionesMap = useMemo(() => {
-    const map = {};
+  // Agrupación jerárquica: Región -> Ciudad -> Usuarias
+  const estructuraRegiones = useMemo(() => {
+    const mapa = {};
     usuarias.forEach(u => {
-      const reg = u.provincia_region || u.ciudad || 'Sin especificar';
-      if (!map[reg]) map[reg] = [];
-      map[reg].push(u);
-    });
-    return map;
-  }, [usuarias]);
+      const reg = u.provincia_region || 'Sin especificar';
+      const ciu = u.ciudad || 'Sin localidad';
 
-  // 2. Agrupación por CIUDAD/PUEBLO EXACTO (Para situar los puntos exactos en el mapa)
-  const ciudadesExactasMap = useMemo(() => {
-    const map = {};
-    usuarias.forEach(u => {
-      // Priorizamos siempre el pueblo/ciudad sobre la región
-      const loc = u.ciudad || u.provincia_region || 'Desconocido';
-      if (!map[loc]) map[loc] = [];
-      map[loc].push(u);
-    });
-    return map;
-  }, [usuarias]);
+      if (!mapa[reg]) mapa[reg] = { total: 0, ciudades: {} };
+      if (!mapa[reg].ciudades[ciu]) mapa[reg].ciudades[ciu] = [];
 
-  const listaRegionesOrdenada = useMemo(() => {
-    return Object.entries(regionesMap)
+      mapa[reg].ciudades[ciu].push(u);
+      mapa[reg].total += 1;
+    });
+
+    return Object.entries(mapa)
       .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
-      .map(([region, lista]) => ({ region, count: lista.length, usuarias: lista }))
-      .sort((a, b) => b.count - a.count);
-  }, [regionesMap]);
+      .map(([region, data]) => ({
+        region,
+        total: data.total,
+        ciudades: Object.entries(data.ciudades).map(([ciudad, list]) => ({
+          ciudad,
+          count: list.length,
+          usuarias: list
+        })).sort((a, b) => b.count - a.count)
+      }))
+      .sort((a, b) => b.total - a.total);
+  }, [usuarias]);
+
+  // Puntos del mapa por ciudad exacta
+  const ciudadesMap = useMemo(() => {
+    const map = {};
+    usuarias.forEach(u => {
+      const loc = u.ciudad || u.provincia_region;
+      if (loc) {
+        if (!map[loc]) map[loc] = [];
+        map[loc].push(u);
+      }
+    });
+    return map;
+  }, [usuarias]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -540,10 +552,7 @@
 
     const renderMarkers = async () => {
       markersGroupRef.current.clearLayers();
-      
-      // Iteramos sobre ciudadesExactasMap para situar cada pueblo
-      for (const [pueblo, lista] of Object.entries(ciudadesExactasMap)) {
-        if (pueblo === 'Desconocido' || pueblo === 'Global') continue;
+      for (const [pueblo, lista] of Object.entries(ciudadesMap)) {
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
           const data = await res.json();
@@ -569,7 +578,7 @@
       }
     };
     renderMarkers();
-  }, [ciudadesExactasMap]);
+  }, [ciudadesMap]);
 
   return (
     <div className="space-y-4">
@@ -593,27 +602,50 @@
         )}
       </div>
 
+      {/* Lista con sub-desplegables por municipio */}
       <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
         <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
-          <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas / Provincias</h4>
+          <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas y Municipios</h4>
           <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
         </div>
-        <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-          {listaRegionesOrdenada.length === 0 ? (
+        <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+          {estructuraRegiones.length === 0 ? (
             <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
           ) : (
-            listaRegionesOrdenada.map((item, idx) => (
-              <div 
-                key={idx}
-                onClick={() => setRegionSeleccionada({ region: item.region, usuarias: item.usuarias })}
-                className="flex justify-between items-center text-xs p-2 rounded-lg bg-[#ffffee] hover:bg-[#f2f2e4] border border-[#e2e2da] cursor-pointer transition-colors"
-              >
-                <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
-                <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-                  {item.count} {item.count === 1 ? 'usuaria' : 'usuarias'}
-                </span>
-              </div>
-            ))
+            estructuraRegiones.map((item, idx) => {
+              const estaAbierta = regionAbierta === item.region;
+              return (
+                <div key={idx} className="rounded-lg border border-[#e2e2da] overflow-hidden">
+                  <div 
+                    onClick={() => setRegionAbierta(estaAbierta ? null : item.region)}
+                    className="flex justify-between items-center text-xs p-2.5 bg-[#ffffee] hover:bg-[#f2f2e4] cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-500`}></i>
+                      <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
+                    </div>
+                    <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                      {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
+                    </span>
+                  </div>
+
+                  {estaAbierta && (
+                    <div className="bg-white p-2 border-t border-[#e2e2da] space-y-1">
+                      {item.ciudades.map((sub, cIdx) => (
+                        <div 
+                          key={cIdx} 
+                          onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
+                          className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
+                        >
+                          <span className="text-gray-700 capitalize">{sub.ciudad}</span>
+                          <span className="text-gray-400 font-semibold">{sub.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       </div>
