@@ -493,134 +493,133 @@
       }
 
       function MapaGilda({ usuarias }) {
-        const mapRef = useRef(null);
-        const markersGroupRef = useRef(null);
-        const [regionSeleccionada, setRegionSeleccionada] = useState(null);
+  const mapRef = useRef(null);
+  const markersGroupRef = useRef(null);
+  const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
-        // 1. Agrupamos por CCAA/Provincia para la LISTA INFERIOR (segun provincia_region)
-        const regionesMap = useMemo(() => {
-          const map = {};
-          usuarias.forEach(u => {
-            const reg = u.provincia_region || 'Sin especificar';
-            if (!map[reg]) map[reg] = [];
-            map[reg].push(u);
-          });
-          return map;
-        }, [usuarias]);
+  // 1. Agrupación por PROVINCIA/REGION (Solo para el contador y lista de abajo)
+  const regionesMap = useMemo(() => {
+    const map = {};
+    usuarias.forEach(u => {
+      const reg = u.provincia_region || u.ciudad || 'Sin especificar';
+      if (!map[reg]) map[reg] = [];
+      map[reg].push(u);
+    });
+    return map;
+  }, [usuarias]);
 
-        // 2. Agrupamos por Pueblo/Ciudad EXACTA para PONER EL PUNTO EN EL MAPA (segun ciudad)
-        const ciudadesExactasMap = useMemo(() => {
-          const map = {};
-          usuarias.forEach(u => {
-            const loc = u.ciudad || u.provincia_region || 'Desconocido';
-            if (!map[loc]) map[loc] = [];
-            map[loc].push(u);
-          });
-          return map;
-        }, [usuarias]);
+  // 2. Agrupación por CIUDAD/PUEBLO EXACTO (Para situar los puntos exactos en el mapa)
+  const ciudadesExactasMap = useMemo(() => {
+    const map = {};
+    usuarias.forEach(u => {
+      // Priorizamos siempre el pueblo/ciudad sobre la región
+      const loc = u.ciudad || u.provincia_region || 'Desconocido';
+      if (!map[loc]) map[loc] = [];
+      map[loc].push(u);
+    });
+    return map;
+  }, [usuarias]);
 
-        // Lista ordenada por número de usuarias para el contador por CCAA/Provincias
-        const listaRegionesOrdenada = useMemo(() => {
-          return Object.entries(regionesMap)
-            .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
-            .map(([region, lista]) => ({ region, count: lista.length, usuarias: lista }))
-            .sort((a, b) => b.count - a.count);
-        }, [regionesMap]);
+  const listaRegionesOrdenada = useMemo(() => {
+    return Object.entries(regionesMap)
+      .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
+      .map(([region, lista]) => ({ region, count: lista.length, usuarias: lista }))
+      .sort((a, b) => b.count - a.count);
+  }, [regionesMap]);
 
-        useEffect(() => {
-          if (!mapRef.current) {
-            const map = L.map('mapa-gilda', { zoomControl: false }).setView([40.4167, -3.7037], 5);
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-              attribution: '&copy; OpenStreetMap', maxZoom: 10
-            }).addTo(map);
-            markersGroupRef.current = L.layerGroup().addTo(map);
-            mapRef.current = map;
+  useEffect(() => {
+    if (!mapRef.current) {
+      const map = L.map('mapa-gilda', { zoomControl: false }).setView([40.4167, -3.7037], 5);
+      L.control.zoom({ position: 'topright' }).addTo(map);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 10
+      }).addTo(map);
+      markersGroupRef.current = L.layerGroup().addTo(map);
+      mapRef.current = map;
+    }
+
+    const renderMarkers = async () => {
+      markersGroupRef.current.clearLayers();
+      
+      // Iteramos sobre ciudadesExactasMap para situar cada pueblo
+      for (const [pueblo, lista] of Object.entries(ciudadesExactasMap)) {
+        if (pueblo === 'Desconocido' || pueblo === 'Global') continue;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const cant = lista.length;
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+
+            const circleMarker = L.circleMarker([lat, lon], {
+              radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
+              fillColor: "#adae1d",
+              color: "#ffffff",
+              weight: 2,
+              opacity: 0.9,
+              fillOpacity: 0.85
+            });
+
+            circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
+            circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
+            markersGroupRef.current.addLayer(circleMarker);
           }
+        } catch (e) {}
+      }
+    };
+    renderMarkers();
+  }, [ciudadesExactasMap]);
 
-          const renderMarkers = async () => {
-            markersGroupRef.current.clearLayers();
-            // Colocamos marcadores usando el pueblo/ciudad EXACTO
-            for (const [pueblo, lista] of Object.entries(ciudadesExactasMap)) {
-              if (pueblo === 'Desconocido' || pueblo === 'Global') continue;
-              try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
-                const data = await res.json();
-                if (data && data.length > 0) {
-                  const cant = lista.length;
-                  const lat = parseFloat(data[0].lat);
-                  const lon = parseFloat(data[0].lon);
-
-                  // Círculo de luz / bombilla tradicional
-                  const circleMarker = L.circleMarker([lat, lon], {
-                    radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
-                    fillColor: "#adae1d",
-                    color: "#ffffff",
-                    weight: 2,
-                    opacity: 0.9,
-                    fillOpacity: 0.85
-                  });
-
-                  circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
-                  circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
-                  markersGroupRef.current.addLayer(circleMarker);
-                }
-              } catch (e) {}
-            }
-          };
-          renderMarkers();
-        }, [ciudadesExactasMap]);
-
-        return (
-          <div className="space-y-4">
-            <div className="relative">
-              <div id="mapa-gilda"></div>
-              {regionSeleccionada && (
-                <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
-                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
-                    <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-                    <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
-                  </div>
-                  <div className="overflow-y-auto flex-grow space-y-2">
-                    {regionSeleccionada.usuarias.map((u, i) => (
-                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
-                        <span className="font-medium">{u.nombre}</span>
-                        <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+  return (
+    <div className="space-y-4">
+      <div className="relative">
+        <div id="mapa-gilda"></div>
+        {regionSeleccionada && (
+          <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
+            <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
+              <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+              <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
             </div>
-
-            {/* Listado inferior organizado estrictamente por CCAA / Provincia */}
-            <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
-              <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
-                <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas / Provincias</h4>
-                <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
-              </div>
-              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                {listaRegionesOrdenada.length === 0 ? (
-                  <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
-                ) : (
-                  listaRegionesOrdenada.map((item, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => setRegionSeleccionada({ region: item.region, usuarias: item.usuarias })}
-                      className="flex justify-between items-center text-xs p-2 rounded-lg bg-[#ffffee] hover:bg-[#f2f2e4] border border-[#e2e2da] cursor-pointer transition-colors"
-                    >
-                      <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
-                      <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-                        {item.count} {item.count === 1 ? 'usuaria' : 'usuarias'}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
+            <div className="overflow-y-auto flex-grow space-y-2">
+              {regionSeleccionada.usuarias.map((u, i) => (
+                <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
+                  <span className="font-medium">{u.nombre}</span>
+                  <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
+                </div>
+              ))}
             </div>
           </div>
-        );
-      }
+        )}
+      </div>
+
+      <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
+        <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
+          <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas / Provincias</h4>
+          <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
+        </div>
+        <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+          {listaRegionesOrdenada.length === 0 ? (
+            <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
+          ) : (
+            listaRegionesOrdenada.map((item, idx) => (
+              <div 
+                key={idx}
+                onClick={() => setRegionSeleccionada({ region: item.region, usuarias: item.usuarias })}
+                className="flex justify-between items-center text-xs p-2 rounded-lg bg-[#ffffee] hover:bg-[#f2f2e4] border border-[#e2e2da] cursor-pointer transition-colors"
+              >
+                <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
+                <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  {item.count} {item.count === 1 ? 'usuaria' : 'usuarias'}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
       function App() {
         const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
