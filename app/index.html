@@ -108,7 +108,6 @@
         to { opacity: 1; transform: scale(1); }
       }
 
-      /* Resplandor suave en la ventana si hay novedad */
       @keyframes windowGlow {
         0%, 100% { box-shadow: 0 0 4px #fffa8d; transform: scale(1); }
         50% { box-shadow: 0 0 10px #ffffaa; transform: scale(1.03); }
@@ -117,7 +116,6 @@
         animation: windowGlow 2s infinite ease-in-out;
       }
 
-      /* Animación de entrada y desvanecimiento para la notificación en cola */
       @keyframes floatBannerQueue {
         0% { opacity: 0; transform: translateY(-4px); }
         12% { opacity: 1; transform: translateY(0); }
@@ -154,7 +152,6 @@
       const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
       const URL_CSV_BUZON = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=899582953&single=true&output=csv';
 
-      // Enlaces reales de Stripe por cada modalidad
       const ENLACES_STRIPE = {
         satelite: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01',
         cafe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02',
@@ -170,7 +167,21 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
-      // Componente del Buscador Predictivo Multi-API
+      // Función auxiliar para unificar provincias e islas en Comunidades Autónomas
+      function normalizarComunidad(nombre) {
+        if (!nombre) return 'Sin especificar';
+        const n = nombre.toLowerCase().trim();
+
+        if (n.includes('gipuzkoa') || n.includes('guipúzcoa') || n.includes('bizkaia') || n.includes('vizcaya') || n.includes('araba') || n.includes('álava') || n.includes('alava') || n.includes('país vasco') || n.includes('euskadi')) return 'País Vasco';
+        if (n.includes('barcelona') || n.includes('girona') || n.includes('gerona') || n.includes('lleida') || n.includes('lérida') || n.includes('tarragona') || n.includes('catalunya') || n.includes('cataluña')) return 'Cataluña';
+        if (n.includes('madrid')) return 'Comunidad de Madrid';
+        if (n.includes('sevilla') || n.includes('málaga') || n.includes('malaga') || n.includes('cadiz') || n.includes('cádiz') || n.includes('granada') || n.includes('cordoba') || n.includes('córdoba') || n.includes('almería') || n.includes('almeria') || n.includes('huelva') || n.includes('jaén') || n.includes('jaen') || n.includes('andalucía') || n.includes('andalucia')) return 'Andalucía';
+        if (n.includes('coruña') || n.includes('lugo') || n.includes('ourense') || n.includes('orense') || n.includes('pontevedra') || n.includes('galicia')) return 'Galicia';
+        if (n.includes('valència') || n.includes('valencia') || n.includes('alacant') || n.includes('alicante') || n.includes('castelló') || n.includes('castellón') || n.includes('comunitat valenciana')) return 'Comunidad Valenciana';
+
+        return nombre;
+      }
+
       function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
         const [sugerencias, setSugerencias] = useState([]);
         const [buscando, setBuscando] = useState(false);
@@ -290,7 +301,6 @@
         );
       }
 
-      // Componente PortadaLibro mejorado
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
         const [imgUrl, setImgUrl] = useState(portada || '');
         const [errorImg, setErrorImg] = useState(false);
@@ -498,7 +508,6 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
         const [regionAbierta, setRegionAbierta] = useState(null);
 
-        // Agrupación jerárquica: Región -> Ciudad -> Usuarias
         const estructuraRegiones = useMemo(() => {
           const mapa = {};
           usuarias.forEach(u => {
@@ -526,7 +535,6 @@
             .sort((a, b) => b.total - a.total);
         }, [usuarias]);
 
-        // Puntos del mapa por ciudad exacta
         const ciudadesMap = useMemo(() => {
           const map = {};
           usuarias.forEach(u => {
@@ -602,7 +610,6 @@
               )}
             </div>
 
-            {/* Lista con sub-desplegables por municipio */}
             <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
               <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
                 <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas y Municipios</h4>
@@ -746,7 +753,6 @@
           });
         };
 
-        // Enriquecimiento automático en segundo plano para registros antiguos que no tenían provincia
         const enriquecerUbicacionesAntiguas = async (listaUsuarias) => {
           const paraActualizar = listaUsuarias.filter(u => {
             const tieneCiudad = u.ciudad && u.ciudad.trim() !== '';
@@ -765,7 +771,8 @@
               const data = await res.json();
               if (data && data.length > 0 && data[0].address) {
                 const addr = data[0].address;
-                const prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || u.ciudad;
+                let prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || u.ciudad;
+                prov = normalizarComunidad(prov);
                 
                 if (prov && prov !== u.provincia_region) {
                   const target = clonUsuarias.find(x => x.email === u.email);
@@ -835,6 +842,32 @@
           } catch (err) { console.error(err); }
         };
 
+        const guardarMiCiudad = async () => {
+          if (!miCiudad.trim()) return;
+          localStorage.setItem('gilda_mi_ciudad', miCiudad);
+          
+          let prov = miCiudad;
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(miCiudad)}&limit=1&addressdetails=1`);
+            const data = await res.json();
+            if (data && data.length > 0 && data[0].address) {
+              const addr = data[0].address;
+              prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || miCiudad;
+            }
+          } catch (e) {}
+
+          prov = normalizarComunidad(prov);
+
+          enviarAccion('actualizar_ubicacion', {
+            email: sesion.email,
+            usuario: nombreUsuarioPersonalizado || sesion.nombre,
+            ciudad: miCiudad,
+            provincia_region: prov
+          });
+
+          mostrarToast('Ubicación actualizada.');
+        };
+
         const iniciarSesion = (e) => {
           e.preventDefault();
           setErrorLogin('');
@@ -877,7 +910,6 @@
               return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
             }
 
-            // Detección automática de la Provincia / Región según el municipio
             let provinciaDetectada = ciu;
             if (ciu) {
               try {
@@ -891,6 +923,8 @@
                 console.error("Error al detectar provincia:", e);
               }
             }
+
+            provinciaDetectada = normalizarComunidad(provinciaDetectada);
 
             enviarAccion('registro_cotilla', {
               nombre: nom,
@@ -918,40 +952,6 @@
         };
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
-
-        // Función para unificar provincias e islas en su Comunidad Autónoma correspondiente
-function normalizarComunidad(nombre) {
-  if (!nombre) return 'Sin especificar';
-  const n = nombre.toLowerCase().trim();
-
-  // País Vasco
-  if (n.includes('gipuzkoa') || n.includes('guipúzcoa') || n.includes('bizkaia') || n.includes('vizcaya') || n.includes('araba') || n.includes('álava') || n.includes('alava') || n.includes('país vasco') || n.includes('euskadi')) {
-    return 'País Vasco';
-  }
-  // Cataluña
-  if (n.includes('barcelona') || n.includes('girona') || n.includes('gerona') || n.includes('lleida') || n.includes('lérida') || n.includes('tarragona') || n.includes('catalunya') || n.includes('cataluña')) {
-    return 'Cataluña';
-  }
-  // Madrid
-  if (n.includes('madrid')) {
-    return 'Comunidad de Madrid';
-  }
-  // Andalucía
-  if (n.includes('sevilla') || n.includes('málaga') || n.includes('malaga') || n.includes('cadiz') || n.includes('cádiz') || n.includes('granada') || n.includes('cordoba') || n.includes('córdoba') || n.includes('almería') || n.includes('almeria') || n.includes('huelva') || n.includes('jaén') || n.includes('jaen') || n.includes('andalucía') || n.includes('andalucia')) {
-    return 'Andalucía';
-  }
-  // Galicia
-  if (n.includes('coruña') || n.includes('lugo') || n.includes('ourense') || n.includes('orense') || n.includes('pontevedra') || n.includes('galicia')) {
-    return 'Galicia';
-  }
-  // Comunidad Valenciana
-  if (n.includes('valència') || n.includes('valencia') || n.includes('alacant') || n.includes('alicante') || n.includes('castelló') || n.includes('castellón') || n.includes('comunitat valenciana')) {
-    return 'Comunidad Valenciana';
-  }
-
-  // Si no coincide con las reglas anteriores, devuelve el nombre capitalizado
-  return nombre;
-}
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
