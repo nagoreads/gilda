@@ -493,165 +493,165 @@
       }
 
       function MapaGilda({ usuarias }) {
-  const mapRef = useRef(null);
-  const markersGroupRef = useRef(null);
-  const [regionSeleccionada, setRegionSeleccionada] = useState(null);
-  const [regionAbierta, setRegionAbierta] = useState(null);
+        const mapRef = useRef(null);
+        const markersGroupRef = useRef(null);
+        const [regionSeleccionada, setRegionSeleccionada] = useState(null);
+        const [regionAbierta, setRegionAbierta] = useState(null);
 
-  // Agrupación jerárquica: Región -> Ciudad -> Usuarias
-  const estructuraRegiones = useMemo(() => {
-    const mapa = {};
-    usuarias.forEach(u => {
-      const reg = u.provincia_region || 'Sin especificar';
-      const ciu = u.ciudad || 'Sin localidad';
+        // Agrupación jerárquica: Región -> Ciudad -> Usuarias
+        const estructuraRegiones = useMemo(() => {
+          const mapa = {};
+          usuarias.forEach(u => {
+            const reg = u.provincia_region || 'Sin especificar';
+            const ciu = u.ciudad || 'Sin localidad';
 
-      if (!mapa[reg]) mapa[reg] = { total: 0, ciudades: {} };
-      if (!mapa[reg].ciudades[ciu]) mapa[reg].ciudades[ciu] = [];
+            if (!mapa[reg]) mapa[reg] = { total: 0, ciudades: {} };
+            if (!mapa[reg].ciudades[ciu]) mapa[reg].ciudades[ciu] = [];
 
-      mapa[reg].ciudades[ciu].push(u);
-      mapa[reg].total += 1;
-    });
+            mapa[reg].ciudades[ciu].push(u);
+            mapa[reg].total += 1;
+          });
 
-    return Object.entries(mapa)
-      .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
-      .map(([region, data]) => ({
-        region,
-        total: data.total,
-        ciudades: Object.entries(data.ciudades).map(([ciudad, list]) => ({
-          ciudad,
-          count: list.length,
-          usuarias: list
-        })).sort((a, b) => b.count - a.count)
-      }))
-      .sort((a, b) => b.total - a.total);
-  }, [usuarias]);
+          return Object.entries(mapa)
+            .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
+            .map(([region, data]) => ({
+              region,
+              total: data.total,
+              ciudades: Object.entries(data.ciudades).map(([ciudad, list]) => ({
+                ciudad,
+                count: list.length,
+                usuarias: list
+              })).sort((a, b) => b.count - a.count)
+            }))
+            .sort((a, b) => b.total - a.total);
+        }, [usuarias]);
 
-  // Puntos del mapa por ciudad exacta
-  const ciudadesMap = useMemo(() => {
-    const map = {};
-    usuarias.forEach(u => {
-      const loc = u.ciudad || u.provincia_region;
-      if (loc) {
-        if (!map[loc]) map[loc] = [];
-        map[loc].push(u);
-      }
-    });
-    return map;
-  }, [usuarias]);
+        // Puntos del mapa por ciudad exacta
+        const ciudadesMap = useMemo(() => {
+          const map = {};
+          usuarias.forEach(u => {
+            const loc = u.ciudad || u.provincia_region;
+            if (loc) {
+              if (!map[loc]) map[loc] = [];
+              map[loc].push(u);
+            }
+          });
+          return map;
+        }, [usuarias]);
 
-  useEffect(() => {
-    if (!mapRef.current) {
-      const map = L.map('mapa-gilda', { zoomControl: false }).setView([40.4167, -3.7037], 5);
-      L.control.zoom({ position: 'topright' }).addTo(map);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap', maxZoom: 10
-      }).addTo(map);
-      markersGroupRef.current = L.layerGroup().addTo(map);
-      mapRef.current = map;
-    }
-
-    const renderMarkers = async () => {
-      markersGroupRef.current.clearLayers();
-      for (const [pueblo, lista] of Object.entries(ciudadesMap)) {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const cant = lista.length;
-            const lat = parseFloat(data[0].lat);
-            const lon = parseFloat(data[0].lon);
-
-            const circleMarker = L.circleMarker([lat, lon], {
-              radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
-              fillColor: "#adae1d",
-              color: "#ffffff",
-              weight: 2,
-              opacity: 0.9,
-              fillOpacity: 0.85
-            });
-
-            circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
-            circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
-            markersGroupRef.current.addLayer(circleMarker);
+        useEffect(() => {
+          if (!mapRef.current) {
+            const map = L.map('mapa-gilda', { zoomControl: false }).setView([40.4167, -3.7037], 5);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; OpenStreetMap', maxZoom: 10
+            }).addTo(map);
+            markersGroupRef.current = L.layerGroup().addTo(map);
+            mapRef.current = map;
           }
-        } catch (e) {}
-      }
-    };
-    renderMarkers();
-  }, [ciudadesMap]);
 
-  return (
-    <div className="space-y-4">
-      <div className="relative">
-        <div id="mapa-gilda"></div>
-        {regionSeleccionada && (
-          <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
-            <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
-              <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-              <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
-            </div>
-            <div className="overflow-y-auto flex-grow space-y-2">
-              {regionSeleccionada.usuarias.map((u, i) => (
-                <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
-                  <span className="font-medium">{u.nombre}</span>
-                  <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
+          const renderMarkers = async () => {
+            markersGroupRef.current.clearLayers();
+            for (const [pueblo, lista] of Object.entries(ciudadesMap)) {
+              try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                  const cant = lista.length;
+                  const lat = parseFloat(data[0].lat);
+                  const lon = parseFloat(data[0].lon);
+
+                  const circleMarker = L.circleMarker([lat, lon], {
+                    radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
+                    fillColor: "#adae1d",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 0.9,
+                    fillOpacity: 0.85
+                  });
+
+                  circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
+                  circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
+                  markersGroupRef.current.addLayer(circleMarker);
+                }
+              } catch (e) {}
+            }
+          };
+          renderMarkers();
+        }, [ciudadesMap]);
+
+        return (
+          <div className="space-y-4">
+            <div className="relative">
+              <div id="mapa-gilda"></div>
+              {regionSeleccionada && (
+                <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
+                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
+                    <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                    <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
+                  </div>
+                  <div className="overflow-y-auto flex-grow space-y-2">
+                    {regionSeleccionada.usuarias.map((u, i) => (
+                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
+                        <span className="font-medium">{u.nombre}</span>
+                        <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+            </div>
+
+            {/* Lista con sub-desplegables por municipio */}
+            <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
+              <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
+                <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas y Municipios</h4>
+                <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
+              </div>
+              <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                {estructuraRegiones.length === 0 ? (
+                  <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
+                ) : (
+                  estructuraRegiones.map((item, idx) => {
+                    const estaAbierta = regionAbierta === item.region;
+                    return (
+                      <div key={idx} className="rounded-lg border border-[#e2e2da] overflow-hidden">
+                        <div 
+                          onClick={() => setRegionAbierta(estaAbierta ? null : item.region)}
+                          className="flex justify-between items-center text-xs p-2.5 bg-[#ffffee] hover:bg-[#f2f2e4] cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-500`}></i>
+                            <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
+                          </div>
+                          <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                            {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
+                          </span>
+                        </div>
+
+                        {estaAbierta && (
+                          <div className="bg-white p-2 border-t border-[#e2e2da] space-y-1">
+                            {item.ciudades.map((sub, cIdx) => (
+                              <div 
+                                key={cIdx} 
+                                onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
+                                className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
+                              >
+                                <span className="text-gray-700 capitalize">{sub.ciudad}</span>
+                                <span className="text-gray-400 font-semibold">{sub.count}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Lista con sub-desplegables por municipio */}
-      <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
-        <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
-          <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas y Municipios</h4>
-          <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
-        </div>
-        <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-          {estructuraRegiones.length === 0 ? (
-            <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
-          ) : (
-            estructuraRegiones.map((item, idx) => {
-              const estaAbierta = regionAbierta === item.region;
-              return (
-                <div key={idx} className="rounded-lg border border-[#e2e2da] overflow-hidden">
-                  <div 
-                    onClick={() => setRegionAbierta(estaAbierta ? null : item.region)}
-                    className="flex justify-between items-center text-xs p-2.5 bg-[#ffffee] hover:bg-[#f2f2e4] cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-500`}></i>
-                      <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
-                    </div>
-                    <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-                      {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
-                    </span>
-                  </div>
-
-                  {estaAbierta && (
-                    <div className="bg-white p-2 border-t border-[#e2e2da] space-y-1">
-                      {item.ciudades.map((sub, cIdx) => (
-                        <div 
-                          key={cIdx} 
-                          onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
-                          className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
-                        >
-                          <span className="text-gray-700 capitalize">{sub.ciudad}</span>
-                          <span className="text-gray-400 font-semibold">{sub.count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+        );
+      }
 
       function App() {
         const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
@@ -731,7 +731,8 @@
             parsearHoja(URL_CSV_VOTACION_CAFE), 
             parsearHoja(URL_CSV_LECTURAS_PERSONALES)
           ]).then(results => {
-            setUsuariasClub(results[0].filter(u => (u.email || '').trim() !== ''));
+            const listU = results[0].filter(u => (u.email || '').trim() !== '');
+            setUsuariasClub(listU);
             setCapitulos(results[1]); 
             setComentarios(results[2].reverse()); 
             setCafecitos(results[3]);
@@ -740,11 +741,59 @@
             setPropuestas(results[6]);
             setFechasCafe(results[7]); 
             setLecturasPersonales(results[8]);
+
+            enriquecerUbicacionesAntiguas(listU);
           });
         };
 
+        // Enriquecimiento automático en segundo plano para registros antiguos que no tenían provincia
+        const enriquecerUbicacionesAntiguas = async (listaUsuarias) => {
+          const paraActualizar = listaUsuarias.filter(u => {
+            const tieneCiudad = u.ciudad && u.ciudad.trim() !== '';
+            const sinProvincia = !u.provincia_region || u.provincia_region.trim() === '' || u.provincia_region.trim().toLowerCase() === u.ciudad.trim().toLowerCase();
+            return tieneCiudad && sinProvincia;
+          });
+
+          if (paraActualizar.length === 0) return;
+
+          let huboCambios = false;
+          const clonUsuarias = [...listaUsuarias];
+
+          for (const u of paraActualizar) {
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(u.ciudad)}&limit=1&addressdetails=1`);
+              const data = await res.json();
+              if (data && data.length > 0 && data[0].address) {
+                const addr = data[0].address;
+                const prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || u.ciudad;
+                
+                if (prov && prov !== u.provincia_region) {
+                  const target = clonUsuarias.find(x => x.email === u.email);
+                  if (target) target.provincia_region = prov;
+                  huboCambios = true;
+
+                  enviarAccion('actualizar_ubicacion', { 
+                    email: u.email,
+                    usuario: u.nombre,
+                    ciudad: u.ciudad, 
+                    provincia_region: prov 
+                  });
+                }
+              }
+            } catch (e) {}
+          }
+
+          if (huboCambios) {
+            setUsuariasClub(clonUsuarias);
+          }
+        };
+
         useEffect(() => {
-          parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
+          parsearHoja(URL_CSV_USUARIAS).then(data => {
+            const list = data.filter(u => (u.email || '').trim() !== '');
+            setUsuariasClub(list);
+            enriquecerUbicacionesAntiguas(list);
+          });
         }, []);
 
         useEffect(() => {
@@ -776,11 +825,12 @@
 
         const enviarAccion = async (action, payload) => {
           try {
-            const nombreActual = nombreUsuarioPersonalizado || sesion?.nombre || 'Socia';
+            const nombreActual = payload.usuario || nombreUsuarioPersonalizado || sesion?.nombre || 'Socia';
+            const emailActual = payload.email || sesion?.email;
             await fetch(GOOGLE_API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action, usuario: nombreActual, usuaria: nombreActual, email: sesion?.email, ...payload }),
+              body: JSON.stringify({ action, usuario: nombreActual, usuaria: nombreActual, email: emailActual, ...payload }),
             });
           } catch (err) { console.error(err); }
         };
@@ -813,98 +863,93 @@
         };
 
         const registrarse = async (e) => {
-  e.preventDefault();
-  setErrorLogin('');
-  const mail = regEmail.trim().toLowerCase();
-  const nom = regNombre.trim();
-  const ciu = regCiudad.trim();
+          e.preventDefault();
+          setErrorLogin('');
+          const mail = regEmail.trim().toLowerCase();
+          const nom = regNombre.trim();
+          const ciu = regCiudad.trim();
 
-  if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
+          if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
 
-  if (regModalidad === 'cotilla') {
-    const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
-    if (sociaExistente) {
-      return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
-    }
+          if (regModalidad === 'cotilla') {
+            const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
+            if (sociaExistente) {
+              return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
+            }
 
-    // Detección automática de la Provincia / Región según el municipio
-    let provinciaDetectada = ciu;
-    if (ciu) {
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciu)}&limit=1&addressdetails=1`);
-        const data = await res.json();
-        if (data && data.length > 0 && data[0].address) {
-          const addr = data[0].address;
-          // Asigna provincia, o en su defecto región o estado
-          provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciu;
-        }
-      } catch (e) {
-        console.error("Error al detectar provincia:", e);
-      }
-    }
+            // Detección automática de la Provincia / Región según el municipio
+            let provinciaDetectada = ciu;
+            if (ciu) {
+              try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciu)}&limit=1&addressdetails=1`);
+                const data = await res.json();
+                if (data && data.length > 0 && data[0].address) {
+                  const addr = data[0].address;
+                  provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciu;
+                }
+              } catch (e) {
+                console.error("Error al detectar provincia:", e);
+              }
+            }
 
-    enviarAccion('registro_cotilla', {
-      nombre: nom,
-      email: mail,
-      ciudad: ciu,
-      provincia_region: provinciaDetectada,
-      modalidad: 'gilda cotilla'
-    });
+            enviarAccion('registro_cotilla', {
+              nombre: nom,
+              email: mail,
+              ciudad: ciu,
+              provincia_region: provinciaDetectada,
+              modalidad: 'gilda cotilla'
+            });
 
-    const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
-    localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-    localStorage.setItem('gilda_nombre_usuario', nom);
-    if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
-    
-    setSesion(datosSesion);
-    mostrarToast('¡Bienvenida a Casa Gilda!');
-  } else {
-    const urlStripe = ENLACES_STRIPE[regModalidad];
-    if (urlStripe) {
-      window.location.href = urlStripe;
-    } else {
-      setErrorLogin('Modalidad de pago seleccionada no válida.');
-    }
-  }
-};
+            const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
+            localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+            localStorage.setItem('gilda_nombre_usuario', nom);
+            if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
+            
+            setSesion(datosSesion);
+            mostrarToast('¡Bienvenida a Casa Gilda!');
+          } else {
+            const urlStripe = ENLACES_STRIPE[regModalidad];
+            if (urlStripe) {
+              window.location.href = urlStripe;
+            } else {
+              setErrorLogin('Modalidad de pago seleccionada no válida.');
+            }
+          }
+        };
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
         const guardarMiCiudad = async () => {
-  const ciudadLimpia = miCiudad.trim();
-  if (!ciudadLimpia) return;
-  
-  localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
-  mostrarToast('Buscando localidad...');
-  
-  try {
-    // Consulta a la API de geolocalización para extraer la provincia/región
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
-    const data = await res.json();
-    let provinciaDetectada = ciudadLimpia;
-    
-    if (data && data.length > 0 && data[0].address) {
-      const addr = data[0].address;
-      // Prioriza provincia, y si no la encuentra pasa a estado/región
-      provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
-    }
-    
-    // Envía la ciudad exacta para el marcador del mapa y la provincia para la lista inferior
-    enviarAccion('actualizar_ubicacion', { 
-      ciudad: ciudadLimpia, 
-      provincia_region: provinciaDetectada 
-    });
-    
-    mostrarToast(`Ubicación guardada: ${ciudadLimpia} (${provinciaDetectada})`);
-  } catch(e) {
-    // Si falla la conexión a la API, guarda el municipio en ambos campos como respaldo
-    enviarAccion('actualizar_ubicacion', { 
-      ciudad: ciudadLimpia, 
-      provincia_region: ciudadLimpia 
-    });
-    mostrarToast('Ubicación guardada.');
-  }
-};
+          const ciudadLimpia = miCiudad.trim();
+          if (!ciudadLimpia) return;
+          
+          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
+          mostrarToast('Buscando localidad...');
+          
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
+            const data = await res.json();
+            let provinciaDetectada = ciudadLimpia;
+            
+            if (data && data.length > 0 && data[0].address) {
+              const addr = data[0].address;
+              provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
+            }
+            
+            enviarAccion('actualizar_ubicacion', { 
+              ciudad: ciudadLimpia, 
+              provincia_region: provinciaDetectada 
+            });
+            
+            mostrarToast(`Ubicación guardada: ${ciudadLimpia} (${provinciaDetectada})`);
+          } catch(e) {
+            enviarAccion('actualizar_ubicacion', { 
+              ciudad: ciudadLimpia, 
+              provincia_region: ciudadLimpia 
+            });
+            mostrarToast('Ubicación guardada.');
+          }
+        };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
