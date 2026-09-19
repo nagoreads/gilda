@@ -1724,8 +1724,6 @@
         );
       }
 
-      const root = ReactDOM.createRoot(project => document.getElementById('root')); // Manteniendo la estructura exacta de root.render
-      // Nota: Corregido sutilmente aquí abajo solo para respetar el render original limpio:
       const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
       containerRoot.render(<App />);
     </script>
