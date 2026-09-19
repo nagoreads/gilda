@@ -824,25 +824,38 @@
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
         const guardarMiCiudad = async () => {
-          const ciudadLimpia = miCiudad.trim();
-          if (!ciudadLimpia) return;
-          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
-          mostrarToast('Detectando región...');
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
-            const data = await res.json();
-            let provincia = ciudadLimpia;
-            if (data && data.length > 0 && data[0].address) {
-              const addr = data[0].address;
-              provincia = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
-            }
-            enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia, provincia_region: provincia });
-            mostrarToast(`Guardado: ${provincia}`);
-          } catch(e) {
-            enviarAccion('actualizar_ubicacion', { ciudad: ciudadLimpia, provincia_region: ciudadLimpia });
-            mostrarToast('Ubicación guardada.');
-          }
-        };
+  const ciudadLimpia = miCiudad.trim();
+  if (!ciudadLimpia) return;
+  
+  localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
+  mostrarToast('Buscando localidad...');
+  
+  try {
+    // 1. Buscamos la provincia/región para la lista inferior
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
+    const data = await res.json();
+    let provincia = ciudadLimpia;
+    
+    if (data && data.length > 0 && data[0].address) {
+      const addr = data[0].address;
+      provincia = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
+    }
+    
+    // 2. Guardamos la ciudad exacta (ciudadLimpia) para colocar el marcador del mapa en el pueblo
+    enviarAccion('actualizar_ubicacion', { 
+      ciudad: ciudadLimpia, 
+      provincia_region: provincia 
+    });
+    
+    mostrarToast(`Ubicación guardada: ${ciudadLimpia}`);
+  } catch(e) {
+    enviarAccion('actualizar_ubicacion', { 
+      ciudad: ciudadLimpia, 
+      provincia_region: ciudadLimpia 
+    });
+    mostrarToast('Ubicación guardada.');
+  }
+};
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
