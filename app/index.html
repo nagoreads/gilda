@@ -130,24 +130,6 @@
 
       #mapa-gilda { height: 280px; width: 100%; border-radius: 8px; border: 1px solid #e2e2da; z-index: 1; }
 
-      /* Marcador personalizado para mostrar número de usuarias */
-      .map-counter-marker {
-        background-color: #adae1d;
-        color: #ffffff;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 11px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease;
-      }
-      .map-counter-marker:hover {
-        transform: scale(1.15);
-      }
-
       ::-webkit-scrollbar { width: 3px; height: 3px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 2px; }
@@ -515,6 +497,7 @@
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
+        // Agrupamos las usuarias por región/provincia
         const regionesMap = useMemo(() => {
           const map = {};
           usuarias.forEach(u => {
@@ -524,6 +507,14 @@
           });
           return map;
         }, [usuarias]);
+
+        // Lista ordenada por número de usuarias para el contador por CCAA/Provincias
+        const listaRegionesOrdenada = useMemo(() => {
+          return Object.entries(regionesMap)
+            .filter(([reg]) => reg !== 'Global')
+            .map(([region, lista]) => ({ region, count: lista.length, usuarias: lista }))
+            .sort((a, b) => b.count - a.count);
+        }, [regionesMap]);
 
         useEffect(() => {
           if (!mapRef.current) {
@@ -545,20 +536,22 @@
                 const data = await res.json();
                 if (data && data.length > 0) {
                   const cant = lista.length;
-                  const size = Math.max(22, 20 + Math.min(cant * 3, 20)); // Tamaño dinámico del círculo según usuarias
-                  
-                  // Icono HTML con el número formateado en el centro del marcador
-                  const customIcon = L.divIcon({
-                    className: 'map-counter-marker',
-                    html: `<span>${cant}</span>`,
-                    iconSize: [size, size],
-                    iconAnchor: [size / 2, size / 2]
+                  const lat = parseFloat(data[0].lat);
+                  const lon = parseFloat(data[0].lon);
+
+                  // RESTAURADO: Marcadores tipo punto/círculo de luz original
+                  const circleMarker = L.circleMarker([lat, lon], {
+                    radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
+                    fillColor: "#adae1d",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 0.9,
+                    fillOpacity: 0.85
                   });
 
-                  const marker = L.marker([parseFloat(data[0].lat), parseFloat(data[0].lon)], { icon: customIcon });
-                  marker.bindTooltip(`<b>${reg}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
-                  marker.on('click', () => setRegionSeleccionada({ region: reg, usuarias: lista }));
-                  markersGroupRef.current.addLayer(marker);
+                  circleMarker.bindTooltip(`<b>${reg}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
+                  circleMarker.on('click', () => setRegionSeleccionada({ region: reg, usuarias: lista }));
+                  markersGroupRef.current.addLayer(circleMarker);
                 }
               } catch (e) {}
             }
@@ -567,24 +560,52 @@
         }, [regionesMap]);
 
         return (
-          <div className="relative">
-            <div id="mapa-gilda"></div>
-            {regionSeleccionada && (
-              <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
-                <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
-                  <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-                  <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
+          <div className="space-y-4">
+            <div className="relative">
+              <div id="mapa-gilda"></div>
+              {regionSeleccionada && (
+                <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
+                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
+                    <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                    <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
+                  </div>
+                  <div className="overflow-y-auto flex-grow space-y-2">
+                    {regionSeleccionada.usuarias.map((u, i) => (
+                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
+                        <span className="font-medium">{u.nombre}</span>
+                        <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="overflow-y-auto flex-grow space-y-2">
-                  {regionSeleccionada.usuarias.map((u, i) => (
-                    <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
-                      <span className="font-medium">{u.nombre}</span>
-                      <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
-                    </div>
-                  ))}
-                </div>
+              )}
+            </div>
+
+            {/* RESTAURADO: Contador por Comunidades Autónomas / Provincias */}
+            <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
+              <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
+                <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas / Provincias</h4>
+                <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
               </div>
-            )}
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                {listaRegionesOrdenada.length === 0 ? (
+                  <p className="text-[11px] text-gray-400 italic text-center py-2">No hay ubicaciones registradas.</p>
+                ) : (
+                  listaRegionesOrdenada.map((item, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setRegionSeleccionada({ region: item.region, usuarias: item.usuarias })}
+                      className="flex justify-between items-center text-xs p-2 rounded-lg bg-[#ffffee] hover:bg-[#f2f2e4] border border-[#e2e2da] cursor-pointer transition-colors"
+                    >
+                      <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
+                      <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        {item.count} {item.count === 1 ? 'usuaria' : 'usuarias'}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         );
       }
