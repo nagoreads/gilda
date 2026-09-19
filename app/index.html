@@ -497,13 +497,24 @@
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
-        // Agrupamos las usuarias por región/provincia
+        // 1. Agrupamos por CCAA/Provincia para la LISTA INFERIOR (segun provincia_region)
         const regionesMap = useMemo(() => {
           const map = {};
           usuarias.forEach(u => {
-            const reg = u.provincia_region || u.ciudad || 'Global';
+            const reg = u.provincia_region || 'Sin especificar';
             if (!map[reg]) map[reg] = [];
             map[reg].push(u);
+          });
+          return map;
+        }, [usuarias]);
+
+        // 2. Agrupamos por Pueblo/Ciudad EXACTA para PONER EL PUNTO EN EL MAPA (segun ciudad)
+        const ciudadesExactasMap = useMemo(() => {
+          const map = {};
+          usuarias.forEach(u => {
+            const loc = u.ciudad || u.provincia_region || 'Desconocido';
+            if (!map[loc]) map[loc] = [];
+            map[loc].push(u);
           });
           return map;
         }, [usuarias]);
@@ -511,7 +522,7 @@
         // Lista ordenada por número de usuarias para el contador por CCAA/Provincias
         const listaRegionesOrdenada = useMemo(() => {
           return Object.entries(regionesMap)
-            .filter(([reg]) => reg !== 'Global')
+            .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
             .map(([region, lista]) => ({ region, count: lista.length, usuarias: lista }))
             .sort((a, b) => b.count - a.count);
         }, [regionesMap]);
@@ -529,17 +540,18 @@
 
           const renderMarkers = async () => {
             markersGroupRef.current.clearLayers();
-            for (const [reg, lista] of Object.entries(regionesMap)) {
-              if (reg === 'Global') continue;
+            // Colocamos marcadores usando el pueblo/ciudad EXACTO
+            for (const [pueblo, lista] of Object.entries(ciudadesExactasMap)) {
+              if (pueblo === 'Desconocido' || pueblo === 'Global') continue;
               try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(reg)}&limit=1`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
                   const cant = lista.length;
                   const lat = parseFloat(data[0].lat);
                   const lon = parseFloat(data[0].lon);
 
-                  // RESTAURADO: Marcadores tipo punto/círculo de luz original
+                  // Círculo de luz / bombilla tradicional
                   const circleMarker = L.circleMarker([lat, lon], {
                     radius: Math.max(6, 5 + Math.min(cant * 1.5, 12)),
                     fillColor: "#adae1d",
@@ -549,15 +561,15 @@
                     fillOpacity: 0.85
                   });
 
-                  circleMarker.bindTooltip(`<b>${reg}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
-                  circleMarker.on('click', () => setRegionSeleccionada({ region: reg, usuarias: lista }));
+                  circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
+                  circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
                   markersGroupRef.current.addLayer(circleMarker);
                 }
               } catch (e) {}
             }
           };
           renderMarkers();
-        }, [regionesMap]);
+        }, [ciudadesExactasMap]);
 
         return (
           <div className="space-y-4">
@@ -581,7 +593,7 @@
               )}
             </div>
 
-            {/* RESTAURADO: Contador por Comunidades Autónomas / Provincias */}
+            {/* Listado inferior organizado estrictamente por CCAA / Provincia */}
             <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
               <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
                 <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas / Provincias</h4>
@@ -824,38 +836,38 @@
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
         const guardarMiCiudad = async () => {
-  const ciudadLimpia = miCiudad.trim();
-  if (!ciudadLimpia) return;
-  
-  localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
-  mostrarToast('Buscando localidad...');
-  
-  try {
-    // 1. Buscamos la provincia/región para la lista inferior
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
-    const data = await res.json();
-    let provincia = ciudadLimpia;
-    
-    if (data && data.length > 0 && data[0].address) {
-      const addr = data[0].address;
-      provincia = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
-    }
-    
-    // 2. Guardamos la ciudad exacta (ciudadLimpia) para colocar el marcador del mapa en el pueblo
-    enviarAccion('actualizar_ubicacion', { 
-      ciudad: ciudadLimpia, 
-      provincia_region: provincia 
-    });
-    
-    mostrarToast(`Ubicación guardada: ${ciudadLimpia}`);
-  } catch(e) {
-    enviarAccion('actualizar_ubicacion', { 
-      ciudad: ciudadLimpia, 
-      provincia_region: ciudadLimpia 
-    });
-    mostrarToast('Ubicación guardada.');
-  }
-};
+          const ciudadLimpia = miCiudad.trim();
+          if (!ciudadLimpia) return;
+          
+          localStorage.setItem('gilda_mi_ciudad', ciudadLimpia);
+          mostrarToast('Buscando localidad...');
+          
+          try {
+            // 1. Buscamos la provincia/región para la lista inferior
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciudadLimpia)}&limit=1&addressdetails=1`);
+            const data = await res.json();
+            let provincia = ciudadLimpia;
+            
+            if (data && data.length > 0 && data[0].address) {
+              const addr = data[0].address;
+              provincia = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciudadLimpia;
+            }
+            
+            // 2. Guardamos la ciudad exacta (ciudadLimpia) para colocar el marcador del mapa en el pueblo
+            enviarAccion('actualizar_ubicacion', { 
+              ciudad: ciudadLimpia, 
+              provincia_region: provincia 
+            });
+            
+            mostrarToast(`Ubicación guardada: ${ciudadLimpia}`);
+          } catch(e) {
+            enviarAccion('actualizar_ubicacion', { 
+              ciudad: ciudadLimpia, 
+              provincia_region: ciudadLimpia 
+            });
+            mostrarToast('Ubicación guardada.');
+          }
+        };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
