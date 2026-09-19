@@ -367,6 +367,27 @@
         );
       }
 
+      function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-lg" }) {
+        const [errorImg, setErrorImg] = useState(false);
+
+        if (foto && foto.trim() !== '' && !errorImg) {
+          return (
+            <img 
+              src={foto} 
+              alt={nombre || 'Socia'} 
+              onError={() => setErrorImg(true)} 
+              className={`${sizeClass} rounded-full object-cover border border-[#e2e2da] shrink-0`} 
+            />
+          );
+        }
+
+        return (
+          <div className={`${sizeClass} rounded-full bg-white border border-[#e2e2da] flex items-center justify-center font-editorial-title ${textClass} text-[#adae1d] shrink-0`}>
+            {(nombre || 'Socia').charAt(0).toUpperCase()}
+          </div>
+        );
+      }
+
       function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
         const [notificacionActual, setNotificacionActual] = useState(null);
@@ -473,9 +494,12 @@
 
             <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in bg-[#ffffee] text-[#1a1a1a] border border-[#e2e2da]">
               <div className="flex justify-between items-center w-full border-b border-[#e2e2da] pb-2.5 gap-2">
-                <span className="font-editorial-title text-base font-medium">
-                  la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
-                </span>
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" />
+                  <span className="font-editorial-title text-base font-medium truncate">
+                    la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
+                  </span>
+                </div>
                 <span className="text-[10px] tracking-[0.5px] text-[#1a1a1a] font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
@@ -622,9 +646,12 @@
                   </div>
                   <div className="overflow-y-auto flex-grow space-y-2">
                     {regionSeleccionada.usuarias.map((u, i) => (
-                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da]">
-                        <span className="font-medium">{u.nombre}</span>
-                        <span className="text-gray-500">{u.ciudad || 'Sin localidad'}</span>
+                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da] gap-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
+                          <span className="font-medium truncate">{u.nombre}</span>
+                        </div>
+                        <span className="text-gray-500 shrink-0">{u.ciudad || 'Sin localidad'}</span>
                       </div>
                     ))}
                   </div>
@@ -717,7 +744,11 @@
         const [miCiudad, setMiCiudad] = useState(() => localStorage.getItem('gilda_mi_ciudad') || '');
         const [miCodigoPostal, setMiCodigoPostal] = useState(() => localStorage.getItem('gilda_mi_cp') || '');
         const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
-        const [editandoNombre, setEditandoNombre] = useState(false);
+        const [fotoPerfilPersonalizada, setFotoPerfilPersonalizada] = useState(() => localStorage.getItem('gilda_foto_perfil') || '');
+        const [editandoPerfil, setEditandoPerfil] = useState(false);
+        const [inputNuevoNombre, setInputNuevoNombre] = useState('');
+        const [inputNuevaFoto, setInputNuevaFoto] = useState('');
+
         const [libroPersonal, setLibroPersonal] = useState('');
         const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
 
@@ -850,7 +881,15 @@
             const socia = usuariasClub.find(u => (u.email || '').toLowerCase() === sesion.email.toLowerCase());
             if (socia) {
               setMiPagina(Number(socia.pagina || 0));
-              if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
+              if (!nombreUsuarioPersonalizado) {
+                const nomDefault = socia.nombre || sesion.email.split('@')[0];
+                setNombreUsuarioPersonalizado(nomDefault);
+                localStorage.setItem('gilda_nombre_usuario', nomDefault);
+              }
+              if (!fotoPerfilPersonalizada && socia.foto_perfil) {
+                setFotoPerfilPersonalizada(socia.foto_perfil);
+                localStorage.setItem('gilda_foto_perfil', socia.foto_perfil);
+              }
               if (socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
               if (socia.codigo_postal && !miCodigoPostal) setMiCodigoPostal(socia.codigo_postal);
             }
@@ -922,6 +961,10 @@
           const datosSesion = { nombre: nombreDef, email: mail, modalidad: (socia.modalidad || 'gilda').toLowerCase() };
           localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
           localStorage.setItem('gilda_nombre_usuario', nombreDef);
+          if (socia.foto_perfil) {
+            localStorage.setItem('gilda_foto_perfil', socia.foto_perfil);
+            setFotoPerfilPersonalizada(socia.foto_perfil);
+          }
           setSesion(datosSesion);
         };
 
@@ -929,11 +972,17 @@
           e.preventDefault();
           setErrorLogin('');
           const mail = regEmail.trim().toLowerCase();
-          const nom = regNombre.trim();
+          const nom = regNombre.trim().toLowerCase();
           const ciu = regCiudad.trim();
           const cp = regCodigoPostal.trim();
 
           if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
+
+          // Validación estricta: Comprobar que el nombre de usuario sea único
+          const nombreOcupado = usuariasClub.some(u => (u.nombre || '').trim().toLowerCase() === nom);
+          if (nombreOcupado) {
+            return setErrorLogin('Este nombre de usuario ya está en uso. Por favor, elige otro.');
+          }
 
           if (regModalidad === 'cotilla') {
             const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
@@ -986,6 +1035,32 @@
         };
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
+
+        const guardarPerfil = () => {
+          const nuevoNom = inputNuevoNombre.trim().toLowerCase();
+          const nuevaFoto = inputNuevaFoto.trim();
+
+          if (nuevoNom && nuevoNom !== (nombreUsuarioPersonalizado || '').toLowerCase()) {
+            // Validación estricta de unicidad al cambiar nombre
+            const ocupado = usuariasClub.some(u => (u.email || '').toLowerCase() !== sesion.email.toLowerCase() && (u.nombre || '').trim().toLowerCase() === nuevoNom);
+            if (ocupado) {
+              mostrarToast('⚠️ Ese nombre de usuario ya está ocupado.');
+              return;
+            }
+            setNombreUsuarioPersonalizado(nuevoNom);
+            localStorage.setItem('gilda_nombre_usuario', nuevoNom);
+            enviarAccion('actualizar_nombre', { nombre: nuevoNom });
+          }
+
+          if (nuevaFoto !== undefined) {
+            setFotoPerfilPersonalizada(nuevaFoto);
+            localStorage.setItem('gilda_foto_perfil', nuevaFoto);
+            enviarAccion('actualizar_foto', { foto_perfil: nuevaFoto });
+          }
+
+          setEditandoPerfil(false);
+          mostrarToast('Perfil actualizado con éxito.');
+        };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
@@ -1124,13 +1199,14 @@
             return {
               ...u,
               nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
+              foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
               misLecturasPersonales: misPersonales,
               tieneNovedad: tieneNovedad
             };
           });
-        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, miPagina, isReadingNow, lecturasPersonales]);
+        }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
 
         if (!sesion) {
           return (
@@ -1164,8 +1240,8 @@
                 ) : (
                   <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in text-left">
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Nombre o Apodo</label>
-                      <input type="text" placeholder="tu nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Nombre de usuario (único)</label>
+                      <input type="text" placeholder="tu nombre o apodo" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
                     <div>
                       <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
@@ -1242,27 +1318,47 @@
             )}
 
             <header className="w-full mb-5 flex justify-between items-center bg-[#ffffee] text-[#1a1a1a] p-3.5 rounded-xl border border-[#e2e2da] shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white border border-[#e2e2da] flex items-center justify-center font-editorial-title text-lg text-[#adae1d]">
-                  {sesion.nombre.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  {editandoNombre ? (
-                    <div className="flex gap-2">
-                      <input type="text" value={nombreUsuarioPersonalizado} onChange={e => setNombreUsuarioPersonalizado(e.target.value)} className="editorial-input text-xs px-2 py-1 w-24" />
-                      <button onClick={() => { localStorage.setItem('gilda_nombre_usuario', nombreUsuarioPersonalizado); setEditandoNombre(false); enviarAccion('actualizar_nombre',{nombre: nombreUsuarioPersonalizado}); }} className="text-[#adae1d] text-xs font-bold">ok</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-semibold text-sm leading-none">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
-                      <button onClick={() => setEditandoNombre(true)} className="text-gray-400 text-[10px]"><i className="fa-solid fa-pen"></i></button>
-                    </div>
-                  )}
-                  <span className="text-[9px] text-gray-500 uppercase block mt-0.5">{sesion.modalidad}</span>
+              <div className="flex items-center gap-3 overflow-hidden">
+                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
+                <div className="overflow-hidden">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-sm leading-none truncate">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                    <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
+                      <i className="fa-solid fa-pen"></i>
+                    </button>
+                  </div>
+                  <span className="text-[9px] text-gray-500 uppercase block mt-0.5 truncate">{sesion.modalidad}</span>
                 </div>
               </div>
-              <button onClick={cerrarSesion} className="text-gray-400 hover:text-black"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+              <button onClick={cerrarSesion} className="text-gray-400 hover:text-black shrink-0"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
             </header>
+
+            {editandoPerfil && (
+              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in bg-[#ffffee]">
+                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2">
+                    <h3 className="font-editorial-title text-base font-bold">Editar mi perfil</h3>
+                    <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-500">✕</button>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Nombre de usuario (único)</label>
+                      <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">URL de la foto de perfil</label>
+                      <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={inputNuevaFoto} onChange={e => setInputNuevaFoto(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-white border border-[#e2e2da] text-gray-600 py-2 rounded-xl text-xs font-medium">Cancelar</button>
+                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs">Guardar cambios</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <main className="w-full flex-grow space-y-4 fade-in">
               {cargandoDatos ? (
@@ -1544,6 +1640,7 @@
                                   <div key={i} className="flex justify-between items-center p-2 bg-white rounded border border-[#e2e2da] text-xs text-[#1a1a1a]">
                                     <div className="flex items-center gap-2">
                                       <span className="w-2 h-2 rounded-full bg-[#adae1d]"></span>
+                                      <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
                                       <span className="font-bold">{u.nombre || u.email}</span>
                                     </div>
                                     <span className="text-[10px] text-gray-500">pág. {u.pagina || 0}</span>
@@ -1557,10 +1654,16 @@
                             {chatMsgs.map((m,i)=>{
                               const autor = m.usuario || m.usuaria || 'Socia';
                               const esMio = autor.toLowerCase() === (nombreUsuarioPersonalizado || sesion.nombre).toLowerCase();
+                              const sociaObj = usuariasClub.find(u => (u.nombre || '').toLowerCase() === autor.toLowerCase());
+                              const fotoAutor = esMio ? fotoPerfilPersonalizada : (sociaObj?.foto_perfil || '');
+
                               return (
-                                <div key={i} className={`flex flex-col ${esMio ? 'items-end ml-auto' : 'items-start mr-auto'} text-xs max-w-[85%]`}>
-                                  <span className="text-[9px] text-gray-400 mb-0.5">{autor}</span>
-                                  <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#1a1a1a] text-[#ffffee]' : 'bg-white text-[#1a1a1a] border border-[#e2e2da]'}`}>{m.mensaje}</div>
+                                <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
+                                  <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />
+                                  <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
+                                    <span className="text-[9px] text-gray-400 mb-0.5">{autor}</span>
+                                    <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#1a1a1a] text-[#ffffee]' : 'bg-white text-[#1a1a1a] border border-[#e2e2da]'}`}>{m.mensaje}</div>
+                                  </div>
                                 </div>
                               );
                             })}
