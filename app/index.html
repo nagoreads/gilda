@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#adae1d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>casa gilda — club de lectura</title>
+    <title>gilda — club de lectura</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json" />
@@ -167,7 +167,6 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
-      // Función auxiliar para unificar provincias e islas en Comunidades Autónomas
       function normalizarComunidad(nombre) {
         if (!nombre) return 'Sin especificar';
         const n = nombre.toLowerCase().trim();
@@ -408,7 +407,7 @@
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
-            <h2 className="text-[28px] font-editorial-title font-medium text-center mb-1 text-white">casa gilda</h2>
+            <h2 className="text-[28px] font-editorial-title font-medium text-center mb-1 text-white">gilda</h2>
             <p className="text-[13px] text-white/80 text-center mb-4 leading-relaxed">
               Selecciona una ventana para ver sus lecturas actuales.
             </p>
@@ -539,12 +538,14 @@
           const map = {};
           usuarias.forEach(u => {
             const loc = u.ciudad || u.provincia_region;
+            const cp = u.codigo_postal || '';
             if (loc) {
-              if (!map[loc]) map[loc] = [];
-              map[loc].push(u);
+              const key = cp ? `${loc}, ${cp}` : loc;
+              if (!map[key]) map[key] = { query: key, nombreLocalidad: loc, usuarias: [] };
+              map[key].usuarias.push(u);
             }
           });
-          return map;
+          return Object.values(map);
         }, [usuarias]);
 
         useEffect(() => {
@@ -560,11 +561,12 @@
 
           const renderMarkers = async () => {
             markersGroupRef.current.clearLayers();
-            for (const [pueblo, lista] of Object.entries(ciudadesMap)) {
+            for (const item of ciudadesMap) {
               try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pueblo)}&limit=1`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
+                  const lista = item.usuarias;
                   const cant = lista.length;
                   const lat = parseFloat(data[0].lat);
                   const lon = parseFloat(data[0].lon);
@@ -578,8 +580,8 @@
                     fillOpacity: 0.85
                   });
 
-                  circleMarker.bindTooltip(`<b>${pueblo}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
-                  circleMarker.on('click', () => setRegionSeleccionada({ region: pueblo, usuarias: lista }));
+                  circleMarker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { direction: 'top', permanent: false });
+                  circleMarker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: lista }));
                   markersGroupRef.current.addLayer(circleMarker);
                 }
               } catch (e) {}
@@ -670,6 +672,7 @@
         const [regNombre, setRegNombre] = useState('');
         const [regEmail, setRegEmail] = useState('');
         const [regCiudad, setRegCiudad] = useState('');
+        const [regCodigoPostal, setRegCodigoPostal] = useState('');
         const [regModalidad, setRegModalidad] = useState('cotilla');
         
         const [seccionApp, setSeccionApp] = useState('inicio');
@@ -692,6 +695,7 @@
         const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
         
         const [miCiudad, setMiCiudad] = useState(() => localStorage.getItem('gilda_mi_ciudad') || '');
+        const [miCodigoPostal, setMiCodigoPostal] = useState(() => localStorage.getItem('gilda_mi_cp') || '');
         const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
         const [editandoNombre, setEditandoNombre] = useState(false);
         const [libroPersonal, setLibroPersonal] = useState('');
@@ -767,7 +771,8 @@
 
           for (const u of paraActualizar) {
             try {
-              const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(u.ciudad)}&limit=1&addressdetails=1`);
+              const queryGeo = u.codigo_postal ? `${u.ciudad}, ${u.codigo_postal}` : u.ciudad;
+              const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
               const data = await res.json();
               if (data && data.length > 0 && data[0].address) {
                 const addr = data[0].address;
@@ -783,6 +788,7 @@
                     email: u.email,
                     usuario: u.nombre,
                     ciudad: u.ciudad, 
+                    codigo_postal: u.codigo_postal || '',
                     provincia_region: prov 
                   });
                 }
@@ -826,6 +832,7 @@
               setMiPagina(Number(socia.pagina || 0));
               if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
               if (socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
+              if (socia.codigo_postal && !miCodigoPostal) setMiCodigoPostal(socia.codigo_postal);
             }
           }
         }, [sesion, usuariasClub.length]);
@@ -842,13 +849,15 @@
           } catch (err) { console.error(err); }
         };
 
-        const guardarMiCiudad = async () => {
+        const guardarMiUbicacion = async () => {
           if (!miCiudad.trim()) return;
           localStorage.setItem('gilda_mi_ciudad', miCiudad);
+          localStorage.setItem('gilda_mi_cp', miCodigoPostal);
           
           let prov = miCiudad;
           try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(miCiudad)}&limit=1&addressdetails=1`);
+            const queryGeo = miCodigoPostal.trim() ? `${miCiudad}, ${miCodigoPostal}` : miCiudad;
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
             const data = await res.json();
             if (data && data.length > 0 && data[0].address) {
               const addr = data[0].address;
@@ -862,6 +871,7 @@
             email: sesion.email,
             usuario: nombreUsuarioPersonalizado || sesion.nombre,
             ciudad: miCiudad,
+            codigo_postal: miCodigoPostal,
             provincia_region: prov
           });
 
@@ -901,6 +911,7 @@
           const mail = regEmail.trim().toLowerCase();
           const nom = regNombre.trim();
           const ciu = regCiudad.trim();
+          const cp = regCodigoPostal.trim();
 
           if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
 
@@ -913,7 +924,8 @@
             let provinciaDetectada = ciu;
             if (ciu) {
               try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ciu)}&limit=1&addressdetails=1`);
+                const queryGeo = cp ? `${ciu}, ${cp}` : ciu;
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
                 const data = await res.json();
                 if (data && data.length > 0 && data[0].address) {
                   const addr = data[0].address;
@@ -930,6 +942,7 @@
               nombre: nom,
               email: mail,
               ciudad: ciu,
+              codigo_postal: cp,
               provincia_region: provinciaDetectada,
               modalidad: 'gilda cotilla'
             });
@@ -938,9 +951,10 @@
             localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
             localStorage.setItem('gilda_nombre_usuario', nom);
             if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
+            if (cp) localStorage.setItem('gilda_mi_cp', cp);
             
             setSesion(datosSesion);
-            mostrarToast('¡Bienvenida a Casa Gilda!');
+            mostrarToast('¡Bienvenida a gilda!');
           } else {
             const urlStripe = ENLACES_STRIPE[regModalidad];
             if (urlStripe) {
@@ -1137,9 +1151,15 @@
                       <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
                       <input type="email" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Pueblo o Ciudad (Opcional)</label>
-                      <input type="text" placeholder="ej. eibar, madrid..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Pueblo o Ciudad</label>
+                        <input type="text" placeholder="ej. tolosa, alava..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Código Postal</label>
+                        <input type="text" placeholder="ej. 20400" value={regCodigoPostal} onChange={(e) => setRegCodigoPostal(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
+                      </div>
                     </div>
 
                     <div>
@@ -1258,12 +1278,13 @@
                         </div>
                       </div>
 
-                      <div className="editorial-card p-4">
-                        <h3 className="font-editorial-title text-sm mb-2">Ubicación geográfica</h3>
-                        <div className="flex gap-2">
-                          <input type="text" placeholder="Pueblo o Ciudad (ej. Eibar, Madrid)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                          <button onClick={guardarMiCiudad} className="editorial-btn px-4 text-xs">actualizar</button>
+                      <div className="editorial-card p-4 space-y-2">
+                        <h3 className="font-editorial-title text-sm">Ubicación geográfica</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
+                          <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
                         </div>
+                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs mt-1">Actualizar ubicación</button>
                       </div>
 
                       <div className="editorial-card p-4 space-y-3">
