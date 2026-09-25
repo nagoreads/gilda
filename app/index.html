@@ -767,9 +767,7 @@
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
-        // Geocodificador interno de ciudades y provincias españolas e internacionales
         const GEO_INTERNA = {
-          // Comunidades Autónomas y Provincias principales (Coordenadas base)
           'madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
           'comunidad de madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
           'barcelona': { coords: [41.3851, 2.1734], ca: 'Cataluña' },
@@ -779,7 +777,6 @@
           'lerida': { coords: [41.6176, 0.6200], ca: 'Cataluña' },
           'tarragona': { coords: [41.1189, 1.2445], ca: 'Cataluña' },
           'cataluña': { coords: [41.5912, 1.5209], ca: 'Cataluña' },
-          
           'bilbao': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
           'donostia': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
           'san sebastian': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
@@ -798,7 +795,6 @@
           'alava': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
           'país vasco': { coords: [42.9896, -2.6189], ca: 'País Vasco' },
           'pais vasco': { coords: [42.9896, -2.6189], ca: 'País Vasco' },
-
           'sevilla': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
           'málaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
           'malaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
@@ -814,14 +810,12 @@
           'jaen': { coords: [37.7796, -3.7849], ca: 'Andalucía' },
           'andalucía': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
           'andalucia': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
-
           'valencia': { coords: [39.4699, -0.3763], ca: 'Comunidad Valenciana' },
           'alicante': { coords: [38.3452, -0.4810], ca: 'Comunidad Valenciana' },
           'alacant': { coords: [38.3452, -0.4810], ca: 'Comunidad Valenciana' },
           'castellón': { coords: [39.9864, -0.0513], ca: 'Comunidad Valenciana' },
           'castellon': { coords: [39.9864, -0.0513], ca: 'Comunidad Valenciana' },
           'comunidad valenciana': { coords: [39.4840, -0.3526], ca: 'Comunidad Valenciana' },
-
           'a coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
           'coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
           'la coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
@@ -833,29 +827,23 @@
           'ourense': { coords: [42.3358, -7.8639], ca: 'Galicia' },
           'orense': { coords: [42.3358, -7.8639], ca: 'Galicia' },
           'galicia': { coords: [42.5751, -8.1339], ca: 'Galicia' },
-
           'zaragoza': { coords: [41.6488, -0.8891], ca: 'Aragón' },
           'huesca': { coords: [42.1361, -0.4087], ca: 'Aragón' },
           'teruel': { coords: [40.3456, -1.1072], ca: 'Aragón' },
           'aragón': { coords: [41.6488, -0.8891], ca: 'Aragón' },
           'aragon': { coords: [41.6488, -0.8891], ca: 'Aragón' },
-
           'oviedo': { coords: [43.3614, -5.8593], ca: 'Asturias' },
           'gijón': { coords: [43.5357, -5.6615], ca: 'Asturias' },
           'gijon': { coords: [43.5357, -5.6615], ca: 'Asturias' },
           'asturias': { coords: [43.3614, -5.8593], ca: 'Asturias' },
           'principado de asturias': { coords: [43.3614, -5.8593], ca: 'Asturias' },
-
           'santander': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
           'cantabria': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
-
           'pamplona': { coords: [42.8125, -1.6458], ca: 'Navarra' },
           'iruña': { coords: [42.8125, -1.6458], ca: 'Navarra' },
           'navarra': { coords: [42.8125, -1.6458], ca: 'Navarra' },
-
           'logroño': { coords: [42.4650, -2.4456], ca: 'La Rioja' },
           'la rioja': { coords: [42.4650, -2.4456], ca: 'La Rioja' },
-
           'palma': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
           'palma de mallorca': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
           'mallorca': { coords: [39.6953, 3.0176], ca: 'Islas Baleares' },
@@ -863,7 +851,6 @@
           'menorca': { coords: [39.9496, 4.1104], ca: 'Islas Baleares' },
           'baleares': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
           'islas baleares': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
-
           'las palmas': { coords: [28.1235, -15.4363], ca: 'Canarias' },
           'las palmas de gran canaria': { coords: [28.1235, -15.4363], ca: 'Canarias' },
           'santa cruz de tenerife': { coords: [28.4636, -16.2518], ca: 'Canarias' },
@@ -871,23 +858,19 @@
           'gran canaria': { coords: [27.9202, -15.5474], ca: 'Canarias' },
           'canarias': { coords: [28.2915, -16.6291], ca: 'Canarias' },
           'islas canarias': { coords: [28.2915, -16.6291], ca: 'Canarias' },
-
           'murcia': { coords: [37.9922, -1.1307], ca: 'Región de Murcia' },
           'cartagena': { coords: [37.6257, -0.9966], ca: 'Región de Murcia' },
-
           'badajoz': { coords: [38.8794, -6.9706], ca: 'Extremadura' },
           'cáceres': { coords: [39.4753, -6.3723], ca: 'Extremadura' },
           'caceres': { coords: [39.4753, -6.3723], ca: 'Extremadura' },
           'mérida': { coords: [38.9161, -6.3437], ca: 'Extremadura' },
           'extremadura': { coords: [38.8794, -6.9706], ca: 'Extremadura' },
-
           'toledo': { coords: [39.8628, -4.0273], ca: 'Castilla-La Mancha' },
           'albacete': { coords: [38.9942, -1.8585], ca: 'Castilla-La Mancha' },
           'ciudad real': { coords: [38.9863, -3.9271], ca: 'Castilla-La Mancha' },
           'cuenca': { coords: [40.0704, -2.1374], ca: 'Castilla-La Mancha' },
           'guadalajara': { coords: [40.6327, -3.1669], ca: 'Castilla-La Mancha' },
           'castilla-la mancha': { coords: [39.8628, -4.0273], ca: 'Castilla-La Mancha' },
-
           'valladolid': { coords: [41.6523, -4.7245], ca: 'Castilla y León' },
           'león': { coords: [42.5987, -5.5671], ca: 'Castilla y León' },
           'leon': { coords: [42.5987, -5.5671], ca: 'Castilla y León' },
@@ -900,11 +883,8 @@
           'ávila': { coords: [40.6565, -4.6818], ca: 'Castilla y León' },
           'avila': { coords: [40.6565, -4.6818], ca: 'Castilla y León' },
           'castilla y león': { coords: [41.6523, -4.7245], ca: 'Castilla y León' },
-
           'ceuta': { coords: [35.8894, -5.3213], ca: 'Ceuta' },
           'melilla': { coords: [35.2923, -2.9388], ca: 'Melilla' },
-
-          // Mapeos internacionales comunes
           'londres': { coords: [51.5074, -0.1278], ca: 'Reino Unido' },
           'london': { coords: [51.5074, -0.1278], ca: 'Reino Unido' },
           'parís': { coords: [48.8566, 2.3522], ca: 'Francia' },
@@ -942,7 +922,6 @@
           return { coords: [40.4168, -3.7038], ca: 'Otras regiones' };
         };
 
-        // Agrupación automática por Comunidades Autónomas / Países Internacionales
         const regionesConteo = useMemo(() => {
           const conteo = {};
           usuarias.forEach(u => {
@@ -954,7 +933,6 @@
           return Object.entries(conteo).sort((a, b) => b[1] - a[1]);
         }, [usuarias]);
 
-        // Mapeo individual de cada socia con dispersión (Jittering) si comparten coordenadas exactas
         const usuariasConCoordenadas = useMemo(() => {
           const mapaCoordenadasSocio = {};
 
@@ -972,7 +950,6 @@
               const count = mapaCoordenadasSocio[coordKey];
               mapaCoordenadasSocio[coordKey]++;
               
-              // Dispersión circular automática (Jittering)
               const angle = count * 1.2;
               const distance = 0.012 * Math.sqrt(count);
               coordsFinales = [
@@ -1094,6 +1071,8 @@
         const [eventosCalendario, setEventosCalendario] = useState([]);
 
         const [miPagina, setMiPagina] = useState(0);
+        const [miCiudadInput, setMiCiudadInput] = useState(() => localStorage.getItem('gilda_ciudad') || '');
+        const [miCodigoPostalInput, setMiCodigoPostalInput] = useState(() => localStorage.getItem('gilda_codigo_postal') || '');
         const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
         
         const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
@@ -1186,6 +1165,12 @@
                   }
                   if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
                     setMiPagina(Number(sociaActual.pagina) || 0);
+                  }
+                  if (sociaActual.ciudad && !localStorage.getItem('gilda_ciudad')) {
+                    setMiCiudadInput(sociaActual.ciudad);
+                  }
+                  if (sociaActual.codigo_postal && !localStorage.getItem('gilda_codigo_postal')) {
+                    setMiCodigoPostalInput(sociaActual.codigo_postal);
                   }
                   if (sociaActual.foto_perfil && !localStorage.getItem('gilda_foto_perfil')) {
                     setFotoPerfilPersonalizada(sociaActual.foto_perfil);
@@ -1479,6 +1464,47 @@
                         }} className="editorial-btn px-3 py-1 text-xs">ok</button>
                       </div>
                     </div>
+                  </div>
+
+                  {/* NUEVA CASILLA: UBICACIÓN DE LA LECTORA */}
+                  <div className="editorial-card p-5 space-y-3">
+                    <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#232321]">
+                      <i className="fa-solid fa-location-dot text-[#4A5028]"></i> Tu Localización
+                    </h3>
+                    <p className="text-xs text-gray-500 font-sans italic">Añade tu ciudad y código postal para ubicarte en el mapa global del club.</p>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <input 
+                        type="text" 
+                        placeholder="Ciudad..." 
+                        value={miCiudadInput} 
+                        onChange={(e) => setMiCiudadInput(e.target.value)} 
+                        className="editorial-input p-2.5 text-xs" 
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="C. Postal..." 
+                        value={miCodigoPostalInput} 
+                        onChange={(e) => setMiCodigoPostalInput(e.target.value)} 
+                        className="editorial-input p-2.5 text-xs" 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        localStorage.setItem('gilda_ciudad', miCiudadInput);
+                        localStorage.setItem('gilda_codigo_postal', miCodigoPostalInput);
+                        enviarAccion('actualizar_ubicacion', { ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput });
+                        setUsuariasClub(prev => prev.map(u => {
+                          if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) {
+                            return { ...u, ciudad: miCiudadInput, provincia_region: miCiudadInput };
+                          }
+                          return u;
+                        }));
+                        mostrarToast('Ubicación guardada correctamente');
+                      }} 
+                      className="w-full editorial-btn py-2 text-xs font-semibold"
+                    >
+                      Guardar ubicación
+                    </button>
                   </div>
 
                   <div className="editorial-card p-5 space-y-4">
