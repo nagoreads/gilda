@@ -460,6 +460,139 @@
         return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
       }
 
+      function CalendarioInteractivo({ eventos }) {
+        const [fechaActual, setFechaActual] = useState(new Date());
+
+        const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const nombresMeses = [
+          'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        const anio = fechaActual.getFullYear();
+        const mes = fechaActual.getMonth();
+
+        const primerDiaMes = new Date(anio, mes, 1);
+        const ultimoDiaMes = new Date(anio, mes + 1, 0);
+
+        let primerDiaSemanaIndice = primerDiaMes.getDay() - 1;
+        if (primerDiaSemanaIndice === -1) primerDiaSemanaIndice = 6;
+
+        const totalDiasMes = ultimoDiaMes.getDate();
+
+        const hoy = new Date();
+        const esMesActual = hoy.getFullYear() === anio && hoy.getMonth() === mes;
+
+        const parsearFechaEvento = (strFecha) => {
+          if (!strFecha) return null;
+          const partes = strFecha.trim().split(' ');
+          if (partes.length >= 2) {
+            const diaNum = parseInt(partes[0], 10);
+            const mesStr = partes[1].toLowerCase().slice(0, 3);
+            const mapaMeses = {
+              ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
+              jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11
+            };
+            if (!isNaN(diaNum) && mapaMeses[mesStr] !== undefined) {
+              return { dia: diaNum, mes: mapaMeses[mesStr] };
+            }
+          }
+          return null;
+        };
+
+        const eventosDelMes = useMemo(() => {
+          const mapa = {};
+          eventos.forEach(ev => {
+            if ((ev.estado || '').toLowerCase() === 'pendiente') return;
+            const parsed = parsearFechaEvento(ev.fecha || ev.dia);
+            if (parsed && parsed.mes === mes) {
+              if (!mapa[parsed.dia]) mapa[parsed.dia] = [];
+              mapa[parsed.dia].push(ev);
+            }
+          });
+          return mapa;
+        }, [eventos, mes]);
+
+        const mesAnterior = () => setFechaActual(new Date(anio, mes - 1, 1));
+        const mesSiguiente = () => setFechaActual(new Date(anio, mes + 1, 1));
+
+        const celdas = [];
+        for (let i = 0; i < primerDiaSemanaIndice; i++) {
+          celdas.push(<div key={`empty-${i}`} className="h-9"></div>);
+        }
+
+        for (let dia = 1; dia <= totalDiasMes; dia++) {
+          const esHoy = esMesActual && hoy.getDate() === dia;
+          const evs = eventosDelMes[dia] || [];
+          const tieneCafecito = evs.some(e => {
+            const t = (e.evento || e.titulo || '').toLowerCase();
+            return t.includes('cafecito') || t.includes('café');
+          });
+          const tieneComentario = evs.some(e => {
+            const t = (e.evento || e.titulo || '').toLowerCase();
+            return t.includes('comentario') || t.includes('libro');
+          });
+
+          celdas.push(
+            <div
+              key={dia}
+              className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-babydoll ${
+                esHoy ? 'bg-[#4A5028] text-white font-bold shadow-xs' : 'hover:bg-[#F8F7F3] text-[#232321]'
+              }`}
+            >
+              <span>{dia}</span>
+              {evs.length > 0 && (
+                <div className="flex gap-0.5 mt-0.5">
+                  {tieneCafecito && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-amber-300' : 'bg-amber-600'}`}></span>
+                  )}
+                  {tieneComentario && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF]">
+              <button onClick={mesAnterior} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-[#232321] transition-colors">
+                <i className="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <h4 className="font-babydoll text-base font-bold text-[#232321]">
+                {nombresMeses[mes]} {anio}
+              </h4>
+              <button onClick={mesSiguiente} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-[#232321] transition-colors">
+                <i className="fa-solid fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 text-center font-babydoll text-[10px] uppercase font-bold text-gray-400 pb-1 border-b border-[#E8E6DF]">
+              {diasSemana.map((d, i) => (
+                <div key={i}>{d}</div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {celdas}
+            </div>
+
+            <div className="flex items-center justify-center gap-4 pt-2 text-[10px] font-babydoll text-gray-500 border-t border-[#E8E6DF]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
+                <span>Comentarios</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-600"></span>
+                <span>Cafecito</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
       function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
         const listaUsuarias = usuarias.length > 0 ? usuarias : [];
@@ -1035,7 +1168,7 @@
                     </div>
                   </div>
 
-                  <div className="editorial-card p-5 space-y-3">
+                  <div className="editorial-card p-5 space-y-4">
                     <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
                       <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
                         <i className="fa-regular fa-calendar-days text-[#4A5028]"></i> Calendario del Club
@@ -1044,6 +1177,8 @@
                         {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length} programado(s)
                       </span>
                     </div>
+
+                    <CalendarioInteractivo eventos={eventosCalendario} />
 
                     <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
                       {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length === 0 ? (
@@ -1574,3 +1709,6 @@
     </script>
   </body>
 </html>
+```eof
+
+He añadido el componente del calendario mensual interactivo (`CalendarioInteractivo`) e integrado su visualización en el archivo HTML principal.
