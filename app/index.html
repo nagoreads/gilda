@@ -985,7 +985,19 @@
                       <span className="text-xs text-gray-500 font-babydoll text-base">página actual:</span>
                       <div className="flex items-center gap-2">
                         <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1 text-xs font-semibold" />
-                        <button onClick={() => { enviarAccion('actualizar_pagina', { pagina: miPagina }); mostrarToast('Progreso actualizado'); }} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
+                        <button onClick={() => { 
+                          // CORRECCIÓN: Actualizar tanto en backend como en el estado local de usuariasClub
+                          enviarAccion('actualizar_pagina', { pagina: miPagina }); 
+                          
+                          setUsuariasClub(prev => prev.map(u => {
+                            if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) {
+                              return { ...u, pagina: miPagina };
+                            }
+                            return u;
+                          }));
+
+                          mostrarToast('Progreso actualizado'); 
+                        }} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
                       </div>
                     </div>
                   </div>
