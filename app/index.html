@@ -549,7 +549,6 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
         const [regionAbierta, setRegionAbierta] = useState(null);
 
-        // Coordenadas predefinidas de respaldo para pintado inmediato sin depender de APIs
         const COORDENADAS_PREDEFINIDAS = {
           'país vasco': [42.9896, -2.6189],
           'cataluña': [41.5912, 1.5209],
@@ -633,50 +632,74 @@
             mapRef.current = map;
           }
 
-          const pintarMarcador = (lat, lon, item) => {
+          // Forzar refresco de dimensiones de Leaflet para corregir visibilidad inicial
+          setTimeout(() => {
+            if (mapRef.current) mapRef.current.invalidateSize();
+          }, 250);
+
+          const pintarPin = (lat, lon, item, boundsArray) => {
             const cant = item.usuarias.length;
-            const circleMarker = L.circleMarker([lat, lon], {
-              radius: Math.max(8, 7 + Math.min(cant * 2, 16)),
-              fillColor: "#1a1a1a",
-              color: "#ffffff",
-              weight: 2,
-              opacity: 1,
-              fillOpacity: 0.9
+            boundsArray.push([lat, lon]);
+
+            // Pin estilo gota/ubicación SVG en el color primario de la app (#1a1a1a con acento #adae1d)
+            const pinHtml = `
+              <div style="position: relative; width: 28px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 32" width="28" height="36" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20c0-6.63-5.37-12-12-12z" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle cx="12" cy="11" r="5" fill="#adae1d" />
+                </svg>
+                <span style="position: absolute; top: 5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 9px; font-family: sans-serif;">${cant}</span>
+              </div>
+            `;
+
+            const customIcon = L.divIcon({
+              html: pinHtml,
+              className: 'custom-pin-gilda',
+              iconSize: [28, 36],
+              iconAnchor: [14, 36], // Ancla la punta inferior del pin exactamente en la coordenada
+              popupAnchor: [0, -36]
             });
 
-            circleMarker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
+            const marker = L.marker([lat, lon], { icon: customIcon });
+
+            marker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
               direction: 'top', 
-              permanent: false 
+              permanent: false,
+              offset: [0, -32]
             });
 
-            circleMarker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
-            markersGroupRef.current.addLayer(circleMarker);
+            marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
+            markersGroupRef.current.addLayer(marker);
           };
 
           const renderMarkers = async () => {
             if (!markersGroupRef.current) return;
             markersGroupRef.current.clearLayers();
+            const boundsArray = [];
 
             for (const item of ciudadesMap) {
               const claveLimpia = item.nombreLocalidad.toLowerCase().trim();
               
-              // 1. Si está en el diccionario local, se pinta al instante
               if (COORDENADAS_PREDEFINIDAS[claveLimpia]) {
                 const [lat, lon] = COORDENADAS_PREDEFINIDAS[claveLimpia];
-                pintarMarcador(lat, lon, item);
+                pintarPin(lat, lon, item, boundsArray);
                 continue;
               }
 
-              // 2. Si no, intenta buscar en la API con fallback
               try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
-                  pintarMarcador(parseFloat(data[0].lat), parseFloat(data[0].lon), item);
+                  pintarPin(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
                 }
               } catch (e) {
                 console.error("No se pudieron obtener coordenadas para:", item.query);
               }
+            }
+
+            // Si hay puntos dibujados, se ajusta el encuadre para que todos los pines queden visibles a simple vista
+            if (boundsArray.length > 0 && mapRef.current) {
+              mapRef.current.fitBounds(boundsArray, { padding: [30, 30], maxZoom: 7 });
             }
           };
 
