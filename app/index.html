@@ -1290,7 +1290,7 @@
             autora: autoraOpt,
             portada: portadaOpt
           });
-          mostrarToast(`Guardado en mi habitación: ${tituloLibro}`);
+          mostrarToast(`Guardado: ${tituloLibro}`);
         };
 
         const agregarAWantToReadDirecto = (titulo, autora = '', portada = '') => {
@@ -1360,13 +1360,18 @@
           });
         }, [usuariasClub, sesion]);
 
-        const misLibrosFiltrados = useMemo(() => {
+        const misLibrosFiltradosLista = useMemo(() => {
           if (!sesion) return [];
           return lecturasPersonales.filter(l => 
             (l.email || '').toLowerCase() === sesion.email.toLowerCase() && 
             (l.estado || 'leyendo') === tabEstanteria
           );
         }, [lecturasPersonales, sesion, tabEstanteria]);
+
+        const todosMisLibrosEstanteria = useMemo(() => {
+          if (!sesion) return [];
+          return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
+        }, [lecturasPersonales, sesion]);
 
         const miembrosEdificio = useMemo(() => {
           const ah = new Date().getTime();
@@ -1679,42 +1684,36 @@
                     </div>
                   )}
 
-                  {seccionApp === 'habitacion' && (
+                  {seccionApp === 'estanterias' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-4">
                         <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
-                          <h3 className="font-babydoll text-2xl font-bold">Mi Estantería Personal</h3>
+                          <h3 className="font-babydoll text-2xl font-bold">Mis Libros</h3>
                           <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all font-babydoll text-xs ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
                             {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                           </button>
                         </div>
 
-                        {/* SELECTOR DE DECORACIÓN (PLANTITAS Y DETALLES) */}
-                        <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
-                          <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de balda:</span>
-                          <select 
-                            value={decoracionActual} 
-                            onChange={(e) => {
-                              setDecoracionActual(e.target.value);
-                              localStorage.setItem('gilda_decoracion', e.target.value);
-                            }}
-                            className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold"
-                          >
-                            <option value="🌿 Plantita monstera">🌿 Plantita monstera</option>
-                            <option value="🪴 Maceta de cerámica">🪴 Maceta de cerámica</option>
-                            <option value="🕯️ Vela aromática">🕯️ Vela aromática</option>
-                            <option value="☕ Taza de café">☕ Taza de café</option>
-                            <option value="🌵 Pequeño cactus">🌵 Pequeño cactus</option>
-                            <option value="✨ Sin decoración">✨ Sin decoración</option>
-                          </select>
+                        {/* SELECTOR DE PESTAÑAS CLÁSICO EN FORMATO LISTA */}
+                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
+                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Leyendo
+                          </button>
+                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Quiero leer
+                          </button>
+                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Leídos
+                          </button>
                         </div>
 
+                        {/* FORMULARIO PARA AÑADIR LIBRO */}
                         <form onSubmit={(e) => {
                           e.preventDefault();
                           if (!libroPersonal.trim()) return;
                           guardarLibroPersonal(undefined, undefined, tabEstanteria);
                         }} className="space-y-2 bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E8E6DF]">
-                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1 font-babydoll text-xs">Añadir libro a esta estantería</span>
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1 font-babydoll text-xs">Añadir libro</span>
                           
                           <BuscadorLibros
                             placeholder="Busca por título o autora..."
@@ -1734,27 +1733,69 @@
                           )}
                         </form>
 
-                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
-                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Leyendo
-                          </button>
-                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Quiero leer
-                          </button>
-                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Leídos
-                          </button>
+                        {/* FORMATO LISTA CLÁSICO */}
+                        <div className="space-y-2.5 pt-1">
+                          {misLibrosFiltradosLista.length === 0 ? (
+                            <p className="text-xs text-gray-400 italic text-center py-6 font-babydoll">No hay libros en esta sección.</p>
+                          ) : (
+                            misLibrosFiltradosLista.map((item, idx) => (
+                              <div key={idx} onClick={() => setLibroSeleccionadoDetalle(item)} className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] cursor-pointer hover:bg-[#F2EFE9] transition-colors">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                  <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
+                                  <div className="overflow-hidden text-left">
+                                    <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro}</p>
+                                    <p className="text-[10px] text-gray-500 italic truncate font-babydoll">{item.autora || 'Autora desconocida'}</p>
+                                    {tabEstanteria === 'leyendo' && (
+                                      <p className="text-[10px] text-gray-400 mt-0.5 font-babydoll">pág. <b>{item.pagina || item.paginas || 0}</b></p>
+                                    )}
+                                  </div>
+                                </div>
+                                <i className="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {seccionApp === 'habitacion' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
+                          <h3 className="font-babydoll text-2xl font-bold">Mi Habitación</h3>
+                          <span className="text-[10px] text-gray-400 font-bold font-babydoll">Estantería Personal</span>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON LOMOS LIMPIOS Y DECORACIÓN */}
+                        {/* SELECTOR DE DECORACIÓN (PLANTITAS Y ILUSTRACIONES) */}
+                        <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                          <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de la balda:</span>
+                          <select 
+                            value={decoracionActual} 
+                            onChange={(e) => {
+                              setDecoracionActual(e.target.value);
+                              localStorage.setItem('gilda_decoracion', e.target.value);
+                            }}
+                            className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold"
+                          >
+                            <option value="🌿 Plantita monstera">🌿 Plantita monstera</option>
+                            <option value="🪴 Maceta de cerámica">🪴 Maceta de cerámica</option>
+                            <option value="🕯️ Vela aromática">🕯️ Vela aromática</option>
+                            <option value="☕ Taza de café">☕ Taza de café</option>
+                            <option value="🌵 Pequeño cactus">🌵 Pequeño cactus</option>
+                            <option value="✨ Sin decoración">✨ Sin decoración</option>
+                          </select>
+                        </div>
+
+                        {/* ESTANTERÍA DE MADERA CON TODOS LOS LIBROS Y DECORACIÓN */}
                         <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
                           <div className="flex items-end justify-start gap-3.5 flex-grow">
-                            {misLibrosFiltrados.length === 0 ? (
+                            {todosMisLibrosEstanteria.length === 0 ? (
                               <div className="w-full text-center py-10">
-                                <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
+                                <p className="text-xs text-[#7A7565] italic font-babydoll">Aún no hay libros en tu estantería...</p>
                               </div>
                             ) : (
-                              misLibrosFiltrados.map((item, idx) => (
+                              todosMisLibrosEstanteria.map((item, idx) => (
                                 <LomoLibroEstanteria 
                                   key={idx} 
                                   item={item} 
@@ -2062,7 +2103,8 @@
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
                 { id: 'edificio', icon: 'fa-building', label: 'casa' },
-                { id: 'habitacion', icon: 'fa-bookmark', label: 'mi habitación' },
+                { id: 'estanterias', icon: 'fa-book', label: 'libros' },
+                { id: 'habitacion', icon: 'fa-bookmark', label: 'habitación' },
                 { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
                 { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
                 { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
