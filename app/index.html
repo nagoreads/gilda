@@ -270,7 +270,7 @@
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
           }
-          return p;
+          return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300`;
         }, [portadaFinal]);
 
         const autoraReal = useMemo(() => {
