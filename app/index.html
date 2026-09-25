@@ -184,7 +184,7 @@
             try {
               const query = encodeURIComponent(valor.trim());
               const [resGoogle, resOpenLib] = await Promise.allSettled([
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&langRestrict=es`),
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books&langRestrict=es`),
                 fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
               ]);
               let listaCombinada = [];
@@ -193,7 +193,18 @@
                 if (dataG.items) {
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
-                    listaCombinada.push({ titulo: info.title || '', autora: info.authors ? info.authors.join(', ') : 'Autora desconocida', portada: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '' });
+                    // Mejoramos la URL de Google Books cambiando zoom=1 por zoom=2 o eliminando restricciones de edge para mayor nitidez
+                    let thumb = info.imageLinks?.thumbnail || '';
+                    if (thumb) {
+                      thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
+                      // Forzamos un poco más de calidad si es posible
+                      if (thumb.includes('zoom=1')) thumb = thumb.replace('zoom=1', 'zoom=2');
+                    }
+                    listaCombinada.push({ 
+                      titulo: info.title || '', 
+                      autora: info.authors ? info.authors.join(', ') : 'Autora desconocida', 
+                      portada: thumb 
+                    });
                   });
                 }
               }
@@ -201,7 +212,11 @@
                 const dataOL = await resOpenLib.value.json();
                 if (dataOL.docs) {
                   dataOL.docs.forEach(doc => {
-                    listaCombinada.push({ titulo: doc.title || '', autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida', portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : '' });
+                    listaCombinada.push({ 
+                      titulo: doc.title || '', 
+                      autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida', 
+                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : '' // Usamos -L (Large) en lugar de -M para mejor resolución
+                    });
                   });
                 }
               }
@@ -209,7 +224,10 @@
               const titulosVistos = new Set();
               listaCombinada.forEach(item => {
                 const tLimpio = item.titulo.toLowerCase().trim();
-                if (tLimpio && !titulosVistos.has(tLimpio)) { titulosVistos.add(tLimpio); unicos.push(item); }
+                if (tLimpio && !titulosVistos.has(tLimpio)) { 
+                  titulosVistos.add(tLimpio); 
+                  unicos.push(item); 
+                }
               });
               setSugerencias(unicos.slice(0, 6));
               setMostrarDropdown(unicos.length > 0);
@@ -242,36 +260,15 @@
       }
 
       function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
-        const [imgUrl, setImgUrl] = useState(portada || '');
         const [errorImg, setErrorImg] = useState(false);
-
-        useEffect(() => {
-          setImgUrl(portada || ''); setErrorImg(false);
-          if ((!portada || portada.trim() === '') && titulo && titulo.trim().length > 1) {
-            let cancelado = false;
-            const query = encodeURIComponent(titulo.trim());
-            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
-              .then(res => res.json())
-              .then(data => {
-                if (!cancelado && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-                  setImgUrl(data.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'));
-                } else if (!cancelado) {
-                  return fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`)
-                    .then(r => r.json())
-                    .then(dataOL => {
-                      if (!cancelado && dataOL.docs && dataOL.docs[0]?.cover_i) {
-                        setImgUrl(`https://covers.openlibrary.org/b/id/${dataOL.docs[0].cover_i}-M.jpg`);
-                      }
-                    });
-                }
-              }).catch(() => {});
-            return () => { cancelado = true; };
-          }
-        }, [titulo, portada]);
-
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        if (imgUrl && !errorImg) return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
+        // Si hay portada y no ha dado error de carga, la mostramos
+        if (portada && portada.trim() !== '' && !errorImg) {
+          return <img src={portada.trim()} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
+        }
+
+        // Si la imagen falla o es muy fea/inexistente, se muestra automáticamente el diseño editorial elegante de Gilda
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
