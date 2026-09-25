@@ -182,7 +182,7 @@
           const timer = setTimeout(async () => {
             setBuscando(true);
             try {
-              const query = encodeURIComponent(valor.trim());
+              const query = encodeURIComponent(`${valor.trim()} lang:es`);
               const [resGoogle, resOpenLib] = await Promise.allSettled([
                 fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=6&printType=books&langRestrict=es&gl=es&hl=es`),
                 fetch(`https://openlibrary.org/search.json?q=${query}&limit=5&language=spa`)
@@ -282,7 +282,7 @@
           let activo = true;
           if ((!portadaOriginal || errorImg || !autoraFinal) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
             setBuscandoOnline(true);
-            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal}`);
+            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal} lang:es`);
             
             Promise.allSettled([
               fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es&gl=es&hl=es`).then(r => r.json()),
