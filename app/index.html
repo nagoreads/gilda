@@ -114,19 +114,7 @@
         0%, 100% { box-shadow: 0 0 6px #C5CB86; transform: scale(1); }
         50% { box-shadow: 0 0 12px #9EA552; transform: scale(1.03); }
       }
-      .ventana-novedad {
-        animation: windowGlow 2s infinite ease-in-out;
-      }
-
-      @keyframes floatBannerQueue {
-        0% { opacity: 0; transform: translateY(-4px); }
-        12% { opacity: 1; transform: translateY(0); }
-        88% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-4px); }
-      }
-      .notificacion-secuencial {
-        animation: floatBannerQueue 4.5s ease-in-out forwards;
-      }
+      .ventana-novedad { animation: windowGlow 2s infinite ease-in-out; }
 
       .estanteria-madera {
         background: linear-gradient(to bottom, #F4F0E6 0%, #EAE4D2 100%);
@@ -143,6 +131,18 @@
         transform: translateY(-10px) scale(1.03);
         box-shadow: 0 16px 30px rgba(0,0,0,0.18);
       }
+
+      @keyframes parpadeoVela {
+        0%, 100% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+        50% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+      }
+      .vela-flama { animation: parpadeoVela 1.5s infinite ease-in-out; transform-origin: bottom center; }
+
+      @keyframes subirHumo {
+        0% { transform: translateY(0) scaleX(1); opacity: 0.8; }
+        100% { transform: translateY(-12px) scaleX(1.4); opacity: 0; }
+      }
+      .humo-taza { animation: subirHumo 2s infinite ease-out; }
 
       #mapa-gilda { height: 280px; width: 100%; border-radius: 16px; border: 1px solid #E8E6DF; z-index: 1; }
 
@@ -186,34 +186,12 @@
       function normalizarComunidad(nombre, ciudad = '') {
         if (!nombre && !ciudad) return 'Sin especificar';
         const textoCompleto = `${nombre || ''} ${ciudad || ''}`.toLowerCase().trim();
-
-        if (
-          textoCompleto.includes('gipuzkoa') || 
-          textoCompleto.includes('guipúzcoa') || 
-          textoCompleto.includes('bizkaia') || 
-          textoCompleto.includes('vizcaya') || 
-          textoCompleto.includes('araba') || 
-          textoCompleto.includes('álava') || 
-          textoCompleto.includes('alava') || 
-          textoCompleto.includes('país vasco') || 
-          textoCompleto.includes('euskadi') ||
-          textoCompleto.includes('tolosa') ||
-          textoCompleto.includes('eibar') ||
-          textoCompleto.includes('donostia') ||
-          textoCompleto.includes('san sebastián') ||
-          textoCompleto.includes('bilbao') ||
-          textoCompleto.includes('vitoria') ||
-          textoCompleto.includes('gasteiz')
-        ) {
-          return 'País Vasco';
-        }
-
-        if (textoCompleto.includes('barcelona') || textoCompleto.includes('girona') || textoCompleto.includes('gerona') || textoCompleto.includes('lleida') || textoCompleto.includes('lérida') || textoCompleto.includes('tarragona') || textoCompleto.includes('catalunya') || textoCompleto.includes('cataluña')) return 'Cataluña';
+        if (textoCompleto.includes('gipuzkoa') || textoCompleto.includes('guipúzcoa') || textoCompleto.includes('bizkaia') || textoCompleto.includes('vizcaya') || textoCompleto.includes('araba') || textoCompleto.includes('álava') || textoCompleto.includes('país vasco') || textoCompleto.includes('euskadi') || textoCompleto.includes('tolosa') || textoCompleto.includes('donostia') || textoCompleto.includes('san sebastián') || textoCompleto.includes('bilbao') || textoCompleto.includes('vitoria')) return 'País Vasco';
+        if (textoCompleto.includes('barcelona') || textoCompleto.includes('girona') || textoCompleto.includes('lleida') || textoCompleto.includes('tarragona') || textoCompleto.includes('catalunya') || textoCompleto.includes('cataluña')) return 'Cataluña';
         if (textoCompleto.includes('madrid')) return 'Comunidad de Madrid';
-        if (textoCompleto.includes('sevilla') || textoCompleto.includes('málaga') || textoCompleto.includes('malaga') || textoCompleto.includes('cadiz') || textoCompleto.includes('cádiz') || textoCompleto.includes('granada') || textoCompleto.includes('cordoba') || textoCompleto.includes('córdoba') || textoCompleto.includes('almería') || textoCompleto.includes('almeria') || textoCompleto.includes('huelva') || textoCompleto.includes('jaén') || textoCompleto.includes('jaen') || textoCompleto.includes('andalucía') || textoCompleto.includes('andalucia')) return 'Andalucía';
-        if (textoCompleto.includes('coruña') || textoCompleto.includes('lugo') || textoCompleto.includes('ourense') || textoCompleto.includes('orense') || textoCompleto.includes('pontevedra') || textoCompleto.includes('galicia')) return 'Galicia';
-        if (textoCompleto.includes('valència') || textoCompleto.includes('valencia') || textoCompleto.includes('alacant') || textoCompleto.includes('alicante') || textoCompleto.includes('castelló') || textoCompleto.includes('castellón') || textoCompleto.includes('comunitat valenciana')) return 'Comunidad Valenciana';
-
+        if (textoCompleto.includes('sevilla') || textoCompleto.includes('málaga') || textoCompleto.includes('cadiz') || textoCompleto.includes('granada') || textoCompleto.includes('andalucía') || textoCompleto.includes('andalucia')) return 'Andalucía';
+        if (textoCompleto.includes('coruña') || textoCompleto.includes('lugo') || textoCompleto.includes('ourense') || textoCompleto.includes('pontevedra') || textoCompleto.includes('galicia')) return 'Galicia';
+        if (textoCompleto.includes('valència') || textoCompleto.includes('valencia') || textoCompleto.includes('alicante') || textoCompleto.includes('castellón')) return 'Comunidad Valenciana';
         return nombre || 'Sin especificar';
       }
 
@@ -228,102 +206,56 @@
             setMostrarDropdown(false);
             return;
           }
-
           const timer = setTimeout(async () => {
             setBuscando(true);
             try {
               const query = encodeURIComponent(valor.trim());
-              
               const [resGoogle, resOpenLib] = await Promise.allSettled([
                 fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&langRestrict=es`),
                 fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
               ]);
-
               let listaCombinada = [];
-
               if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
                 const dataG = await resGoogle.value.json();
                 if (dataG.items) {
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
-                    listaCombinada.push({
-                      titulo: info.title || '',
-                      autora: info.authors ? info.authors.join(', ') : 'Autora desconocida',
-                      portada: info.imageLinks?.thumbnail?.replace('http:', 'https:') || ''
-                    });
+                    listaCombinada.push({ titulo: info.title || '', autora: info.authors ? info.authors.join(', ') : 'Autora desconocida', portada: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '' });
                   });
                 }
               }
-
               if (resOpenLib.status === 'fulfilled' && resOpenLib.value.ok) {
                 const dataOL = await resOpenLib.value.json();
                 if (dataOL.docs) {
                   dataOL.docs.forEach(doc => {
-                    listaCombinada.push({
-                      titulo: doc.title || '',
-                      autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida',
-                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : ''
-                    });
+                    listaCombinada.push({ titulo: doc.title || '', autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida', portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : '' });
                   });
                 }
               }
-
               const unicos = [];
               const titulosVistos = new Set();
               listaCombinada.forEach(item => {
                 const tLimpio = item.titulo.toLowerCase().trim();
-                if (tLimpio && !titulosVistos.has(tLimpio)) {
-                  titulosVistos.add(tLimpio);
-                  unicos.push(item);
-                }
+                if (tLimpio && !titulosVistos.has(tLimpio)) { titulosVistos.add(tLimpio); unicos.push(item); }
               });
-
               setSugerencias(unicos.slice(0, 6));
               setMostrarDropdown(unicos.length > 0);
-            } catch (err) {
-              console.error("Error al consultar APIs de libros:", err);
-            } finally {
-              setBuscando(false);
-            }
+            } catch (err) { console.error(err); } finally { setBuscando(false); }
           }, 350);
-
           return () => clearTimeout(timer);
         }, [valor]);
 
         return (
           <div className="relative w-full">
             <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder={placeholder}
-                value={valor}
-                onChange={(e) => {
-                  setValor(e.target.value);
-                  setMostrarDropdown(true);
-                }}
-                className="w-full editorial-input p-2.5 text-xs italic pr-8"
-              />
-              {buscando && (
-                <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#4A5028]"></i>
-              )}
+              <input type="text" placeholder={placeholder} value={valor} onChange={(e) => { setValor(e.target.value); setMostrarDropdown(true); }} className="w-full editorial-input p-2.5 text-xs italic pr-8" />
+              {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#4A5028]"></i>}
             </div>
-
             {mostrarDropdown && sugerencias.length > 0 && (
               <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#E8E6DF] rounded-b-lg shadow-xl max-h-56 overflow-y-auto mt-1">
                 {sugerencias.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => {
-                      onSelectLibro(item);
-                      setMostrarDropdown(false);
-                    }}
-                    className="flex items-center gap-2.5 p-2 hover:bg-[#FBF9F5] cursor-pointer border-b border-[#E8E6DF] last:border-0 text-left"
-                  >
-                    {item.portada ? (
-                      <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" />
-                    ) : (
-                      <div className="w-7 h-10 bg-[#F8F7F3] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E8E6DF]">Sin foto</div>
-                    )}
+                  <div key={idx} onClick={() => { onSelectLibro(item); setMostrarDropdown(false); }} className="flex items-center gap-2.5 p-2 hover:bg-[#FBF9F5] cursor-pointer border-b border-[#E8E6DF] last:border-0 text-left">
+                    {item.portada ? <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" /> : <div className="w-7 h-10 bg-[#F8F7F3] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E8E6DF]">Sin foto</div>}
                     <div className="overflow-hidden">
                       <p className="text-sm font-bold text-[#232321] truncate leading-tight font-babydoll">{item.titulo}</p>
                       <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
@@ -341,13 +273,10 @@
         const [errorImg, setErrorImg] = useState(false);
 
         useEffect(() => {
-          setImgUrl(portada || '');
-          setErrorImg(false);
-
+          setImgUrl(portada || ''); setErrorImg(false);
           if ((!portada || portada.trim() === '') && titulo && titulo.trim().length > 1) {
             let cancelado = false;
             const query = encodeURIComponent(titulo.trim());
-            
             fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
               .then(res => res.json())
               .then(data => {
@@ -362,18 +291,14 @@
                       }
                     });
                 }
-              })
-              .catch(() => {});
-
+              }).catch(() => {});
             return () => { cancelado = true; };
           }
         }, [titulo, portada]);
 
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        if (imgUrl && !errorImg) {
-          return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
-        }
+        if (imgUrl && !errorImg) return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
@@ -386,29 +311,14 @@
       function LomoLibroEstanteria({ item, onClick }) {
         const generarColorEditorial = (texto) => {
           let hash = 0;
-          for (let i = 0; i < texto.length; i++) {
-            hash = texto.charCodeAt(i) + ((hash << 5) - hash);
-          }
-          const matices = [
-            '#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', 
-            '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242',
-            '#6A4E36', '#35424A', '#523A3A', '#4A3B5C', '#3F4E4F'
-          ];
-          const index = Math.abs(hash) % matices.length;
-          return matices[index];
+          for (let i = 0; i < texto.length; i++) { hash = texto.charCodeAt(i) + ((hash << 5) - hash); }
+          const matices = ['#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242', '#6A4E36', '#35424A', '#523A3A', '#4A3B5C', '#3F4E4F'];
+          return matices[Math.abs(hash) % matices.length];
         };
 
-        const colorFondo = generarColorEditorial(item.libro || 'libro');
-
         return (
-          <div
-            onClick={onClick}
-            style={{ backgroundColor: colorFondo }}
-            className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20"
-            title={`${item.libro} — ${item.autora || 'Autora'}`}
-          >
+          <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(item.libro || 'libro') }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${item.libro} — ${item.autora || 'Autora'}`}>
             <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
-            
             <div className="flex flex-col h-full justify-start pt-3">
               <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '110px'}}>
                 {item.libro}
@@ -418,142 +328,73 @@
         );
       }
 
+      function IlustracionDecoracion({ tipo }) {
+        if (tipo === 'monstera') return (
+          <svg width="42" height="46" viewBox="0 0 42 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+            <path d="M14 34H28V44H14V34Z" fill="#D29062" stroke="#232321" strokeWidth="1.5"/><path d="M12 34H30V37H12V34Z" fill="#B87343" stroke="#232321" strokeWidth="1.5"/><path d="M21 34V16" stroke="#4A5028" strokeWidth="2" strokeLinecap="round"/><path d="M21 22C14 20 8 24 6 28C11 31 16 28 21 22Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/><path d="M21 18C28 16 34 20 36 24C31 27 26 24 21 18Z" fill="#636E31" stroke="#232321" strokeWidth="1.5"/><path d="M21 14C17 6 10 6 7 9C10 13 15 14 21 14Z" fill="#8A9945" stroke="#232321" strokeWidth="1.5"/><path d="M21 14C25 6 32 6 35 9C32 13 27 14 21 14Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/>
+          </svg>
+        );
+        if (tipo === 'maceta') return (
+          <svg width="40" height="42" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+            <path d="M10 28H30V40H10V28Z" fill="#E2D6C5" stroke="#232321" strokeWidth="1.5"/><path d="M8 25H32V29H8V25Z" fill="#F0E8DC" stroke="#232321" strokeWidth="1.5"/><path d="M20 25C15 16 11 10 9 6C15 10 18 16 20 25Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/><path d="M20 25C25 16 29 10 31 6C25 10 22 16 20 25Z" fill="#8A9945" stroke="#232321" strokeWidth="1.5"/>
+          </svg>
+        );
+        if (tipo === 'vela') return (
+          <svg width="32" height="44" viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+            <path d="M8 20H24V42H8V20Z" fill="#FAF6EE" stroke="#232321" strokeWidth="1.5"/><path d="M15 16H17V20H15V16Z" fill="#232321"/><path className="vela-flama" d="M16 14C19 10 18 6 16 3C14 6 13 10 16 14Z" fill="#E67E22" stroke="#232321" strokeWidth="1.2"/>
+          </svg>
+        );
+        if (tipo === 'cafe') return (
+          <svg width="40" height="38" viewBox="0 0 40 38" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+            <path d="M8 14H28V32H8V14Z" fill="#FFFFFF" stroke="#232321" strokeWidth="1.5"/><path d="M28 17H33C35 17 35 25 33 25H28" stroke="#232321" strokeWidth="1.5"/><path d="M8 14H28V18H8V14Z" fill="#633B28" stroke="#232321" strokeWidth="1.5"/><path className="humo-taza" d="M14 10C15 7 13 5 15 2" stroke="#B8A890" strokeWidth="1.5" strokeLinecap="round"/><path className="humo-taza" style={{animationDelay: '1s'}} d="M22 11C23 8 21 6 23 3" stroke="#B8A890" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        );
+        if (tipo === 'cactus') return (
+          <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+            <path d="M10 32H26V40H10V32Z" fill="#B87343" stroke="#232321" strokeWidth="1.5"/><path d="M15 12C15 8 21 8 21 12V32H15V12Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/><path d="M10 18H15V22H10C8 22 8 18 10 18Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/><path d="M21 16H26C28 16 28 20 26 20H21V16Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/>
+          </svg>
+        );
+        return null;
+      }
+
       function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-lg" }) {
         const [errorImg, setErrorImg] = useState(false);
-
-        if (foto && foto.trim() !== '' && !errorImg) {
-          return (
-            <img 
-              src={foto} 
-              alt={nombre || 'Socia'} 
-              onError={() => setErrorImg(true)} 
-              className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} 
-            />
-          );
-        }
-
-        return (
-          <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>
-            {(nombre || 'Socia').charAt(0).toUpperCase()}
-          </div>
-        );
+        if (foto && foto.trim() !== '' && !errorImg) return <img src={foto} alt={nombre || 'Socia'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
+        return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'Socia').charAt(0).toUpperCase()}</div>;
       }
 
       function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
         const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
-        const [notificacionActual, setNotificacionActual] = useState(null);
-        const colaNotificaciones = useRef([]);
-        const estaProcesando = useRef(false);
-
         const listaUsuarias = usuarias.length > 0 ? usuarias : [];
         const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0] || {};
-
         const tieneProgresoClub = Number(usuariaActiva.pagina || 0) > 0;
         const misLibrosPersonales = usuariaActiva.misLecturasPersonales || [];
-
-        const procesarSiguienteNotificacion = () => {
-          if (colaNotificaciones.current.length === 0) {
-            estaProcesando.current = false;
-            setNotificacionActual(null);
-            return;
-          }
-          estaProcesando.current = true;
-          const siguiente = colaNotificaciones.current.shift();
-          setNotificacionActual(siguiente);
-
-          setTimeout(() => {
-            setNotificacionActual(null);
-            setTimeout(() => {
-              procesarSiguienteNotificacion();
-            }, 400);
-          }, 4500);
-        };
-
-        useEffect(() => {
-          const nuevas = [];
-          listaUsuarias.forEach((u, i) => {
-            if (u.tieneNovedad) {
-              const tituloLibro = (Number(u.pagina || 0) > 0) 
-                ? libroActual.titulo 
-                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? u.misLecturasPersonales[0].libro : '');
-              
-              const pagLibro = (Number(u.pagina || 0) > 0)
-                ? u.pagina
-                : (u.misLecturasPersonales && u.misLecturasPersonales.length > 0 ? (u.misLecturasPersonales[0].pagina || u.misLecturasPersonales[0].paginas) : 0);
-
-              const texto = `${(u.nombre || '').toLowerCase()} - ${tituloLibro || 'lectura'} - pag. ${pagLibro || 0}`;
-
-              if (!colaNotificaciones.current.some(n => n.id === u.email) && (!notificacionActual || notificacionActual.id !== u.email)) {
-                nuevas.push({ id: u.email, texto, indice: i });
-              }
-            }
-          });
-
-          if (nuevas.length > 0) {
-            colaNotificaciones.current = [...colaNotificaciones.current, ...nuevas];
-            if (!estaProcesando.current) {
-              procesarSiguienteNotificacion();
-            }
-          }
-        }, [listaUsuarias, libroActual]);
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
             <h2 className="text-[48px] font-babydoll text-center mb-0 text-[#232321] leading-none">gilda</h2>
-            <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-babydoll italic">
-              selecciona una ventana para asomarte a sus lecturas
-            </p>
-
-            <div className="h-8 mb-4 flex items-center justify-center">
-              {notificacionActual && (
-                <div 
-                  key={notificacionActual.id + notificacionActual.texto}
-                  onClick={() => setUsuariaActivaIndice(notificacionActual.indice)}
-                  className="bg-[#232321] text-[#FBF9F5] border border-[#4A5028] px-3.5 py-1 rounded-full shadow-md text-[11px] font-medium tracking-wide notificacion-secuencial cursor-pointer flex items-center gap-2 font-babydoll"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#A2A86E] animate-pulse"></span>
-                  <span>{notificacionActual.texto}</span>
-                </div>
-              )}
-            </div>
-
+            <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-babydoll italic">selecciona una ventana para asomarte a sus lecturas</p>
             <div className="grid grid-cols-3 gap-x-6 gap-y-8 w-full max-w-[220px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
-                const tieneNovedad = usuaria.tieneNovedad;
                 const seleccionada = usuariaActivaIndice === indice;
-                const esNotificacionActiva = notificacionActual && notificacionActual.id === usuaria.email;
                 const nombreMostrar = (usuaria.nombre || 'Socia').split(' ')[0].toLowerCase();
-
                 return (
                   <div key={indice} className="relative flex flex-col items-center">
-                    <div
-                      onClick={() => setUsuariaActivaIndice(indice)}
-                      className={`w-[32px] h-[44px] rounded-[2px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${
-                        estaLeyendo ? 'bg-[#FAF6E8] border-[#DCD6BE] shadow-[0_4px_12px_rgba(230,220,180,0.3)]' : 'bg-[#E3E0D6] border-[#D0CEB3]'
-                      } ${tieneNovedad ? 'ventana-novedad' : ''} ${
-                        esNotificacionActiva ? 'ring-2 ring-[#4A5028] scale-110 z-20' : ''
-                      } ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}
-                    ></div>
-                    <span className="text-[13px] text-gray-700 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-babydoll">
-                      {nombreMostrar}
-                    </span>
+                    <div onClick={() => setUsuariaActivaIndice(indice)} className={`w-[32px] h-[44px] rounded-[2px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${estaLeyendo ? 'bg-[#FAF6E8] border-[#DCD6BE] shadow-[0_4px_12px_rgba(230,220,180,0.3)]' : 'bg-[#E3E0D6] border-[#D0CEB3]'} ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}></div>
+                    <span className="text-[13px] text-gray-700 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-babydoll">{nombreMostrar}</span>
                   </div>
                 );
               })}
             </div>
-
             <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in">
               <div className="flex justify-between items-center w-full border-b border-[#E8E6DF] pb-2.5 gap-2">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" />
-                  <span className="font-babydoll text-xl font-bold truncate text-[#232321]">
-                    la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
-                  </span>
+                  <span className="font-babydoll text-xl font-bold truncate text-[#232321]">la habitación de {(usuariaActiva.nombre || '').toLowerCase()}</span>
                 </div>
                 <span className="text-[10px] tracking-[0.5px] text-gray-400 font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
-
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                   <div className="flex items-center gap-3 overflow-hidden">
@@ -563,15 +404,10 @@
                       <p className="text-[11px] text-gray-500">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)}
-                    className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-babydoll text-xs"
-                    title="Añadir a mi estantería"
-                  >
+                  <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-babydoll text-xs">
                     <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
                   </button>
                 </div>
-
                 {misLibrosPersonales.map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -581,11 +417,7 @@
                         <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')}
-                      className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-babydoll text-xs"
-                      title="Añadir a mi estantería"
-                    >
+                    <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-babydoll text-xs">
                       <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
                     </button>
                   </div>
@@ -602,20 +434,9 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
         const COORDENADAS_PREDEFINIDAS = {
-          'país vasco': [42.9896, -2.6189],
-          'cataluña': [41.5912, 1.5209],
-          'comunidad de madrid': [40.4168, -3.7038],
-          'andalucía': [37.3891, -5.9845],
-          'galicia': [42.5751, -8.1339],
-          'comunidad valenciana': [39.4840, -0.3526],
-          'tolosa': [43.1362, -2.0735],
-          'donostia': [43.3183, -1.9812],
-          'san sebastián': [43.3183, -1.9812],
-          'bilbao': [43.2630, -2.9350],
-          'madrid': [40.4168, -3.7038],
-          'barcelona': [41.3851, 2.1734],
-          'sevilla': [37.3891, -5.9845],
-          'valencia': [39.4699, -0.3763]
+          'país vasco': [42.9896, -2.6189], 'cataluña': [41.5912, 1.5209], 'comunidad de madrid': [40.4168, -3.7038],
+          'andalucía': [37.3891, -5.9845], 'galicia': [42.5751, -8.1339], 'comunidad valenciana': [39.4840, -0.3526],
+          'tolosa': [43.1362, -2.0735], 'donostia': [43.3183, -1.9812], 'bilbao': [43.2630, -2.9350], 'madrid': [40.4168, -3.7038], 'barcelona': [41.3851, 2.1734]
         };
 
         const ciudadesMap = useMemo(() => {
@@ -640,19 +461,16 @@
             markersGroupRef.current = L.layerGroup().addTo(map);
             mapRef.current = map;
           }
-
           setTimeout(() => { if (mapRef.current) mapRef.current.invalidateSize(); }, 200);
 
           const renderMarkers = async () => {
             if (!markersGroupRef.current) return;
             markersGroupRef.current.clearLayers();
             const boundsArray = [];
-
             for (const item of ciudadesMap) {
               const locNombre = item.nombreLocalidad.toLowerCase().trim();
               let coor = COORDENADAS_PREDEFINIDAS[locNombre] || [40.4168, -3.7038];
               boundsArray.push(coor);
-
               const piruletaHtml = `
                 <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
                   <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
@@ -662,18 +480,13 @@
                   <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">${item.usuarias.length}</span>
                 </div>
               `;
-
               const customIcon = L.divIcon({ html: piruletaHtml, className: 'custom-piruleta-mini', iconSize: [16, 24], iconAnchor: [8, 23], popupAnchor: [0, -24] });
               const marker = L.marker(coor, { icon: customIcon });
               marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
               markersGroupRef.current.addLayer(marker);
             }
-
-            if (boundsArray.length > 0 && mapRef.current) {
-              mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
-            }
+            if (boundsArray.length > 0 && mapRef.current) mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
           };
-
           renderMarkers();
         }, [ciudadesMap]);
 
@@ -708,14 +521,8 @@
         const [inputPassword, setInputPassword] = useState('');
         const [errorLogin, setErrorLogin] = useState('');
         
-        const [modoRegistro, setModoRegistro] = useState(false);
-        const [regNombre, setRegNombre] = useState('');
-        const [regEmail, setRegEmail] = useState('');
-        const [regCiudad, setRegCiudad] = useState('');
-        const [regCodigoPostal, setRegCodigoPostal] = useState('');
-        const [regModalidad, setRegModalidad] = useState('cotilla');
-        
         const [seccionApp, setSeccionApp] = useState('inicio');
+        const [subTabComunidad, setSubTabComunidad] = useState('chat');
         const [tabEstanteria, setTabEstanteria] = useState('leyendo');
         const [cargandoDatos, setCargandoDatos] = useState(false);
         const [toastMsg, setToastMsg] = useState(null);
@@ -732,17 +539,12 @@
         const [miPagina, setMiPagina] = useState(0);
         const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
         
-        const [miCiudad, setMiCiudad] = useState(() => localStorage.getItem('gilda_mi_ciudad') || '');
-        const [miCodigoPostal, setMiCodigoPostal] = useState(() => localStorage.getItem('gilda_mi_cp') || '');
         const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
         const [fotoPerfilPersonalizada, setFotoPerfilPersonalizada] = useState(() => localStorage.getItem('gilda_foto_perfil') || '');
-        const [editandoPerfil, setEditandoPerfil] = useState(false);
-        const [inputNuevoNombre, setInputNuevoNombre] = useState('');
-        const [inputNuevaFoto, setInputNuevaFoto] = useState('');
 
         const [libroPersonal, setLibroPersonal] = useState('');
         const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
-        const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || '🌿 Plantita monstera');
+        const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || 'monstera');
 
         const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
         const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
@@ -750,10 +552,11 @@
         const [botellaAbierta, setBotellaAbierta] = useState(false);
         const [fraseActualBotella, setFraseActualBotella] = useState(0);
 
-        const [nuevoComentario, setNuevoComentario] = useState({});
-        const [respuestaComentario, setRespuestaComentario] = useState({});
-        const [nuevaCitaCapsula, setNuevaCitaCapsula] = useState({});
+        const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
+        const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
+        const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
         const [nuevoChat, setNuevoChat] = useState('');
+        const [mensajeFundadora, setMensajeFundadora] = useState('');
         
         const chatEndRef = useRef(null);
 
@@ -769,16 +572,14 @@
             parsearHoja(URL_CSV_CAFECITOS), parsearHoja(URL_CSV_LECTURAS), parsearHoja(URL_CSV_CHAT), 
             parsearHoja(URL_CSV_PROPUESTAS), parsearHoja(URL_CSV_VOTACION_CAFE), parsearHoja(URL_CSV_LECTURAS_PERSONALES)
           ]).then(results => {
-            const listU = results[0].filter(u => (u.email || '').trim() !== '');
-            setUsuariasClub(listU); setCapitulos(results[1]); setComentarios(results[2].reverse()); 
+            setUsuariasClub(results[0].filter(u => (u.email || '').trim() !== '')); 
+            setCapitulos(results[1]); setComentarios(results[2].reverse()); 
             setLecturas(results[4]); setChatMsgs(results[5]); setPropuestas(results[6]);
             setFechasCafe(results[7]); setLecturasPersonales(results[8]);
           });
         };
 
-        useEffect(() => {
-          parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
-        }, []);
+        useEffect(() => { parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== ''))); }, []);
 
         useEffect(() => {
           if (sesion) {
@@ -792,8 +593,8 @@
         }, [sesion]);
 
         useEffect(() => {
-          if (seccionApp === 'comunidad') chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
-        }, [chatMsgs, seccionApp]);
+          if (subTabComunidad === 'chat') chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        }, [chatMsgs, subTabComunidad]);
 
         useEffect(() => {
           if (sesion && usuariasClub.length > 0) {
@@ -802,7 +603,6 @@
               setMiPagina(Number(socia.pagina || 0));
               if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
               if (!fotoPerfilPersonalizada && socia.foto_perfil) setFotoPerfilPersonalizada(socia.foto_perfil);
-              if (socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
             }
           }
         }, [sesion, usuariasClub.length]);
@@ -825,7 +625,6 @@
 
           const clon = [...lecturasPersonales];
           const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
-          
           if (idx > -1) {
             clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
             if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
@@ -968,20 +767,20 @@
                           </button>
                         </div>
 
-                        {/* SELECTOR DE DECORACIÓN */}
+                        {/* SELECTOR DE DECORACIÓN DIGITAL */}
                         <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                           <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de balda:</span>
                           <select value={decoracionActual} onChange={(e) => { setDecoracionActual(e.target.value); localStorage.setItem('gilda_decoracion', e.target.value); }} className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold">
-                            <option value="🌿 Plantita monstera">🌿 Plantita monstera</option>
-                            <option value="🪴 Maceta de cerámica">🪴 Maceta de cerámica</option>
-                            <option value="🕯️ Vela aromática">🕯️ Vela aromática</option>
-                            <option value="☕ Taza de café">☕ Taza de café</option>
-                            <option value="🌵 Pequeño cactus">🌵 Pequeño cactus</option>
-                            <option value="✨ Sin decoración">✨ Sin decoración</option>
+                            <option value="monstera">Plantita Monstera</option>
+                            <option value="maceta">Maceta Cerámica</option>
+                            <option value="vela">Vela Aromática</option>
+                            <option value="cafe">Taza de Café</option>
+                            <option value="cactus">Pequeño Cactus</option>
+                            <option value="ninguna">Sin decoración</option>
                           </select>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON TODOS LOS LIBROS */}
+                        {/* ESTANTERÍA DE MADERA CON ILUSTRACIÓN DIGITAL ANIMADA */}
                         <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
                           <div className="flex items-end justify-start gap-3.5 flex-grow">
                             {todosMisLibrosEstanteria.length === 0 ? (
@@ -990,7 +789,11 @@
                               todosMisLibrosEstanteria.map((item, idx) => <LomoLibroEstanteria key={idx} item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />)
                             )}
                           </div>
-                          {decoracionActual !== '✨ Sin decoración' && <div className="shrink-0 pl-3 pb-1 text-lg select-none">{decoracionActual.split(' ')[0]}</div>}
+                          {decoracionActual !== 'ninguna' && (
+                            <div className="shrink-0 pl-3 pb-1 flex items-end select-none">
+                              <IlustracionDecoracion tipo={decoracionActual} />
+                            </div>
+                          )}
                         </div>
 
                         {/* SELLO HORIZONTAL ABAJO PARA STORIES */}
@@ -1047,30 +850,100 @@
                   )}
 
                   {seccionApp === 'comunidad' && (
-                    <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden fade-in">
-                      <div className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-center text-xs rounded-t-xl font-babydoll font-bold">
-                        Chat de Lectoras
+                    <div className="space-y-4 fade-in">
+                      <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#E8E6DF] font-babydoll">
+                        <button onClick={() => setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'chat' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Chat</button>
+                        <button onClick={() => setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'mapa' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Mapa ({usuariasClub.length})</button>
+                        <button onClick={() => setSubTabComunidad('archivo')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'archivo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Archivo</button>
+                        <button onClick={() => setSubTabComunidad('buzon')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'buzon' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Buzón</button>
                       </div>
-                      <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
-                        {chatMsgs.map((m,i) => (
-                          <div key={i} className="bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] text-xs">
-                            <span className="font-bold text-[10px] text-gray-400 font-babydoll block mb-0.5">{m.usuario || m.usuaria}</span>
-                            <span>{m.mensaje}</span>
+
+                      {subTabComunidad === 'chat' && (
+                        <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
+                          <div className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-center text-xs rounded-t-xl font-babydoll font-bold">Chat de Lectoras</div>
+                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
+                            {chatMsgs.map((m,i) => (
+                              <div key={i} className="bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] text-xs">
+                                <span className="font-bold text-[10px] text-gray-400 font-babydoll block mb-0.5">{m.usuario || m.usuaria}</span>
+                                <span>{m.mensaje}</span>
+                              </div>
+                            ))}
+                            <div ref={chatEndRef} />
                           </div>
-                        ))}
-                        <div ref={chatEndRef} />
-                      </div>
-                      <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2 border-t border-[#E8E6DF] flex gap-2 bg-white">
-                        <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
-                        <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
-                      </form>
+                          <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2 border-t border-[#E8E6DF] flex gap-2 bg-white">
+                            <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                            <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                          </form>
+                        </div>
+                      )}
+
+                      {subTabComunidad === 'mapa' && (
+                        <div className="editorial-card p-3 space-y-2">
+                          <div className="flex justify-between items-center text-xs px-1">
+                            <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                            <span className="text-[10px] text-[#4A5028] font-bold font-babydoll">{usuariasClub.length} socia(s)</span>
+                          </div>
+                          <MapaGilda usuarias={usuariasClub} />
+                        </div>
+                      )}
+
+                      {subTabComunidad === 'archivo' && (
+                        <div className="space-y-4">
+                          <div className="editorial-card p-5 space-y-3">
+                            <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              const tit = nuevaPropuestaTitulo?.trim();
+                              if (!tit) return;
+                              const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || 'Desconocida', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
+                              setPropuestas([...propuestas, nueva]);
+                              enviarAccion('propuesta', nueva);
+                              setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
+                              mostrarToast('Propuesta añadida.');
+                            }} className="space-y-2">
+                              <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+                              <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+                              <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll">Añadir propuesta</button>
+                            </form>
+                          </div>
+
+                          <div className="editorial-card p-5">
+                            <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
+                            <div className="space-y-3">
+                              {propuestas.map((p,i) => (
+                                <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
+                                  <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                                  <div className="flex flex-col justify-between w-full">
+                                    <div><h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4><p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p></div>
+                                    <button onClick={()=>{
+                                      const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
+                                      let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
+                                      if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
+                                      item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
+                                    }} className="self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-babydoll">Votar ({p.votos||0})</button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {subTabComunidad === 'buzon' && (
+                        <div className="editorial-card p-5 space-y-3">
+                          <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
+                          <p className="text-xs text-gray-500 font-babydoll">Sugerencias y comunicación directa con la administración.</p>
+                          <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
+                          <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll">Enviar mensaje</button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
               )}
             </main>
 
-            {/* BARRA INFERIOR SIMPLIFICADA */}
+            {/* BARRA INFERIOR SIMPLIFICADA DE 5 PESTAÑAS */}
             <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
