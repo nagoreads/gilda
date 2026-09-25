@@ -964,7 +964,7 @@
                                                         <span className="font-bold font-babydoll text-[#4A5028]">{nombreAutorRespuesta}</span>
                                                         <span className="text-[9px] text-gray-400">{resp.fecha || ''}</span>
                                                       </div>
-                                                      <p className="text-gray-700">{resp.texto || resp.comentario || resp.mensaje}</p>
+                                                      <p className="text-gray-700">{resp.reacciones || resp.texto || resp.comentario || resp.mensaje}</p>
                                                     </div>
                                                   );
                                                 })}
@@ -985,6 +985,7 @@
                                                   respuesta_a: idComentario, 
                                                   usuario: nombreActual, 
                                                   email: sesion.email, 
+                                                  reacciones: txtResp, 
                                                   texto: txtResp, 
                                                   fecha: 'Justo ahora' 
                                                 };
