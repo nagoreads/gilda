@@ -378,6 +378,8 @@
           if (!pFinal || typeof pFinal !== 'string') return '';
           let p = pFinal.trim();
           
+          if (p.startsWith('data:image')) return p;
+
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
           }
@@ -473,10 +475,42 @@
         return null;
       }
 
-      function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-lg" }) {
+      function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-lg", editable = false, onFotoChange = () => {} }) {
         const [errorImg, setErrorImg] = useState(false);
-        if (foto && foto.trim() !== '' && !errorImg) return <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
-        return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
+        const fileInputRef = useRef(null);
+
+        const handleFileChange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setErrorImg(false);
+              onFotoChange(reader.result);
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+
+        const renderContent = () => {
+          if (foto && foto.trim() !== '' && !errorImg) {
+            return <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
+          }
+          return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
+        };
+
+        if (editable) {
+          return (
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current && fileInputRef.current.click()} title="Cambiar foto de perfil desde tu galería">
+              {renderContent()}
+              <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i className="fa-solid fa-camera text-white text-xs"></i>
+              </div>
+              <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+            </div>
+          );
+        }
+
+        return renderContent();
       }
 
       function CalendarioInteractivo({ eventos }) {
@@ -926,6 +960,13 @@
           return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
         };
 
+        const handleFotoPerfilUpdate = (base64Img) => {
+          setFotoPerfilPersonalizada(base64Img);
+          localStorage.setItem('gilda_foto_perfil', base64Img);
+          enviarAccion('actualizar_foto_perfil', { foto_perfil: base64Img });
+          mostrarToast('Foto de perfil actualizada');
+        };
+
         useEffect(() => {
           const cargarDatosSilenciosos = () => {
             Promise.all([
@@ -946,6 +987,9 @@
                   }
                   if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
                     setMiPagina(Number(sociaActual.pagina) || 0);
+                  }
+                  if (sociaActual.foto_perfil && !localStorage.getItem('gilda_foto_perfil')) {
+                    setFotoPerfilPersonalizada(sociaActual.foto_perfil);
                   }
                 }
               }
@@ -1193,7 +1237,7 @@
 
             <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF]">
               <div className="flex items-center gap-3 overflow-hidden">
-                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
+                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" editable={true} onFotoChange={handleFotoPerfilUpdate} />
                 <div className="overflow-hidden">
                   <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
                   <span className="text-[9px] text-gray-400 uppercase font-sans tracking-wider">{sesion.modalidad}</span>
@@ -1268,7 +1312,6 @@
                                   <span className="font-bold font-sans text-[#4A5028] flex items-center gap-1.5">
                                     <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia || ev.date || ev.fecha_evento} {ev.hora && `• ${ev.hora}`}
                                   </span>
-                                  {/* Muestra la frase limpia en tipo oración y sin la clase CSS 'capitalize' */}
                                   <span className="text-[11px] font-bold text-gray-700 font-sans">{formatoOracion(ev.evento || ev.titulo || ev.nombre)}</span>
                                 </div>
                                 <p className="text-[10px] text-gray-400 italic font-sans pt-1 border-t border-[#E8E6DF]/60">
@@ -1348,6 +1391,14 @@
                   </div>
 
                   <div className="editorial-card p-4 space-y-3">
+                    <div className="flex justify-between items-center text-xs px-1">
+                      <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                      <span className="text-[10px] text-[#4A5028] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+                    </div>
+                    <MapaGilda usuarias={usuariasClub} />
+                  </div>
+
+                  <div className="editorial-card p-4 space-y-3">
                     <div className="flex justify-between items-center">
                       <h3 className="font-babydoll text-xl font-bold">Citas y notas</h3>
                       <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-sans font-bold">descubrir</button>
@@ -1375,6 +1426,14 @@
                       <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); localStorage.setItem('gilda_is_reading', JSON.stringify(nuevo)); enviarAccion('estado_lectura', { leyendo: nuevo }); }} className={`px-3 py-1 text-xs rounded-full font-bold font-sans ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
                         {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                       </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                      <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-12 h-12" textClass="text-xl" editable={true} onFotoChange={handleFotoPerfilUpdate} />
+                      <div className="flex flex-col text-xs font-sans">
+                        <span className="font-bold text-gray-700">Foto de perfil</span>
+                        <span className="text-[10px] text-gray-400">Haz clic sobre la foto para subir una imagen de la galería de tu móvil</span>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
