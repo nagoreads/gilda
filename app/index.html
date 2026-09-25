@@ -843,8 +843,8 @@
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
-                        // REVISIÓN ROBUSTA: busca cualquier propiedad de página en la hoja de capítulos
-                        const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || cap.paginaminima || cap.minima || cap.limite || 0);
+                        // AQUÍ ESTÁ EL CAMBIO PRINCIPAL: Lee prioritariamente "pagina_fin" y alternativas
+                        const paginaMinima = Number(cap.pagina_fin || cap.pagina_bloqueo || cap.pagina || cap.paginaminima || cap.minima || cap.limite || 0);
                         const desbloqueado = miPagina >= paginaMinima;
                         const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
                         
