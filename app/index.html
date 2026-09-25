@@ -193,16 +193,13 @@
                 if (dataG.items) {
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
-                    // Mejoramos la URL de Google Books cambiando zoom=1 por zoom=2 o eliminando restricciones de edge para mayor nitidez
                     let thumb = info.imageLinks?.thumbnail || '';
                     if (thumb) {
                       thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
-                      // Forzamos un poco más de calidad si es posible
-                      if (thumb.includes('zoom=1')) thumb = thumb.replace('zoom=1', 'zoom=2');
                     }
                     listaCombinada.push({ 
                       titulo: info.title || '', 
-                      autora: info.authors ? info.authors.join(', ') : 'Autora desconocida', 
+                      autora: info.authors ? info.authors.join(', ') : 'Desconocida', 
                       portada: thumb 
                     });
                   });
@@ -214,8 +211,8 @@
                   dataOL.docs.forEach(doc => {
                     listaCombinada.push({ 
                       titulo: doc.title || '', 
-                      autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida', 
-                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : '' // Usamos -L (Large) en lugar de -M para mejor resolución
+                      autora: doc.author_name ? doc.author_name.join(', ') : 'Desconocida', 
+                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : '' 
                     });
                   });
                 }
@@ -259,46 +256,45 @@
         );
       }
 
-      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
+      function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        // Normalizamos y aseguramos que la URL use https
+        const portadaFinal = portada || cover || image || '';
+        const tituloFinal = titulo || 'Sin título';
+        const autoraFinal = autora || autor || escritora || '';
+
         const urlLimpia = useMemo(() => {
-          if (!portada || typeof portada !== 'string') return '';
-          let p = portada.trim();
+          if (!portadaFinal || typeof portadaFinal !== 'string') return '';
+          let p = portadaFinal.trim();
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
           }
           return p;
-        }, [portada]);
+        }, [portadaFinal]);
 
-        // Verificamos y limpiamos el nombre de la autora para que muestre el real
         const autoraReal = useMemo(() => {
-          if (!autora || typeof autora !== 'string') return 'gilda';
-          let a = autora.trim();
-          // Si el texto es genérico o vacío, usamos 'gilda' o lo dejamos limpio, de lo contrario usamos el nombre real
-          if (a.toLowerCase() === 'autora' || a.toLowerCase() === 'desconocida') return 'gilda';
+          if (!autoraFinal || typeof autoraFinal !== 'string') return 'gilda';
+          let a = autoraFinal.trim();
+          if (['autora', 'autor', 'desconocida', 'escritora'].includes(a.toLowerCase())) return 'gilda';
           return a;
-        }, [autora]);
+        }, [autoraFinal]);
 
-        // Si tenemos URL válida y no ha dado error, mostramos la imagen
         if (urlLimpia !== '' && !errorImg) {
           return (
             <img 
               src={urlLimpia} 
-              alt={titulo || 'Libro'} 
+              alt={tituloFinal} 
               onError={() => setErrorImg(true)} 
               className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} 
             />
           );
         }
 
-        // Respaldo editorial mostrando el título del libro y el nombre real de la escritora
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
-            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{titulo || 'Sin título'}</span>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{tituloFinal}</span>
             <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autoraReal}</span>
           </div>
         );
@@ -407,7 +403,7 @@
                 {misLibrosPersonales.map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
+                      <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
                       <div className="text-xs text-[#232321] overflow-hidden">
                         <p className="font-bold truncate font-babydoll text-sm">{item.libro}</p>
                         <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
@@ -519,7 +515,6 @@
               )}
             </div>
 
-            {/* CONTADOR POR PROVINCIAS / REGIONES */}
             <div className="editorial-card p-4 space-y-2.5">
               <h4 className="font-babydoll text-base font-bold text-[#232321]">Lectoras por provincia o región</h4>
               <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
@@ -852,7 +847,6 @@
                           </button>
                         </div>
 
-                        {/* SELECTOR DE DECORACIÓN DIGITAL */}
                         <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                           <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de balda:</span>
                           <select value={decoracionActual} onChange={(e) => { setDecoracionActual(e.target.value); localStorage.setItem('gilda_decoracion', e.target.value); }} className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold">
@@ -865,7 +859,6 @@
                           </select>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON ILUSTRACIÓN DIGITAL ANIMADA */}
                         <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
                           <div className="flex items-end justify-start gap-3.5 flex-grow">
                             {todosMisLibrosEstanteria.length === 0 ? (
@@ -881,12 +874,10 @@
                           )}
                         </div>
 
-                        {/* SELLO HORIZONTAL ABAJO PARA STORIES */}
                         <div className="text-center pt-1 pb-2">
                           <span className="text-[11px] font-bold text-gray-400 tracking-wider font-babydoll">@gilda.mailclub</span>
                         </div>
 
-                        {/* PESTAÑAS Y LISTA CLÁSICA DE LIBROS */}
                         <div className="pt-4 border-t border-[#E8E6DF] space-y-3">
                           <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll">
                             <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Leyendo</button>
@@ -1182,7 +1173,6 @@
               )}
             </main>
 
-            {/* BARRA INFERIOR SIMPLIFICADA DE 5 PESTAÑAS */}
             <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
