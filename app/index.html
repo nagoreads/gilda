@@ -385,74 +385,23 @@
       }
 
       function LomoLibroEstanteria({ item, onClick }) {
-        const [colorFondo, setColorFondo] = useState('#4A5028'); // Color predeterminado gilda
-        const [imgUrl, setImgUrl] = useState(item.portada || '');
-
-        useEffect(() => {
-          let url = item.portada || '';
-          if (!url && item.libro && item.libro.trim().length > 1) {
-            const query = encodeURIComponent(item.libro.trim());
-            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
-              .then(res => res.json())
-              .then(data => {
-                if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-                  const fetchedUrl = data.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:');
-                  setImgUrl(fetchedUrl);
-                  extraerColorDominante(fetchedUrl);
-                } else {
-                  fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`)
-                    .then(r => r.json())
-                    .then(dataOL => {
-                      if (dataOL.docs && dataOL.docs[0]?.cover_i) {
-                        const fetchedUrl = `https://covers.openlibrary.org/b/id/${dataOL.docs[0].cover_i}-M.jpg`;
-                        setImgUrl(fetchedUrl);
-                        extraerColorDominante(fetchedUrl);
-                      }
-                    });
-                }
-              })
-              .catch(() => {});
-          } else if (url) {
-            extraerColorDominante(url);
+        // Generador de color determinista y sofisticado basado en el título del libro
+        const generarColorEditorial = (texto) => {
+          let hash = 0;
+          for (let i = 0; i < texto.length; i++) {
+            hash = texto.charCodeAt(i) + ((hash << 5) - hash);
           }
-        }, [item.libro, item.portada]);
-
-        const extraerColorDominante = (urlImagen) => {
-          const img = new Image();
-          img.crossOrigin = "Anonymous";
-          img.src = urlImagen;
-          img.onload = () => {
-            try {
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              canvas.width = 10;
-              canvas.height = 10;
-              ctx.drawImage(img, 0, 0, 10, 10);
-              const data = ctx.getImageData(0, 0, 10, 10).data;
-              
-              let r = 0, g = 0, b = 0, count = 0;
-              for (let i = 0; i < data.length; i += 4) {
-                // Ignorar colores muy oscuros (negros) o muy claros (blancos) puros para capturar el tono real
-                const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-                if (avg > 25 && avg < 230) {
-                  r += data[i];
-                  g += data[i+1];
-                  b += data[i+2];
-                  count++;
-                }
-              }
-
-              if (count > 0) {
-                r = Math.floor(r / count);
-                g = Math.floor(g / count);
-                b = Math.floor(b / count);
-                setColorFondo(`rgb(${r}, ${g}, ${b})`);
-              }
-            } catch (e) {
-              // Si CORS bloquea la imagen, se queda con el tono base predeterminado
-            }
-          };
+          // Paleta de matices editoriales (Tonos tierra, olivos, granates, añejos, azules atardecer)
+          const matices = [
+            '#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', 
+            '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242',
+            '#6A4E36', '#35424A', '#523A3A', '#4A3B5C', '#3F4E4F'
+          ];
+          const index = Math.abs(hash) % matices.length;
+          return matices[index];
         };
+
+        const colorFondo = generarColorEditorial(item.libro || 'libro');
 
         return (
           <div
@@ -1540,500 +1489,460 @@
                 </div>
               </div>
             </div>
-          </div>
-        );
-      }
+          );
+        }
 
-      return (
-        <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
-          
-          {toastMsg && (
-            <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-sm">
-              <span className="w-2 h-2 rounded-full bg-[#A2A86E]"></span><span>{toastMsg}</span>
-            </div>
-          )}
-
-          <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF] shadow-xs">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
-              <div className="overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
-                  <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
-                    <i className="fa-solid fa-pen"></i>
-                  </button>
-                </div>
-                <span className="text-[9px] text-gray-400 uppercase block mt-0.5 truncate font-babydoll">{sesion.modalidad}</span>
+        return (
+          <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
+            
+            {toastMsg && (
+              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-sm">
+                <span className="w-2 h-2 rounded-full bg-[#A2A86E]"></span><span>{toastMsg}</span>
               </div>
-            </div>
-            <button onClick={cerrarSesion} className="text-gray-400 hover:text-black shrink-0"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
-          </header>
+            )}
 
-          {editandoPerfil && (
-            <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in">
-                <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
-                  <h3 className="font-babydoll text-2xl font-bold">Editar mi perfil</h3>
-                  <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-400">✕</button>
-                </div>
-
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Nombre de usuario (único)</label>
-                    <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+            <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF] shadow-xs">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
+                <div className="overflow-hidden">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                    <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
+                      <i className="fa-solid fa-pen"></i>
+                    </button>
                   </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Foto de perfil</label>
-                    <div className="flex items-center gap-3 bg-[#FBF9F5] p-2 rounded-xl border border-[#E8E6DF]">
-                      <AvatarUsuaria foto={inputNuevaFoto || fotoPerfilPersonalizada} nombre={inputNuevoNombre || nombreUsuarioPersonalizado} sizeClass="w-10 h-10" textClass="text-sm" />
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={manejarCambioArchivoFoto} 
-                        className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#232321] file:text-[#FBF9F5] hover:file:bg-[#4A5028] hover:file:text-white cursor-pointer font-babydoll" 
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-[#FBF9F5] border border-[#E8E6DF] text-gray-600 py-2 rounded-xl text-xs font-medium font-babydoll">Cancelar</button>
-                  <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-base">Guardar cambios</button>
+                  <span className="text-[9px] text-gray-400 uppercase block mt-0.5 truncate font-babydoll">{sesion.modalidad}</span>
                 </div>
               </div>
-            </div>
-          )}
+              <button onClick={cerrarSesion} className="text-gray-400 hover:text-black shrink-0"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </header>
 
-          {libroSeleccionadoDetalle && (
-            <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in text-left">
-                <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
-                  <h3 className="font-babydoll text-xl font-bold truncate pr-2">{libroSeleccionadoDetalle.libro}</h3>
-                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="text-xs text-gray-400">✕</button>
-                </div>
-                
-                <div className="flex gap-4 items-center">
-                  <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
-                  <div className="space-y-2 text-xs w-full">
-                    <p className="text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
-                    {libroSeleccionadoDetalle.estado === 'leyendo' && (
-                      <div>
-                        <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll">Página actual</label>
-                        <div className="flex gap-2 mt-1">
-                          <input 
-                            type="number" 
-                            defaultValue={libroSeleccionadoDetalle.pagina || libroSeleccionadoDetalle.paginas || 0} 
-                            onBlur={(e) => guardarLibroPersonal(libroSeleccionadoDetalle.libro, e.target.value, 'leyendo', libroSeleccionadoDetalle.autora, libroSeleccionadoDetalle.portada)}
-                            className="editorial-input w-20 px-2 py-1 text-center font-bold" 
-                          />
-                          <span className="text-xs text-gray-500 self-center font-babydoll">pág.</span>
-                        </div>
-                      </div>
-                    )}
+            {editandoPerfil && (
+              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in">
+                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
+                    <h3 className="font-babydoll text-2xl font-bold">Editar mi perfil</h3>
+                    <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-400">✕</button>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
                     <div>
-                      <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll mb-1">Mover a estantería</label>
-                      <select 
-                        value={libroSeleccionadoDetalle.estado || 'leyendo'} 
-                        onChange={(e) => {
-                          cambiarEstadoLibro(libroSeleccionadoDetalle, e.target.value);
-                          setLibroSeleccionadoDetalle(null);
-                        }}
-                        className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll"
-                      >
-                        <option value="leyendo">Leyendo</option>
-                        <option value="want_to_read">Quiero leer</option>
-                        <option value="leidos">Leído</option>
-                      </select>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Nombre de usuario (único)</label>
+                      <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Foto de perfil</label>
+                      <div className="flex items-center gap-3 bg-[#FBF9F5] p-2 rounded-xl border border-[#E8E6DF]">
+                        <AvatarUsuaria foto={inputNuevaFoto || fotoPerfilPersonalizada} nombre={inputNuevoNombre || nombreUsuarioPersonalizado} sizeClass="w-10 h-10" textClass="text-sm" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={manejarCambioArchivoFoto} 
+                          className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#232321] file:text-[#FBF9F5] hover:file:bg-[#4A5028] hover:file:text-white cursor-pointer font-babydoll" 
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-[#FBF9F5] border border-[#E8E6DF] text-gray-600 py-2 rounded-xl text-xs font-medium font-babydoll">Cancelar</button>
+                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-base">Guardar cambios</button>
+                  </div>
                 </div>
-
-                <button onClick={() => setLibroSeleccionadoDetalle(null)} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Cerrar</button>
               </div>
-            </div>
-          )}
+            )}
 
-          <main className="w-full flex-grow space-y-4 fade-in">
-            {cargandoDatos ? (
-              <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
-            ) : (
-              <>
-                {seccionApp === 'inicio' && (
-                  <div className="space-y-4 fade-in">
-                    <div className="editorial-card p-5 space-y-4">
-                      <div className="flex gap-4 items-center">
-                        <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
-                        <div className="space-y-2 w-full">
-                          <span className="text-[9px] uppercase tracking-wider text-[#4A5028] font-bold font-babydoll text-xs">Lectura del Club</span>
-                          <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
-                          <p className="text-xs text-gray-500 italic font-babydoll">{libroActual.autora}</p>
-                          <div className="mt-2">
-                            <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-babydoll">
-                              <span>progreso general</span><span>{porcentajeLibro}%</span>
-                            </div>
-                            <div className="w-full bg-[#F8F7F3] rounded-full h-1.5 border border-[#E8E6DF]"><div className="bg-[#4A5028] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
+            {libroSeleccionadoDetalle && (
+              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in text-left">
+                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
+                    <h3 className="font-babydoll text-xl font-bold truncate pr-2">{libroSeleccionadoDetalle.libro}</h3>
+                    <button onClick={() => setLibroSeleccionadoDetalle(null)} className="text-xs text-gray-400">✕</button>
+                  </div>
+                  
+                  <div className="flex gap-4 items-center">
+                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
+                    <div className="space-y-2 text-xs w-full">
+                      <p className="text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
+                      {libroSeleccionadoDetalle.estado === 'leyendo' && (
+                        <div>
+                          <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll">Página actual</label>
+                          <div className="flex gap-2 mt-1">
+                            <input 
+                              type="number" 
+                              defaultValue={libroSeleccionadoDetalle.pagina || libroSeleccionadoDetalle.paginas || 0} 
+                              onBlur={(e) => guardarLibroPersonal(libroSeleccionadoDetalle.libro, e.target.value, 'leyendo', libroSeleccionadoDetalle.autora, libroSeleccionadoDetalle.portada)}
+                              className="editorial-input w-20 px-2 py-1 text-center font-bold" 
+                            />
+                            <span className="text-xs text-gray-500 self-center font-babydoll">pág.</span>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
-                        <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
-                        <div className="flex items-center gap-2">
-                          <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1 text-xs font-semibold" />
-                          <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="editorial-card p-4 space-y-2">
-                      <h3 className="font-babydoll text-xl font-bold">Ubicación geográfica</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
-                        <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
-                      </div>
-                      <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-base mt-1">Actualizar ubicación</button>
-                    </div>
-
-                    <div className="editorial-card p-4 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-babydoll text-xl font-bold">Notas y fragmentos</h3>
-                        <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-semibold font-babydoll text-xs">
-                          {botellaAbierta ? 'ocultar' : 'descubrir cita'}
-                        </button>
-                      </div>
-                      {botellaAbierta && (
-                        <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">
-                          "{FRASES_INICIALES[fraseActualBotella]}"
                         </div>
                       )}
-                      <div className="flex gap-2 pt-2 border-t border-[#E8E6DF]">
-                        <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                        <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {seccionApp === 'edificio' && (
-                  <div className="w-full flex justify-center">
-                    <EdificioClub 
-                      usuarias={miembrosEdificio} 
-                      libroActual={libroActual} 
-                      onAddWantToRead={agregarAWantToReadDirecto}
-                    />
-                  </div>
-                )}
-
-                {seccionApp === 'habitacion' && (
-                  <div className="space-y-4 fade-in">
-                    <div className="editorial-card p-5 space-y-4">
-                      <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
-                        <h3 className="font-babydoll text-2xl font-bold">Mi Estantería Personal</h3>
-                        <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all font-babydoll text-xs ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
-                          {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
-                        </button>
-                      </div>
-
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!libroPersonal.trim()) return;
-                        guardarLibroPersonal(undefined, undefined, tabEstanteria);
-                      }} className="space-y-2 bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E8E6DF]">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1 font-babydoll text-xs">Añadir libro a esta estantería</span>
-                        
-                        <BuscadorLibros
-                          placeholder="Busca por título o autora..."
-                          valor={libroPersonal}
-                          setValor={setLibroPersonal}
-                          onSelectLibro={(libroSel) => {
-                            setLibroPersonal(libroSel.titulo);
-                            guardarLibroPersonal(libroSel.titulo, 0, tabEstanteria, libroSel.autora, libroSel.portada);
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll mb-1">Mover a estantería</label>
+                        <select 
+                          value={libroSeleccionadoDetalle.estado || 'leyendo'} 
+                          onChange={(e) => {
+                            cambiarEstadoLibro(libroSeleccionadoDetalle, e.target.value);
+                            setLibroSeleccionadoDetalle(null);
                           }}
-                        />
-
-                        {tabEstanteria === 'leyendo' && (
-                          <div className="flex gap-2 pt-1">
-                            <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
-                            <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-base">Guardar</button>
-                          </div>
-                        )}
-                      </form>
-
-                      <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
-                        <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                          Leyendo
-                        </button>
-                        <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                          Quiero leer
-                        </button>
-                        <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                          Leídos
-                        </button>
-                      </div>
-
-                      {/* ESTANTERÍA DE MADERA CON LOMOS SEGÚN COLOR DOMINANTE DE LA PORTADA */}
-                      <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-start gap-3.5 overflow-x-auto">
-                        {misLibrosFiltrados.length === 0 ? (
-                          <div className="w-full text-center py-10">
-                            <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
-                          </div>
-                        ) : (
-                          misLibrosFiltrados.map((item, idx) => (
-                            <LomoLibroEstanteria 
-                              key={idx} 
-                              item={item} 
-                              onClick={() => setLibroSeleccionadoDetalle(item)} 
-                            />
-                          ))
-                        )}
+                          className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll"
+                        >
+                          <option value="leyendo">Leyendo</option>
+                          <option value="want_to_read">Quiero leer</option>
+                          <option value="leidos">Leído</option>
+                        </select>
                       </div>
                     </div>
                   </div>
-                )}
 
-                {seccionApp === 'capitulos' && (
-                  <div className="space-y-4 fade-in">
-                    {capitulos.map((cap, i) => {
-                      const tituloCap = cap.titulo || `Capítulo ${i}`;
-                      const paginaFin = Number(cap.pagina_fin || 0);
-                      const bloqueado = paginaFin > 0 && miPagina < paginaFin;
+                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Cerrar</button>
+                </div>
+              </div>
+            )}
 
-                      return (
-                        <div key={i} className="editorial-card p-5 space-y-4">
-                          <div className="flex justify-between items-start border-b border-[#E8E6DF] pb-2">
-                            <h3 className="font-babydoll text-2xl font-bold">{tituloCap}</h3>
-                            {paginaFin > 0 && (
-                              <span className="text-[10px] bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2 font-babydoll">
-                                hasta pág. {paginaFin}
-                              </span>
-                            )}
+            <main className="w-full flex-grow space-y-4 fade-in">
+              {cargandoDatos ? (
+                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
+              ) : (
+                <>
+                  {seccionApp === 'inicio' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex gap-4 items-center">
+                          <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+                          <div className="space-y-2 w-full">
+                            <span className="text-[9px] uppercase tracking-wider text-[#4A5028] font-bold font-babydoll text-xs">Lectura del Club</span>
+                            <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
+                            <p className="text-xs text-gray-500 italic font-babydoll">{libroActual.autora}</p>
+                            <div className="mt-2">
+                              <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-babydoll">
+                                <span>progreso general</span><span>{porcentajeLibro}%</span>
+                              </div>
+                              <div className="w-full bg-[#F8F7F3] rounded-full h-1.5 border border-[#E8E6DF]"><div className="bg-[#4A5028] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
+                        </div>
+
+                        <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
+                          <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
+                          <div className="flex items-center gap-2">
+                            <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1 text-xs font-semibold" />
+                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="editorial-card p-4 space-y-2">
+                        <h3 className="font-babydoll text-xl font-bold">Ubicación geográfica</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
+                          <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
+                        </div>
+                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-base mt-1">Actualizar ubicación</button>
+                      </div>
+
+                      <div className="editorial-card p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-babydoll text-xl font-bold">Notas y fragmentos</h3>
+                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-semibold font-babydoll text-xs">
+                            {botellaAbierta ? 'ocultar' : 'descubrir cita'}
+                          </button>
+                        </div>
+                        {botellaAbierta && (
+                          <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">
+                            "{FRASES_INICIALES[fraseActualBotella]}"
+                          </div>
+                        )}
+                        <div className="flex gap-2 pt-2 border-t border-[#E8E6DF]">
+                          <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
+                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {seccionApp === 'edificio' && (
+                    <div className="w-full flex justify-center">
+                      <EdificioClub 
+                        usuarias={miembrosEdificio} 
+                        libroActual={libroActual} 
+                        onAddWantToRead={agregarAWantToReadDirecto}
+                      />
+                    </div>
+                  )}
+
+                  {seccionApp === 'habitacion' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-4">
+                        <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
+                          <h3 className="font-babydoll text-2xl font-bold">Mi Estantería Personal</h3>
+                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all font-babydoll text-xs ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
+                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
+                          </button>
+                        </div>
+
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!libroPersonal.trim()) return;
+                          guardarLibroPersonal(undefined, undefined, tabEstanteria);
+                        }} className="space-y-2 bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E8E6DF]">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1 font-babydoll text-xs">Añadir libro a esta estantería</span>
                           
-                          {bloqueado ? (
-                            <div className="bg-[#FBF9F5] p-4 rounded-lg border border-[#E8E6DF] text-center space-y-2 my-2">
-                              <i className="fa-solid fa-lock text-[#4A5028] text-base"></i>
-                              <p className="text-xs font-bold text-gray-800 font-babydoll text-sm">Capítulo protegido contra spoilers</p>
-                              <p className="text-[11px] text-gray-500 leading-relaxed font-babydoll">
-                                Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear.
-                              </p>
+                          <BuscadorLibros
+                            placeholder="Busca por título o autora..."
+                            valor={libroPersonal}
+                            setValor={setLibroPersonal}
+                            onSelectLibro={(libroSel) => {
+                              setLibroPersonal(libroSel.titulo);
+                              guardarLibroPersonal(libroSel.titulo, 0, tabEstanteria, libroSel.autora, libroSel.portada);
+                            }}
+                          />
+
+                          {tabEstanteria === 'leyendo' && (
+                            <div className="flex gap-2 pt-1">
+                              <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
+                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-base">Guardar</button>
+                            </div>
+                          )}
+                        </form>
+
+                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
+                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Leyendo
+                          </button>
+                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Quiero leer
+                          </button>
+                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
+                            Leídos
+                          </button>
+                        </div>
+
+                        {/* ESTANTERÍA DE MADERA CON LOMOS DE TONOS EDITORIALES */}
+                        <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-start gap-3.5 overflow-x-auto">
+                          {misLibrosFiltrados.length === 0 ? (
+                            <div className="w-full text-center py-10">
+                              <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
                             </div>
                           ) : (
-                            <>
-                              <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF] flex gap-2">
-                                <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
-                                <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
-                              </div>
-
-                              <div className="pt-2">
-                                <div className="flex gap-2 mb-4">
-                                  <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
-                                  <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-base">publicar</button>
-                                </div>
-
-                                <div className="space-y-4">
-                                  {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
-                                    <div key={c.id} className="space-y-2">
-                                      <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF]">
-                                        <div className="flex justify-between mb-1 text-[10px] text-gray-400">
-                                          <span className="font-bold text-[#232321] uppercase font-babydoll text-sm">{c.autora}</span><span className="font-babydoll">{c.fecha}</span>
-                                        </div>
-                                        <p className="text-xs text-gray-800">{c.texto}</p>
-                                        <div className="flex gap-3 mt-2 pt-2 border-t border-[#E8E6DF] text-[11px] text-gray-400">
-                                          <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium font-babydoll">Responder</button>
-                                          <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
-                                          <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
-                                          {c.reacciones && <span className="bg-white text-black px-1.5 rounded border border-[#E8E6DF] font-babydoll">{c.reacciones}</span>}
-                                        </div>
-                                      </div>
-                                      <div className="pl-6 space-y-2 border-l-2 border-[#4A5028] ml-3">
-                                        {comentarios.filter(r => r.parent_id === c.id).map(r => (
-                                          <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#E8E6DF]">
-                                            <span className="font-bold mr-1 text-[10px] uppercase font-babydoll text-sm">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
-                                          </div>
-                                        ))}
-                                        {respuestaComentario[c.id] !== undefined && (
-                                          <div className="flex gap-2 mt-1">
-                                            <input type="text" placeholder="Tu respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
-                                            <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px] font-babydoll">ok</button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </>
+                            misLibrosFiltrados.map((item, idx) => (
+                              <LomoLibroEstanteria 
+                                key={idx} 
+                                item={item} 
+                                onClick={() => setLibroSeleccionadoDetalle(item)} 
+                              />
+                            ))
                           )}
                         </div>
-                      )
-                    })}
-                  </div>
-                )}
-
-                {seccionApp === 'comunidad' && (
-                  <div className="space-y-4 fade-in">
-                    <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#E8E6DF] font-babydoll text-sm">
-                      <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='chat'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Chat</button>
-                      <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='mapa'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Mapa ({usuariasClub.length})</button>
+                      </div>
                     </div>
-                    
-                    {subTabComunidad === 'chat' && (
-                      <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
-                        <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
-                            <span className="font-babydoll text-xl font-bold">Conversación en vivo</span>
-                          </div>
-                          <span className="bg-white px-2 py-0.5 rounded border border-[#E8E6DF] text-[#4A5028] font-bold text-[10px] flex items-center gap-1 font-babydoll">
-                            <i className="fa-solid fa-users text-[9px]"></i> {usuariasConectadas.length} en línea
-                          </span>
-                        </div>
+                  )}
 
-                        {mostrarModalConectadas && (
-                          <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
-                            <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
-                              <h3 className="font-babydoll font-bold text-xl text-[#232321]">Socias activas en la app</h3>
-                              <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded font-babydoll">cerrar</button>
+                  {seccionApp === 'capitulos' && (
+                    <div className="space-y-4 fade-in">
+                      {capitulos.map((cap, i) => {
+                        const tituloCap = cap.titulo || `Capítulo ${i}`;
+                        const paginaFin = Number(cap.pagina_fin || 0);
+                        const bloqueado = paginaFin > 0 && miPagina < paginaFin;
+
+                        return (
+                          <div key={i} className="editorial-card p-5 space-y-4">
+                            <div className="flex justify-between items-start border-b border-[#E8E6DF] pb-2">
+                              <h3 className="font-babydoll text-2xl font-bold">{tituloCap}</h3>
+                              {paginaFin > 0 && (
+                                <span className="text-[10px] bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2 font-babydoll">
+                                  hasta pág. {paginaFin}
+                                </span>
+                              )}
                             </div>
-                            <div className="overflow-y-auto space-y-2 flex-grow">
-                              {usuariasConectadas.map((u, i) => (
-                                <div key={i} className="flex justify-between items-center p-2 bg-[#FBF9F5] rounded border border-[#E8E6DF] text-xs text-[#232321]">
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
-                                    <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                                    <span className="font-bold font-babydoll text-base">{u.nombre || u.email}</span>
-                                  </div>
-                                  <span className="text-[10px] text-gray-400 font-babydoll">pág. {u.pagina || 0}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
-                          {chatMsgs.map((m,i)=>{
-                            const autor = m.usuario || m.usuaria || 'Socia';
-                            const esMio = autor.toLowerCase() === (nombreUsuarioPersonalizado || sesion.nombre).toLowerCase();
-                            const sociaObj = usuariasClub.find(u => (u.nombre || '').toLowerCase() === autor.toLowerCase());
-                            const fotoAutor = esMio ? fotoPerfilPersonalizada : (sociaObj?.foto_perfil || '');
-
-                            return (
-                              <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
-                                {!esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
-                                <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
-                                  <span className="text-[10px] font-babydoll text-gray-500 mb-0.5">{autor}</span>
-                                  <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#232321] text-[#FBF9F5]' : 'bg-[#FBF9F5] text-[#232321] border border-[#E8E6DF]'}`}>{m.mensaje}</div>
-                                </div>
-                                {esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
+                            <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
+                            
+                            {bloqueado ? (
+                              <div className="bg-[#FBF9F5] p-4 rounded-lg border border-[#E8E6DF] text-center space-y-2 my-2">
+                                <i className="fa-solid fa-lock text-[#4A5028] text-base"></i>
+                                <p className="text-xs font-bold text-gray-800 font-babydoll text-sm">Capítulo protegido contra spoilers</p>
+                                <p className="text-[11px] text-gray-500 leading-relaxed font-babydoll">
+                                  Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear.
+                                </p>
                               </div>
-                            );
-                          })}
-                          <div ref={chatEndRef} />
-                        </div>
+                            ) : (
+                              <>
+                                <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF] flex gap-2">
+                                  <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
+                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
+                                </div>
 
-                        <form onSubmit={enviarChat} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 shrink-0 bg-white rounded-b-xl">
-                          <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
-                          <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                                <div className="pt-2">
+                                  <div className="flex gap-2 mb-4">
+                                    <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
+                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-base">publicar</button>
+                                  </div>
+
+                                  <div className="space-y-4">
+                                    {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
+                                      <div key={c.id} className="space-y-2">
+                                        <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF]">
+                                          <div className="flex justify-between mb-1 text-[10px] text-gray-400">
+                                            <span className="font-bold text-[#232321] uppercase font-babydoll text-sm">{c.autora}</span><span className="font-babydoll">{c.fecha}</span>
+                                          </div>
+                                          <p className="text-xs text-gray-800">{c.texto}</p>
+                                          <div className="flex gap-3 mt-2 pt-2 border-t border-[#E8E6DF] text-[11px] text-gray-400">
+                                            <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium font-babydoll">Responder</button>
+                                            <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
+                                            <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
+                                            {c.reacciones && <span className="bg-white text-black px-1.5 rounded border border-[#E8E6DF] font-babydoll">{c.reacciones}</span>}
+                                          </div>
+                                        </div>
+                                        <div className="pl-6 space-y-2 border-l-2 border-[#4A5028] ml-3">
+                                          {comentarios.filter(r => r.parent_id === c.id).map(r => (
+                                            <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#E8E6DF]">
+                                              <span className="font-bold mr-1 text-[10px] uppercase font-babydoll text-sm">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
+                                            </div>
+                                          ))}
+                                          {respuestaComentario[c.id] !== undefined && (
+                                            <div className="flex gap-2 mt-1">
+                                              <input type="text" placeholder="Tu respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
+                                              <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px] font-babydoll">ok</button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {seccionApp === 'comunidad' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#E8E6DF] font-babydoll text-sm">
+                        <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='chat'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Chat</button>
+                        <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='mapa'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Mapa ({usuariasClub.length})</button>
+                      </div>
+                      
+                      {subTabComunidad === 'chat' && (
+                        <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
+                          <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
+                              <span className="font-babydoll text-xl font-bold">Conversación en vivo</span>
+                            </div>
+                            <span className="bg-white px-2 py-0.5 rounded border border-[#E8E6DF] text-[#4A5028] font-bold text-[10px] flex items-center gap-1 font-babydoll">
+                              <i className="fa-solid fa-users text-[9px]"></i> {usuariasConectadas.length} en línea
+                            </span>
+                          </div>
+
+                          {mostrarModalConectadas && (
+                            <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
+                              <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
+                                <h3 className="font-babydoll font-bold text-xl text-[#232321]">Socias activas en la app</h3>
+                                <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded font-babydoll">cerrar</button>
+                              </div>
+                              <div className="overflow-y-auto space-y-2 flex-grow">
+                                {usuariasConectadas.map((u, i) => (
+                                  <div key={i} className="flex justify-between items-center p-2 bg-[#FBF9F5] rounded border border-[#E8E6DF] text-xs text-[#232321]">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
+                                      <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
+                                      <span className="font-bold font-babydoll text-base">{u.nombre || u.email}</span>
+                                    </div>
+                                    <span className="text-[10px] text-gray-400 font-babydoll">pág. {u.pagina || 0}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
+                            {chatMsgs.map((m,i)=>{
+                              const autor = m.usuario || m.usuaria || 'Socia';
+                              const esMio = autor.toLowerCase() === (nombreUsuarioPersonalizado || sesion.nombre).toLowerCase();
+                              const sociaObj = usuariasClub.find(u => (u.nombre || '').toLowerCase() === autor.toLowerCase());
+                              const fotoAutor = esMio ? fotoPerfilPersonalizada : (sociaObj?.foto_perfil || '');
+
+                              return (
+                                <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
+                                  {!esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
+                                  <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
+                                    <span className="text-[10px] font-babydoll text-gray-500 mb-0.5">{autor}</span>
+                                    <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#232321] text-[#FBF9F5]' : 'bg-[#FBF9F5] text-[#232321] border border-[#E8E6DF]'}`}>{m.mensaje}</div>
+                                  </div>
+                                  {esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
+                                </div>
+                              );
+                            })}
+                            <div ref={chatEndRef} />
+                          </div>
+
+                          <form onSubmit={enviarChat} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 shrink-0 bg-white rounded-b-xl">
+                            <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                            <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                          </form>
+                        </div>
+                      )}
+
+                      {subTabComunidad === 'mapa' && (
+                        <div className="editorial-card p-3 space-y-2">
+                          <div className="flex justify-between items-center text-xs px-1">
+                            <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                            <span className="text-[10px] text-[#4A5028] font-bold font-babydoll">{usuariasClub.length} socia(s)</span>
+                          </div>
+                          <MapaGilda usuarias={usuariasClub} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {seccionApp === 'archivo' && (
+                    <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-3">
+                        <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          const tit = nuevaPropuestaTitulo?.trim();
+                          if (!tit) return;
+                          const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || 'Desconocida', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
+                          setPropuestas([...propuestas, nueva]);
+                          enviarAccion('propuesta', nueva);
+                          setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
+                          mostrarToast('Propuesta añadida.');
+                        }} className="space-y-2">
+                          
+                          <BuscadorLibros
+                            placeholder="Título del libro o autora..."
+                            valor={nuevaPropuestaTitulo}
+                            setValor={setNuevaPropuestaTitulo}
+                            onSelectLibro={(libroSel) => {
+                              setNuevaPropuestaTitulo(libroSel.titulo);
+                              setNuevaPropuestaAutora(libroSel.autora);
+                              setNuevaPropuestaPortada(libroSel.portada);
+                            }}
+                          />
+
+                          <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+                          <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-base font-medium">Añadir propuesta</button>
                         </form>
                       </div>
-                    )}
 
-                    {subTabComunidad === 'mapa' && (
-                      <div className="editorial-card p-3 space-y-2">
-                        <div className="flex justify-between items-center text-xs px-1">
-                          <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
-                          <span className="text-[10px] text-[#4A5028] font-bold font-babydoll">{usuariasClub.length} socia(s)</span>
-                        </div>
-                        <MapaGilda usuarias={usuariasClub} />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {seccionApp === 'archivo' && (
-                  <div className="space-y-4 fade-in">
-                    <div className="editorial-card p-5 space-y-3">
-                      <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        const tit = nuevaPropuestaTitulo?.trim();
-                        if (!tit) return;
-                        const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || 'Desconocida', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
-                        setPropuestas([...propuestas, nueva]);
-                        enviarAccion('propuesta', nueva);
-                        setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
-                        mostrarToast('Propuesta añadida.');
-                      }} className="space-y-2">
-                        
-                        <BuscadorLibros
-                          placeholder="Título del libro o autora..."
-                          valor={nuevaPropuestaTitulo}
-                          setValor={setNuevaPropuestaTitulo}
-                          onSelectLibro={(libroSel) => {
-                            setNuevaPropuestaTitulo(libroSel.titulo);
-                            setNuevaPropuestaAutora(libroSel.autora);
-                            setNuevaPropuestaPortada(libroSel.portada);
-                          }}
-                        />
-
-                        <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                        <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                        <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-base font-medium">Añadir propuesta</button>
-                      </form>
-                    </div>
-
-                    <div className="editorial-card p-5">
-                      <h3 className="font-babydoll text-xl font-bold mb-3">Votación Cafecito</h3>
-                      <div className="space-y-2">
-                        {fechasCafe.map((f,i) => {
-                          const votantesArr = (f.votantes || "").toLowerCase().split(',').map(v=>v.trim());
-                          const votado = votantesArr.includes(sesion.email.toLowerCase());
-                          return (
-                            <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] rounded-lg border border-[#E8E6DF]">
-                              <span className="font-medium font-babydoll text-base">{f.fecha}</span>
-                              <button onClick={()=>{
-                                const clon = [...fechasCafe];
-                                const item = clon.find(x => x.fecha === f.fecha);
-                                if(!item) return;
-                                let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                                if(arr.includes(sesion.email.toLowerCase())){ 
-                                  arr = arr.filter(v=>v!==sesion.email.toLowerCase()); 
-                                  item.votos = Math.max(0, Number(item.votos||0) - 1); 
-                                } else { 
-                                  arr.push(sesion.email.toLowerCase()); 
-                                  item.votos = Number(item.votos||0) + 1; 
-                                }
-                                item.votantes = arr.join(',');
-                                setFechasCafe(clon);
-                                enviarAccion('votar', { tipo: 'cafe', id: f.fecha, email: sesion.email });
-                                mostrarToast('Voto actualizado.');
-                              }} className={`px-3 py-1.5 rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white shadow-xs' : 'bg-white text-gray-500 border border-[#E8E6DF]'}`}>
-                                {votado ? `Votado (${f.votos||0})` : `Votar (${f.votos||0})`}
-                              </button>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="editorial-card p-5">
-                      <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
-                      <div className="space-y-3">
-                        {propuestas.map((p,i) => {
-                          const votantesArr = (p.votantes || "").toLowerCase().split(',').map(v=>v.trim());
-                          const votado = votantesArr.includes(sesion.email.toLowerCase());
-                          return (
-                            <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
-                              <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
-                              <div className="flex flex-col justify-between w-full">
-                                <div>
-                                  <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
-                                  <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
-                                </div>
+                      <div className="editorial-card p-5">
+                        <h3 className="font-babydoll text-xl font-bold mb-3">Votación Cafecito</h3>
+                        <div className="space-y-2">
+                          {fechasCafe.map((f,i) => {
+                            const votantesArr = (f.votantes || "").toLowerCase().split(',').map(v=>v.trim());
+                            const votado = votantesArr.includes(sesion.email.toLowerCase());
+                            return (
+                              <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] rounded-lg border border-[#E8E6DF]">
+                                <span className="font-medium font-babydoll text-base">{f.fecha}</span>
                                 <button onClick={()=>{
-                                  const clon = [...propuestas];
-                                  const item = clon.find(x => x.titulo === p.titulo);
+                                  const clon = [...fechasCafe];
+                                  const item = clon.find(x => x.fecha === f.fecha);
                                   if(!item) return;
                                   let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
                                   if(arr.includes(sesion.email.toLowerCase())){ 
@@ -2044,55 +1953,94 @@
                                     item.votos = Number(item.votos||0) + 1; 
                                   }
                                   item.votantes = arr.join(',');
-                                  setPropuestas(clon);
-                                  enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email });
+                                  setFechasCafe(clon);
+                                  enviarAccion('votar', { tipo: 'cafe', id: f.fecha, email: sesion.email });
                                   mostrarToast('Voto actualizado.');
-                                }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white' : 'bg-white text-[#232321] border border-[#E8E6DF]'}`}>
-                                  {votado ? `Votado (${p.votos||0})` : `Votar (${p.votos||0})`}
+                                }} className={`px-3 py-1.5 rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white shadow-xs' : 'bg-white text-gray-500 border border-[#E8E6DF]'}`}>
+                                  {votado ? `Votado (${f.votos||0})` : `Votar (${f.votos||0})`}
                                 </button>
                               </div>
-                            </div>
-                          )
-                        })}
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="editorial-card p-5">
+                        <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
+                        <div className="space-y-3">
+                          {propuestas.map((p,i) => {
+                            const votantesArr = (p.votantes || "").toLowerCase().split(',').map(v=>v.trim());
+                            const votado = votantesArr.includes(sesion.email.toLowerCase());
+                            return (
+                              <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
+                                <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                                <div className="flex flex-col justify-between w-full">
+                                  <div>
+                                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
+                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
+                                  </div>
+                                  <button onClick={()=>{
+                                    const clon = [...propuestas];
+                                    const item = clon.find(x => x.titulo === p.titulo);
+                                    if(!item) return;
+                                    let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
+                                    if(arr.includes(sesion.email.toLowerCase())){ 
+                                      arr = arr.filter(v=>v!==sesion.email.toLowerCase()); 
+                                      item.votos = Math.max(0, Number(item.votos||0) - 1); 
+                                    } else { 
+                                      arr.push(sesion.email.toLowerCase()); 
+                                      item.votos = Number(item.votos||0) + 1; 
+                                    }
+                                    item.votantes = arr.join(',');
+                                    setPropuestas(clon);
+                                    enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email });
+                                    mostrarToast('Voto actualizado.');
+                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white' : 'bg-white text-[#232321] border border-[#E8E6DF]'}`}>
+                                    {votado ? `Votado (${p.votos||0})` : `Votar (${p.votos||0})`}
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {seccionApp === 'buzon' && (
-                  <div className="editorial-card p-5 space-y-3 fade-in">
-                    <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
-                    <p className="text-xs text-gray-500 font-babydoll">Sugerencias y comunicación directa con la administración.</p>
-                    <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
-                    <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Enviar mensaje</button>
-                  </div>
-                )}
-              </>
-            )}
-          </main>
+                  {seccionApp === 'buzon' && (
+                    <div className="editorial-card p-5 space-y-3 fade-in">
+                      <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
+                      <p className="text-xs text-gray-500 font-babydoll">Sugerencias y comunicación directa con la administración.</p>
+                      <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
+                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Enviar mensaje</button>
+                    </div>
+                  )}
+                </>
+              )}
+            </main>
 
-          <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
-            {[
-              { id: 'inicio', icon: 'fa-house', label: 'inicio' },
-              { id: 'edificio', icon: 'fa-building', label: 'casa' },
-              { id: 'habitacion', icon: 'fa-bookmark', label: 'mi habitación' },
-              { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
-              { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
-              { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
-              { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
-            ].map(tab => (
-              <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-2 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
-                <i className={`fa-solid ${tab.icon} text-sm`}></i>
-                <span className="text-[8px] font-bold uppercase font-babydoll">{tab.label}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-      );
-    }
+            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
+              {[
+                { id: 'inicio', icon: 'fa-house', label: 'inicio' },
+                { id: 'edificio', icon: 'fa-building', label: 'casa' },
+                { id: 'habitacion', icon: 'fa-bookmark', label: 'mi habitación' },
+                { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
+                { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
+                { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
+                { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-2 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
+                  <i className={`fa-solid ${tab.icon} text-sm`}></i>
+                  <span className="text-[8px] font-bold uppercase font-babydoll">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        );
+      }
 
-    const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
-    containerRoot.render(<App />);
-  </script>
-</body>
+      const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
+      containerRoot.render(<App />);
+    </script>
+  </body>
 </html>
