@@ -128,7 +128,6 @@
         animation: floatBannerQueue 4.5s ease-in-out forwards;
       }
 
-      /* Estilos para la estantería de madera animada */
       .estanteria-madera {
         background: linear-gradient(to bottom, #F4F0E6 0%, #EAE4D2 100%);
         border-bottom: 14px solid #C5B99E;
@@ -601,92 +600,23 @@
         const mapRef = useRef(null);
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
-        const [regionAbierta, setRegionAbierta] = useState(null);
 
         const COORDENADAS_PREDEFINIDAS = {
           'país vasco': [42.9896, -2.6189],
-          'euskadi': [42.9896, -2.6189],
           'cataluña': [41.5912, 1.5209],
-          'catalunya': [41.5912, 1.5209],
           'comunidad de madrid': [40.4168, -3.7038],
           'andalucía': [37.3891, -5.9845],
           'galicia': [42.5751, -8.1339],
           'comunidad valenciana': [39.4840, -0.3526],
-          'comunitat valenciana': [39.4840, -0.3526],
-          'alava': [42.8467, -2.6716],
-          'álava': [42.8467, -2.6716],
-          'araba': [42.8467, -2.6716],
-          'gipuzkoa': [43.1500, -2.3000],
-          'guipúzcoa': [43.1500, -2.3000],
-          'bizkaia': [43.2630, -2.9350],
-          'vizcaya': [43.2630, -2.9350],
           'tolosa': [43.1362, -2.0735],
           'donostia': [43.3183, -1.9812],
           'san sebastián': [43.3183, -1.9812],
           'bilbao': [43.2630, -2.9350],
-          'eibar': [43.1843, -2.4722],
-          'vitoria': [42.8467, -2.6716],
-          'gasteiz': [42.8467, -2.6716],
           'madrid': [40.4168, -3.7038],
           'barcelona': [41.3851, 2.1734],
-          'girona': [41.9794, 2.8214],
-          'gerona': [41.9794, 2.8214],
-          'lleida': [41.6176, 0.6200],
-          'lérida': [41.6176, 0.6200],
-          'tarragona': [41.1189, 1.2445],
           'sevilla': [37.3891, -5.9845],
-          'málaga': [36.7213, -4.4214],
-          'malaga': [36.7213, -4.4214],
-          'cadiz': [36.5271, -6.2886],
-          'cádiz': [36.5271, -6.2886],
-          'granada': [37.1773, -3.5986],
-          'cordoba': [37.8882, -4.7794],
-          'córdoba': [37.8882, -4.7794],
-          'almería': [36.8340, -2.4637],
-          'almeria': [36.8340, -2.4637],
-          'huelva': [37.2614, -6.9447],
-          'jaén': [37.7796, -3.7849],
-          'jaen': [37.7796, -3.7849],
-          'coruña': [43.3623, -8.4115],
-          'a coruña': [43.3623, -8.4115],
-          'lugo': [43.0125, -7.5558],
-          'ourense': [42.3358, -7.8639],
-          'orense': [42.3358, -7.8639],
-          'pontevedra': [42.4310, -8.6444],
-          'valencia': [39.4699, -0.3763],
-          'valència': [39.4699, -0.3763],
-          'alicante': [38.3452, -0.4815],
-          'alacant': [38.3452, -0.4815],
-          'castellón': [39.9864, -0.0513],
-          'castelló': [39.9864, -0.0513]
+          'valencia': [39.4699, -0.3763]
         };
-
-        const estructuraRegiones = useMemo(() => {
-          const mapa = {};
-          usuarias.forEach(u => {
-            const reg = normalizarComunidad(u.provincia_region, u.ciudad);
-            const ciu = u.ciudad || 'Sin localidad';
-
-            if (!mapa[reg]) mapa[reg] = { total: 0, ciudades: {} };
-            if (!mapa[reg].ciudades[ciu]) mapa[reg].ciudades[ciu] = [];
-
-            mapa[reg].ciudades[ciu].push(u);
-            mapa[reg].total += 1;
-          });
-
-          return Object.entries(mapa)
-            .filter(([reg]) => reg !== 'Sin especificar' && reg !== 'Global')
-            .map(([region, data]) => ({
-              region,
-              total: data.total,
-              ciudades: Object.entries(data.ciudades).map(([ciudad, list]) => ({
-                ciudad,
-                count: list.length,
-                usuarias: list
-              })).sort((a, b) => b.count - a.count)
-            }))
-            .sort((a, b) => b.total - a.total);
-        }, [usuarias]);
 
         const ciudadesMap = useMemo(() => {
           const map = {};
@@ -704,58 +634,14 @@
 
         useEffect(() => {
           if (!mapRef.current) {
-            const map = L.map('mapa-gilda', { 
-              zoomControl: false, 
-              attributionControl: false 
-            }).setView([40.4167, -3.7037], 5);
-
+            const map = L.map('mapa-gilda', { zoomControl: false, attributionControl: false }).setView([40.4167, -3.7037], 5);
             L.control.zoom({ position: 'topright' }).addTo(map);
-
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-              maxZoom: 16
-            }).addTo(map);
-
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
             markersGroupRef.current = L.layerGroup().addTo(map);
             mapRef.current = map;
           }
 
-          setTimeout(() => {
-            if (mapRef.current) mapRef.current.invalidateSize();
-          }, 200);
-
-          const pintarPinPiruletaCompacto = (lat, lon, item, boundsArray) => {
-            const cant = item.usuarias.length;
-            boundsArray.push([lat, lon]);
-
-            const piruletaHtml = `
-              <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
-                  <line x1="8" y1="12" x2="8" y2="23" stroke="#232321" stroke-width="1.8" stroke-linecap="round"/>
-                  <circle cx="8" cy="7" r="6" fill="#4A5028" stroke="#232321" stroke-width="1.5"/>
-                </svg>
-                <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">${cant}</span>
-              </div>
-            `;
-
-            const customIcon = L.divIcon({
-              html: piruletaHtml,
-              className: 'custom-piruleta-mini',
-              iconSize: [16, 24],
-              iconAnchor: [8, 23],
-              popupAnchor: [0, -24]
-            });
-
-            const marker = L.marker([lat, lon], { icon: customIcon });
-
-            marker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
-              direction: 'top', 
-              permanent: false,
-              offset: [0, -20]
-            });
-
-            marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
-            markersGroupRef.current.addLayer(marker);
-          };
+          setTimeout(() => { if (mapRef.current) mapRef.current.invalidateSize(); }, 200);
 
           const renderMarkers = async () => {
             if (!markersGroupRef.current) return;
@@ -764,28 +650,27 @@
 
             for (const item of ciudadesMap) {
               const locNombre = item.nombreLocalidad.toLowerCase().trim();
-              let coor = COORDENADAS_PREDEFINIDAS[locNombre];
+              let coor = COORDENADAS_PREDEFINIDAS[locNombre] || [40.4168, -3.7038];
+              boundsArray.push(coor);
 
-              if (!coor) {
-                const claveEncontrada = Object.keys(COORDENADAS_PREDEFINIDAS).find(k => locNombre.includes(k) || k.includes(locNombre));
-                if (claveEncontrada) coor = COORDENADAS_PREDEFINIDAS[claveEncontrada];
-              }
+              const piruletaHtml = `
+                <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
+                    <line x1="8" y1="12" x2="8" y2="23" stroke="#232321" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="8" cy="7" r="6" fill="#4A5028" stroke="#232321" stroke-width="1.5"/>
+                  </svg>
+                  <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">${item.usuarias.length}</span>
+                </div>
+              `;
 
-              if (coor) {
-                pintarPinPiruletaCompacto(coor[0], coor[1], item, boundsArray);
-              } else {
-                try {
-                  const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
-                  const data = await res.json();
-                  if (data && data.length > 0) {
-                    pintarPinPiruletaCompacto(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
-                  }
-                } catch (e) {}
-              }
+              const customIcon = L.divIcon({ html: piruletaHtml, className: 'custom-piruleta-mini', iconSize: [16, 24], iconAnchor: [8, 23], popupAnchor: [0, -24] });
+              const marker = L.marker(coor, { icon: customIcon });
+              marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
+              markersGroupRef.current.addLayer(marker);
             }
 
             if (boundsArray.length > 0 && mapRef.current) {
-              mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 7 });
+              mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
             }
           };
 
@@ -805,63 +690,13 @@
                   <div className="overflow-y-auto flex-grow space-y-2">
                     {regionSeleccionada.usuarias.map((u, i) => (
                       <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#E8E6DF] gap-2">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                          <span className="font-bold truncate font-babydoll text-sm">{u.nombre}</span>
-                        </div>
-                        <span className="text-gray-500 shrink-0 font-babydoll">{u.ciudad || 'Sin localidad'}</span>
+                        <span className="font-bold font-babydoll text-sm">{u.nombre}</span>
+                        <span className="text-gray-500 font-babydoll">{u.ciudad || 'Sin localidad'}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className="bg-white p-3.5 rounded-xl border border-[#E8E6DF] space-y-2">
-              <div className="flex justify-between items-center pb-2 border-b border-[#E8E6DF]">
-                <h4 className="font-babydoll text-base font-bold text-[#232321]">Comunidades Autónomas y Municipios</h4>
-                <span className="text-[10px] text-gray-400 uppercase font-semibold font-babydoll">Usuarias</span>
-              </div>
-              <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-                {estructuraRegiones.length === 0 ? (
-                  <p className="text-[11px] text-gray-400 italic text-center py-2 font-babydoll">No hay ubicaciones registradas.</p>
-                ) : (
-                  estructuraRegiones.map((item, idx) => {
-                    const estaAbierta = regionAbierta === item.region;
-                    return (
-                      <div key={idx} className="rounded-lg border border-[#E8E6DF] overflow-hidden">
-                        <div 
-                          onClick={() => setRegionAbierta(estaAbierta ? null : item.region)}
-                          className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] hover:bg-[#F2EFE9] cursor-pointer transition-colors"
-                        >
-                          <div className="flex items-center gap-2">
-                            <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-400`}></i>
-                            <span className="font-bold text-[#232321] capitalize font-babydoll text-sm">{item.region}</span>
-                          </div>
-                          <span className="bg-[#4A5028] text-white px-2 py-0.5 rounded-full text-[10px] font-bold font-babydoll">
-                            {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
-                          </span>
-                        </div>
-
-                        {estaAbierta && (
-                          <div className="bg-white p-2 border-t border-[#E8E6DF] space-y-1">
-                            {item.ciudades.map((sub, cIdx) => (
-                              <div 
-                                key={cIdx} 
-                                onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
-                                className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
-                              >
-                                <span className="text-gray-700 capitalize font-babydoll text-xs">{sub.ciudad}</span>
-                                <span className="text-gray-400 font-semibold font-babydoll">{sub.count}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
             </div>
           </div>
         );
@@ -881,7 +716,6 @@
         const [regModalidad, setRegModalidad] = useState('cotilla');
         
         const [seccionApp, setSeccionApp] = useState('inicio');
-        const [subTabComunidad, setSubTabComunidad] = useState('chat');
         const [tabEstanteria, setTabEstanteria] = useState('leyendo');
         const [cargandoDatos, setCargandoDatos] = useState(false);
         const [toastMsg, setToastMsg] = useState(null);
@@ -889,7 +723,6 @@
         const [usuariasClub, setUsuariasClub] = useState([]);
         const [capitulos, setCapitulos] = useState([]);
         const [comentarios, setComentarios] = useState([]);
-        const [cafecitos, setCafecitos] = useState([]);
         const [lecturas, setLecturas] = useState([]);
         const [chatMsgs, setChatMsgs] = useState([]);
         const [propuestas, setPropuestas] = useState([]);
@@ -909,16 +742,9 @@
 
         const [libroPersonal, setLibroPersonal] = useState('');
         const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
-
-        // Decoración de la habitación (plantas, objetos, etc.)
         const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || '🌿 Plantita monstera');
 
-        const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
-        const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
-        const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
-        const [mostrarModalConectadas, setMostrarModalConectadas] = useState(false);
         const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
-
         const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
         const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
         const [botellaAbierta, setBotellaAbierta] = useState(false);
@@ -928,477 +754,114 @@
         const [respuestaComentario, setRespuestaComentario] = useState({});
         const [nuevaCitaCapsula, setNuevaCitaCapsula] = useState({});
         const [nuevoChat, setNuevoChat] = useState('');
-        const [mensajeFundadora, setMensajeFundadora] = useState('');
         
         const chatEndRef = useRef(null);
 
         const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
         
         const parsearHoja = (url) => new Promise(resolve => {
-          Papa.parse(url, { 
-            download: true, 
-            header: true, 
-            skipEmptyLines: true, 
-            transformHeader: (h) => h.trim().toLowerCase(),
-            complete: (res) => resolve(res.data || []), 
-            error: () => resolve([]) 
-          });
+          Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
         const cargarTodosLosDatos = () => {
           Promise.all([
-            parsearHoja(URL_CSV_USUARIAS),
-            parsearHoja(URL_CSV_CAPITULOS), 
-            parsearHoja(URL_CSV_COMENTARIOS), 
-            parsearHoja(URL_CSV_CAFECITOS),
-            parsearHoja(URL_CSV_LECTURAS), 
-            parsearHoja(URL_CSV_CHAT), 
-            parsearHoja(URL_CSV_PROPUESTAS),
-            parsearHoja(URL_CSV_VOTACION_CAFE), 
-            parsearHoja(URL_CSV_LECTURAS_PERSONALES)
+            parsearHoja(URL_CSV_USUARIAS), parsearHoja(URL_CSV_CAPITULOS), parsearHoja(URL_CSV_COMENTARIOS), 
+            parsearHoja(URL_CSV_CAFECITOS), parsearHoja(URL_CSV_LECTURAS), parsearHoja(URL_CSV_CHAT), 
+            parsearHoja(URL_CSV_PROPUESTAS), parsearHoja(URL_CSV_VOTACION_CAFE), parsearHoja(URL_CSV_LECTURAS_PERSONALES)
           ]).then(results => {
             const listU = results[0].filter(u => (u.email || '').trim() !== '');
-            setUsuariasClub(listU);
-            setCapitulos(results[1]); 
-            setComentarios(results[2].reverse()); 
-            setCafecitos(results[3]);
-            setLecturas(results[4]); 
-            setChatMsgs(results[5]); 
-            setPropuestas(results[6]);
-            setFechasCafe(results[7]); 
-            setLecturasPersonales(results[8]);
-
-            enriquecerUbicacionesAntiguas(listU);
+            setUsuariasClub(listU); setCapitulos(results[1]); setComentarios(results[2].reverse()); 
+            setLecturas(results[4]); setChatMsgs(results[5]); setPropuestas(results[6]);
+            setFechasCafe(results[7]); setLecturasPersonales(results[8]);
           });
-        };
-
-        const enriquecerUbicacionesAntiguas = async (listaUsuarias) => {
-          const paraActualizar = listaUsuarias.filter(u => {
-            const tieneCiudad = u.ciudad && u.ciudad.trim() !== '';
-            const sinProvincia = !u.provincia_region || u.provincia_region.trim() === '' || u.provincia_region.trim().toLowerCase() === u.ciudad.trim().toLowerCase();
-            return tieneCiudad && sinProvincia;
-          });
-
-          if (paraActualizar.length === 0) return;
-
-          let huboCambios = false;
-          const clonUsuarias = [...listaUsuarias];
-
-          for (const u of paraActualizar) {
-            try {
-              const queryGeo = u.codigo_postal ? `${u.ciudad}, ${u.codigo_postal}` : u.ciudad;
-              const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
-              const data = await res.json();
-              if (data && data.length > 0 && data[0].address) {
-                const addr = data[0].address;
-                let prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || u.ciudad;
-                prov = normalizarComunidad(prov, u.ciudad);
-                
-                if (prov && prov !== u.provincia_region) {
-                  const target = clonUsuarias.find(x => x.email === u.email);
-                  if (target) target.provincia_region = prov;
-                  huboCambios = true;
-
-                  enviarAccion('actualizar_ubicacion', { 
-                    email: u.email,
-                    usuario: u.nombre,
-                    ciudad: u.ciudad, 
-                    codigo_postal: u.codigo_postal || '',
-                    provincia_region: prov 
-                  });
-                }
-              }
-            } catch (e) {}
-          }
-
-          if (huboCambios) {
-            setUsuariasClub(clonUsuarias);
-          }
         };
 
         useEffect(() => {
-          parsearHoja(URL_CSV_USUARIAS).then(data => {
-            const list = data.filter(u => (u.email || '').trim() !== '');
-            setUsuariasClub(list);
-            enriquecerUbicacionesAntiguas(list);
-          });
+          parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
         }, []);
 
         useEffect(() => {
           if (sesion) {
-            setCargandoDatos(true);
-            cargarTodosLosDatos();
-            setCargandoDatos(false);
-
+            setCargandoDatos(true); cargarTodosLosDatos(); setCargandoDatos(false);
             const interval = setInterval(() => {
               parsearHoja(URL_CSV_CHAT).then(data => setChatMsgs(data));
-              parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== '')));
               parsearHoja(URL_CSV_LECTURAS_PERSONALES).then(data => setLecturasPersonales(data));
             }, 10000);
-
             return () => clearInterval(interval);
           }
         }, [sesion]);
 
         useEffect(() => {
-          if (subTabComunidad === 'chat') {
-            chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
-          }
-        }, [chatMsgs, subTabComunidad]);
+          if (seccionApp === 'comunidad') chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        }, [chatMsgs, seccionApp]);
 
         useEffect(() => {
           if (sesion && usuariasClub.length > 0) {
             const socia = usuariasClub.find(u => (u.email || '').toLowerCase() === sesion.email.toLowerCase());
             if (socia) {
               setMiPagina(Number(socia.pagina || 0));
-              if (!nombreUsuarioPersonalizado) {
-                const nomDefault = socia.nombre || sesion.email.split('@')[0];
-                setNombreUsuarioPersonalizado(nomDefault);
-                localStorage.setItem('gilda_nombre_usuario', nomDefault);
-              }
-              if (!fotoPerfilPersonalizada && socia.foto_perfil) {
-                setFotoPerfilPersonalizada(socia.foto_perfil);
-                localStorage.setItem('gilda_foto_perfil', socia.foto_perfil);
-              }
+              if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
+              if (!fotoPerfilPersonalizada && socia.foto_perfil) setFotoPerfilPersonalizada(socia.foto_perfil);
               if (socia.ciudad && !miCiudad) setMiCiudad(socia.ciudad);
-              if (socia.codigo_postal && !miCodigoPostal) setMiCodigoPostal(socia.codigo_postal);
             }
           }
         }, [sesion, usuariasClub.length]);
 
         const enviarAccion = async (action, payload) => {
           try {
-            const nombreActual = payload.usuario || nombreUsuarioPersonalizado || sesion?.nombre || 'Socia';
-            const emailActual = payload.email || sesion?.email;
             await fetch(GOOGLE_API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action, usuario: nombreActual, usuaria: nombreActual, email: emailActual, ...payload }),
+              body: JSON.stringify({ action, usuario: nombreUsuarioPersonalizado || sesion?.nombre, email: sesion?.email, ...payload }),
             });
           } catch (err) { console.error(err); }
-        };
-
-        const guardarMiUbicacion = async () => {
-          if (!miCiudad.trim()) return;
-          localStorage.setItem('gilda_mi_ciudad', miCiudad);
-          localStorage.setItem('gilda_mi_cp', miCodigoPostal);
-          
-          let prov = miCiudad;
-          try {
-            const queryGeo = miCodigoPostal.trim() ? `${miCiudad}, ${miCodigoPostal}` : miCiudad;
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
-            const data = await res.json();
-            if (data && data.length > 0 && data[0].address) {
-              const addr = data[0].address;
-              prov = addr.province || addr.state || addr.region || addr.county || addr.state_district || miCiudad;
-            }
-          } catch (e) {}
-
-          prov = normalizarComunidad(prov, miCiudad);
-
-          enviarAccion('actualizar_ubicacion', {
-            email: sesion.email,
-            usuario: nombreUsuarioPersonalizado || sesion.nombre,
-            ciudad: miCiudad,
-            codigo_postal: miCodigoPostal,
-            provincia_region: prov
-          });
-
-          mostrarToast('Ubicación actualizada.');
-        };
-
-        const iniciarSesion = (e) => {
-          e.preventDefault();
-          setErrorLogin('');
-          const mail = inputEmail.trim().toLowerCase();
-          const pwd = inputPassword.trim();
-          if (!mail || !pwd) return;
-
-          const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
-          if (!socia) return setErrorLogin('Este correo no está registrado en gilda.');
-          if ((socia.estado || '').toLowerCase() === 'pendiente') return setErrorLogin('Tu cuenta está pendiente de aprobación.');
-
-          const pwdSheet = socia.password || '';
-          if (pwdSheet === '') {
-            if (pwd.length < 4) return setErrorLogin('Establece una contraseña de al menos 4 caracteres.');
-            enviarAccion('set_password', { email: mail, password: pwd });
-            mostrarToast('Contraseña registrada con éxito.');
-          } else {
-            if (pwdSheet !== pwd) return setErrorLogin('Contraseña incorrecta.');
-          }
-
-          const nombreDef = socia.nombre || mail.split('@')[0];
-          const datosSesion = { nombre: nombreDef, email: mail, modalidad: (socia.modalidad || 'gilda').toLowerCase() };
-          localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-          localStorage.setItem('gilda_nombre_usuario', nombreDef);
-          if (socia.foto_perfil) {
-            localStorage.setItem('gilda_foto_perfil', socia.foto_perfil);
-            setFotoPerfilPersonalizada(socia.foto_perfil);
-          }
-          setSesion(datosSesion);
-        };
-
-        const registrarse = async (e) => {
-          e.preventDefault();
-          setErrorLogin('');
-          const mail = regEmail.trim().toLowerCase();
-          const nom = regNombre.trim().toLowerCase();
-          const ciu = regCiudad.trim();
-          const cp = regCodigoPostal.trim();
-
-          if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
-
-          const nombreOcupado = usuariasClub.some(u => (u.nombre || '').trim().toLowerCase() === nom);
-          if (nombreOcupado) {
-            return setErrorLogin('Este nombre de usuario ya está en uso. Por favor, elige otro.');
-          }
-
-          if (regModalidad === 'cotilla') {
-            const sociaExistente = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
-            if (sociaExistente) {
-              return setErrorLogin('Este correo ya está registrado. Por favor, inicia sesión.');
-            }
-
-            let provinciaDetectada = ciu;
-            if (ciu) {
-              try {
-                const queryGeo = cp ? `${ciu}, ${cp}` : ciu;
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeo)}&limit=1&addressdetails=1`);
-                const data = await res.json();
-                if (data && data.length > 0 && data[0].address) {
-                  const addr = data[0].address;
-                  provinciaDetectada = addr.province || addr.state || addr.region || addr.county || addr.state_district || ciu;
-                }
-              } catch (e) {
-                console.error("Error al detectar provincia:", e);
-              }
-            }
-
-            provinciaDetectada = normalizarComunidad(provinciaDetectada, ciu);
-
-            enviarAccion('registro_cotilla', {
-              nombre: nom,
-              email: mail,
-              ciudad: ciu,
-              codigo_postal: cp,
-              provincia_region: provinciaDetectada,
-              modalidad: 'gilda cotilla'
-            });
-
-            const datosSesion = { nombre: nom, email: mail, modalidad: 'gilda cotilla' };
-            localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-            localStorage.setItem('gilda_nombre_usuario', nom);
-            if (ciu) localStorage.setItem('gilda_mi_ciudad', ciu);
-            if (cp) localStorage.setItem('gilda_mi_cp', cp);
-            
-            setSesion(datosSesion);
-            mostrarToast('¡Bienvenida a gilda!');
-          } else {
-            const urlStripe = ENLACES_STRIPE[regModalidad];
-            if (urlStripe) {
-              window.location.href = urlStripe;
-            } else {
-              setErrorLogin('Modalidad de pago seleccionada no válida.');
-            }
-          }
-        };
-
-        const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
-
-        const manejarCambioArchivoFoto = (e) => {
-          const archivo = e.target.files[0];
-          if (!archivo) return;
-
-          if (archivo.size > 2 * 1024 * 1024) {
-            mostrarToast('⚠️ La imagen es muy pesada (máx 2MB).');
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = (uploadEvent) => {
-            setInputNuevaFoto(uploadEvent.target.result);
-          };
-          reader.readAsDataURL(archivo);
-        };
-
-        const guardarPerfil = () => {
-          const nuevoNom = inputNuevoNombre.trim().toLowerCase();
-          const nuevaFoto = inputNuevaFoto;
-
-          if (nuevoNom && nuevoNom !== (nombreUsuarioPersonalizado || '').toLowerCase()) {
-            const ocupado = usuariasClub.some(u => (u.email || '').toLowerCase() !== sesion.email.toLowerCase() && (u.nombre || '').trim().toLowerCase() === nuevoNom);
-            if (ocupado) {
-              mostrarToast('⚠️ Ese nombre de usuario ya está ocupado.');
-              return;
-            }
-            setNombreUsuarioPersonalizado(nuevoNom);
-            localStorage.setItem('gilda_nombre_usuario', nuevoNom);
-            enviarAccion('actualizar_nombre', { nombre: nuevoNom });
-          }
-
-          if (nuevaFoto !== undefined && nuevaFoto !== '') {
-            setFotoPerfilPersonalizada(nuevaFoto);
-            localStorage.setItem('gilda_foto_perfil', nuevaFoto);
-            enviarAccion('actualizar_foto', { foto_perfil: nuevaFoto });
-          }
-
-          setEditandoPerfil(false);
-          mostrarToast('Perfil actualizado con éxito.');
         };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
-          
           const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
-          
-          const pagFinal = pagOpt !== undefined 
-            ? (Number(pagOpt) || 0) 
-            : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
+          const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
 
           const clon = [...lecturasPersonales];
           const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
           
           if (idx > -1) {
-            clon[idx].pagina = pagFinal;
-            clon[idx].paginas = pagFinal;
-            clon[idx].estado = estadoOpt;
-            if (autoraOpt) clon[idx].autora = autoraOpt;
-            if (portadaOpt) clon[idx].portada = portadaOpt;
+            clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
+            if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
           } else {
-            clon.push({ 
-              email: sesion.email, 
-              nombre: nombreUsuarioPersonalizado || sesion.nombre, 
-              libro: tituloLibro, 
-              pagina: pagFinal,
-              paginas: pagFinal,
-              estado: estadoOpt,
-              autora: autoraOpt,
-              portada: portadaOpt
-            });
+            clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
           }
-          setLecturasPersonales(clon);
-          setLibroPersonal('');
-          setPaginaPersonalInput('');
-
-          enviarAccion('actualizar_libro_personal', { 
-            email: sesion.email, 
-            nombre: nombreUsuarioPersonalizado || sesion.nombre, 
-            libro: tituloLibro, 
-            pagina: pagFinal,
-            estado: estadoOpt,
-            autora: autoraOpt,
-            portada: portadaOpt
-          });
+          setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput('');
+          enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloLibro, pagina: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
           mostrarToast(`Guardado: ${tituloLibro}`);
-        };
-
-        const agregarAWantToReadDirecto = (titulo, autora = '', portada = '') => {
-          guardarLibroPersonal(titulo, 0, 'want_to_read', autora, portada);
-        };
-
-        const cambiarEstadoLibro = (libro, nuevoEstado) => {
-          const item = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === libro.libro.toLowerCase());
-          const paginaActual = item ? (item.pagina || item.paginas || 0) : (libro.pagina || libro.paginas || 0);
-          guardarLibroPersonal(libro.libro, paginaActual, nuevoEstado, libro.autora || '', libro.portada || '');
-        };
-
-        const enviarRespuesta = (idPadre, capTitulo) => {
-          const txt = respuestaComentario[idPadre];
-          if(!txt || !txt.trim()) return;
-          const nuevo = { id: Date.now().toString(), parent_id: idPadre, capitulo: capTitulo, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txt, fecha: 'Ahora' };
-          setComentarios([nuevo, ...comentarios]);
-          setRespuestaComentario({...respuestaComentario, [idPadre]: ''});
-          enviarAccion('comentario', nuevo);
-          mostrarToast('Respuesta publicada.');
-        };
-
-        const reaccionar = (idComentario, emoji) => {
-          const clon = [...comentarios];
-          const com = clon.find(c => c.id === idComentario);
-          if(com) {
-            com.reacciones = (com.reacciones || "") + emoji;
-            setComentarios(clon);
-            enviarAccion('reaccionar', { id: idComentario, reacciones: com.reacciones });
-          }
-        };
-
-        const enviarChat = (e) => {
-          e.preventDefault();
-          const textoMsg = nuevoChat.trim();
-          if (!textoMsg) return;
-          const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
-          setChatMsgs(prev => [...prev, { usuario: nombreActual, mensaje: textoMsg, fecha: 'Ahora' }]);
-          enviarAccion('enviar_chat', { mensaje: textoMsg });
-          setNuevoChat('');
-          chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
-        };
-
-        const toggleLecturaLamp = () => {
-          const nuevo = !isReadingNow; 
-          setIsReadingNow(nuevo);
-          localStorage.setItem('gilda_is_reading', JSON.stringify(nuevo));
-          enviarAccion('estado_lectura', { leyendo: nuevo });
-        };
-
-        const actualizarPagina = (nuevaPag) => {
-          const pagValida = Math.max(0, nuevaPag); setMiPagina(pagValida);
-          enviarAccion('actualizar_pagina', { pagina: pagValida });
-          mostrarToast(`Progreso: pág. ${pagValida}`);
         };
 
         const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
         const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
         
-        const usuariasConectadas = useMemo(() => {
-          const ah = new Date().getTime();
-          return usuariasClub.filter(u => {
-            if ((u.email || '').toLowerCase() === (sesion?.email || '').toLowerCase()) return true;
-            if (!u.ultima_actividad) return false;
-            const t = new Date(u.ultima_actividad).getTime();
-            return (ah - (isNaN(t) ? 0 : t)) < 15 * 60 * 1000;
-          });
-        }, [usuariasClub, sesion]);
-
-        const misLibrosFiltradosLista = useMemo(() => {
-          if (!sesion) return [];
-          return lecturasPersonales.filter(l => 
-            (l.email || '').toLowerCase() === sesion.email.toLowerCase() && 
-            (l.estado || 'leyendo') === tabEstanteria
-          );
-        }, [lecturasPersonales, sesion, tabEstanteria]);
-
         const todosMisLibrosEstanteria = useMemo(() => {
           if (!sesion) return [];
           return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
         }, [lecturasPersonales, sesion]);
 
+        const misLibrosFiltradosLista = useMemo(() => {
+          if (!sesion) return [];
+          return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.estado || 'leyendo') === tabEstanteria);
+        }, [lecturasPersonales, sesion, tabEstanteria]);
+
         const miembrosEdificio = useMemo(() => {
-          const ah = new Date().getTime();
           return usuariasClub.map(u => {
             const emailU = (u.email || '').toLowerCase().trim();
             const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
-            const misPersonales = lecturasPersonales.filter(l => 
-              (l.email || '').toLowerCase().trim() === emailU && 
-              (l.estado || 'leyendo') === 'leyendo'
-            );
-            
-            let tieneNovedad = false;
-            if (u.ultima_actividad) {
-              const t = new Date(u.ultima_actividad).getTime();
-              if (!isNaN(t) && (ah - t) < 24 * 60 * 60 * 1000) {
-                tieneNovedad = true;
-              }
-            }
-
+            const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
             return {
               ...u,
               nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
               foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
-              misLecturasPersonales: misPersonales,
-              tieneNovedad: tieneNovedad
+              misLecturasPersonales: misPersonales
             };
           });
         }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
@@ -1406,99 +869,22 @@
         if (!sesion) {
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
-              <div className="editorial-card max-w-sm w-full p-8 space-y-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#4A5028] rounded-bl-full opacity-10"></div>
-                
-                <div className="space-y-1 relative z-10 text-center">
-                  <h1 className="font-babydoll text-6xl text-[#232321] font-bold">gilda</h1>
-                  <p className="text-xs text-gray-500 font-babydoll italic text-base">el club de lectura privado</p>
-                </div>
-
-                <div className="bg-[#FBF9F5] border border-[#E8E6DF] p-3 rounded-lg text-center text-xs text-gray-600 font-babydoll">
-                  <span className="text-[#232321] font-bold text-lg">{usuariasClub.length}</span> lectoras conectadas
-                </div>
-
-                {!modoRegistro ? (
-                  <form onSubmit={iniciarSesion} className="space-y-4 relative z-10">
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Correo electrónico</label>
-                      <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Contraseña</label>
-                      <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
-                    </div>
-                    {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center font-babydoll">{errorLogin}</p>}
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
-                      Iniciar sesión
-                    </button>
-                  </form>
-                ) : (
-                  <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in text-left">
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Nombre de usuario (único)</label>
-                      <input type="text" placeholder="tu nombre o apodo" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Correo electrónico</label>
-                      <input type="email" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Pueblo o Ciudad</label>
-                        <input type="text" placeholder="ej. tolosa, alava..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1 font-babydoll text-xs">Código Postal</label>
-                        <input type="text" placeholder="ej. 20400" value={regCodigoPostal} onChange={(e) => setRegCodigoPostal(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] uppercase font-bold text-[#232321] block mb-1 font-babydoll text-xs">modalidad de gilda</label>
-                      <select 
-                        value={regModalidad} 
-                        onChange={(e) => setRegModalidad(e.target.value)}
-                        className="w-full editorial-input p-2 text-xs bg-white font-medium text-[#232321]"
-                      >
-                        <optgroup label="asomarme un ratito">
-                          <option value="cotilla">gilda cotilla (gratis)</option>
-                        </optgroup>
-                        <optgroup label="desde dentro">
-                          <option value="satelite">gilda satélite (1 €/mes)</option>
-                          <option value="cafe">gilda de café (5 €/mes)</option>
-                          <option value="nube">gilda de nube (5 €/mes)</option>
-                          <option value="virtual">gilda virtual (8 €/mes)</option>
-                          <option value="papel">gilda de papel (10 €/mes)</option>
-                          <option value="absoluta">gilda absoluta (12 €/mes)</option>
-                        </optgroup>
-                      </select>
-                    </div>
-
-                    <p className="text-[10px] text-gray-500 italic bg-[#FBF9F5] p-2.5 rounded-lg border border-[#E8E6DF] leading-normal text-left font-babydoll">
-                      Puedes cancelar tu suscripción cuando quieras o pausarla durante algún mes.
-                    </p>
-
-                    {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center font-babydoll">{errorLogin}</p>}
-
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
-                      {regModalidad === 'cotilla' ? 'Crear cuenta gratuita' : 'Ir al pago en Stripe'}
-                    </button>
-                  </form>
-                )}
-
-                <div className="pt-4 border-t border-[#E8E6DF] text-center space-y-2">
-                  <p className="text-[11px] text-gray-500 leading-relaxed px-1 font-babydoll">
-                    {modoRegistro ? '¿Ya tienes una cuenta registrada?' : '¿Aún no eres miembro de gilda?'}:
-                  </p>
-                  <button 
-                    type="button"
-                    onClick={() => { setModoRegistro(!modoRegistro); setErrorLogin(''); }} 
-                    className="inline-block text-xs text-[#4A5028] font-bold hover:underline bg-transparent border-0 cursor-pointer font-babydoll text-base"
-                  >
-                    {modoRegistro ? 'iniciar sesión con mi correo' : 'quiero registrarme :)'}
-                  </button>
-                </div>
+              <div className="editorial-card max-w-sm w-full p-8 space-y-6 text-center">
+                <h1 className="font-babydoll text-6xl text-[#232321] font-bold">gilda</h1>
+                <p className="text-xs text-gray-500 font-babydoll italic text-base">el club de lectura privado</p>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === inputEmail.trim().toLowerCase());
+                  if (!socia) return setErrorLogin('Correo no registrado.');
+                  const datosSesion = { nombre: socia.nombre || inputEmail.split('@')[0], email: inputEmail, modalidad: socia.modalidad || 'gilda' };
+                  localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+                  setSesion(datosSesion);
+                }} className="space-y-4">
+                  <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
+                  <input type="password" placeholder="contraseña" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
+                  {errorLogin && <p className="text-xs text-red-600 font-babydoll">{errorLogin}</p>}
+                  <button type="submit" className="w-full editorial-btn py-3 text-xl font-babydoll">Entrar</button>
+                </form>
               </div>
             </div>
           );
@@ -1506,116 +892,26 @@
 
         return (
           <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
-            
             {toastMsg && (
-              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-sm">
-                <span className="w-2 h-2 rounded-full bg-[#A2A86E]"></span><span>{toastMsg}</span>
+              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2 rounded-full shadow-lg fade-in font-babydoll text-sm">
+                {toastMsg}
               </div>
             )}
 
-            <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF] shadow-xs">
+            <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF]">
               <div className="flex items-center gap-3 overflow-hidden">
                 <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
                 <div className="overflow-hidden">
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
-                    <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
-                      <i className="fa-solid fa-pen"></i>
-                    </button>
-                  </div>
-                  <span className="text-[9px] text-gray-400 uppercase block mt-0.5 truncate font-babydoll">{sesion.modalidad}</span>
+                  <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                  <span className="text-[9px] text-gray-400 uppercase font-babydoll">{sesion.modalidad}</span>
                 </div>
               </div>
-              <button onClick={cerrarSesion} className="text-gray-400 hover:text-black shrink-0"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+              <button onClick={() => { localStorage.removeItem('gilda_sesion'); setSesion(null); }} className="text-gray-400 hover:text-black"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
             </header>
-
-            {editandoPerfil && (
-              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in">
-                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
-                    <h3 className="font-babydoll text-2xl font-bold">Editar mi perfil</h3>
-                    <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-400">✕</button>
-                  </div>
-
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Nombre de usuario (único)</label>
-                      <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1 font-babydoll text-xs">Foto de perfil</label>
-                      <div className="flex items-center gap-3 bg-[#FBF9F5] p-2 rounded-xl border border-[#E8E6DF]">
-                        <AvatarUsuaria foto={inputNuevaFoto || fotoPerfilPersonalizada} nombre={inputNuevoNombre || nombreUsuarioPersonalizado} sizeClass="w-10 h-10" textClass="text-sm" />
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={manejarCambioArchivoFoto} 
-                          className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#232321] file:text-[#FBF9F5] hover:file:bg-[#4A5028] hover:file:text-white cursor-pointer font-babydoll" 
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-[#FBF9F5] border border-[#E8E6DF] text-gray-600 py-2 rounded-xl text-xs font-medium font-babydoll">Cancelar</button>
-                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-base">Guardar cambios</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {libroSeleccionadoDetalle && (
-              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in text-left">
-                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
-                    <h3 className="font-babydoll text-xl font-bold truncate pr-2">{libroSeleccionadoDetalle.libro}</h3>
-                    <button onClick={() => setLibroSeleccionadoDetalle(null)} className="text-xs text-gray-400">✕</button>
-                  </div>
-                  
-                  <div className="flex gap-4 items-center">
-                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
-                    <div className="space-y-2 text-xs w-full">
-                      <p className="text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
-                      {libroSeleccionadoDetalle.estado === 'leyendo' && (
-                        <div>
-                          <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll">Página actual</label>
-                          <div className="flex gap-2 mt-1">
-                            <input 
-                              type="number" 
-                              defaultValue={libroSeleccionadoDetalle.pagina || libroSeleccionadoDetalle.paginas || 0} 
-                              onBlur={(e) => guardarLibroPersonal(libroSeleccionadoDetalle.libro, e.target.value, 'leyendo', libroSeleccionadoDetalle.autora, libroSeleccionadoDetalle.portada)}
-                              className="editorial-input w-20 px-2 py-1 text-center font-bold" 
-                            />
-                            <span className="text-xs text-gray-500 self-center font-babydoll">pág.</span>
-                          </div>
-                        </div>
-                      )}
-                      <div>
-                        <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll mb-1">Mover a estantería</label>
-                        <select 
-                          value={libroSeleccionadoDetalle.estado || 'leyendo'} 
-                          onChange={(e) => {
-                            cambiarEstadoLibro(libroSeleccionadoDetalle, e.target.value);
-                            setLibroSeleccionadoDetalle(null);
-                          }}
-                          className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll font-bold"
-                        >
-                          <option value="leyendo">Leyendo</option>
-                          <option value="want_to_read">Quiero leer</option>
-                          <option value="leidos">Leído</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Cerrar</button>
-                </div>
-              </div>
-            )}
 
             <main className="w-full flex-grow space-y-4 fade-in">
               {cargandoDatos ? (
-                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
+                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando biblioteca...</div>
               ) : (
                 <>
                   {seccionApp === 'inicio' && (
@@ -1628,44 +924,26 @@
                             <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
                             <p className="text-xs text-gray-500 italic font-babydoll">{libroActual.autora}</p>
                             <div className="mt-2">
-                              <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-babydoll">
-                                <span>progreso general</span><span>{porcentajeLibro}%</span>
-                              </div>
-                              <div className="w-full bg-[#F8F7F3] rounded-full h-1.5 border border-[#E8E6DF]"><div className="bg-[#4A5028] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
+                              <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-babydoll"><span>progreso</span><span>{porcentajeLibro}%</span></div>
+                              <div className="w-full bg-[#F8F7F3] rounded-full h-1.5 border border-[#E8E6DF]"><div className="bg-[#4A5028] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
                             </div>
                           </div>
                         </div>
-
-                        <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
-                          <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
+                        <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between">
+                          <span className="text-xs text-gray-500 font-babydoll text-base">página actual:</span>
                           <div className="flex items-center gap-2">
                             <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1 text-xs font-semibold" />
-                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
+                            <button onClick={() => { enviarAccion('actualizar_pagina', { pagina: miPagina }); mostrarToast('Progreso actualizado'); }} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="editorial-card p-4 space-y-2">
-                        <h3 className="font-babydoll text-xl font-bold">Ubicación geográfica</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
-                          <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
-                        </div>
-                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-base mt-1">Actualizar ubicación</button>
                       </div>
 
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-babydoll text-xl font-bold">Notas y fragmentos</h3>
-                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-semibold font-babydoll text-xs">
-                            {botellaAbierta ? 'ocultar' : 'descubrir cita'}
-                          </button>
+                          <h3 className="font-babydoll text-xl font-bold">Citas y notas</h3>
+                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-babydoll">descubrir</button>
                         </div>
-                        {botellaAbierta && (
-                          <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">
-                            "{FRASES_INICIALES[fraseActualBotella]}"
-                          </div>
-                        )}
+                        {botellaAbierta && <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">"{FRASES_INICIALES[fraseActualBotella]}"</div>}
                         <div className="flex gap-2 pt-2 border-t border-[#E8E6DF]">
                           <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
                           <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
@@ -1676,86 +954,7 @@
 
                   {seccionApp === 'edificio' && (
                     <div className="w-full flex justify-center">
-                      <EdificioClub 
-                        usuarias={miembrosEdificio} 
-                        libroActual={libroActual} 
-                        onAddWantToRead={agregarAWantToReadDirecto}
-                      />
-                    </div>
-                  )}
-
-                  {seccionApp === 'estanterias' && (
-                    <div className="space-y-4 fade-in">
-                      <div className="editorial-card p-5 space-y-4">
-                        <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
-                          <h3 className="font-babydoll text-2xl font-bold">Mis Libros</h3>
-                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all font-babydoll text-xs ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
-                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
-                          </button>
-                        </div>
-
-                        {/* SELECTOR DE PESTAÑAS CLÁSICO EN FORMATO LISTA */}
-                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
-                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Leyendo
-                          </button>
-                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Quiero leer
-                          </button>
-                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
-                            Leídos
-                          </button>
-                        </div>
-
-                        {/* FORMULARIO PARA AÑADIR LIBRO */}
-                        <form onSubmit={(e) => {
-                          e.preventDefault();
-                          if (!libroPersonal.trim()) return;
-                          guardarLibroPersonal(undefined, undefined, tabEstanteria);
-                        }} className="space-y-2 bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E8E6DF]">
-                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1 font-babydoll text-xs">Añadir libro</span>
-                          
-                          <BuscadorLibros
-                            placeholder="Busca por título o autora..."
-                            valor={libroPersonal}
-                            setValor={setLibroPersonal}
-                            onSelectLibro={(libroSel) => {
-                              setLibroPersonal(libroSel.titulo);
-                              guardarLibroPersonal(libroSel.titulo, 0, tabEstanteria, libroSel.autora, libroSel.portada);
-                            }}
-                          />
-
-                          {tabEstanteria === 'leyendo' && (
-                            <div className="flex gap-2 pt-1">
-                              <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
-                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-base">Guardar</button>
-                            </div>
-                          )}
-                        </form>
-
-                        {/* FORMATO LISTA CLÁSICO */}
-                        <div className="space-y-2.5 pt-1">
-                          {misLibrosFiltradosLista.length === 0 ? (
-                            <p className="text-xs text-gray-400 italic text-center py-6 font-babydoll">No hay libros en esta sección.</p>
-                          ) : (
-                            misLibrosFiltradosLista.map((item, idx) => (
-                              <div key={idx} onClick={() => setLibroSeleccionadoDetalle(item)} className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] cursor-pointer hover:bg-[#F2EFE9] transition-colors">
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                  <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
-                                  <div className="overflow-hidden text-left">
-                                    <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro}</p>
-                                    <p className="text-[10px] text-gray-500 italic truncate font-babydoll">{item.autora || 'Autora desconocida'}</p>
-                                    {tabEstanteria === 'leyendo' && (
-                                      <p className="text-[10px] text-gray-400 mt-0.5 font-babydoll">pág. <b>{item.pagina || item.paginas || 0}</b></p>
-                                    )}
-                                  </div>
-                                </div>
-                                <i className="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
+                      <EdificioClub usuarias={miembrosEdificio} libroActual={libroActual} onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} />
                     </div>
                   )}
 
@@ -1764,20 +963,15 @@
                       <div className="editorial-card p-5 space-y-4">
                         <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
                           <h3 className="font-babydoll text-2xl font-bold">Mi Habitación</h3>
-                          <span className="text-[10px] text-gray-400 font-bold font-babydoll">Estantería Personal</span>
+                          <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); localStorage.setItem('gilda_is_reading', JSON.stringify(nuevo)); enviarAccion('estado_lectura', { leyendo: nuevo }); }} className={`px-3 py-1 text-xs rounded-full font-bold font-babydoll ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
+                            {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
+                          </button>
                         </div>
 
-                        {/* SELECTOR DE DECORACIÓN (PLANTITAS Y ILUSTRACIONES) */}
+                        {/* SELECTOR DE DECORACIÓN */}
                         <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
-                          <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de la balda:</span>
-                          <select 
-                            value={decoracionActual} 
-                            onChange={(e) => {
-                              setDecoracionActual(e.target.value);
-                              localStorage.setItem('gilda_decoracion', e.target.value);
-                            }}
-                            className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold"
-                          >
+                          <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de balda:</span>
+                          <select value={decoracionActual} onChange={(e) => { setDecoracionActual(e.target.value); localStorage.setItem('gilda_decoracion', e.target.value); }} className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold">
                             <option value="🌿 Plantita monstera">🌿 Plantita monstera</option>
                             <option value="🪴 Maceta de cerámica">🪴 Maceta de cerámica</option>
                             <option value="🕯️ Vela aromática">🕯️ Vela aromática</option>
@@ -1787,33 +981,55 @@
                           </select>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON TODOS LOS LIBROS Y DECORACIÓN */}
+                        {/* ESTANTERÍA DE MADERA CON TODOS LOS LIBROS */}
                         <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
                           <div className="flex items-end justify-start gap-3.5 flex-grow">
                             {todosMisLibrosEstanteria.length === 0 ? (
-                              <div className="w-full text-center py-10">
-                                <p className="text-xs text-[#7A7565] italic font-babydoll">Aún no hay libros en tu estantería...</p>
-                              </div>
+                              <div className="w-full text-center py-10"><p className="text-xs text-[#7A7565] italic font-babydoll">Aún no hay libros en tu estantería...</p></div>
                             ) : (
-                              todosMisLibrosEstanteria.map((item, idx) => (
-                                <LomoLibroEstanteria 
-                                  key={idx} 
-                                  item={item} 
-                                  onClick={() => setLibroSeleccionadoDetalle(item)} 
-                                />
-                              ))
+                              todosMisLibrosEstanteria.map((item, idx) => <LomoLibroEstanteria key={idx} item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />)
                             )}
                           </div>
-                          {decoracionActual !== '✨ Sin decoración' && (
-                            <div className="shrink-0 pl-3 pb-1 text-lg select-none" title={decoracionActual}>
-                              {decoracionActual.split(' ')[0]}
-                            </div>
-                          )}
+                          {decoracionActual !== '✨ Sin decoración' && <div className="shrink-0 pl-3 pb-1 text-lg select-none">{decoracionActual.split(' ')[0]}</div>}
                         </div>
 
                         {/* SELLO HORIZONTAL ABAJO PARA STORIES */}
                         <div className="text-center pt-1 pb-2">
                           <span className="text-[11px] font-bold text-gray-400 tracking-wider font-babydoll">@gilda.mailclub</span>
+                        </div>
+
+                        {/* PESTAÑAS Y LISTA CLÁSICA DE LIBROS */}
+                        <div className="pt-4 border-t border-[#E8E6DF] space-y-3">
+                          <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll">
+                            <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Leyendo</button>
+                            <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Quiero leer</button>
+                            <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Leídos</button>
+                          </div>
+
+                          <form onSubmit={(e) => { e.preventDefault(); if (!libroPersonal.trim()) return; guardarLibroPersonal(undefined, undefined, tabEstanteria); }} className="space-y-2 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                            <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
+                            {tabEstanteria === 'leyendo' && (
+                              <div className="flex gap-2">
+                                <input type="number" placeholder="Pág." value={paginaPersonalInput} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-1.5 text-xs" />
+                                <button type="submit" className="w-1/2 editorial-btn py-1 text-xs font-babydoll">Añadir</button>
+                              </div>
+                            )}
+                          </form>
+
+                          <div className="space-y-2">
+                            {misLibrosFiltradosLista.map((item, idx) => (
+                              <div key={idx} onClick={() => setLibroSeleccionadoDetalle(item)} className="flex items-center justify-between bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] cursor-pointer hover:bg-[#F2EFE9]">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                  <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
+                                  <div className="overflow-hidden text-left">
+                                    <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro}</p>
+                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{item.autora || 'Autora'}</p>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] text-gray-400 font-babydoll">pág. {item.pagina || item.paginas || 0}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1821,298 +1037,51 @@
 
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
-                      {capitulos.map((cap, i) => {
-                        const tituloCap = cap.titulo || `Capítulo ${i}`;
-                        const paginaFin = Number(cap.pagina_fin || 0);
-                        const bloqueado = paginaFin > 0 && miPagina < paginaFin;
-
-                        return (
-                          <div key={i} className="editorial-card p-5 space-y-4">
-                            <div className="flex justify-between items-start border-b border-[#E8E6DF] pb-2">
-                              <h3 className="font-babydoll text-2xl font-bold">{tituloCap}</h3>
-                              {paginaFin > 0 && (
-                                <span className="text-[10px] bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2 font-babydoll">
-                                  hasta pág. {paginaFin}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
-                            
-                            {bloqueado ? (
-                              <div className="bg-[#FBF9F5] p-4 rounded-lg border border-[#E8E6DF] text-center space-y-2 my-2">
-                                <i className="fa-solid fa-lock text-[#4A5028] text-base"></i>
-                                <p className="text-xs font-bold text-gray-800 font-babydoll text-sm">Capítulo protegido contra spoilers</p>
-                                <p className="text-[11px] text-gray-500 leading-relaxed font-babydoll">
-                                  Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear.
-                                </p>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF] flex gap-2">
-                                  <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
-                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
-                                </div>
-
-                                <div className="pt-2">
-                                  <div className="flex gap-2 mb-4">
-                                    <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
-                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-base">publicar</button>
-                                  </div>
-
-                                  <div className="space-y-4">
-                                    {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
-                                      <div key={c.id} className="space-y-2">
-                                        <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF]">
-                                          <div className="flex justify-between mb-1 text-[10px] text-gray-400">
-                                            <span className="font-bold text-[#232321] uppercase font-babydoll text-sm">{c.autora}</span><span className="font-babydoll">{c.fecha}</span>
-                                          </div>
-                                          <p className="text-xs text-gray-800">{c.texto}</p>
-                                          <div className="flex gap-3 mt-2 pt-2 border-t border-[#E8E6DF] text-[11px] text-gray-400">
-                                            <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium font-babydoll">Responder</button>
-                                            <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
-                                            <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
-                                            {c.reacciones && <span className="bg-white text-black px-1.5 rounded border border-[#E8E6DF] font-babydoll">{c.reacciones}</span>}
-                                          </div>
-                                        </div>
-                                        <div className="pl-6 space-y-2 border-l-2 border-[#4A5028] ml-3">
-                                          {comentarios.filter(r => r.parent_id === c.id).map(r => (
-                                            <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#E8E6DF]">
-                                              <span className="font-bold mr-1 text-[10px] uppercase font-babydoll text-sm">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
-                                            </div>
-                                          ))}
-                                          {respuestaComentario[c.id] !== undefined && (
-                                            <div className="flex gap-2 mt-1">
-                                              <input type="text" placeholder="Tu respuesta..." value={respuestaComentario[c.id]} onChange={e=>setRespuestaComentario({...respuestaComentario,[c.id]:e.target.value})} className="editorial-input px-2 py-1 text-[11px] flex-grow" />
-                                              <button onClick={()=>enviarRespuesta(c.id, tituloCap)} className="editorial-btn px-2 text-[10px] font-babydoll">ok</button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )
-                      })}
+                      {capitulos.map((cap, i) => (
+                        <div key={i} className="editorial-card p-5 space-y-3">
+                          <h3 className="font-babydoll text-2xl font-bold">{cap.titulo}</h3>
+                          <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
+                        </div>
+                      ))}
                     </div>
                   )}
 
                   {seccionApp === 'comunidad' && (
-                    <div className="space-y-4 fade-in">
-                      <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#E8E6DF] font-babydoll text-sm">
-                        <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='chat'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Chat</button>
-                        <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='mapa'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Mapa ({usuariasClub.length})</button>
+                    <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden fade-in">
+                      <div className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-center text-xs rounded-t-xl font-babydoll font-bold">
+                        Chat de Lectoras
                       </div>
-                      
-                      {subTabComunidad === 'chat' && (
-                        <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
-                          <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
-                              <span className="font-babydoll text-xl font-bold">Conversación en vivo</span>
-                            </div>
-                            <span className="bg-white px-2 py-0.5 rounded border border-[#E8E6DF] text-[#4A5028] font-bold text-[10px] flex items-center gap-1 font-babydoll">
-                              <i className="fa-solid fa-users text-[9px]"></i> {usuariasConectadas.length} en línea
-                            </span>
+                      <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
+                        {chatMsgs.map((m,i) => (
+                          <div key={i} className="bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] text-xs">
+                            <span className="font-bold text-[10px] text-gray-400 font-babydoll block mb-0.5">{m.usuario || m.usuaria}</span>
+                            <span>{m.mensaje}</span>
                           </div>
-
-                          {mostrarModalConectadas && (
-                            <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
-                              <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
-                                <h3 className="font-babydoll font-bold text-xl text-[#232321]">Socias activas en la app</h3>
-                                <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded font-babydoll">cerrar</button>
-                              </div>
-                              <div className="overflow-y-auto space-y-2 flex-grow">
-                                {usuariasConectadas.map((u, i) => (
-                                  <div key={i} className="flex justify-between items-center p-2 bg-[#FBF9F5] rounded border border-[#E8E6DF] text-xs text-[#232321]">
-                                    <div className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
-                                      <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                                      <span className="font-bold font-babydoll text-base">{u.nombre || u.email}</span>
-                                    </div>
-                                    <span className="text-[10px] text-gray-400 font-babydoll">pág. {u.pagina || 0}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
-                            {chatMsgs.map((m,i)=>{
-                              const autor = m.usuario || m.usuaria || 'Socia';
-                              const esMio = autor.toLowerCase() === (nombreUsuarioPersonalizado || sesion.nombre).toLowerCase();
-                              const sociaObj = usuariasClub.find(u => (u.nombre || '').toLowerCase() === autor.toLowerCase());
-                              const fotoAutor = esMio ? fotoPerfilPersonalizada : (sociaObj?.foto_perfil || '');
-
-                              return (
-                                <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
-                                  {!esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
-                                  <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
-                                    <span className="text-[10px] font-babydoll text-gray-500 mb-0.5">{autor}</span>
-                                    <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#232321] text-[#FBF9F5]' : 'bg-[#FBF9F5] text-[#232321] border border-[#E8E6DF]'}`}>{m.mensaje}</div>
-                                  </div>
-                                  {esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
-                                </div>
-                              );
-                            })}
-                            <div ref={chatEndRef} />
-                          </div>
-
-                          <form onSubmit={enviarChat} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 shrink-0 bg-white rounded-b-xl">
-                            <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
-                            <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
-                          </form>
-                        </div>
-                      )}
-
-                      {subTabComunidad === 'mapa' && (
-                        <div className="editorial-card p-3 space-y-2">
-                          <div className="flex justify-between items-center text-xs px-1">
-                            <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
-                            <span className="text-[10px] text-[#4A5028] font-bold font-babydoll">{usuariasClub.length} socia(s)</span>
-                          </div>
-                          <MapaGilda usuarias={usuariasClub} />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {seccionApp === 'archivo' && (
-                    <div className="space-y-4 fade-in">
-                      <div className="editorial-card p-5 space-y-3">
-                        <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
-                        <form onSubmit={(e) => {
-                          e.preventDefault();
-                          const tit = nuevaPropuestaTitulo?.trim();
-                          if (!tit) return;
-                          const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || 'Desconocida', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
-                          setPropuestas([...propuestas, nueva]);
-                          enviarAccion('propuesta', nueva);
-                          setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
-                          mostrarToast('Propuesta añadida.');
-                        }} className="space-y-2">
-                          
-                          <BuscadorLibros
-                            placeholder="Título del libro o autora..."
-                            valor={nuevaPropuestaTitulo}
-                            setValor={setNuevaPropuestaTitulo}
-                            onSelectLibro={(libroSel) => {
-                              setNuevaPropuestaTitulo(libroSel.titulo);
-                              setNuevaPropuestaAutora(libroSel.autora);
-                              setNuevaPropuestaPortada(libroSel.portada);
-                            }}
-                          />
-
-                          <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                          <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-base font-medium">Añadir propuesta</button>
-                        </form>
+                        ))}
+                        <div ref={chatEndRef} />
                       </div>
-
-                      <div className="editorial-card p-5">
-                        <h3 className="font-babydoll text-xl font-bold mb-3">Votación Cafecito</h3>
-                        <div className="space-y-2">
-                          {fechasCafe.map((f,i) => {
-                            const votantesArr = (f.votantes || "").toLowerCase().split(',').map(v=>v.trim());
-                            const votado = votantesArr.includes(sesion.email.toLowerCase());
-                            return (
-                              <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] rounded-lg border border-[#E8E6DF]">
-                                <span className="font-medium font-babydoll text-base">{f.fecha}</span>
-                                <button onClick={()=>{
-                                  const clon = [...fechasCafe];
-                                  const item = clon.find(x => x.fecha === f.fecha);
-                                  if(!item) return;
-                                  let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                                  if(arr.includes(sesion.email.toLowerCase())){ 
-                                    arr = arr.filter(v=>v!==sesion.email.toLowerCase()); 
-                                    item.votos = Math.max(0, Number(item.votos||0) - 1); 
-                                  } else { 
-                                    arr.push(sesion.email.toLowerCase()); 
-                                    item.votos = Number(item.votos||0) + 1; 
-                                  }
-                                  item.votantes = arr.join(',');
-                                  setFechasCafe(clon);
-                                  enviarAccion('votar', { tipo: 'cafe', id: f.fecha, email: sesion.email });
-                                  mostrarToast('Voto actualizado.');
-                                }} className={`px-3 py-1.5 rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white shadow-xs' : 'bg-white text-gray-500 border border-[#E8E6DF]'}`}>
-                                  {votado ? `Votado (${f.votos||0})` : `Votar (${f.votos||0})`}
-                                </button>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="editorial-card p-5">
-                        <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
-                        <div className="space-y-3">
-                          {propuestas.map((p,i) => {
-                            const votantesArr = (p.votantes || "").toLowerCase().split(',').map(v=>v.trim());
-                            const votado = votantesArr.includes(sesion.email.toLowerCase());
-                            return (
-                              <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
-                                <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
-                                <div className="flex flex-col justify-between w-full">
-                                  <div>
-                                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
-                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
-                                  </div>
-                                  <button onClick={()=>{
-                                    const clon = [...propuestas];
-                                    const item = clon.find(x => x.titulo === p.titulo);
-                                    if(!item) return;
-                                    let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                                    if(arr.includes(sesion.email.toLowerCase())){ 
-                                      arr = arr.filter(v=>v!==sesion.email.toLowerCase()); 
-                                      item.votos = Math.max(0, Number(item.votos||0) - 1); 
-                                    } else { 
-                                      arr.push(sesion.email.toLowerCase()); 
-                                      item.votos = Number(item.votos||0) + 1; 
-                                    }
-                                    item.votantes = arr.join(',');
-                                    setPropuestas(clon);
-                                    enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email });
-                                    mostrarToast('Voto actualizado.');
-                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold transition-all font-babydoll text-xs ${votado ? 'bg-[#4A5028] text-white' : 'bg-white text-[#232321] border border-[#E8E6DF]'}`}>
-                                    {votado ? `Votado (${p.votos||0})` : `Votar (${p.votos||0})`}
-                                  </button>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {seccionApp === 'buzon' && (
-                    <div className="editorial-card p-5 space-y-3 fade-in">
-                      <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
-                      <p className="text-xs text-gray-500 font-babydoll">Sugerencias y comunicación directa con la administración.</p>
-                      <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
-                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Enviar mensaje</button>
+                      <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2 border-t border-[#E8E6DF] flex gap-2 bg-white">
+                        <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                        <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                      </form>
                     </div>
                   )}
                 </>
               )}
             </main>
 
-            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
+            {/* BARRA INFERIOR SIMPLIFICADA */}
+            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
                 { id: 'edificio', icon: 'fa-building', label: 'casa' },
-                { id: 'estanterias', icon: 'fa-book', label: 'libros' },
                 { id: 'habitacion', icon: 'fa-bookmark', label: 'habitación' },
                 { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
-                { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
-                { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
-                { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
+                { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' }
               ].map(tab => (
-                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-2 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-3 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
                   <i className={`fa-solid ${tab.icon} text-sm`}></i>
-                  <span className="text-[8px] font-bold uppercase font-babydoll">{tab.label}</span>
+                  <span className="text-[9px] font-bold uppercase font-babydoll">{tab.label}</span>
                 </button>
               ))}
             </nav>
