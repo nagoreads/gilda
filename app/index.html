@@ -409,12 +409,16 @@
             title={`${item.libro} — ${item.autora || 'Autora'}`}
           >
             <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
-            <span className="font-babydoll font-bold text-[10px] tracking-tight line-clamp-4 leading-tight text-left mt-3 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
-              {item.libro}
-            </span>
-            <span className="text-[7px] text-[#FBF9F5]/85 uppercase truncate text-left font-babydoll drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
-              {item.autora || 'gilda'}
-            </span>
+            
+            {/* Título y autora distribuidos verticalmente con lectura limpia */}
+            <div className="flex flex-col h-full justify-between pt-2 pb-1">
+              <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '100px'}}>
+                {item.libro}
+              </span>
+              <span className="text-[7px] text-[#FBF9F5]/90 uppercase text-left font-babydoll tracking-wider drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] whitespace-nowrap" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                @gilda.mailclub
+              </span>
+            </div>
           </div>
         );
       }
@@ -1590,7 +1594,7 @@
                             cambiarEstadoLibro(libroSeleccionadoDetalle, e.target.value);
                             setLibroSeleccionadoDetalle(null);
                           }}
-                          className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll"
+                          className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll font-bold"
                         >
                           <option value="leyendo">Leyendo</option>
                           <option value="want_to_read">Quiero leer</option>
@@ -1723,7 +1727,7 @@
                           </button>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON LOMOS DE TONOS EDITORIALES */}
+                        {/* ESTANTERÍA DE MADERA CON LOMOS DE TONOS EDITORIALES Y @gilda.mailclub */}
                         <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-start gap-3.5 overflow-x-auto">
                           {misLibrosFiltrados.length === 0 ? (
                             <div className="w-full text-center py-10">
