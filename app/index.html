@@ -183,7 +183,6 @@
             setBuscando(true);
             try {
               const query = encodeURIComponent(valor.trim());
-              // Priorizamos España (gl=es&hl=es) para obtener editoriales y portadas en castellano
               const [resGoogle, resOpenLib] = await Promise.allSettled([
                 fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=6&printType=books&langRestrict=es&gl=es&hl=es`),
                 fetch(`https://openlibrary.org/search.json?q=${query}&limit=5&language=spa`)
@@ -268,7 +267,6 @@
         const portadaOriginal = portada || cover || image || '';
         const tituloFinal = titulo || 'Sin título';
         
-        // Limpieza de etiquetas erróneas en la autora
         const autoraCruda = autora || autor || escritora || '';
         const autoraFinal = useMemo(() => {
           if (!autoraCruda || typeof autoraCruda !== 'string') return '';
@@ -349,6 +347,14 @@
 
         const autoraMostrar = autoraFinal || autoraEncontrada || '';
 
+        // Generador dinámico de color editorial basado en el título para el diseño de respaldo garantizado
+        const colorEditorialFallback = useMemo(() => {
+          let hash = 0;
+          for (let i = 0; i < tituloFinal.length; i++) { hash = tituloFinal.charCodeAt(i) + ((hash << 5) - hash); }
+          const matices = ['#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242'];
+          return matices[Math.abs(hash) % matices.length];
+        }, [tituloFinal]);
+
         if (urlSegura !== '' && !errorImg) {
           return (
             <img 
@@ -360,10 +366,16 @@
           );
         }
 
+        // Portada Editorial de Bolsillo Estilizada de Respaldo Garantizado (Fallback perfecto)
         return (
-          <div className={`${sizeClasses} bg-[#F3EFE6] text-[#232321] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
-            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{tituloFinal}</span>
-            <span className="text-[8px] text-gray-500 uppercase tracking-wider truncate">{autoraMostrar}</span>
+          <div style={{ backgroundColor: colorEditorialFallback }} className={`${sizeClasses} text-[#FBF9F5] p-2 rounded shadow-xs border border-white/20 shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
+            <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-white/30"></div>
+            <span className="font-bold tracking-tight line-clamp-3 leading-tight font-babydoll drop-shadow-xs" style={{ fontSize: size === 'large' ? '11px' : '9px' }}>
+              {tituloFinal}
+            </span>
+            <span className="text-[7px] text-white/80 uppercase tracking-wider truncate font-sans">
+              {autoraMostrar}
+            </span>
           </div>
         );
       }
