@@ -767,35 +767,226 @@
         const markersGroupRef = useRef(null);
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
 
-        const COORDENADAS_PREDEFINIDAS = {
-          'país vasco': [42.9896, -2.6189], 'cataluña': [41.5912, 1.5209], 'comunidad de madrid': [40.4168, -3.7038],
-          'andalucía': [37.3891, -5.9845], 'galicia': [42.5751, -8.1339], 'comunidad valenciana': [39.4840, -0.3526],
-          'tolosa': [43.1362, -2.0735], 'donostia': [43.3183, -1.9812], 'bilbao': [43.2630, -2.9350], 'madrid': [40.4168, -3.7038], 'barcelona': [41.3851, 2.1734]
+        // Geocodificador interno de ciudades y provincias españolas e internacionales
+        const GEO_INTERNA = {
+          // Comunidades Autónomas y Provincias principales (Coordenadas base)
+          'madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
+          'comunidad de madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
+          'barcelona': { coords: [41.3851, 2.1734], ca: 'Cataluña' },
+          'girona': { coords: [41.9794, 2.8214], ca: 'Cataluña' },
+          'gerona': { coords: [41.9794, 2.8214], ca: 'Cataluña' },
+          'lleida': { coords: [41.6176, 0.6200], ca: 'Cataluña' },
+          'lerida': { coords: [41.6176, 0.6200], ca: 'Cataluña' },
+          'tarragona': { coords: [41.1189, 1.2445], ca: 'Cataluña' },
+          'cataluña': { coords: [41.5912, 1.5209], ca: 'Cataluña' },
+          
+          'bilbao': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
+          'donostia': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'san sebastian': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'san sebastián': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'vitoria': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'vitoria-gasteiz': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'gasteiz': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'tolosa': { coords: [43.1362, -2.0735], ca: 'País Vasco' },
+          'bizkaia': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
+          'vizcaya': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
+          'gipuzkoa': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'guipuzcoa': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'guipúzcoa': { coords: [43.3183, -1.9812], ca: 'País Vasco' },
+          'araba': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'álava': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'alava': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+          'país vasco': { coords: [42.9896, -2.6189], ca: 'País Vasco' },
+          'pais vasco': { coords: [42.9896, -2.6189], ca: 'País Vasco' },
+
+          'sevilla': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
+          'málaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+          'malaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+          'granada': { coords: [37.1773, -3.5986], ca: 'Andalucía' },
+          'córdoba': { coords: [37.8882, -4.7794], ca: 'Andalucía' },
+          'cordoba': { coords: [37.8882, -4.7794], ca: 'Andalucía' },
+          'cadiz': { coords: [36.5271, -6.2886], ca: 'Andalucía' },
+          'cádiz': { coords: [36.5271, -6.2886], ca: 'Andalucía' },
+          'almería': { coords: [36.8340, -2.4637], ca: 'Andalucía' },
+          'almeria': { coords: [36.8340, -2.4637], ca: 'Andalucía' },
+          'huelva': { coords: [37.2614, -6.9447], ca: 'Andalucía' },
+          'jaén': { coords: [37.7796, -3.7849], ca: 'Andalucía' },
+          'jaen': { coords: [37.7796, -3.7849], ca: 'Andalucía' },
+          'andalucía': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
+          'andalucia': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
+
+          'valencia': { coords: [39.4699, -0.3763], ca: 'Comunidad Valenciana' },
+          'alicante': { coords: [38.3452, -0.4810], ca: 'Comunidad Valenciana' },
+          'alacant': { coords: [38.3452, -0.4810], ca: 'Comunidad Valenciana' },
+          'castellón': { coords: [39.9864, -0.0513], ca: 'Comunidad Valenciana' },
+          'castellon': { coords: [39.9864, -0.0513], ca: 'Comunidad Valenciana' },
+          'comunidad valenciana': { coords: [39.4840, -0.3526], ca: 'Comunidad Valenciana' },
+
+          'a coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
+          'coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
+          'la coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
+          'pontevedra': { coords: [42.4310, -8.6444], ca: 'Galicia' },
+          'vigo': { coords: [42.2406, -8.7207], ca: 'Galicia' },
+          'santiago': { coords: [42.8782, -8.5448], ca: 'Galicia' },
+          'santiago de compostela': { coords: [42.8782, -8.5448], ca: 'Galicia' },
+          'lugo': { coords: [43.0097, -7.5568], ca: 'Galicia' },
+          'ourense': { coords: [42.3358, -7.8639], ca: 'Galicia' },
+          'orense': { coords: [42.3358, -7.8639], ca: 'Galicia' },
+          'galicia': { coords: [42.5751, -8.1339], ca: 'Galicia' },
+
+          'zaragoza': { coords: [41.6488, -0.8891], ca: 'Aragón' },
+          'huesca': { coords: [42.1361, -0.4087], ca: 'Aragón' },
+          'teruel': { coords: [40.3456, -1.1072], ca: 'Aragón' },
+          'aragón': { coords: [41.6488, -0.8891], ca: 'Aragón' },
+          'aragon': { coords: [41.6488, -0.8891], ca: 'Aragón' },
+
+          'oviedo': { coords: [43.3614, -5.8593], ca: 'Asturias' },
+          'gijón': { coords: [43.5357, -5.6615], ca: 'Asturias' },
+          'gijon': { coords: [43.5357, -5.6615], ca: 'Asturias' },
+          'asturias': { coords: [43.3614, -5.8593], ca: 'Asturias' },
+          'principado de asturias': { coords: [43.3614, -5.8593], ca: 'Asturias' },
+
+          'santander': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
+          'cantabria': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
+
+          'pamplona': { coords: [42.8125, -1.6458], ca: 'Navarra' },
+          'iruña': { coords: [42.8125, -1.6458], ca: 'Navarra' },
+          'navarra': { coords: [42.8125, -1.6458], ca: 'Navarra' },
+
+          'logroño': { coords: [42.4650, -2.4456], ca: 'La Rioja' },
+          'la rioja': { coords: [42.4650, -2.4456], ca: 'La Rioja' },
+
+          'palma': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+          'palma de mallorca': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+          'mallorca': { coords: [39.6953, 3.0176], ca: 'Islas Baleares' },
+          'ibiza': { coords: [38.9067, 1.4206], ca: 'Islas Baleares' },
+          'menorca': { coords: [39.9496, 4.1104], ca: 'Islas Baleares' },
+          'baleares': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+          'islas baleares': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+
+          'las palmas': { coords: [28.1235, -15.4363], ca: 'Canarias' },
+          'las palmas de gran canaria': { coords: [28.1235, -15.4363], ca: 'Canarias' },
+          'santa cruz de tenerife': { coords: [28.4636, -16.2518], ca: 'Canarias' },
+          'tenerife': { coords: [28.2915, -16.6291], ca: 'Canarias' },
+          'gran canaria': { coords: [27.9202, -15.5474], ca: 'Canarias' },
+          'canarias': { coords: [28.2915, -16.6291], ca: 'Canarias' },
+          'islas canarias': { coords: [28.2915, -16.6291], ca: 'Canarias' },
+
+          'murcia': { coords: [37.9922, -1.1307], ca: 'Región de Murcia' },
+          'cartagena': { coords: [37.6257, -0.9966], ca: 'Región de Murcia' },
+
+          'badajoz': { coords: [38.8794, -6.9706], ca: 'Extremadura' },
+          'cáceres': { coords: [39.4753, -6.3723], ca: 'Extremadura' },
+          'caceres': { coords: [39.4753, -6.3723], ca: 'Extremadura' },
+          'mérida': { coords: [38.9161, -6.3437], ca: 'Extremadura' },
+          'extremadura': { coords: [38.8794, -6.9706], ca: 'Extremadura' },
+
+          'toledo': { coords: [39.8628, -4.0273], ca: 'Castilla-La Mancha' },
+          'albacete': { coords: [38.9942, -1.8585], ca: 'Castilla-La Mancha' },
+          'ciudad real': { coords: [38.9863, -3.9271], ca: 'Castilla-La Mancha' },
+          'cuenca': { coords: [40.0704, -2.1374], ca: 'Castilla-La Mancha' },
+          'guadalajara': { coords: [40.6327, -3.1669], ca: 'Castilla-La Mancha' },
+          'castilla-la mancha': { coords: [39.8628, -4.0273], ca: 'Castilla-La Mancha' },
+
+          'valladolid': { coords: [41.6523, -4.7245], ca: 'Castilla y León' },
+          'león': { coords: [42.5987, -5.5671], ca: 'Castilla y León' },
+          'leon': { coords: [42.5987, -5.5671], ca: 'Castilla y León' },
+          'burgos': { coords: [42.3440, -3.6969], ca: 'Castilla y León' },
+          'salamanca': { coords: [40.9701, -5.6635], ca: 'Castilla y León' },
+          'zamora': { coords: [41.5063, -5.7446], ca: 'Castilla y León' },
+          'palencia': { coords: [42.0095, -4.5283], ca: 'Castilla y León' },
+          'segovia': { coords: [40.9429, -4.1088], ca: 'Castilla y León' },
+          'soria': { coords: [41.7640, -2.4688], ca: 'Castilla y León' },
+          'ávila': { coords: [40.6565, -4.6818], ca: 'Castilla y León' },
+          'avila': { coords: [40.6565, -4.6818], ca: 'Castilla y León' },
+          'castilla y león': { coords: [41.6523, -4.7245], ca: 'Castilla y León' },
+
+          'ceuta': { coords: [35.8894, -5.3213], ca: 'Ceuta' },
+          'melilla': { coords: [35.2923, -2.9388], ca: 'Melilla' },
+
+          // Mapeos internacionales comunes
+          'londres': { coords: [51.5074, -0.1278], ca: 'Reino Unido' },
+          'london': { coords: [51.5074, -0.1278], ca: 'Reino Unido' },
+          'parís': { coords: [48.8566, 2.3522], ca: 'Francia' },
+          'paris': { coords: [48.8566, 2.3522], ca: 'Francia' },
+          'lisboa': { coords: [38.7223, -9.1393], ca: 'Portugal' },
+          'porto': { coords: [41.1579, -8.6291], ca: 'Portugal' },
+          'oporto': { coords: [41.1579, -8.6291], ca: 'Portugal' },
+          'roma': { coords: [41.9028, 12.4964], ca: 'Italia' },
+          'milán': { coords: [45.4642, 9.1900], ca: 'Italia' },
+          'milan': { coords: [45.4642, 9.1900], ca: 'Italia' },
+          'berlín': { coords: [52.5200, 13.4050], ca: 'Alemania' },
+          'berlin': { coords: [52.5200, 13.4050], ca: 'Alemania' },
+          'buenos aires': { coords: [-34.6037, -58.3816], ca: 'Argentina' },
+          'mexico': { coords: [19.4326, -99.1332], ca: 'México' },
+          'méxico': { coords: [19.4326, -99.1332], ca: 'México' },
+          'bogotá': { coords: [4.7110, -74.0721], ca: 'Colombia' },
+          'bogota': { coords: [4.7110, -74.0721], ca: 'Colombia' },
+          'santiago de chile': { coords: [-33.4489, -70.6693], ca: 'Chile' }
         };
 
-        const provinciasConteo = useMemo(() => {
+        const obtenerDatosUbicacion = (loc) => {
+          if (!loc) return { coords: [40.4168, -3.7038], ca: 'Otras regiones' };
+          const lLimpia = loc.toLowerCase().trim();
+          
+          if (GEO_INTERNA[lLimpia]) {
+            return GEO_INTERNA[lLimpia];
+          }
+
+          for (const key in GEO_INTERNA) {
+            if (lLimpia.includes(key) || key.includes(lLimpia)) {
+              return GEO_INTERNA[key];
+            }
+          }
+
+          return { coords: [40.4168, -3.7038], ca: 'Otras regiones' };
+        };
+
+        // Agrupación automática por Comunidades Autónomas / Países Internacionales
+        const regionesConteo = useMemo(() => {
           const conteo = {};
           usuarias.forEach(u => {
             const loc = (u.ciudad || u.provincia_region || 'Otras').trim();
-            if (loc) {
-              conteo[loc] = (conteo[loc] || 0) + 1;
-            }
+            const info = obtenerDatosUbicacion(loc);
+            const caNombre = info.ca;
+            conteo[caNombre] = (conteo[caNombre] || 0) + 1;
           });
           return Object.entries(conteo).sort((a, b) => b[1] - a[1]);
         }, [usuarias]);
 
-        const ciudadesMap = useMemo(() => {
-          const map = {};
-          usuarias.forEach(u => {
-            const loc = u.ciudad || u.provincia_region;
-            const cp = u.codigo_postal || '';
-            if (loc) {
-              const key = cp ? `${loc}, ${cp}` : loc;
-              if (!map[key]) map[key] = { query: key, nombreLocalidad: loc, usuarias: [] };
-              map[key].usuarias.push(u);
+        // Mapeo individual de cada socia con dispersión (Jittering) si comparten coordenadas exactas
+        const usuariasConCoordenadas = useMemo(() => {
+          const mapaCoordenadasSocio = {};
+
+          return usuarias.map(u => {
+            const loc = (u.ciudad || u.provincia_region || '').trim();
+            const info = obtenerDatosUbicacion(loc);
+            const baseCoords = info.coords;
+            const coordKey = `${baseCoords[0].toFixed(4)},${baseCoords[1].toFixed(4)}`;
+
+            let coordsFinales = [...baseCoords];
+
+            if (!mapaCoordenadasSocio[coordKey]) {
+              mapaCoordenadasSocio[coordKey] = 1;
+            } else {
+              const count = mapaCoordenadasSocio[coordKey];
+              mapaCoordenadasSocio[coordKey]++;
+              
+              // Dispersión circular automática (Jittering)
+              const angle = count * 1.2;
+              const distance = 0.012 * Math.sqrt(count);
+              coordsFinales = [
+                baseCoords[0] + distance * Math.cos(angle),
+                baseCoords[1] + distance * Math.sin(angle)
+              ];
             }
+
+            return {
+              ...u,
+              coords: coordsFinales,
+              regionAgrupada: info.ca
+            };
           });
-          return Object.values(map);
         }, [usuarias]);
 
         useEffect(() => {
@@ -812,28 +1003,36 @@
             if (!markersGroupRef.current) return;
             markersGroupRef.current.clearLayers();
             const boundsArray = [];
-            for (const item of ciudadesMap) {
-              const locNombre = item.nombreLocalidad.toLowerCase().trim();
-              let coor = COORDENADAS_PREDEFINIDAS[locNombre] || [40.4168, -3.7038];
+
+            usuariasConCoordenadas.forEach(item => {
+              const coor = item.coords;
               boundsArray.push(coor);
+
               const piruletaHtml = `
-                <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;" title="${item.nombre} (${item.ciudad || item.provincia_region || ''})">
                   <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
                     <line x1="8" y1="12" x2="8" y2="23" stroke="#232321" stroke-width="1.8" stroke-linecap="round"/>
                     <circle cx="8" cy="7" r="6" fill="#4A5028" stroke="#232321" stroke-width="1.5"/>
                   </svg>
-                  <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">${item.usuarias.length}</span>
+                  <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">1</span>
                 </div>
               `;
               const customIcon = L.divIcon({ html: piruletaHtml, className: 'custom-piruleta-mini', iconSize: [16, 24], iconAnchor: [8, 23], popupAnchor: [0, -24] });
               const marker = L.marker(coor, { icon: customIcon });
-              marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
+
+              const socioRegion = item.regionAgrupada;
+              const usuariasDeLaRegion = usuariasConCoordenadas.filter(u => u.regionAgrupada === socioRegion);
+
+              marker.on('click', () => setRegionSeleccionada({ region: socioRegion, usuarias: usuariasDeLaRegion }));
               markersGroupRef.current.addLayer(marker);
+            });
+
+            if (boundsArray.length > 0 && mapRef.current) {
+              mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
             }
-            if (boundsArray.length > 0 && mapRef.current) mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
           };
           renderMarkers();
-        }, [ciudadesMap]);
+        }, [usuariasConCoordenadas]);
 
         return (
           <div className="space-y-4">
@@ -849,7 +1048,7 @@
                     {regionSeleccionada.usuarias.map((u, i) => (
                       <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#E8E6DF] gap-2">
                         <span className="font-bold font-babydoll text-sm">{u.nombre}</span>
-                        <span className="text-gray-500 font-sans text-[11px]">{u.ciudad || 'Sin localidad'}</span>
+                        <span className="text-gray-500 font-sans text-[11px]">{u.ciudad || u.provincia_region || 'Sin localidad'}</span>
                       </div>
                     ))}
                   </div>
@@ -858,11 +1057,11 @@
             </div>
 
             <div className="editorial-card p-4 space-y-2.5">
-              <h4 className="font-babydoll text-base font-bold text-[#232321]">Lectoras por provincia o región</h4>
+              <h4 className="font-babydoll text-base font-bold text-[#232321]">Lectoras por Comunidad Autónoma / País</h4>
               <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-                {provinciasConteo.map(([provincia, cantidad], idx) => (
+                {regionesConteo.map(([region, cantidad], idx) => (
                   <div key={idx} className="flex justify-between items-center bg-[#FBF9F5] px-3 py-2 rounded-xl border border-[#E8E6DF] text-xs">
-                    <span className="font-bold font-babydoll truncate pr-2">{provincia}</span>
+                    <span className="font-bold font-babydoll truncate pr-2">{region}</span>
                     <span className="bg-[#4A5028] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 font-sans">{cantidad}</span>
                   </div>
                 ))}
