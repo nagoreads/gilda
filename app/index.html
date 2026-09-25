@@ -908,8 +908,8 @@
                         const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
                         
                         const comentariosCapitulo = comentarios.filter(c => {
-                          const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
-                          const padreId = c.parent_id || c.respuesta_a || c.padre || c.id_padre || '';
+                          const cCap = String(c.capitulo || '').trim().toLowerCase();
+                          const padreId = String(c.parent_id || '').trim();
                           const esPrincipal = !padreId || padreId === '' || padreId === 'undefined' || padreId === 'null';
                           const coincide = !cCap || cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase() || cCap.includes(String(i + 1));
                           return coincide && esPrincipal;
@@ -933,15 +933,15 @@
                                       <p className="text-[11px] text-gray-400 italic font-babydoll">Aún no hay comentarios en este capítulo. ¡Sé la primera en escribir!</p>
                                     ) : (
                                       comentariosCapitulo.map((com, cIdx) => {
-                                        const idComentario = com.id || com.comentario_id || `com_${cIdx}`;
+                                        const idComentario = String(com.id || '').trim();
                                         
                                         const respuestasCom = comentarios.filter(r => {
-                                          const rPadre = String(r.parent_id || r.respuesta_a || r.padre || r.id_padre || '').trim();
-                                          return rPadre && (rPadre === String(idComentario).trim() || rPadre === String(com.id || '').trim());
+                                          const rPadre = String(r.parent_id || '').trim();
+                                          return rPadre && idComentario && rPadre === idComentario;
                                         });
 
-                                        const nombreAutorComentario = obtenerNombreReal(com.email, com.usuario || com.usuaria);
-                                        const textoComTxt = com.reacciones || com.texto || com.comentario || com.mensaje || '';
+                                        const nombreAutorComentario = obtenerNombreReal(com.autora, com.autora);
+                                        const textoComTxt = com.texto || '';
 
                                         return (
                                           <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-2">
@@ -960,8 +960,8 @@
                                             {respuestasCom.length > 0 && (
                                               <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
                                                 {respuestasCom.map((resp, rIdx) => {
-                                                  const nombreAutorRespuesta = obtenerNombreReal(resp.email, resp.usuario || resp.usuaria);
-                                                  const textoRespTxt = resp.reacciones || resp.texto || resp.comentario || resp.mensaje || '';
+                                                  const nombreAutorRespuesta = obtenerNombreReal(resp.autora, resp.autora);
+                                                  const textoRespTxt = resp.texto || '';
                                                   return (
                                                     <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#E8E6DF] text-xs space-y-1">
                                                       <div className="flex justify-between items-center">
@@ -983,19 +983,14 @@
                                                 
                                                 const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
                                                 const nuevaRespObj = { 
-                                                  capitulo_id: identificadorCap, 
                                                   capitulo: identificadorCap, 
                                                   parent_id: idComentario, 
-                                                  respuesta_a: idComentario, 
-                                                  usuario: nombreActual, 
-                                                  email: sesion.email, 
-                                                  reacciones: txtResp, 
+                                                  autora: nombreActual, 
                                                   texto: txtResp, 
-                                                  comentario: txtResp,
                                                   fecha: 'Justo ahora' 
                                                 };
                                                 setComentarios([...comentarios, nuevaRespObj]);
-                                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, respuesta_a: idComentario, comentario: txtResp });
+                                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
                                                 setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
                                                 setRespondiendoA(null);
                                                 mostrarToast('Respuesta enviada');
@@ -1024,13 +1019,10 @@
                                     
                                     const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
                                     const nuevoCom = { 
-                                      capitulo_id: identificadorCap, 
                                       capitulo: identificadorCap, 
-                                      usuario: nombreActual, 
-                                      email: sesion.email, 
+                                      parent_id: '',
+                                      autora: nombreActual, 
                                       texto: txt, 
-                                      comentario: txt,
-                                      reacciones: txt,
                                       fecha: 'Justo ahora' 
                                     };
                                     setComentarios([...comentarios, nuevoCom]);
