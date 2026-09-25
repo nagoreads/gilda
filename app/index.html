@@ -199,7 +199,7 @@
                     }
                     listaCombinada.push({ 
                       titulo: info.title || '', 
-                      autora: info.authors ? info.authors.join(', ') : 'Desconocida', 
+                      autora: info.authors ? info.authors.join(', ') : '', 
                       portada: thumb 
                     });
                   });
@@ -211,7 +211,7 @@
                   dataOL.docs.forEach(doc => {
                     listaCombinada.push({ 
                       titulo: doc.title || '', 
-                      autora: doc.author_name ? doc.author_name.join(', ') : 'Desconocida', 
+                      autora: doc.author_name ? doc.author_name.join(', ') : '', 
                       portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : '' 
                     });
                   });
@@ -246,7 +246,7 @@
                     {item.portada ? <img src={`https://images.weserv.nl/?url=${encodeURIComponent(item.portada)}&w=100&output=jpg`} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" /> : <div className="w-7 h-10 bg-[#F3EFE6] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-500 border border-[#E8E6DF]">Sin foto</div>}
                     <div className="overflow-hidden">
                       <p className="text-sm font-bold text-[#232321] truncate leading-tight font-babydoll">{item.titulo}</p>
-                      <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
+                      <p className="text-[10px] text-gray-500 italic truncate">{item.autora || ''}</p>
                     </div>
                   </div>
                 ))}
@@ -265,14 +265,27 @@
 
         const portadaOriginal = portada || cover || image || '';
         const tituloFinal = titulo || 'Sin título';
-        const autoraFinal = autora || autor || escritora || '';
+        
+        // Limpieza y validación segura de la autora para evitar que imprima la palabra literal "autora"
+        const autoraCruda = autora || autor || escritora || '';
+        const autoraFinal = useMemo(() => {
+          if (!autoraCruda || typeof autoraCruda !== 'string') return '';
+          const aLimpia = autoraCruda.trim();
+          const lower = aLimpia.toLowerCase();
+          if (['autora', 'autor', 'desconocida', 'escritora', 'undefined', 'null'].includes(lower)) {
+            return '';
+          }
+          return aLimpia;
+        }, [autoraCruda]);
 
-        // Búsqueda automática optimizada en segundo plano
+        // Búsqueda automática en segundo plano para encontrar portada e incluso autora si faltaba
+        const [autoraEncontrada, setAutoraEncontrada] = useState('');
+
         useEffect(() => {
           let activo = true;
-          if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
+          if ((!portadaOriginal || errorImg || !autoraFinal) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
             setBuscandoOnline(true);
-            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal !== 'Desconocida' ? autoraFinal : ''}`);
+            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal}`);
             
             Promise.allSettled([
               fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`).then(r => r.json()),
@@ -280,23 +293,37 @@
             ]).then(results => {
               if (!activo) return;
               let imgEncontrada = '';
+              let autEncontrada = '';
 
               if (results[0].status === 'fulfilled') {
                 const itemG = results[0].value.items?.[0]?.volumeInfo;
-                if (itemG?.imageLinks?.thumbnail || itemG?.imageLinks?.smallThumbnail) {
-                  imgEncontrada = itemG.imageLinks.thumbnail || itemG.imageLinks.smallThumbnail;
+                if (itemG) {
+                  if (itemG.imageLinks?.thumbnail || itemG.imageLinks?.smallThumbnail) {
+                    imgEncontrada = itemG.imageLinks.thumbnail || itemG.imageLinks.smallThumbnail;
+                  }
+                  if (itemG.authors && itemG.authors.length > 0) {
+                    autEncontrada = itemG.authors.join(', ');
+                  }
                 }
               }
 
               if (!imgEncontrada && results[1].status === 'fulfilled') {
                 const docOL = results[1].value.docs?.[0];
-                if (docOL?.cover_i) {
-                  imgEncontrada = `https://covers.openlibrary.org/b/id/${docOL.cover_i}-L.jpg`;
+                if (docOL) {
+                  if (docOL.cover_i) {
+                    imgEncontrada = `https://covers.openlibrary.org/b/id/${docOL.cover_i}-L.jpg`;
+                  }
+                  if (docOL.author_name && docOL.author_name.length > 0) {
+                    autEncontrada = docOL.author_name.join(', ');
+                  }
                 }
               }
 
               if (imgEncontrada) {
                 setPortadaDinamica(imgEncontrada.replace('http:', 'https:'));
+              }
+              if (autEncontrada && !autoraFinal) {
+                setAutoraEncontrada(autEncontrada);
               }
             }).catch(() => {}).finally(() => {
               if (activo) setBuscandoOnline(false);
@@ -321,12 +348,7 @@
           return '';
         }, [portadaOriginal, portadaDinamica]);
 
-        const autoraReal = useMemo(() => {
-          if (!autoraFinal || typeof autoraFinal !== 'string') return 'gilda';
-          let a = autoraFinal.trim();
-          if (['autora', 'autor', 'desconocida', 'escritora'].includes(a.toLowerCase())) return 'gilda';
-          return a;
-        }, [autoraFinal]);
+        const autoraMostrar = autoraFinal || autoraEncontrada || '';
 
         if (urlSegura !== '' && !errorImg) {
           return (
@@ -342,7 +364,7 @@
         return (
           <div className={`${sizeClasses} bg-[#F3EFE6] text-[#232321] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{tituloFinal}</span>
-            <span className="text-[8px] text-gray-500 uppercase tracking-wider truncate">{autoraReal}</span>
+            <span className="text-[8px] text-gray-500 uppercase tracking-wider truncate">{autoraMostrar}</span>
           </div>
         );
       }
@@ -356,7 +378,7 @@
         };
 
         return (
-          <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(item.libro || 'libro') }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${item.libro} — ${item.autora || 'Autora'}`}>
+          <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(item.libro || 'libro') }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${item.libro} — ${item.autora || ''}`}>
             <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
             <div className="flex flex-col h-full justify-start pt-3">
               <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '110px'}}>
@@ -949,7 +971,7 @@
                                   <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
                                   <div className="overflow-hidden text-left">
                                     <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro}</p>
-                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{item.autora || 'Autora'}</p>
+                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{item.autora || ''}</p>
                                   </div>
                                 </div>
                                 <span className="text-[10px] text-gray-400 font-babydoll">pág. {item.pagina || item.paginas || 0}</span>
@@ -1172,7 +1194,7 @@
                               e.preventDefault();
                               const tit = nuevaPropuestaTitulo?.trim();
                               if (!tit) return;
-                              const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || 'Desconocida', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
+                              const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || '', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
                               setPropuestas([...propuestas, nueva]);
                               enviarAccion('propuesta', nueva);
                               setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
