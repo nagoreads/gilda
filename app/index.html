@@ -682,7 +682,9 @@
         const [fraseActualBotella, setFraseActualBotella] = useState(0);
 
         const [nuevoEventoFecha, setNuevoEventoFecha] = useState('');
+        const [nuevoEventoHora, setNuevoEventoHora] = useState('');
         const [nuevoEventoTitulo, setNuevoEventoTitulo] = useState('');
+        const [nuevoEventoEstado, setNuevoEventoEstado] = useState('activo');
 
         const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
         const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
@@ -1038,39 +1040,101 @@
                       <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
                         <i className="fa-regular fa-calendar-days text-[#4A5028]"></i> Calendario del Club
                       </h3>
-                      <span className="text-[10px] text-gray-400 font-babydoll uppercase">{eventosCalendario.length} fecha(s)</span>
+                      <span className="text-[10px] text-gray-400 font-babydoll uppercase">
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length} programado(s)
+                      </span>
                     </div>
 
-                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                      {eventosCalendario.length === 0 ? (
-                        <p className="text-xs text-gray-400 italic font-babydoll text-center py-2">No hay fechas importantes programadas todavía.</p>
+                    <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                      {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length === 0 ? (
+                        <p className="text-xs text-gray-400 italic font-babydoll text-center py-2">No hay fechas fijas programadas todavía.</p>
                       ) : (
-                        eventosCalendario.map((ev, idx) => (
-                          <div key={idx} className="flex justify-between items-center bg-[#FBF9F5] px-3 py-2 rounded-xl border border-[#E8E6DF] text-xs gap-2">
-                            <span className="font-bold font-babydoll text-[#4A5028] shrink-0">{ev.fecha || ev.dia}</span>
-                            <span className="text-gray-700 truncate font-sans text-right">{ev.evento || ev.descripcion || ev.titulo}</span>
-                          </div>
-                        ))
+                        eventosCalendario
+                          .filter(e => (e.estado || '').toLowerCase() !== 'pendiente')
+                          .map((ev, idx) => {
+                            const tipoEvento = (ev.evento || ev.titulo || '').toLowerCase();
+                            const esCafecito = tipoEvento.includes('cafecito') || tipoEvento.includes('café');
+                            const iconoTipo = esCafecito ? 'fa-mug-hot text-[#B87343]' : 'fa-book-open text-[#4A5028]';
+                            
+                            return (
+                              <div key={idx} className="flex flex-col bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs gap-1">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold font-babydoll text-[#4A5028] flex items-center gap-1.5">
+                                    <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia} {ev.hora && `• ${ev.hora}`}
+                                  </span>
+                                  <span className="text-[11px] font-bold text-gray-700 capitalize font-babydoll">{ev.evento || ev.titulo}</span>
+                                </div>
+                                <p className="text-[10px] text-gray-400 italic font-babydoll pt-1 border-t border-[#E8E6DF]/60">
+                                  * El enlace de acceso se enviará por el chat.
+                                </p>
+                              </div>
+                            );
+                          })
                       )}
+                    </div>
+
+                    <div className="pt-3 border-t border-[#E8E6DF] space-y-2">
+                      <h4 className="font-babydoll text-xs font-bold uppercase tracking-wider text-[#7A7565] flex items-center gap-1.5">
+                        <i className="fa-solid fa-hourglass-half text-amber-600 text-[10px]"></i> Pendientes de fecha (en votación)
+                      </h4>
+
+                      <div className="space-y-2">
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() === 'pendiente').length === 0 ? (
+                          <p className="text-[11px] text-gray-400 italic font-babydoll text-center py-1">No hay eventos pendientes de votación ahora mismo.</p>
+                        ) : (
+                          eventosCalendario
+                            .filter(e => (e.estado || '').toLowerCase() === 'pendiente')
+                            .map((pend, pIdx) => (
+                              <div key={pIdx} className="bg-[#FAF6E8] p-2.5 rounded-xl border border-[#EEDFB3] text-xs flex justify-between items-center gap-2">
+                                <span className="font-babydoll font-bold text-[#232321]">{pend.evento || pend.titulo}</span>
+                                <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">Por fechar</span>
+                              </div>
+                            ))
+                        )}
+                      </div>
                     </div>
 
                     {esAdmin && (
                       <form onSubmit={(e) => {
                         e.preventDefault();
-                        if (!nuevoEventoFecha.trim() || !nuevoEventoTitulo.trim()) return;
-                        const nuevoEv = { fecha: nuevoEventoFecha.trim(), evento: nuevoEventoTitulo.trim() };
+                        if (!nuevoEventoTitulo.trim()) return;
+                        const esPendienteCheck = nuevoEventoEstado === 'pendiente';
+                        const nuevoEv = { 
+                          fecha: esPendienteCheck ? 'Por definir' : (nuevoEventoFecha.trim() || 'Por definir'), 
+                          hora: esPendienteCheck ? '' : nuevoEventoHora.trim(), 
+                          evento: nuevoEventoTitulo.trim(),
+                          estado: nuevoEventoEstado || 'activo'
+                        };
                         setEventosCalendario([...eventosCalendario, nuevoEv]);
                         enviarAccion('agregar_evento_calendario', nuevoEv);
                         setNuevoEventoFecha('');
+                        setNuevoEventoHora('');
                         setNuevoEventoTitulo('');
-                        mostrarToast('Fecha añadida al calendario');
+                        setNuevoEventoEstado('activo');
+                        mostrarToast('Evento añadido correctamente');
                       }} className="pt-3 border-t border-[#E8E6DF] space-y-2">
-                        <p className="text-[10px] uppercase font-bold text-[#4A5028] font-babydoll">Panel de administración (Añadir fecha):</p>
+                        <p className="text-[10px] uppercase font-bold text-[#4A5028] font-babydoll">Panel de administración (Añadir evento):</p>
+                        
                         <div className="flex gap-2">
-                          <input type="text" placeholder="Ej: 15 Oct" value={nuevoEventoFecha} onChange={(e) => setNuevoEventoFecha(e.target.value)} className="w-1/3 editorial-input p-2 text-xs" />
-                          <input type="text" placeholder="Descripción del evento..." value={nuevoEventoTitulo} onChange={(e) => setNuevoEventoTitulo(e.target.value)} className="flex-grow editorial-input p-2 text-xs" />
+                          <select value={nuevoEventoEstado} onChange={(e) => setNuevoEventoEstado(e.target.value)} className="w-1/3 editorial-input p-2 text-xs font-babydoll font-bold">
+                            <option value="activo">Con fecha</option>
+                            <option value="pendiente">Sin fecha (Votación)</option>
+                          </select>
+                          <select value={nuevoEventoTitulo} onChange={(e) => setNuevoEventoTitulo(e.target.value)} className="flex-grow editorial-input p-2 text-xs font-babydoll">
+                            <option value="">Selecciona tipo de evento...</option>
+                            <option value="Comentario del libro">Comentario del libro</option>
+                            <option value="Cafecito con la autora">Cafecito con la autora</option>
+                          </select>
                         </div>
-                        <button type="submit" className="w-full editorial-btn py-1.5 text-xs font-babydoll">Añadir fecha importante</button>
+
+                        {nuevoEventoEstado !== 'pendiente' && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <input type="text" placeholder="Ej: 15 Oct" value={nuevoEventoFecha} onChange={(e) => setNuevoEventoFecha(e.target.value)} className="editorial-input p-2 text-xs" />
+                            <input type="text" placeholder="Ej: 18:30h" value={nuevoEventoHora} onChange={(e) => setNuevoEventoHora(e.target.value)} className="editorial-input p-2 text-xs" />
+                          </div>
+                        )}
+
+                        <button type="submit" className="w-full editorial-btn py-1.5 text-xs font-babydoll">Publicar en el calendario</button>
                       </form>
                     )}
                   </div>
@@ -1427,62 +1491,38 @@
                       </div>
 
                       <div className="editorial-card p-5">
-                        <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-babydoll text-xl font-bold">Votación del Mes</h3>
+                          <span className="text-[10px] text-gray-400 font-babydoll uppercase">Top 3 finalistas</span>
+                        </div>
                         <div className="space-y-3">
-                          {subTabComunidad === 'archivo' && (
-  <div className="space-y-4">
-    <div className="editorial-card p-5 space-y-3">
-      <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        const tit = nuevaPropuestaTitulo?.trim();
-        if (!tit) return;
-        const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || '', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
-        setPropuestas([...propuestas, nueva]);
-        enviarAccion('propuesta', nueva);
-        setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
-        mostrarToast('Propuesta añadida.');
-      }} className="space-y-2">
-        <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
-        <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-        <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll">Añadir propuesta</button>
-      </form>
-    </div>
-
-    <div className="editorial-card p-5">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="font-babydoll text-xl font-bold">Votación del Mes</h3>
-        <span className="text-[10px] text-gray-400 font-babydoll uppercase">Top 3 finalistas</span>
-      </div>
-      <div className="space-y-3">
-        {/* Ordenamos por votos de mayor a menor y seleccionamos solo los 3 primeros */}
-        {[...propuestas]
-          .sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0))
-          .slice(0, 3)
-          .map((p, i) => (
-            <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
-              <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
-              <div className="flex flex-col justify-between w-full">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-[#4A5028] font-babydoll">#{i + 1}</span>
-                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
-                  </div>
-                  <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
-                </div>
-                <button onClick={()=>{
-                  const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
-                  let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                  if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
-                  item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
-                }} className="self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-babydoll">Votar ({p.votos||0})</button>
-              </div>
-            </div>
-          ))}
-      </div>
-    </div>
-  </div>
-)}
+                          {[...propuestas]
+                            .sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0))
+                            .slice(0, 3)
+                            .map((p, i) => (
+                              <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
+                                <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                                <div className="flex flex-col justify-between w-full">
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[10px] font-bold text-[#4A5028] font-babydoll">#{i + 1}</span>
+                                      <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
+                                  </div>
+                                  <button onClick={()=>{
+                                    const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
+                                    let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
+                                    if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
+                                    item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
+                                  }} className="self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-babydoll">Votar ({p.votos||0})</button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {subTabComunidad === 'buzon' && (
                     <div className="editorial-card p-5 space-y-3">
