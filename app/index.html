@@ -194,9 +194,9 @@
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
                     let thumb = info.imageLinks?.thumbnail || '';
-                    if (thumb) {
-                      thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
-                    }
+                if (thumb) {
+                  thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
+                }
                     listaCombinada.push({ 
                       titulo: info.title || '', 
                       autora: info.authors ? info.authors.join(', ') : 'Desconocida', 
