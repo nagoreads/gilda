@@ -412,6 +412,17 @@
           'tolosa': [43.1362, -2.0735], 'donostia': [43.3183, -1.9812], 'bilbao': [43.2630, -2.9350], 'madrid': [40.4168, -3.7038], 'barcelona': [41.3851, 2.1734]
         };
 
+        const provinciasConteo = useMemo(() => {
+          const conteo = {};
+          usuarias.forEach(u => {
+            const loc = (u.ciudad || u.provincia_region || 'Otras').trim();
+            if (loc) {
+              conteo[loc] = (conteo[loc] || 0) + 1;
+            }
+          });
+          return Object.entries(conteo).sort((a, b) => b[1] - a[1]);
+        }, [usuarias]);
+
         const ciudadesMap = useMemo(() => {
           const map = {};
           usuarias.forEach(u => {
@@ -484,6 +495,19 @@
                 </div>
               )}
             </div>
+
+            {/* CONTADOR POR PROVINCIAS / REGIONES */}
+            <div className="editorial-card p-4 space-y-2.5">
+              <h4 className="font-babydoll text-base font-bold text-[#232321]">Lectoras por provincia o región</h4>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                {provinciasConteo.map(([provincia, cantidad], idx) => (
+                  <div key={idx} className="flex justify-between items-center bg-[#FBF9F5] px-3 py-2 rounded-xl border border-[#E8E6DF] text-xs">
+                    <span className="font-bold font-babydoll truncate pr-2">{provincia}</span>
+                    <span className="bg-[#4A5028] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">{cantidad}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         );
       }
@@ -530,6 +554,10 @@
         const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
         const [nuevoChat, setNuevoChat] = useState('');
         const [mensajeFundadora, setMensajeFundadora] = useState('');
+
+        const [textoComentario, setTextoComentario] = useState({});
+        const [respendiendoA, setRespendiendoA] = useState(null);
+        const [textoRespuesta, setTextoRespuesta] = useState('');
         
         const chatEndRef = useRef(null);
 
@@ -546,7 +574,7 @@
             parsearHoja(URL_CSV_PROPUESTAS), parsearHoja(URL_CSV_VOTACION_CAFE), parsearHoja(URL_CSV_LECTURAS_PERSONALES)
           ]).then(results => {
             setUsuariasClub(results[0].filter(u => (u.email || '').trim() !== '')); 
-            setCapitulos(results[1]); setComentarios(results[2].reverse()); 
+            setCapitulos(results[1]); setComentarios(results[2]); 
             setLecturas(results[4]); setChatMsgs(results[5]); setPropuestas(results[6]);
             setFechasCafe(results[7]); setLecturasPersonales(results[8]);
           });
@@ -559,6 +587,7 @@
             setCargandoDatos(true); cargarTodosLosDatos(); setCargandoDatos(false);
             const interval = setInterval(() => {
               parsearHoja(URL_CSV_CHAT).then(data => setChatMsgs(data));
+              parsearHoja(URL_CSV_COMENTARIOS).then(data => setComentarios(data));
               parsearHoja(URL_CSV_LECTURAS_PERSONALES).then(data => setLecturasPersonales(data));
             }, 10000);
             return () => clearInterval(interval);
@@ -816,14 +845,61 @@
                       {capitulos.map((cap, i) => {
                         const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || 0);
                         const desbloqueado = miPagina >= paginaMinima;
+                        const comentariosCapitulo = comentarios.filter(c => String(c.capitulo_id || c.capitulo || '') === String(cap.id || cap.titulo || ''));
+
                         return (
-                          <div key={i} className="editorial-card p-5 space-y-3">
+                          <div key={i} className="editorial-card p-5 space-y-4">
                             <div className="flex justify-between items-center">
                               <h3 className="font-babydoll text-2xl font-bold">{cap.titulo}</h3>
                               <span className="text-[10px] text-gray-400 font-babydoll">pág. {paginaMinima}</span>
                             </div>
                             {desbloqueado ? (
-                              <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
+                              <div className="space-y-4">
+                                <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
+
+                                {/* COMENTARIOS Y RESPUESTAS EN EL CAPÍTULO */}
+                                <div className="pt-4 border-t border-[#E8E6DF] space-y-3">
+                                  <h4 className="font-babydoll text-sm font-bold">Comentarios de lectoras</h4>
+                                  
+                                  <div className="space-y-2">
+                                    {comentariosCapitulo.map((com, cIdx) => (
+                                      <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-1">
+                                        <div className="flex justify-between items-center">
+                                          <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
+                                          <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
+                                        </div>
+                                        <p className="text-gray-700">{com.comentario || com.mensaje}</p>
+
+                                        {/* Hilos de respuestas si existen */}
+                                        {com.respuestas && (
+                                          <div className="pl-4 mt-2 border-l-2 border-[#DCD6BE] space-y-1.5">
+                                            {/* Aquí puedes mostrar respuestas si vienen estructuradas */}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Formulario nuevo comentario */}
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const txt = textoComentario[cap.id || cap.titulo];
+                                    if (!txt || !txt.trim()) return;
+                                    enviarAccion('comentar_capitulo', { capitulo: cap.id || cap.titulo, comentario: txt });
+                                    setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: '' });
+                                    mostrarToast('Comentario enviado');
+                                  }} className="flex gap-2 pt-1">
+                                    <input 
+                                      type="text" 
+                                      placeholder="Escribe tu reflexión sobre este capítulo..." 
+                                      value={textoComentario[cap.id || cap.titulo] || ''} 
+                                      onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} 
+                                      className="flex-grow editorial-input px-3 py-2 text-xs" 
+                                    />
+                                    <button type="submit" className="editorial-btn px-3 text-xs font-babydoll">Comentar</button>
+                                  </form>
+                                </div>
+                              </div>
                             ) : (
                               <div className="p-4 bg-[#FBF9F5] border border-[#E8E6DF] rounded-xl text-center space-y-2">
                                 <i className="fa-solid fa-lock text-gray-400 text-sm"></i>
