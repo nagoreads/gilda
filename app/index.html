@@ -1429,24 +1429,60 @@
                       <div className="editorial-card p-5">
                         <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
                         <div className="space-y-3">
-                          {propuestas.map((p,i) => (
-                            <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
-                              <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
-                              <div className="flex flex-col justify-between w-full">
-                                <div><h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4><p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p></div>
-                                <button onClick={()=>{
-                                  const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
-                                  let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                                  if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
-                                  item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
-                                }} className="self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-babydoll">Votar ({p.votos||0})</button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          {subTabComunidad === 'archivo' && (
+  <div className="space-y-4">
+    <div className="editorial-card p-5 space-y-3">
+      <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        const tit = nuevaPropuestaTitulo?.trim();
+        if (!tit) return;
+        const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || '', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
+        setPropuestas([...propuestas, nueva]);
+        enviarAccion('propuesta', nueva);
+        setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
+        mostrarToast('Propuesta añadida.');
+      }} className="space-y-2">
+        <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+        <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+        <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll">Añadir propuesta</button>
+      </form>
+    </div>
+
+    <div className="editorial-card p-5">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-babydoll text-xl font-bold">Votación del Mes</h3>
+        <span className="text-[10px] text-gray-400 font-babydoll uppercase">Top 3 finalistas</span>
+      </div>
+      <div className="space-y-3">
+        {/* Ordenamos por votos de mayor a menor y seleccionamos solo los 3 primeros */}
+        {[...propuestas]
+          .sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0))
+          .slice(0, 3)
+          .map((p, i) => (
+            <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
+              <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+              <div className="flex flex-col justify-between w-full">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-[#4A5028] font-babydoll">#{i + 1}</span>
+                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
+                  </div>
+                  <p className="text-[10px] text-gray-500 italic font-babydoll">{p.autora}</p>
+                </div>
+                <button onClick={()=>{
+                  const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
+                  let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
+                  if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
+                  item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
+                }} className="self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-babydoll">Votar ({p.votos||0})</button>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+  </div>
+)}
 
                   {subTabComunidad === 'buzon' && (
                     <div className="editorial-card p-5 space-y-3">
