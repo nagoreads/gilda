@@ -128,6 +128,23 @@
         animation: floatBannerQueue 4.5s ease-in-out forwards;
       }
 
+      /* Estilos para la estantería de libros animada */
+      .estanteria-madera {
+        background: linear-gradient(to bottom, #F4F0E6 0%, #EAE4D2 100%);
+        border-bottom: 12px solid #C5B99E;
+        border-radius: 4px 4px 8px 8px;
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.04);
+        position: relative;
+      }
+
+      .lomo-libro {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+      }
+      .lomo-libro:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+      }
+
       #mapa-gilda { height: 280px; width: 100%; border-radius: 16px; border: 1px solid #E8E6DF; z-index: 1; }
 
       ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -862,6 +879,7 @@
         const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
         const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
         const [mostrarModalConectadas, setMostrarModalConectadas] = useState(false);
+        const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
 
         const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
         const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
@@ -1497,6 +1515,55 @@
               </div>
             )}
 
+            {libroSeleccionadoDetalle && (
+              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in text-left">
+                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
+                    <h3 className="font-babydoll text-xl font-bold truncate pr-2">{libroSeleccionadoDetalle.libro}</h3>
+                    <button onClick={() => setLibroSeleccionadoDetalle(null)} className="text-xs text-gray-400">✕</button>
+                  </div>
+                  
+                  <div className="flex gap-4 items-center">
+                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
+                    <div className="space-y-2 text-xs w-full">
+                      <p className="text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
+                      {libroSeleccionadoDetalle.estado === 'leyendo' && (
+                        <div>
+                          <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll">Página actual</label>
+                          <div className="flex gap-2 mt-1">
+                            <input 
+                              type="number" 
+                              defaultValue={libroSeleccionadoDetalle.pagina || libroSeleccionadoDetalle.paginas || 0} 
+                              onBlur={(e) => guardarLibroPersonal(libroSeleccionadoDetalle.libro, e.target.value, 'leyendo', libroSeleccionadoDetalle.autora, libroSeleccionadoDetalle.portada)}
+                              className="editorial-input w-20 px-2 py-1 text-center font-bold" 
+                            />
+                            <span className="text-xs text-gray-500 self-center font-babydoll">pág.</span>
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase font-bold block font-babydoll mb-1">Mover a estantería</label>
+                        <select 
+                          value={libroSeleccionadoDetalle.estado || 'leyendo'} 
+                          onChange={(e) => {
+                            cambiarEstadoLibro(libroSeleccionadoDetalle, e.target.value);
+                            setLibroSeleccionadoDetalle(null);
+                          }}
+                          className="editorial-input text-xs px-2.5 py-1.5 w-full bg-white font-babydoll"
+                        >
+                          <option value="leyendo">Leyendo</option>
+                          <option value="want_to_read">Quiero leer</option>
+                          <option value="leidos">Leído</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Cerrar</button>
+                </div>
+              </div>
+            )}
+
             <main className="w-full flex-grow space-y-4 fade-in">
               {cargandoDatos ? (
                 <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
@@ -1615,50 +1682,35 @@
                           </button>
                         </div>
 
-                        <div className="space-y-3 pt-1">
+                        {/* ESTANTERÍA DE MADERA ANIMADA */}
+                        <div className="pt-4 pb-6 px-2 estanteria-madera min-h-[220px] flex items-end justify-start gap-4 overflow-x-auto">
                           {misLibrosFiltrados.length === 0 ? (
-                            <div className="text-center py-8 bg-[#FBF9F5] rounded-xl border border-[#E8E6DF]">
-                              <p className="text-xs text-gray-400 italic font-babydoll">No tienes libros en esta estantería todavía.</p>
+                            <div className="w-full text-center py-10">
+                              <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
                             </div>
                           ) : (
-                            misLibrosFiltrados.map((item, idx) => (
-                              <div key={idx} className="flex gap-3 items-center justify-between p-3 bg-[#FBF9F5] rounded-xl border border-[#E8E6DF]">
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                  <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
-                                  <div className="overflow-hidden text-xs">
-                                    <p className="font-bold text-[#232321] truncate font-babydoll text-base">{item.libro}</p>
-                                    <p className="text-[10px] text-gray-500 italic truncate">{item.autora || 'Autora no especificada'}</p>
-                                    {item.estado === 'leyendo' && (
-                                      <p className="text-[10px] text-[#4A5028] font-bold mt-1 font-babydoll">Página {item.pagina || item.paginas || 0}</p>
-                                    )}
-                                  </div>
-                                </div>
+                            misLibrosFiltrados.map((item, idx) => {
+                              // Generamos colores de lomo basados en el índice para dar variedad estética
+                              const coloresLomos = ['bg-[#3E4522]', 'bg-[#232321]', 'bg-[#7A4232]', 'bg-[#3C5868]', 'bg-[#684C3C]', 'bg-[#4C3C68]'];
+                              const colorLomo = coloresLomos[idx % coloresLomos.length];
 
-                                <div className="flex flex-col items-end gap-1 shrink-0">
-                                  {tabEstanteria === 'leyendo' && (
-                                    <div className="flex items-center gap-1 mb-1">
-                                      <input 
-                                        type="number" 
-                                        defaultValue={item.pagina || item.paginas || 0} 
-                                        onBlur={(e) => guardarLibroPersonal(item.libro, e.target.value, 'leyendo', item.autora, item.portada)} 
-                                        className="editorial-input w-12 text-center py-0.5 text-[11px]" 
-                                      />
-                                      <span className="text-[10px] text-gray-400 font-babydoll">pág.</span>
-                                    </div>
-                                  )}
-
-                                  <select 
-                                    value={item.estado || 'leyendo'} 
-                                    onChange={(e) => cambiarEstadoLibro(item, e.target.value)}
-                                    className="editorial-input text-[10px] px-2 py-1 rounded bg-white font-babydoll"
-                                  >
-                                    <option value="leyendo">Leyendo</option>
-                                    <option value="want_to_read">Quiero leer</option>
-                                    <option value="leidos">Leído</option>
-                                  </select>
+                              return (
+                                <div
+                                  key={idx}
+                                  onClick={() => setLibroSeleccionadoDetalle(item)}
+                                  className={`lomo-libro ${colorLomo} text-[#FBF9F5] w-12 h-36 rounded-t-md p-2 flex flex-col justify-between shrink-0 cursor-pointer shadow-md relative border-t border-white/10`}
+                                  title={`${item.libro} - ${item.autora || 'Autora'}`}
+                                >
+                                  <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
+                                  <span className="font-babydoll font-bold text-xs tracking-tight line-clamp-4 leading-none text-left writing-vertical mt-3" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                                    {item.libro}
+                                  </span>
+                                  <span className="text-[8px] text-[#D0CEB3] uppercase truncate font-babydoll text-left" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                                    {item.autora || 'gilda'}
+                                  </span>
                                 </div>
-                              </div>
-                            ))
+                              );
+                            })
                           )}
                         </div>
                       </div>
