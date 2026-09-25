@@ -485,16 +485,54 @@
 
         const parsearFechaEvento = (strFecha) => {
           if (!strFecha) return null;
-          const partes = strFecha.trim().split(' ');
-          if (partes.length >= 2) {
-            const diaNum = parseInt(partes[0], 10);
-            const mesStr = partes[1].toLowerCase().slice(0, 3);
+          const s = strFecha.toString().trim().toLowerCase();
+
+          // Formatos del tipo ISO (2026-10-15) o con guiones/barras (15/10/2026, 15-10)
+          if (s.includes('-') || s.includes('/')) {
+            const partes = s.split(/[\/-]/);
+            if (partes.length >= 2) {
+              if (partes[0].length === 4) {
+                // YYYY-MM-DD
+                const y = parseInt(partes[0], 10);
+                const m = parseInt(partes[1], 10) - 1;
+                const d = parseInt(partes[2], 10);
+                if (!isNaN(d) && !isNaN(m)) return { dia: d, mes: m, anio: y };
+              } else {
+                // DD/MM/YYYY o DD/MM
+                const d = parseInt(partes[0], 10);
+                const m = parseInt(partes[1], 10) - 1;
+                const y = partes[2] ? parseInt(partes[2], 10) : anio;
+                if (!isNaN(d) && !isNaN(m)) return { dia: d, mes: m, anio: y };
+              }
+            }
+          }
+
+          // Formatos naturales: "15 Oct", "15 de octubre", "15 Octubre 2026"
+          const matchDia = s.match(/^(\d{1,2})/);
+          if (matchDia) {
+            const diaNum = parseInt(matchDia[1], 10);
             const mapaMeses = {
-              ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
-              jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11
+              ene: 0, enero: 0,
+              feb: 1, febrero: 1,
+              mar: 2, marzo: 2,
+              abr: 3, abril: 3,
+              may: 4, mayo: 4,
+              jun: 5, junio: 5,
+              jul: 6, julio: 6,
+              ago: 7, agosto: 7,
+              sep: 8, sept: 8, septiembre: 8,
+              oct: 9, octubre: 9,
+              nov: 10, noviembre: 10,
+              dic: 11, diciembre: 11
             };
-            if (!isNaN(diaNum) && mapaMeses[mesStr] !== undefined) {
-              return { dia: diaNum, mes: mapaMeses[mesStr] };
+
+            for (const [clave, mesIndex] of Object.entries(mapaMeses)) {
+              if (s.includes(clave)) {
+                // Buscar año si está explícito en la cadena
+                const matchAnio = s.match(/\b(20\d{2})\b/);
+                const anioParsed = matchAnio ? parseInt(matchAnio[1], 10) : anio;
+                return { dia: diaNum, mes: mesIndex, anio: anioParsed };
+              }
             }
           }
           return null;
@@ -502,16 +540,20 @@
 
         const eventosDelMes = useMemo(() => {
           const mapa = {};
-          eventos.forEach(ev => {
-            if ((ev.estado || '').toLowerCase() === 'pendiente') return;
-            const parsed = parsearFechaEvento(ev.fecha || ev.dia);
-            if (parsed && parsed.mes === mes) {
+          (eventos || []).forEach(ev => {
+            const est = (ev.estado || '').toLowerCase();
+            if (est === 'pendiente' || est === 'por definir') return;
+
+            const valFecha = ev.fecha || ev.dia || ev.date || ev.fecha_evento;
+            const parsed = parsearFechaEvento(valFecha);
+
+            if (parsed && parsed.mes === mes && parsed.anio === anio) {
               if (!mapa[parsed.dia]) mapa[parsed.dia] = [];
               mapa[parsed.dia].push(ev);
             }
           });
           return mapa;
-        }, [eventos, mes]);
+        }, [eventos, mes, anio]);
 
         const mesAnterior = () => setFechaActual(new Date(anio, mes - 1, 1));
         const mesSiguiente = () => setFechaActual(new Date(anio, mes + 1, 1));
@@ -525,11 +567,11 @@
           const esHoy = esMesActual && hoy.getDate() === dia;
           const evs = eventosDelMes[dia] || [];
           const tieneCafecito = evs.some(e => {
-            const t = (e.evento || e.titulo || '').toLowerCase();
+            const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
             return t.includes('cafecito') || t.includes('café');
           });
           const tieneComentario = evs.some(e => {
-            const t = (e.evento || e.titulo || '').toLowerCase();
+            const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
             return t.includes('comentario') || t.includes('libro');
           });
 
@@ -547,6 +589,9 @@
                     <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-amber-300' : 'bg-amber-600'}`}></span>
                   )}
                   {tieneComentario && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
+                  )}
+                  {!tieneCafecito && !tieneComentario && (
                     <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
                   )}
                 </div>
@@ -1174,20 +1219,20 @@
                         <i className="fa-regular fa-calendar-days text-[#4A5028]"></i> Calendario del Club
                       </h3>
                       <span className="text-[10px] text-gray-400 font-babydoll uppercase">
-                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length} programado(s)
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir').length} programado(s)
                       </span>
                     </div>
 
                     <CalendarioInteractivo eventos={eventosCalendario} />
 
                     <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                      {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente').length === 0 ? (
+                      {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir').length === 0 ? (
                         <p className="text-xs text-gray-400 italic font-babydoll text-center py-2">No hay fechas fijas programadas todavía.</p>
                       ) : (
                         eventosCalendario
-                          .filter(e => (e.estado || '').toLowerCase() !== 'pendiente')
+                          .filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir')
                           .map((ev, idx) => {
-                            const tipoEvento = (ev.evento || ev.titulo || '').toLowerCase();
+                            const tipoEvento = (ev.evento || ev.titulo || ev.nombre || '').toLowerCase();
                             const esCafecito = tipoEvento.includes('cafecito') || tipoEvento.includes('café');
                             const iconoTipo = esCafecito ? 'fa-mug-hot text-[#B87343]' : 'fa-book-open text-[#4A5028]';
                             
@@ -1195,9 +1240,9 @@
                               <div key={idx} className="flex flex-col bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs gap-1">
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold font-babydoll text-[#4A5028] flex items-center gap-1.5">
-                                    <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia} {ev.hora && `• ${ev.hora}`}
+                                    <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia || ev.date || ev.fecha_evento} {ev.hora && `• ${ev.hora}`}
                                   </span>
-                                  <span className="text-[11px] font-bold text-gray-700 capitalize font-babydoll">{ev.evento || ev.titulo}</span>
+                                  <span className="text-[11px] font-bold text-gray-700 capitalize font-babydoll">{ev.evento || ev.titulo || ev.nombre}</span>
                                 </div>
                                 <p className="text-[10px] text-gray-400 italic font-babydoll pt-1 border-t border-[#E8E6DF]/60">
                                   * El enlace de acceso se enviará por el chat.
@@ -1214,14 +1259,14 @@
                       </h4>
 
                       <div className="space-y-2">
-                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() === 'pendiente').length === 0 ? (
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() === 'pendiente' || (e.estado || '').toLowerCase() === 'por definir').length === 0 ? (
                           <p className="text-[11px] text-gray-400 italic font-babydoll text-center py-1">No hay eventos pendientes de votación ahora mismo.</p>
                         ) : (
                           eventosCalendario
-                            .filter(e => (e.estado || '').toLowerCase() === 'pendiente')
+                            .filter(e => (e.estado || '').toLowerCase() === 'pendiente' || (e.estado || '').toLowerCase() === 'por definir')
                             .map((pend, pIdx) => (
                               <div key={pIdx} className="bg-[#FAF6E8] p-2.5 rounded-xl border border-[#EEDFB3] text-xs flex justify-between items-center gap-2">
-                                <span className="font-babydoll font-bold text-[#232321]">{pend.evento || pend.titulo}</span>
+                                <span className="font-babydoll font-bold text-[#232321]">{pend.evento || pend.titulo || pend.nombre}</span>
                                 <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">Por fechar</span>
                               </div>
                             ))
