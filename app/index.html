@@ -567,17 +567,38 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
-        // Función auxiliar para recuperar el nombre real de usuaria evitando "socia"
-        const obtenerNombreReal = (emailComentario, usuarioPorDefecto) => {
-          if (!emailComentario) return usuarioPorDefecto || 'Lector(a)';
-          const sociaEncontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
-          if (sociaEncontrada && sociaEncontrada.nombre) {
-            return sociaEncontrada.nombre;
+        // Función robusta para consultar el nombre directamente desde la columna del Google Sheets (usuariasClub)
+        const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
+          if (!emailComentario && !usuarioOriginal) return 'Socia';
+          
+          // 1. Buscar en la lista de usuarias cargadas desde el Google Sheets por correo electrónico
+          if (emailComentario) {
+            const encontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
+            if (encontrada && encontrada.nombre && encontrada.nombre.trim() !== '') {
+              return encontrada.nombre.trim();
+            }
           }
-          if (sesion && sesion.email && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
-            return nombreUsuarioPersonalizado || sesion.nombre || usuarioPorDefecto || 'Lector(a)';
+
+          // 2. Si el registro pasado coincide con la usuaria actual de la sesión
+          if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
+            if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
+            if (sesion.nombre) return sesion.nombre;
           }
-          return usuarioPorDefecto || emailComentario.split('@')[0] || 'Lector(a)';
+
+          // 3. Si el parámetro recibido ya es un nombre válido y no un correo o genérico
+          if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia') {
+            return usuarioOriginal;
+          }
+
+          // 4. Buscar de nuevo por si el identificador recibido era el propio nombre en lugar del email
+          if (usuarioOriginal) {
+            const encontradaPorNombre = usuariasClub.find(u => (u.nombre || '').trim().toLowerCase() === usuarioOriginal.trim().toLowerCase());
+            if (encontradaPorNombre && encontradaPorNombre.nombre) {
+              return encontradaPorNombre.nombre.trim();
+            }
+          }
+
+          return usuarioOriginal || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
         };
 
         const cargarTodosLosDatos = () => {
@@ -671,7 +692,7 @@
             const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
             return {
               ...u,
-              nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Lector(a)'),
+              nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
               foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
