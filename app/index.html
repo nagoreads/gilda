@@ -263,12 +263,27 @@
         const [errorImg, setErrorImg] = useState(false);
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        // Si hay portada y no ha dado error de carga, la mostramos
-        if (portada && portada.trim() !== '' && !errorImg) {
-          return <img src={portada.trim()} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
+        // Limpiamos y normalizamos la URL de la portada de forma segura sin romper los parámetros de Google
+        const urlLimpia = useMemo(() => {
+          if (!portada) return '';
+          let p = portada.trim();
+          p = p.replace('http:', 'https:');
+          return p;
+        }, [portada]);
+
+        // Si tenemos una URL válida y la imagen no ha dado error al cargar, la mostramos
+        if (urlLimpia !== '' && !errorImg) {
+          return (
+            <img 
+              src={urlLimpia} 
+              alt={titulo || 'Libro'} 
+              onError={() => setErrorImg(true)} 
+              className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} 
+            />
+          );
         }
 
-        // Si la imagen falla o es muy fea/inexistente, se muestra automáticamente el diseño editorial elegante de Gilda
+        // Tarjeta editorial de respaldo solo si no hay imagen o si la imagen falló al cargar
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
