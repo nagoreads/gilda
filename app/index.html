@@ -267,12 +267,12 @@
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        // Buscar automáticamente la portada en Google Books si no existe o falló
+        // Automatización 100%: Si la hoja de cálculo no tiene URL de portada, la busca automáticamente en Google Books
         useEffect(() => {
           let activo = true;
           if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline) {
             setBuscandoOnline(true);
-            const query = encodeURIComponent(tituloFinal);
+            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal !== 'Desconocida' ? autoraFinal : ''}`);
             fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`)
               .then(res => res.json())
               .then(data => {
@@ -288,9 +288,9 @@
               });
           }
           return () => { activo = false; };
-        }, [portadaOriginal, errorImg, tituloFinal]);
+        }, [portadaOriginal, errorImg, tituloFinal, autoraFinal]);
 
-        // URL Segura optimizada mediante proxy universal Weserv para evitar bloqueos de CORS o HTTP
+        // Proxy de seguridad con Weserv para evitar bloqueos de red, CORS o HTTP en la carga de imágenes
         const urlSegura = useMemo(() => {
           const pFinal = portadaOriginal || portadaDinamica;
           if (!pFinal || typeof pFinal !== 'string') return '';
