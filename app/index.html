@@ -168,6 +168,30 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
+      function ModalUpgrade({ onClose }) {
+        return (
+          <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+            <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative">
+              <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+                <i className="fa-solid fa-xmark text-sm"></i>
+              </button>
+              <div className="w-12 h-12 bg-[#FAF6E8] rounded-full flex items-center justify-center mx-auto text-[#4A5028]">
+                <i className="fa-solid fa-lock text-lg"></i>
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-babydoll text-xl font-bold">Acceso restringido</h3>
+                <p className="text-xs text-gray-600 font-babydoll leading-relaxed">
+                  Con tu modalidad actual no tienes acceso a esta función. ¡Sube de nivel para disfrutar de toda la experiencia de Gilda!
+                </p>
+              </div>
+              <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="block w-full editorial-btn py-2.5 text-xs font-babydoll text-center">
+                Actualizar modalidad
+              </a>
+            </div>
+          </div>
+        );
+      }
+
       function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
         const [sugerencias, setSugerencias] = useState([]);
         const [buscando, setBuscando] = useState(false);
@@ -620,6 +644,7 @@
         const [subTabComunidad, setSubTabComunidad] = useState('chat');
         const [tabEstanteria, setTabEstanteria] = useState('leyendo');
         const [toastMsg, setToastMsg] = useState(null);
+        const [mostrarModalUpgrade, setMostrarModalUpgrade] = useState(false);
         
         const [usuariasClub, setUsuariasClub] = useState([]);
         const [capitulos, setCapitulos] = useState([]);
@@ -795,6 +820,11 @@
           });
         }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
 
+        // Verificación de restricciones de modalidad
+        const modalidadLimpia = (sesion?.modalidad || '').toLowerCase().trim();
+        const esModalidadCorreo = modalidadLimpia.includes('nube') || modalidadLimpia.includes('papel');
+        const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satélite');
+
         if (!sesion) {
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
@@ -805,6 +835,12 @@
                   e.preventDefault();
                   const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === inputEmail.trim().toLowerCase());
                   if (!socia) return setErrorLogin('Correo no registrado.');
+                  
+                  const modUser = (socia.modalidad || '').toLowerCase().trim();
+                  if (modUser.includes('nube') || modUser.includes('papel')) {
+                    return setErrorLogin('Tu modalidad ("gilda de nube" o "gilda de papel") es exclusiva para correo y no tiene acceso a la aplicación web.');
+                  }
+
                   const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
                   const pagSocia = Number(socia.pagina || 0);
                   const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
@@ -824,6 +860,20 @@
           );
         }
 
+        if (esModalidadCorreo) {
+          return (
+            <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
+              <div className="editorial-card max-w-sm w-full p-8 space-y-4 text-center">
+                <h1 className="font-babydoll text-4xl text-[#232321] font-bold">gilda</h1>
+                <p className="text-xs text-gray-600 font-babydoll leading-relaxed">
+                  Tu modalidad actual ({sesion.modalidad}) está registrada exclusivamente para el mailclub por correo y no tiene acceso a la aplicación web.
+                </p>
+                <button onClick={() => { localStorage.removeItem('gilda_sesion'); setSesion(null); }} className="editorial-btn px-4 py-2 text-xs font-babydoll">Cerrar sesión</button>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
             {toastMsg && (
@@ -831,6 +881,8 @@
                 {toastMsg}
               </div>
             )}
+
+            {mostrarModalUpgrade && <ModalUpgrade onClose={() => setMostrarModalUpgrade(false)} />}
 
             {/* Modal de Detalle de Libro con opción para corregir portada y borrar */}
             {libroSeleccionadoDetalle && (
@@ -1107,11 +1159,13 @@
                                         </div>
                                         <p className="text-gray-700">{textoComTxt}</p>
 
-                                        <div className="flex justify-end">
-                                          <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-[10px] text-[#4A5028] font-bold font-babydoll hover:underline">
-                                            {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
-                                          </button>
-                                        </div>
+                                        {!modalidadLimpia.includes('cotilla') && (
+                                          <div className="flex justify-end">
+                                            <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-[10px] text-[#4A5028] font-bold font-babydoll hover:underline">
+                                              {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
+                                            </button>
+                                          </div>
+                                        )}
 
                                         {respuestasCom.length > 0 && (
                                           <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
@@ -1131,7 +1185,7 @@
                                           </div>
                                         )}
 
-                                        {respondiendoA === idComentario && (
+                                        {respondiendoA === idComentario && !modalidadLimpia.includes('cotilla') && (
                                           <form onSubmit={(e) => {
                                             e.preventDefault();
                                             const txtResp = textoRespuesta[idComentario];
@@ -1167,35 +1221,43 @@
                                 )}
                               </div>
 
-                              <form onSubmit={(e) => {
-                                e.preventDefault();
-                                const clave = cap.id || cap.titulo;
-                                const txt = textoComentario[clave];
-                                if (!txt || !txt.trim()) return;
-                                
-                                const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
-                                const nuevoCom = { 
-                                  capitulo: identificadorCap, 
-                                  parent_id: '',
-                                  autora: nombreActual, 
-                                  texto: txt, 
-                                  fecha: 'Justo ahora' 
-                                };
-                                setComentarios([...comentarios, nuevoCom]);
+                              {modalidadLimpia.includes('cotilla') ? (
+                                <div className="p-3 bg-[#F8F7F3] border border-[#E8E6DF] rounded-xl text-center">
+                                  <p className="text-[11px] text-gray-500 font-babydoll">
+                                    Tu modalidad actual es de solo lectura en comentarios. <button onClick={() => setMostrarModalUpgrade(true)} className="text-[#4A5028] font-bold underline">Sube de nivel</button> para participar.
+                                  </p>
+                                </div>
+                              ) : (
+                                <form onSubmit={(e) => {
+                                  e.preventDefault();
+                                  const clave = cap.id || cap.titulo;
+                                  const txt = textoComentario[clave];
+                                  if (!txt || !txt.trim()) return;
+                                  
+                                  const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+                                  const nuevoCom = { 
+                                    capitulo: identificadorCap, 
+                                    parent_id: '',
+                                    autora: nombreActual, 
+                                    texto: txt, 
+                                    fecha: 'Justo ahora' 
+                                  };
+                                  setComentarios([...comentarios, nuevoCom]);
 
-                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
-                                setTextoComentario({ ...textoComentario, [clave]: '' });
-                                mostrarToast('Comentario enviado');
-                              }} className="flex gap-2 pt-1">
-                                <input 
-                                  type="text" 
-                                  placeholder="Escribe tu reflexión sobre este capítulo..." 
-                                  value={textoComentario[cap.id || cap.titulo] || ''} 
-                                  onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} 
-                                  className="flex-grow editorial-input px-3 py-2 text-xs" 
-                                />
-                                <button type="submit" className="editorial-btn px-3 text-xs font-babydoll">Comentar</button>
-                              </form>
+                                  enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
+                                  setTextoComentario({ ...textoComentario, [clave]: '' });
+                                  mostrarToast('Comentario enviado');
+                                }} className="flex gap-2 pt-1">
+                                  <input 
+                                    type="text" 
+                                    placeholder="Escribe tu reflexión sobre este capítulo..." 
+                                    value={textoComentario[cap.id || cap.titulo] || ''} 
+                                    onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} 
+                                    className="flex-grow editorial-input px-3 py-2 text-xs" 
+                                  />
+                                  <button type="submit" className="editorial-btn px-3 text-xs font-babydoll">Comentar</button>
+                                </form>
+                              )}
                             </div>
                           </div>
                         ) : (
@@ -1320,12 +1382,27 @@
                 { id: 'habitacion', icon: 'fa-bookmark', label: 'habitación' },
                 { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
                 { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' }
-              ].map(tab => (
-                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-3 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
-                  <i className={`fa-solid ${tab.icon} text-sm`}></i>
-                  <span className="text-[9px] font-bold uppercase font-babydoll">{tab.label}</span>
-                </button>
-              ))}
+              ].map(tab => {
+                const esComunidad = tab.id === 'comunidad';
+                const bloqueado = esRestringida && esComunidad;
+
+                return (
+                  <button 
+                    key={tab.id} 
+                    onClick={() => {
+                      if (bloqueado) {
+                        setMostrarModalUpgrade(true);
+                      } else {
+                        setSeccionApp(tab.id);
+                      }
+                    }} 
+                    className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-3 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'} ${bloqueado ? 'opacity-50' : ''}`}
+                  >
+                    <i className={`fa-solid ${tab.icon} text-sm ${bloqueado ? 'fa-lock text-xs' : ''}`}></i>
+                    <span className="text-[9px] font-bold uppercase font-babydoll">{tab.label}</span>
+                  </button>
+                );
+              })}
             </nav>
           </div>
         );
