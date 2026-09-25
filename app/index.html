@@ -405,18 +405,14 @@
           <div
             onClick={onClick}
             style={{ backgroundColor: colorFondo }}
-            className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-between p-2 border-t border-white/20"
+            className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20"
             title={`${item.libro} — ${item.autora || 'Autora'}`}
           >
             <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
             
-            {/* Título y autora distribuidos verticalmente con lectura limpia */}
-            <div className="flex flex-col h-full justify-between pt-2 pb-1">
-              <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '100px'}}>
+            <div className="flex flex-col h-full justify-start pt-3">
+              <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '110px'}}>
                 {item.libro}
-              </span>
-              <span className="text-[7px] text-[#FBF9F5]/90 uppercase text-left font-babydoll tracking-wider drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] whitespace-nowrap" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
-                @gilda.mailclub
               </span>
             </div>
           </div>
@@ -913,6 +909,9 @@
 
         const [libroPersonal, setLibroPersonal] = useState('');
         const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
+
+        // Decoración de la habitación (plantas, objetos, etc.)
+        const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || '🌿 Plantita monstera');
 
         const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
         const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
@@ -1690,6 +1689,26 @@
                           </button>
                         </div>
 
+                        {/* SELECTOR DE DECORACIÓN (PLANTITAS Y DETALLES) */}
+                        <div className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                          <span className="text-xs font-bold text-gray-600 font-babydoll">Decoración de balda:</span>
+                          <select 
+                            value={decoracionActual} 
+                            onChange={(e) => {
+                              setDecoracionActual(e.target.value);
+                              localStorage.setItem('gilda_decoracion', e.target.value);
+                            }}
+                            className="editorial-input text-xs px-2.5 py-1.5 bg-white font-babydoll font-bold"
+                          >
+                            <option value="🌿 Plantita monstera">🌿 Plantita monstera</option>
+                            <option value="🪴 Maceta de cerámica">🪴 Maceta de cerámica</option>
+                            <option value="🕯️ Vela aromática">🕯️ Vela aromática</option>
+                            <option value="☕ Taza de café">☕ Taza de café</option>
+                            <option value="🌵 Pequeño cactus">🌵 Pequeño cactus</option>
+                            <option value="✨ Sin decoración">✨ Sin decoración</option>
+                          </select>
+                        </div>
+
                         <form onSubmit={(e) => {
                           e.preventDefault();
                           if (!libroPersonal.trim()) return;
@@ -1727,21 +1746,33 @@
                           </button>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA CON LOMOS DE TONOS EDITORIALES Y @gilda.mailclub */}
-                        <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-start gap-3.5 overflow-x-auto">
-                          {misLibrosFiltrados.length === 0 ? (
-                            <div className="w-full text-center py-10">
-                              <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
+                        {/* ESTANTERÍA DE MADERA CON LOMOS LIMPIOS Y DECORACIÓN */}
+                        <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
+                          <div className="flex items-end justify-start gap-3.5 flex-grow">
+                            {misLibrosFiltrados.length === 0 ? (
+                              <div className="w-full text-center py-10">
+                                <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
+                              </div>
+                            ) : (
+                              misLibrosFiltrados.map((item, idx) => (
+                                <LomoLibroEstanteria 
+                                  key={idx} 
+                                  item={item} 
+                                  onClick={() => setLibroSeleccionadoDetalle(item)} 
+                                />
+                              ))
+                            )}
+                          </div>
+                          {decoracionActual !== '✨ Sin decoración' && (
+                            <div className="shrink-0 pl-3 pb-1 text-lg select-none" title={decoracionActual}>
+                              {decoracionActual.split(' ')[0]}
                             </div>
-                          ) : (
-                            misLibrosFiltrados.map((item, idx) => (
-                              <LomoLibroEstanteria 
-                                key={idx} 
-                                item={item} 
-                                onClick={() => setLibroSeleccionadoDetalle(item)} 
-                              />
-                            ))
                           )}
+                        </div>
+
+                        {/* SELLO HORIZONTAL ABAJO PARA STORIES */}
+                        <div className="text-center pt-1 pb-2">
+                          <span className="text-[11px] font-bold text-gray-400 tracking-wider font-babydoll">@gilda.mailclub</span>
                         </div>
                       </div>
                     </div>
