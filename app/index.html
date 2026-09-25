@@ -258,20 +258,30 @@
 
       function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
+        const [usarProxy, setUsarProxy] = useState(true);
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
         const portadaFinal = portada || cover || image || '';
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        const urlLimpia = useMemo(() => {
+        const urlOriginal = useMemo(() => {
           if (!portadaFinal || typeof portadaFinal !== 'string') return '';
           let p = portadaFinal.trim();
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
           }
-          return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300&output=jpg`;
+          return p;
         }, [portadaFinal]);
+
+        const urlLimpia = useMemo(() => {
+          if (!urlOriginal) return '';
+          // Si usa el proxy de weserv o si cargamos directo
+          if (usarProxy) {
+            return `https://images.weserv.nl/?url=${encodeURIComponent(urlOriginal)}&w=300&output=jpg`;
+          }
+          return urlOriginal;
+        }, [urlOriginal, usarProxy]);
 
         const autoraReal = useMemo(() => {
           if (!autoraFinal || typeof autoraFinal !== 'string') return 'gilda';
@@ -280,13 +290,21 @@
           return a;
         }, [autoraFinal]);
 
-        if (urlLimpia !== '' && !errorImg) {
+        if (urlOriginal !== '' && !errorImg) {
           return (
             <img 
               src={urlLimpia} 
               alt={tituloFinal} 
-              onError={() => setErrorImg(true)} 
-              className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} 
+              onError={() => {
+                if (usarProxy) {
+                  // Si falla el proxy, intentamos cargar la URL original directamente
+                  setUsarProxy(false);
+                } else {
+                  // Si falla también la original, mostramos la tarjeta de respaldo
+                  setErrorImg(true);
+                }
+              }} 
+              className={`${sizeClasses} object-cover rounded shadow-xs shrink-0 bg-gray-100`} 
             />
           );
         }
