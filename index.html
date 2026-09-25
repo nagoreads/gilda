@@ -8,7 +8,7 @@
     <!-- Fontshare: Satoshi -->
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
 
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome Icons para flechas de navegación -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -90,6 +90,80 @@
     <script type="text/babel">
       const { useState } = React;
 
+      // Componente SVG Moderno para cada modalidad
+      function IconoModalidad({ tipo, className = "w-6 h-6" }) {
+        switch (tipo) {
+          case 'cotilla':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            );
+          case 'satelite':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="2" />
+                <path d="M16.2 7.8a6 6 0 0 1 0 8.4" />
+                <path d="M7.8 16.2a6 6 0 0 1 0-8.4" />
+                <path d="M19.8 4.2a11 11 0 0 1 0 15.6" />
+                <path d="M4.2 19.8a11 11 0 0 1 0-15.6" />
+              </svg>
+            );
+          case 'cafe':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+                <line x1="6" y1="2" x2="6" y2="4" />
+                <line x1="10" y1="2" x2="10" y2="4" />
+                <line x1="14" y1="2" x2="14" y2="4" />
+              </svg>
+            );
+          case 'nube':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M12 12v9" />
+                <path d="m8 17 4 4 4-4" />
+              </svg>
+            );
+          case 'papel':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                <path d="M19 16v6" />
+                <path d="M16 19h6" />
+              </svg>
+            );
+          case 'virtual':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                <path d="M5 3v4" />
+                <path d="M19 17v4" />
+                <path d="M3 5h4" />
+                <path d="M17 19h4" />
+              </svg>
+            );
+          case 'absoluta':
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="7.5" cy="15.5" r="5.5" />
+                <path d="m21 2-9.6 9.6" />
+                <path d="m15.5 7.5 3 3" />
+              </svg>
+            );
+          default:
+            return (
+              <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            );
+        }
+      }
+
       function App() {
         const [rutaElegida, setRutaElegida] = useState(null);
         const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
@@ -99,13 +173,13 @@
         const [codigoSecreto, setCodigoSecreto] = useState('');
 
         const modalidades = [
-          { nombre: 'gilda cotilla', precio: 'Gratis', iconoClass: 'fa-regular fa-eye', esGratis: true, soloEmail: true, pideDireccion: false, incluyeAmiga: false, enlaceStripe: 'https://buy.stripe.com/bJe4gt3IdakFdfqaxv6Ri09', descripcion: 'Solo lectura de comentarios en la app.' },
-          { nombre: 'gilda satélite', precio: '1 €/mes', iconoClass: 'fa-solid fa-satellite', esGratis: false, soloEmail: true, pideDireccion: true, incluyeAmiga: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'Leer comentarios y añadir apuntes en la app (Sin chat ni cafecitos).' },
-          { nombre: 'gilda de café', precio: '5 €/mes', iconoClass: 'fa-solid fa-mug-hot', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'Acceso a la app (Chat, cafecitos, leer comentarios y añadir apuntes).' },
-          { nombre: 'gilda de nube', precio: '5 €/mes', iconoClass: 'fa-solid fa-cloud-arrow-down', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'Recibes por email la carta, plantilla, anti-guía de la autora, pegatinas y marcapáginas digital.' },
-          { nombre: 'gilda de papel', precio: '10 €/mes', iconoClass: 'fa-regular fa-envelope-open', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'Envío físico a tu buzón con carta, plantilla, anti-guía, pegatinas, marcapáginas y sorpresas.' },
-          { nombre: 'gilda virtual', precio: '8 €/mes', iconoClass: 'fa-solid fa-[#4A5028] fa-sparkles', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', destacado: true, descripcion: 'Envío digital por email + Acceso total a la app (Chat, cafecitos, comentarios y apuntes).' },
-          { nombre: 'gilda absoluta', precio: '12 €/mes', iconoClass: 'fa-solid fa-[#4A5028] fa-key', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'Envío físico a tu buzón + Acceso total a la app y club de lectura (Chat, cafecitos, comentarios).' }
+          { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, soloEmail: true, pideDireccion: false, incluyeAmiga: false, enlaceStripe: 'https://buy.stripe.com/bJe4gt3IdakFdfqaxv6Ri09', descripcion: 'Solo lectura de comentarios en la app.' },
+          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, soloEmail: true, pideDireccion: true, incluyeAmiga: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'Leer comentarios y añadir apuntes en la app (Sin chat ni cafecitos).' },
+          { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'Acceso a la app (Chat, cafecitos, leer comentarios y añadir apuntes).' },
+          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'Recibes por email la carta, plantilla, anti-guía de la autora, pegatinas y marcapáginas digital.' },
+          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'Envío físico a tu buzón con carta, plantilla, anti-guía, pegatinas, marcapáginas y sorpresas.' },
+          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', destacado: true, descripcion: 'Envío digital por email + Acceso total a la app (Chat, cafecitos, comentarios y apuntes).' },
+          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, soloEmail: false, pideDireccion: true, incluyeAmiga: true, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'Envío físico a tu buzón + Acceso total a la app y club de lectura (Chat, cafecitos, comentarios).' }
         ];
 
         const modalidadGratis = modalidades.find((m) => m.esGratis);
@@ -142,15 +216,15 @@
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <button onClick={() => setRutaElegida('pago')} className="group editorial-card flex flex-col items-center justify-center p-8 hover:border-[#4A5028] transition-all text-center">
-                    <div className="w-14 h-14 bg-[#FAF6E8] rounded-full flex items-center justify-center mb-4 text-[#4A5028] group-hover:scale-105 transition-transform border border-[#E8E6DF]">
-                      <i className="fa-solid fa-sparkles text-xl"></i>
+                    <div className="w-12 h-12 bg-[#FAF6E8] rounded-2xl flex items-center justify-center mb-4 text-[#4A5028] group-hover:scale-105 transition-transform border border-[#E8E6DF]">
+                      <IconoModalidad tipo="virtual" className="w-6 h-6" />
                     </div>
                     <h3 className="text-2xl font-babydoll font-bold mb-2 text-[#232321]">desde dentro</h3>
                     <p className="text-xs text-gray-500 font-sans leading-relaxed">accede al club de lectura, los cafecitos con autoras, recibe tu mail o carta y participa en el sorteo de varios libros.</p>
                   </button>
                   <button onClick={() => { setRutaElegida('gratis'); setModalidadSeleccionada(modalidadGratis); }} className="group editorial-card flex flex-col items-center justify-center p-8 hover:border-[#4A5028] transition-all text-center">
-                    <div className="w-14 h-14 bg-[#FAF6E8] rounded-full flex items-center justify-center mb-4 text-[#4A5028] group-hover:scale-105 transition-transform border border-[#E8E6DF]">
-                      <i className="fa-regular fa-eye text-xl"></i>
+                    <div className="w-12 h-12 bg-[#FAF6E8] rounded-2xl flex items-center justify-center mb-4 text-[#4A5028] group-hover:scale-105 transition-transform border border-[#E8E6DF]">
+                      <IconoModalidad tipo="cotilla" className="w-6 h-6" />
                     </div>
                     <h3 className="text-2xl font-babydoll font-bold mb-2 text-[#232321]">asomarme un ratito</h3>
                     <p className="text-xs text-gray-500 font-sans leading-relaxed">únete gratis como gilda cotilla para ver si esto te encaja.</p>
@@ -171,8 +245,8 @@
                   {modalidadesPago.map((mod, index) => (
                     <div key={index} className={`relative flex flex-col editorial-card p-6 text-left ${mod.destacado ? 'border-[#4A5028] border-2 shadow-md lg:scale-105 z-10' : ''} hover:border-[#4A5028] transition-all`}>
                       {mod.destacado && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4A5028] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider font-sans">más popular</span>}
-                      <div className="w-10 h-10 rounded-xl bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center text-[#4A5028] mb-4">
-                        <i className={`${mod.iconoClass} text-lg`}></i>
+                      <div className="w-10 h-10 rounded-xl bg-[#FAF6E8] border border-[#E8E6DF] flex items-center justify-center text-[#4A5028] mb-4 shrink-0">
+                        <IconoModalidad tipo={mod.id} className="w-5 h-5" />
                       </div>
                       <h3 className="text-xl font-babydoll font-bold text-[#232321]">{mod.nombre}</h3>
                       <div className="mt-1 mb-3"><span className="text-xl font-bold font-sans text-[#4A5028]">{mod.precio}</span></div>
@@ -193,7 +267,12 @@
                 </button>
                 <div className="editorial-card p-8 md:p-10 space-y-6">
                   <div className="border-b border-[#E8E6DF] pb-5">
-                    <h2 className="text-3xl font-babydoll font-bold text-[#232321] mb-1">ya casi lo tenemos</h2>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#FAF6E8] border border-[#E8E6DF] flex items-center justify-center text-[#4A5028] shrink-0">
+                        <IconoModalidad tipo={modalidadSeleccionada.id} className="w-5 h-5" />
+                      </div>
+                      <h2 className="text-3xl font-babydoll font-bold text-[#232321]">ya casi lo tenemos</h2>
+                    </div>
                     <p className="text-xs text-gray-500 font-sans leading-relaxed">
                       estás a punto de unirte a <strong className="text-[#232321]">{modalidadSeleccionada.nombre}</strong> ({modalidadSeleccionada.precio}). déjame tus datos para que pueda preparar tu llegada.
                     </p>
