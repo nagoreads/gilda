@@ -887,14 +887,14 @@
                       <input type="text" placeholder="Pega aquí la URL de la portada correcta..." value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} className="w-full editorial-input p-2 text-xs" />
                       <div className="flex gap-2">
                         <button onClick={() => {
-                          const tituloBuscado = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                          const tituloBuscado = (libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo || '').trim().toLowerCase();
                           const clon = [...lecturasPersonales];
-                          const itemIdx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloBuscado.toLowerCase()));
+                          const itemIdx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').trim().toLowerCase() === tituloBuscado));
                           if (itemIdx > -1) {
                             clon[itemIdx].portada = editandoPortadaUrl;
                             setLecturasPersonales(clon);
                             setLibroSeleccionadoDetalle({ ...clon[itemIdx] });
-                            enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloBuscado, pagina: clon[itemIdx].pagina || 0, estado: clon[itemIdx].estado, autora: clon[itemIdx].autora, portada: editandoPortadaUrl });
+                            enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo, pagina: clon[itemIdx].pagina || 0, estado: clon[itemIdx].estado, autora: clon[itemIdx].autora, portada: editandoPortadaUrl });
                             mostrarToast('Portada corregida correctamente');
                           }
                           setMostrarInputCorreccionPortada(false);
@@ -911,10 +911,23 @@
 
                   <div className="pt-2 border-t border-[#E8E6DF] flex gap-2">
                     <button onClick={() => {
-                      const tituloBuscado = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
-                      const clon = lecturasPersonales.filter(l => !((l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloBuscado.toLowerCase())));
+                      const tituloBuscado = (libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo || '').trim().toLowerCase();
+                      const nombreOriginalLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                      
+                      // Filtrado robusto insensible a mayúsculas/minúsculas y espacios
+                      const clon = lecturasPersonales.filter(l => {
+                        const emailItem = (l.email || '').toLowerCase().trim();
+                        const emailSesion = (sesion.email || '').toLowerCase().trim();
+                        const tituloItem = (l.libro || l.titulo || '').toLowerCase().trim();
+                        
+                        const esMismoUsuario = emailItem === emailSesion;
+                        const esMismoLibro = tituloItem === tituloBuscado;
+                        
+                        return !(esMismoUsuario && esMismoLibro);
+                      });
+
                       setLecturasPersonales(clon);
-                      enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: tituloBuscado });
+                      enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: nombreOriginalLibro });
                       setLibroSeleccionadoDetalle(null);
                       mostrarToast('Libro eliminado de la estantería');
                     }} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold font-babydoll hover:bg-red-50">Eliminar</button>
