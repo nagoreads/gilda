@@ -174,7 +174,7 @@
         const [mostrarDropdown, setMostrarDropdown] = useState(false);
 
         useEffect(() => {
-          if (!valor || valor.trim().length < 3) {
+          if (!valor || valor.trim().length < 2) {
             setSugerencias([]);
             setMostrarDropdown(false);
             return;
@@ -182,10 +182,10 @@
           const timer = setTimeout(async () => {
             setBuscando(true);
             try {
-              const query = encodeURIComponent(`${valor.trim()} lang:es`);
+              const query = encodeURIComponent(valor.trim());
               const [resGoogle, resOpenLib] = await Promise.allSettled([
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=6&printType=books&langRestrict=es&gl=es&hl=es`),
-                fetch(`https://openlibrary.org/search.json?q=${query}&limit=5&language=spa`)
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=8&printType=books&langRestrict=es`),
+                fetch(`https://openlibrary.org/search.json?q=${query}&limit=6&language=spa`)
               ]);
               let listaCombinada = [];
               if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
@@ -226,10 +226,10 @@
                   unicos.push(item); 
                 }
               });
-              setSugerencias(unicos.slice(0, 6));
+              setSugerencias(unicos.slice(0, 8));
               setMostrarDropdown(unicos.length > 0);
             } catch (err) { console.error(err); } finally { setBuscando(false); }
-          }, 350);
+          }, 300);
           return () => clearTimeout(timer);
         }, [valor]);
 
@@ -282,10 +282,10 @@
           let activo = true;
           if ((!portadaOriginal || errorImg || !autoraFinal) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
             setBuscandoOnline(true);
-            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal} lang:es`);
+            const query = encodeURIComponent(`${tituloFinal} ${autoraFinal}`);
             
             Promise.allSettled([
-              fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es&gl=es&hl=es`).then(r => r.json()),
+              fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`).then(r => r.json()),
               fetch(`https://openlibrary.org/search.json?q=${query}&limit=1&language=spa`).then(r => r.json())
             ]).then(results => {
               if (!activo) return;
