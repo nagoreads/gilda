@@ -267,10 +267,10 @@
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        // Búsqueda automática en segundo plano (Google Books + Open Library simultáneos)
+        // Búsqueda automática optimizada en segundo plano
         useEffect(() => {
           let activo = true;
-          if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline) {
+          if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
             setBuscandoOnline(true);
             const query = encodeURIComponent(`${tituloFinal} ${autoraFinal !== 'Desconocida' ? autoraFinal : ''}`);
             
@@ -296,7 +296,7 @@
               }
 
               if (imgEncontrada) {
-                setPortadaDinamica(imgEncontrada);
+                setPortadaDinamica(imgEncontrada.replace('http:', 'https:'));
               }
             }).catch(() => {}).finally(() => {
               if (activo) setBuscandoOnline(false);
@@ -318,7 +318,7 @@
             return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300&output=jpg`;
           }
           
-          return p;
+          return '';
         }, [portadaOriginal, portadaDinamica]);
 
         const autoraReal = useMemo(() => {
@@ -339,7 +339,6 @@
           );
         }
 
-        // Diseño monocromático minimalista limpio (sin el bloque verde oscuro lateral)
         return (
           <div className={`${sizeClasses} bg-[#F3EFE6] text-[#232321] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{tituloFinal}</span>
