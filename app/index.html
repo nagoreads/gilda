@@ -128,12 +128,12 @@
         animation: floatBannerQueue 4.5s ease-in-out forwards;
       }
 
-      /* Estilos para la estantería de libros animada */
+      /* Estilos para la estantería de madera animada */
       .estanteria-madera {
         background: linear-gradient(to bottom, #F4F0E6 0%, #EAE4D2 100%);
-        border-bottom: 12px solid #C5B99E;
-        border-radius: 4px 4px 8px 8px;
-        box-shadow: inset 0 3px 6px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.04);
+        border-bottom: 14px solid #C5B99E;
+        border-radius: 6px 6px 10px 10px;
+        box-shadow: inset 0 3px 8px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.05);
         position: relative;
       }
 
@@ -141,8 +141,8 @@
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
       }
       .lomo-libro:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 16px 30px rgba(0,0,0,0.18);
       }
 
       #mapa-gilda { height: 280px; width: 100%; border-radius: 16px; border: 1px solid #E8E6DF; z-index: 1; }
@@ -380,6 +380,79 @@
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
             <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{titulo || 'Sin título'}</span>
             <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
+          </div>
+        );
+      }
+
+      function LomoLibroEstanteria({ item, onClick }) {
+        const [imgUrl, setImgUrl] = useState(item.portada || '');
+        const [errorImg, setErrorImg] = useState(false);
+
+        useEffect(() => {
+          setImgUrl(item.portada || '');
+          setErrorImg(false);
+
+          if ((!item.portada || item.portada.trim() === '') && item.libro && item.libro.trim().length > 1) {
+            let cancelado = false;
+            const query = encodeURIComponent(item.libro.trim());
+            
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
+              .then(res => res.json())
+              .then(data => {
+                if (!cancelado && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
+                  setImgUrl(data.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'));
+                } else if (!cancelado) {
+                  return fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`)
+                    .then(r => r.json())
+                    .then(dataOL => {
+                      if (!cancelado && dataOL.docs && dataOL.docs[0]?.cover_i) {
+                        setImgUrl(`https://covers.openlibrary.org/b/id/${dataOL.docs[0].cover_i}-M.jpg`);
+                      }
+                    });
+                }
+              })
+              .catch(() => {});
+
+            return () => { cancelado = true; };
+          }
+        }, [item.libro, item.portada]);
+
+        // Paleta elegante inspirada en portadas clásicas para cuando no cargue la imagen
+        const coloresPaleta = ['bg-[#3E4522]', 'bg-[#2B3027]', 'bg-[#7A4232]', 'bg-[#3C5868]', 'bg-[#684C3C]', 'bg-[#4C3C68]', 'bg-[#5C4033]'];
+        const colorIndex = (item.libro || '').length % coloresPaleta.length;
+        const colorFondo = coloresPaleta[colorIndex];
+
+        return (
+          <div
+            onClick={onClick}
+            className="lomo-libro w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col items-center group border border-white/20"
+            title={`${item.libro} — ${item.autora || 'Autora'}`}
+          >
+            {imgUrl && !errorImg ? (
+              <div className="w-full h-full relative">
+                <img 
+                  src={imgUrl} 
+                  alt={item.libro} 
+                  onError={() => setErrorImg(true)} 
+                  className="w-full h-full object-cover brightness-95 group-hover:brightness-100 transition-all" 
+                />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center p-1">
+                  <span className="font-babydoll font-bold text-[9px] text-white text-center leading-tight line-clamp-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                    {item.libro}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className={`w-full h-full ${colorFondo} text-[#FBF9F5] p-1.5 flex flex-col justify-between relative`}>
+                <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
+                <span className="font-babydoll font-bold text-[10px] tracking-tight line-clamp-4 leading-tight text-left mt-3" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                  {item.libro}
+                </span>
+                <span className="text-[7px] text-[#D0CEB3] uppercase truncate text-left font-babydoll" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
+                  {item.autora || 'gilda'}
+                </span>
+              </div>
+            )}
           </div>
         );
       }
@@ -1682,35 +1755,20 @@
                           </button>
                         </div>
 
-                        {/* ESTANTERÍA DE MADERA ANIMADA */}
-                        <div className="pt-4 pb-6 px-2 estanteria-madera min-h-[220px] flex items-end justify-start gap-4 overflow-x-auto">
+                        {/* ESTANTERÍA DE MADERA CON PORTADAS LOMOS */}
+                        <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-start gap-3.5 overflow-x-auto">
                           {misLibrosFiltrados.length === 0 ? (
                             <div className="w-full text-center py-10">
                               <p className="text-xs text-[#7A7565] italic font-babydoll">La balda está vacía todavía...</p>
                             </div>
                           ) : (
-                            misLibrosFiltrados.map((item, idx) => {
-                              // Generamos colores de lomo basados en el índice para dar variedad estética
-                              const coloresLomos = ['bg-[#3E4522]', 'bg-[#232321]', 'bg-[#7A4232]', 'bg-[#3C5868]', 'bg-[#684C3C]', 'bg-[#4C3C68]'];
-                              const colorLomo = coloresLomos[idx % coloresLomos.length];
-
-                              return (
-                                <div
-                                  key={idx}
-                                  onClick={() => setLibroSeleccionadoDetalle(item)}
-                                  className={`lomo-libro ${colorLomo} text-[#FBF9F5] w-12 h-36 rounded-t-md p-2 flex flex-col justify-between shrink-0 cursor-pointer shadow-md relative border-t border-white/10`}
-                                  title={`${item.libro} - ${item.autora || 'Autora'}`}
-                                >
-                                  <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
-                                  <span className="font-babydoll font-bold text-xs tracking-tight line-clamp-4 leading-none text-left writing-vertical mt-3" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
-                                    {item.libro}
-                                  </span>
-                                  <span className="text-[8px] text-[#D0CEB3] uppercase truncate font-babydoll text-left" style={{writingMode: 'vertical-rl', textOrientation: 'mixed'}}>
-                                    {item.autora || 'gilda'}
-                                  </span>
-                                </div>
-                              );
-                            })
+                            misLibrosFiltrados.map((item, idx) => (
+                              <LomoLibroEstanteria 
+                                key={idx} 
+                                item={item} 
+                                onClick={() => setLibroSeleccionadoDetalle(item)} 
+                              />
+                            ))
                           )}
                         </div>
                       </div>
