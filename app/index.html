@@ -385,13 +385,11 @@
       }
 
       function LomoLibroEstanteria({ item, onClick }) {
-        // Generador de color determinista y sofisticado basado en el título del libro
         const generarColorEditorial = (texto) => {
           let hash = 0;
           for (let i = 0; i < texto.length; i++) {
             hash = texto.charCodeAt(i) + ((hash << 5) - hash);
           }
-          // Paleta de matices editoriales (Tonos tierra, olivos, granates, añejos, azules atardecer)
           const matices = [
             '#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', 
             '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242',
@@ -1248,14 +1246,19 @@
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
-          const pag = Number(pagOpt !== undefined ? pagOpt : paginaPersonalInput) || 0;
+          
+          const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+          
+          const pagFinal = pagOpt !== undefined 
+            ? (Number(pagOpt) || 0) 
+            : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
 
           const clon = [...lecturasPersonales];
           const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
           
           if (idx > -1) {
-            clon[idx].pagina = pag;
-            clon[idx].paginas = pag;
+            clon[idx].pagina = pagFinal;
+            clon[idx].paginas = pagFinal;
             clon[idx].estado = estadoOpt;
             if (autoraOpt) clon[idx].autora = autoraOpt;
             if (portadaOpt) clon[idx].portada = portadaOpt;
@@ -1264,8 +1267,8 @@
               email: sesion.email, 
               nombre: nombreUsuarioPersonalizado || sesion.nombre, 
               libro: tituloLibro, 
-              pagina: pag,
-              paginas: pag,
+              pagina: pagFinal,
+              paginas: pagFinal,
               estado: estadoOpt,
               autora: autoraOpt,
               portada: portadaOpt
@@ -1279,7 +1282,7 @@
             email: sesion.email, 
             nombre: nombreUsuarioPersonalizado || sesion.nombre, 
             libro: tituloLibro, 
-            pagina: pag,
+            pagina: pagFinal,
             estado: estadoOpt,
             autora: autoraOpt,
             portada: portadaOpt
@@ -1293,7 +1296,8 @@
 
         const cambiarEstadoLibro = (libro, nuevoEstado) => {
           const item = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === libro.libro.toLowerCase());
-          guardarLibroPersonal(libro.libro, item ? (item.pagina || item.paginas || 0) : 0, nuevoEstado, libro.autora || '', libro.portada || '');
+          const paginaActual = item ? (item.pagina || item.paginas || 0) : (libro.pagina || libro.paginas || 0);
+          guardarLibroPersonal(libro.libro, paginaActual, nuevoEstado, libro.autora || '', libro.portada || '');
         };
 
         const enviarRespuesta = (idPadre, capTitulo) => {
