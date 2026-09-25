@@ -567,6 +567,19 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
+        // Función auxiliar para recuperar el nombre real de usuaria evitando "socia"
+        const obtenerNombreReal = (emailComentario, usuarioPorDefecto) => {
+          if (!emailComentario) return usuarioPorDefecto || 'Lector(a)';
+          const sociaEncontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
+          if (sociaEncontrada && sociaEncontrada.nombre) {
+            return sociaEncontrada.nombre;
+          }
+          if (sesion && sesion.email && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
+            return nombreUsuarioPersonalizado || sesion.nombre || usuarioPorDefecto || 'Lector(a)';
+          }
+          return usuarioPorDefecto || emailComentario.split('@')[0] || 'Lector(a)';
+        };
+
         const cargarTodosLosDatos = () => {
           Promise.all([
             parsearHoja(URL_CSV_USUARIAS), parsearHoja(URL_CSV_CAPITULOS), parsearHoja(URL_CSV_COMENTARIOS), 
@@ -658,7 +671,7 @@
             const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
             return {
               ...u,
-              nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
+              nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Lector(a)'),
               foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
@@ -843,14 +856,16 @@
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
-                        // AQUÍ ESTÁ EL CAMBIO PRINCIPAL: Lee prioritariamente "pagina_fin" y alternativas
                         const paginaMinima = Number(cap.pagina_fin || cap.pagina_bloqueo || cap.pagina || cap.paginaminima || cap.minima || cap.limite || 0);
                         const desbloqueado = miPagina >= paginaMinima;
                         const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
                         
+                        // Filtramos únicamente comentarios principales (aquellos que NO tienen parent_id o respuesta_a)
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
-                          return cCap === identificadorCap;
+                          const esDeEsteCap = cCap === identificadorCap;
+                          const esPrincipal = !c.parent_id && !c.respuesta_a;
+                          return esDeEsteCap && esPrincipal;
                         });
 
                         return (
@@ -873,12 +888,19 @@
                                     ) : (
                                       comentariosCapitulo.map((com, cIdx) => {
                                         const idComentario = com.id || com.comentario_id || cIdx;
-                                        const respuestasCom = comentarios.filter(r => String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim());
+                                        // Buscamos las respuestas asociadas a este comentario concreto
+                                        const respuestasCom = comentarios.filter(r => {
+                                          const rCap = String(r.capitulo_id || r.capitulo || '').trim().toLowerCase();
+                                          const parentMatch = String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim();
+                                          return rCap === identificadorCap && parentMatch;
+                                        });
+
+                                        const nombreAutorComentario = obtenerNombreReal(com.email, com.usuario || com.usuaria);
 
                                         return (
                                           <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-2">
                                             <div className="flex justify-between items-center">
-                                              <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
+                                              <span className="font-bold font-babydoll text-[#4A5028]">{nombreAutorComentario}</span>
                                               <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
                                             </div>
                                             <p className="text-gray-700">{com.comentario || com.mensaje}</p>
@@ -892,15 +914,18 @@
                                             {/* Hilos de respuestas encadenadas */}
                                             {respuestasCom.length > 0 && (
                                               <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
-                                                {respuestasCom.map((resp, rIdx) => (
-                                                  <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#E8E6DF] text-xs space-y-1">
-                                                    <div className="flex justify-between items-center">
-                                                      <span className="font-bold font-babydoll text-[#4A5028]">{resp.usuario || resp.usuaria || 'Socia'}</span>
-                                                      <span className="text-[9px] text-gray-400">{resp.fecha || ''}</span>
+                                                {respuestasCom.map((resp, rIdx) => {
+                                                  const nombreAutorRespuesta = obtenerNombreReal(resp.email, resp.usuario || resp.usuaria);
+                                                  return (
+                                                    <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#E8E6DF] text-xs space-y-1">
+                                                      <div className="flex justify-between items-center">
+                                                        <span className="font-bold font-babydoll text-[#4A5028]">{nombreAutorRespuesta}</span>
+                                                        <span className="text-[9px] text-gray-400">{resp.fecha || ''}</span>
+                                                      </div>
+                                                      <p className="text-gray-700">{resp.comentario || resp.mensaje}</p>
                                                     </div>
-                                                    <p className="text-gray-700">{resp.comentario || resp.mensaje}</p>
-                                                  </div>
-                                                ))}
+                                                  );
+                                                })}
                                               </div>
                                             )}
 
@@ -911,7 +936,17 @@
                                                 const txtResp = textoRespuesta[idComentario];
                                                 if (!txtResp || !txtResp.trim()) return;
                                                 
-                                                const nuevaRespObj = { capitulo_id: identificadorCap, capitulo: identificadorCap, parent_id: idComentario, respuesta_a: idComentario, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txtResp, fecha: 'Justo ahora' };
+                                                const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+                                                const nuevaRespObj = { 
+                                                  capitulo_id: identificadorCap, 
+                                                  capitulo: identificadorCap, 
+                                                  parent_id: idComentario, 
+                                                  respuesta_a: idComentario, 
+                                                  usuario: nombreActual, 
+                                                  email: sesion.email, 
+                                                  comentario: txtResp, 
+                                                  fecha: 'Justo ahora' 
+                                                };
                                                 setComentarios([...comentarios, nuevaRespObj]);
                                                 enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
                                                 setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
@@ -941,7 +976,15 @@
                                     const txt = textoComentario[clave];
                                     if (!txt || !txt.trim()) return;
                                     
-                                    const nuevoCom = { capitulo_id: identificadorCap, capitulo: identificadorCap, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txt, fecha: 'Justo ahora' };
+                                    const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+                                    const nuevoCom = { 
+                                      capitulo_id: identificadorCap, 
+                                      capitulo: identificadorCap, 
+                                      usuario: nombreActual, 
+                                      email: sesion.email, 
+                                      comentario: txt, 
+                                      fecha: 'Justo ahora' 
+                                    };
                                     setComentarios([...comentarios, nuevoCom]);
 
                                     enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
@@ -988,12 +1031,13 @@
                           </div>
                           <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col">
                             {chatMsgs.map((m, i) => {
-                              const usuarioMsg = (m.usuario || m.usuaria || '').toLowerCase().trim();
+                              const nombreAutorChat = obtenerNombreReal(m.email, m.usuario || m.usuaria);
+                              const usuarioMsg = nombreAutorChat.toLowerCase().trim();
                               const miNombre = (nombreUsuarioPersonalizado || sesion.nombre || '').toLowerCase().trim();
                               const esMia = usuarioMsg === miNombre;
                               return (
                                 <div key={i} className={`flex flex-col max-w-[85%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
-                                  <span className="text-[9px] text-gray-400 font-babydoll mb-0.5 px-1">{m.usuario || m.usuaria}</span>
+                                  <span className="text-[9px] text-gray-400 font-babydoll mb-0.5 px-1">{nombreAutorChat}</span>
                                   <div className={`p-3 rounded-2xl text-xs leading-relaxed shadow-xs ${esMia ? 'bg-[#4A5028] text-white rounded-br-xs' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] rounded-bl-xs'}`}>
                                     {m.mensaje}
                                   </div>
