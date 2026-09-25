@@ -567,7 +567,6 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
-        // Función robusta para vincular el nombre correcto desde la columna "nombre" del Google Sheets
         const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
           if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
             if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
@@ -910,9 +909,9 @@
                         
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
-                          const esDeEsteCap = cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase();
                           const esPrincipal = !c.parent_id && !c.respuesta_a;
-                          return esDeEsteCap && esPrincipal;
+                          const coincide = !cCap || cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase() || cCap.includes(String(i + 1));
+                          return coincide && esPrincipal;
                         });
 
                         return (
@@ -935,9 +934,8 @@
                                       comentariosCapitulo.map((com, cIdx) => {
                                         const idComentario = com.id || com.comentario_id || cIdx;
                                         const respuestasCom = comentarios.filter(r => {
-                                          const rCap = String(r.capitulo_id || r.capitulo || '').trim().toLowerCase();
                                           const parentMatch = String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim();
-                                          return (rCap === identificadorCap || rCap === String(cap.titulo || '').trim().toLowerCase()) && parentMatch;
+                                          return parentMatch;
                                         });
 
                                         const nombreAutorComentario = obtenerNombreReal(com.email, com.usuario || com.usuaria);
