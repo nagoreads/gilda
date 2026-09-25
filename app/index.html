@@ -181,6 +181,13 @@
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
 
+      // Función auxiliar para normalizar frases a formato tipo oración
+      const formatoOracion = (texto) => {
+        if (!texto) return '';
+        const str = texto.toString().trim().toLowerCase();
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      };
+
       function ModalUpgrade({ onClose }) {
         return (
           <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
@@ -1261,7 +1268,8 @@
                                   <span className="font-bold font-sans text-[#4A5028] flex items-center gap-1.5">
                                     <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia || ev.date || ev.fecha_evento} {ev.hora && `• ${ev.hora}`}
                                   </span>
-                                  <span className="text-[11px] font-bold text-gray-700 capitalize font-sans">{ev.evento || ev.titulo || ev.nombre}</span>
+                                  {/* Muestra la frase limpia en tipo oración y sin la clase CSS 'capitalize' */}
+                                  <span className="text-[11px] font-bold text-gray-700 font-sans">{formatoOracion(ev.evento || ev.titulo || ev.nombre)}</span>
                                 </div>
                                 <p className="text-[10px] text-gray-400 italic font-sans pt-1 border-t border-[#E8E6DF]/60">
                                   * El enlace de acceso se enviará por el chat.
@@ -1285,7 +1293,7 @@
                             .filter(e => (e.estado || '').toLowerCase() === 'pendiente' || (e.estado || '').toLowerCase() === 'por definir')
                             .map((pend, pIdx) => (
                               <div key={pIdx} className="bg-[#FAF6E8] p-2.5 rounded-xl border border-[#EEDFB3] text-xs flex justify-between items-center gap-2">
-                                <span className="font-sans font-semibold text-[#232321]">{pend.evento || pend.titulo || pend.nombre}</span>
+                                <span className="font-sans font-semibold text-[#232321]">{formatoOracion(pend.evento || pend.titulo || pend.nombre)}</span>
                                 <span className="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-sans shrink-0">recordatorio</span>
                               </div>
                             ))
