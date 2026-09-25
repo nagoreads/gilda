@@ -263,15 +263,26 @@
         const [errorImg, setErrorImg] = useState(false);
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        // Limpiamos y normalizamos la URL de la portada de forma segura sin romper los parámetros de Google
+        // Normalizamos y aseguramos que la URL use https
         const urlLimpia = useMemo(() => {
-          if (!portada) return '';
+          if (!portada || typeof portada !== 'string') return '';
           let p = portada.trim();
-          p = p.replace('http:', 'https:');
+          if (p.startsWith('http://')) {
+            p = p.replace('http://', 'https://');
+          }
           return p;
         }, [portada]);
 
-        // Si tenemos una URL válida y la imagen no ha dado error al cargar, la mostramos
+        // Verificamos y limpiamos el nombre de la autora para que muestre el real
+        const autoraReal = useMemo(() => {
+          if (!autora || typeof autora !== 'string') return 'gilda';
+          let a = autora.trim();
+          // Si el texto es genérico o vacío, usamos 'gilda' o lo dejamos limpio, de lo contrario usamos el nombre real
+          if (a.toLowerCase() === 'autora' || a.toLowerCase() === 'desconocida') return 'gilda';
+          return a;
+        }, [autora]);
+
+        // Si tenemos URL válida y no ha dado error, mostramos la imagen
         if (urlLimpia !== '' && !errorImg) {
           return (
             <img 
@@ -283,12 +294,12 @@
           );
         }
 
-        // Tarjeta editorial de respaldo solo si no hay imagen o si la imagen falló al cargar
+        // Respaldo editorial mostrando el título del libro y el nombre real de la escritora
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
             <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{titulo || 'Sin título'}</span>
-            <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
+            <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autoraReal}</span>
           </div>
         );
       }
