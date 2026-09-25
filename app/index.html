@@ -184,7 +184,7 @@
             try {
               const query = encodeURIComponent(valor.trim());
               const [resGoogle, resOpenLib] = await Promise.allSettled([
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books&langRestrict=es`),
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books`),
                 fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
               ]);
               let listaCombinada = [];
@@ -193,7 +193,7 @@
                 if (dataG.items) {
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
-                    let thumb = info.imageLinks?.thumbnail || '';
+                    let thumb = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || '';
                     if (thumb) {
                       thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
                     }
@@ -243,7 +243,7 @@
               <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#E8E6DF] rounded-b-lg shadow-xl max-h-56 overflow-y-auto mt-1">
                 {sugerencias.map((item, idx) => (
                   <div key={idx} onClick={() => { onSelectLibro(item); setMostrarDropdown(false); }} className="flex items-center gap-2.5 p-2 hover:bg-[#FBF9F5] cursor-pointer border-b border-[#E8E6DF] last:border-0 text-left">
-                    {item.portada ? <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" /> : <div className="w-7 h-10 bg-[#F8F7F3] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E8E6DF]">Sin foto</div>}
+                    {item.portada ? <img src={`https://images.weserv.nl/?url=${encodeURIComponent(item.portada)}&w=100&output=jpg`} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" /> : <div className="w-7 h-10 bg-[#F8F7F3] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E8E6DF]">Sin foto</div>}
                     <div className="overflow-hidden">
                       <p className="text-sm font-bold text-[#232321] truncate leading-tight font-babydoll">{item.titulo}</p>
                       <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
@@ -267,30 +267,47 @@
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        // Automatización 100%: Si la hoja de cálculo no tiene URL de portada, la busca automáticamente en Google Books
+        // Búsqueda automática en segundo plano (Google Books + Open Library simultáneos)
         useEffect(() => {
           let activo = true;
           if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline) {
             setBuscandoOnline(true);
             const query = encodeURIComponent(`${tituloFinal} ${autoraFinal !== 'Desconocida' ? autoraFinal : ''}`);
-            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`)
-              .then(res => res.json())
-              .then(data => {
-                if (activo && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-                  let imgEncontrada = data.items[0].volumeInfo.imageLinks.thumbnail;
-                  imgEncontrada = imgEncontrada.replace('http:', 'https:').replace('&edge=curl', '');
-                  setPortadaDinamica(imgEncontrada);
+            
+            Promise.allSettled([
+              fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`).then(r => r.json()),
+              fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`).then(r => r.json())
+            ]).then(results => {
+              if (!activo) return;
+              let imgEncontrada = '';
+
+              // Revisar Google Books
+              if (results[0].status === 'fulfilled') {
+                const itemG = results[0].value.items?.[0]?.volumeInfo;
+                if (itemG?.imageLinks?.thumbnail || itemG?.imageLinks?.smallThumbnail) {
+                  imgEncontrada = itemG.imageLinks.thumbnail || itemG.imageLinks.smallThumbnail;
                 }
-              })
-              .catch(() => {})
-              .finally(() => {
-                if (activo) setBuscandoOnline(false);
-              });
+              }
+
+              // Si no hay en Google, revisar Open Library
+              if (!imgEncontrada && results[1].status === 'fulfilled') {
+                const docOL = results[1].value.docs?.[0];
+                if (docOL?.cover_i) {
+                  imgEncontrada = `https://covers.openlibrary.org/b/id/${docOL.cover_i}-L.jpg`;
+                }
+              }
+
+              if (imgEncontrada) {
+                setPortadaDinamica(imgEncontrada);
+              }
+            }).catch(() => {}).finally(() => {
+              if (activo) setBuscandoOnline(false);
+            });
           }
           return () => { activo = false; };
         }, [portadaOriginal, errorImg, tituloFinal, autoraFinal]);
 
-        // Proxy de seguridad con Weserv para evitar bloqueos de red, CORS o HTTP en la carga de imágenes
+        // Enrutado seguro con el proxy universal Weserv para evitar bloqueos CORS y certificados
         const urlSegura = useMemo(() => {
           const pFinal = portadaOriginal || portadaDinamica;
           if (!pFinal || typeof pFinal !== 'string') return '';
