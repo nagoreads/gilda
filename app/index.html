@@ -549,6 +549,32 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
         const [regionAbierta, setRegionAbierta] = useState(null);
 
+        // Coordenadas predefinidas de respaldo para pintado inmediato sin depender de APIs
+        const COORDENADAS_PREDEFINIDAS = {
+          'país vasco': [42.9896, -2.6189],
+          'cataluña': [41.5912, 1.5209],
+          'comunidad de madrid': [40.4168, -3.7038],
+          'andalucía': [37.3891, -5.9845],
+          'galicia': [42.5751, -8.1339],
+          'comunidad valenciana': [39.4840, -0.3526],
+          'alava': [42.8467, -2.6716],
+          'álava': [42.8467, -2.6716],
+          'gipuzkoa': [43.1500, -2.3000],
+          'guipúzcoa': [43.1500, -2.3000],
+          'bizkaia': [43.2630, -2.9350],
+          'vizcaya': [43.2630, -2.9350],
+          'tolosa': [43.1362, -2.0735],
+          'donostia': [43.3183, -1.9812],
+          'san sebastián': [43.3183, -1.9812],
+          'bilbao': [43.2630, -2.9350],
+          'vitoria': [42.8467, -2.6716],
+          'gasteiz': [42.8467, -2.6716],
+          'madrid': [40.4168, -3.7038],
+          'barcelona': [41.3851, 2.1734],
+          'sevilla': [37.3891, -5.9845],
+          'valencia': [39.4699, -0.3763]
+        };
+
         const estructuraRegiones = useMemo(() => {
           const mapa = {};
           usuarias.forEach(u => {
@@ -592,7 +618,6 @@
 
         useEffect(() => {
           if (!mapRef.current) {
-            // attributionControl: false quita por completo la barra "Leaflet | © OpenStreetMap"
             const map = L.map('mapa-gilda', { 
               zoomControl: false, 
               attributionControl: false 
@@ -600,7 +625,6 @@
 
             L.control.zoom({ position: 'topright' }).addTo(map);
 
-            // TileLayer limpio usando OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 18
             }).addTo(map);
@@ -609,43 +633,49 @@
             mapRef.current = map;
           }
 
+          const pintarMarcador = (lat, lon, item) => {
+            const cant = item.usuarias.length;
+            const circleMarker = L.circleMarker([lat, lon], {
+              radius: Math.max(8, 7 + Math.min(cant * 2, 16)),
+              fillColor: "#1a1a1a",
+              color: "#ffffff",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.9
+            });
+
+            circleMarker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
+              direction: 'top', 
+              permanent: false 
+            });
+
+            circleMarker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
+            markersGroupRef.current.addLayer(circleMarker);
+          };
+
           const renderMarkers = async () => {
             if (!markersGroupRef.current) return;
             markersGroupRef.current.clearLayers();
 
             for (const item of ciudadesMap) {
-              try {
-                // Pausa de 200ms entre peticiones para evitar bloqueos por tasa de uso en Nominatim
-                await new Promise(r => setTimeout(r, 200));
+              const claveLimpia = item.nombreLocalidad.toLowerCase().trim();
+              
+              // 1. Si está en el diccionario local, se pinta al instante
+              if (COORDENADAS_PREDEFINIDAS[claveLimpia]) {
+                const [lat, lon] = COORDENADAS_PREDEFINIDAS[claveLimpia];
+                pintarMarcador(lat, lon, item);
+                continue;
+              }
 
+              // 2. Si no, intenta buscar en la API con fallback
+              try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
                 const data = await res.json();
-
                 if (data && data.length > 0) {
-                  const lista = item.usuarias;
-                  const cant = lista.length;
-                  const lat = parseFloat(data[0].lat);
-                  const lon = parseFloat(data[0].lon);
-
-                  const circleMarker = L.circleMarker([lat, lon], {
-                    radius: Math.max(7, 6 + Math.min(cant * 2, 14)),
-                    fillColor: "#1a1a1a",
-                    color: "#ffffff",
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.95
-                  });
-
-                  circleMarker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
-                    direction: 'top', 
-                    permanent: false 
-                  });
-
-                  circleMarker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: lista }));
-                  markersGroupRef.current.addLayer(circleMarker);
+                  pintarMarcador(parseFloat(data[0].lat), parseFloat(data[0].lon), item);
                 }
               } catch (e) {
-                console.error("Error al obtener coordenadas de:", item.query, e);
+                console.error("No se pudieron obtener coordenadas para:", item.query);
               }
             }
           };
