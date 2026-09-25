@@ -37,7 +37,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
-      /* Carga directa del archivo babydoll.ttf desde tu GitHub */
       @font-face {
         font-family: 'BabyDoll';
         src: url('babydoll.ttf') format('truetype'),
@@ -874,6 +873,8 @@
         const [nuevaCitaCapsula, setNuevaCitaCapsula] = useState({});
         const [nuevoChat, setNuevoChat] = useState('');
         const [mensajeFundadora, setMensajeFundadora] = useState('');
+        
+        const chatEndRef = useRef(null);
 
         const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
         
@@ -982,6 +983,12 @@
             return () => clearInterval(interval);
           }
         }, [sesion]);
+
+        useEffect(() => {
+          if (subTabComunidad === 'chat') {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, [chatMsgs, subTabComunidad]);
 
         useEffect(() => {
           if (sesion && usuariasClub.length > 0) {
@@ -1262,7 +1269,7 @@
           setChatMsgs(prev => [...prev, { usuario: nombreActual, mensaje: textoMsg, fecha: 'Ahora' }]);
           enviarAccion('enviar_chat', { mensaje: textoMsg });
           setNuevoChat('');
-          mostrarToast('Mensaje enviado.');
+          chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         };
 
         const toggleLecturaLamp = () => {
@@ -1748,7 +1755,7 @@
                       </div>
                       
                       {subTabComunidad === 'chat' && (
-                        <div className="editorial-card h-[420px] flex flex-col justify-between relative overflow-hidden">
+                        <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
                           <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
@@ -1789,15 +1796,18 @@
 
                               return (
                                 <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
-                                  <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />
+                                  {!esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
                                   <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
                                     <span className="text-[10px] font-babydoll text-gray-500 mb-0.5">{autor}</span>
                                     <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#232321] text-[#FBF9F5]' : 'bg-[#FBF9F5] text-[#232321] border border-[#E8E6DF]'}`}>{m.mensaje}</div>
                                   </div>
+                                  {esMio && <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />}
                                 </div>
                               );
                             })}
+                            <div ref={chatEndRef} />
                           </div>
+
                           <form onSubmit={enviarChat} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 shrink-0 bg-white rounded-b-xl">
                             <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
                             <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
