@@ -574,6 +574,10 @@
             const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
             return t.includes('comentario') || t.includes('libro');
           });
+          const tieneRecordatorio = evs.some(e => {
+            const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
+            return t.includes('votar') || t.includes('recordatorio') || t.includes('último día');
+          });
 
           celdas.push(
             <div
@@ -591,7 +595,10 @@
                   {tieneComentario && (
                     <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
                   )}
-                  {!tieneCafecito && !tieneComentario && (
+                  {tieneRecordatorio && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-purple-300' : 'bg-purple-600'}`}></span>
+                  )}
+                  {!tieneCafecito && !tieneComentario && !tieneRecordatorio && (
                     <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
                   )}
                 </div>
@@ -624,7 +631,7 @@
               {celdas}
             </div>
 
-            <div className="flex items-center justify-center gap-4 pt-2 text-[10px] font-babydoll text-gray-500 border-t border-[#E8E6DF]">
+            <div className="flex items-center justify-center gap-3 pt-2 text-[10px] font-babydoll text-gray-500 border-t border-[#E8E6DF] flex-wrap">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
                 <span>Comentarios</span>
@@ -632,6 +639,10 @@
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-600"></span>
                 <span>Cafecito</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                <span>Recordatorio</span>
               </div>
             </div>
           </div>
@@ -1234,7 +1245,8 @@
                           .map((ev, idx) => {
                             const tipoEvento = (ev.evento || ev.titulo || ev.nombre || '').toLowerCase();
                             const esCafecito = tipoEvento.includes('cafecito') || tipoEvento.includes('café');
-                            const iconoTipo = esCafecito ? 'fa-mug-hot text-[#B87343]' : 'fa-book-open text-[#4A5028]';
+                            const esRecordatorio = tipoEvento.includes('votar') || tipoEvento.includes('recordatorio') || tipoEvento.includes('último día');
+                            const iconoTipo = esCafecito ? 'fa-mug-hot text-[#B87343]' : esRecordatorio ? 'fa-bell text-purple-600' : 'fa-book-open text-[#4A5028]';
                             
                             return (
                               <div key={idx} className="flex flex-col bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs gap-1">
@@ -1267,7 +1279,7 @@
                             .map((pend, pIdx) => (
                               <div key={pIdx} className="bg-[#FAF6E8] p-2.5 rounded-xl border border-[#EEDFB3] text-xs flex justify-between items-center gap-2">
                                 <span className="font-babydoll font-bold text-[#232321]">{pend.evento || pend.titulo || pend.nombre}</span>
-                                <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">recordatorio</span>
+                                <span className="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">recordatorio</span>
                               </div>
                             ))
                         )}
