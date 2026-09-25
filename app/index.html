@@ -909,7 +909,8 @@
                         
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
-                          const esPrincipal = !c.parent_id && !c.respuesta_a;
+                          const padreId = c.parent_id || c.respuesta_a || c.padre || c.id_padre || '';
+                          const esPrincipal = !padreId || padreId === '' || padreId === 'undefined' || padreId === 'null';
                           const coincide = !cCap || cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase() || cCap.includes(String(i + 1));
                           return coincide && esPrincipal;
                         });
@@ -932,13 +933,15 @@
                                       <p className="text-[11px] text-gray-400 italic font-babydoll">Aún no hay comentarios en este capítulo. ¡Sé la primera en escribir!</p>
                                     ) : (
                                       comentariosCapitulo.map((com, cIdx) => {
-                                        const idComentario = com.id || com.comentario_id || cIdx;
+                                        const idComentario = com.id || com.comentario_id || `com_${cIdx}`;
+                                        
                                         const respuestasCom = comentarios.filter(r => {
-                                          const parentMatch = String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim();
-                                          return parentMatch;
+                                          const rPadre = String(r.parent_id || r.respuesta_a || r.padre || r.id_padre || '').trim();
+                                          return rPadre && (rPadre === String(idComentario).trim() || rPadre === String(com.id || '').trim());
                                         });
 
                                         const nombreAutorComentario = obtenerNombreReal(com.email, com.usuario || com.usuaria);
+                                        const textoComTxt = com.reacciones || com.texto || com.comentario || com.mensaje || '';
 
                                         return (
                                           <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-2">
@@ -946,7 +949,7 @@
                                               <span className="font-bold font-babydoll text-[#4A5028]">{nombreAutorComentario}</span>
                                               <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
                                             </div>
-                                            <p className="text-gray-700">{com.texto || com.comentario || com.mensaje}</p>
+                                            <p className="text-gray-700">{textoComTxt}</p>
 
                                             <div className="flex justify-end">
                                               <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-[10px] text-[#4A5028] font-bold font-babydoll hover:underline">
@@ -958,13 +961,14 @@
                                               <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
                                                 {respuestasCom.map((resp, rIdx) => {
                                                   const nombreAutorRespuesta = obtenerNombreReal(resp.email, resp.usuario || resp.usuaria);
+                                                  const textoRespTxt = resp.reacciones || resp.texto || resp.comentario || resp.mensaje || '';
                                                   return (
                                                     <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#E8E6DF] text-xs space-y-1">
                                                       <div className="flex justify-between items-center">
                                                         <span className="font-bold font-babydoll text-[#4A5028]">{nombreAutorRespuesta}</span>
                                                         <span className="text-[9px] text-gray-400">{resp.fecha || ''}</span>
                                                       </div>
-                                                      <p className="text-gray-700">{resp.reacciones || resp.texto || resp.comentario || resp.mensaje}</p>
+                                                      <p className="text-gray-700">{textoRespTxt}</p>
                                                     </div>
                                                   );
                                                 })}
@@ -987,10 +991,11 @@
                                                   email: sesion.email, 
                                                   reacciones: txtResp, 
                                                   texto: txtResp, 
+                                                  comentario: txtResp,
                                                   fecha: 'Justo ahora' 
                                                 };
                                                 setComentarios([...comentarios, nuevaRespObj]);
-                                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
+                                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, respuesta_a: idComentario, comentario: txtResp });
                                                 setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
                                                 setRespondiendoA(null);
                                                 mostrarToast('Respuesta enviada');
@@ -1024,6 +1029,8 @@
                                       usuario: nombreActual, 
                                       email: sesion.email, 
                                       texto: txt, 
+                                      comentario: txt,
+                                      reacciones: txt,
                                       fecha: 'Justo ahora' 
                                     };
                                     setComentarios([...comentarios, nuevoCom]);
