@@ -258,16 +258,43 @@
 
       function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
+        const [portadaDinamica, setPortadaDinamica] = useState('');
+        const [buscandoOnline, setBuscandoOnline] = useState(false);
+
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
 
-        const portadaFinal = portada || cover || image || '';
+        const portadaOriginal = portada || cover || image || '';
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        // Solución definitiva universal: procesar y tunelizar cualquier enlace por weserv.nl para GitHub Pages
+        // Buscar automáticamente la portada en Google Books si no existe o falló
+        useEffect(() => {
+          let activo = true;
+          if ((!portadaOriginal || errorImg) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline) {
+            setBuscandoOnline(true);
+            const query = encodeURIComponent(tituloFinal);
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`)
+              .then(res => res.json())
+              .then(data => {
+                if (activo && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
+                  let imgEncontrada = data.items[0].volumeInfo.imageLinks.thumbnail;
+                  imgEncontrada = imgEncontrada.replace('http:', 'https:').replace('&edge=curl', '');
+                  setPortadaDinamica(imgEncontrada);
+                }
+              })
+              .catch(() => {})
+              .finally(() => {
+                if (activo) setBuscandoOnline(false);
+              });
+          }
+          return () => { activo = false; };
+        }, [portadaOriginal, errorImg, tituloFinal]);
+
+        // URL Segura optimizada mediante proxy universal Weserv para evitar bloqueos de CORS o HTTP
         const urlSegura = useMemo(() => {
-          if (!portadaFinal || typeof portadaFinal !== 'string') return '';
-          let p = portadaFinal.trim();
+          const pFinal = portadaOriginal || portadaDinamica;
+          if (!pFinal || typeof pFinal !== 'string') return '';
+          let p = pFinal.trim();
           
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
@@ -278,7 +305,7 @@
           }
           
           return p;
-        }, [portadaFinal]);
+        }, [portadaOriginal, portadaDinamica]);
 
         const autoraReal = useMemo(() => {
           if (!autoraFinal || typeof autoraFinal !== 'string') return 'gilda';
