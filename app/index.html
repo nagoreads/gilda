@@ -347,7 +347,6 @@
 
         const autoraMostrar = autoraFinal || autoraEncontrada || '';
 
-        // Generador dinámico de color editorial basado en el título para el diseño de respaldo garantizado
         const colorEditorialFallback = useMemo(() => {
           let hash = 0;
           for (let i = 0; i < tituloFinal.length; i++) { hash = tituloFinal.charCodeAt(i) + ((hash << 5) - hash); }
@@ -366,7 +365,6 @@
           );
         }
 
-        // Portada Editorial de Bolsillo Estilizada de Respaldo Garantizado (Fallback perfecto)
         return (
           <div style={{ backgroundColor: colorEditorialFallback }} className={`${sizeClasses} text-[#FBF9F5] p-2 rounded shadow-xs border border-white/20 shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-white/30"></div>
@@ -854,6 +852,35 @@
             {toastMsg && (
               <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2 rounded-full shadow-lg fade-in font-babydoll text-sm">
                 {toastMsg}
+              </div>
+            )}
+
+            {/* Modal de Detalle de Libro */}
+            {libroSeleccionadoDetalle && (
+              <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
+                <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative">
+                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+                    <i className="fa-solid fa-xmark text-sm"></i>
+                  </button>
+                  <div className="flex justify-center">
+                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-babydoll text-xl font-bold">{libroSeleccionadoDetalle.libro}</h3>
+                    <p className="text-xs text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider pt-1 font-babydoll">Estado: <b>{libroSeleccionadoDetalle.estado || 'leyendo'}</b></p>
+                  </div>
+                  <div className="pt-2 border-t border-[#E8E6DF] flex gap-2">
+                    <button onClick={() => {
+                      const clon = lecturasPersonales.filter(l => !(l.libro === libroSeleccionadoDetalle.libro && l.email === sesion.email));
+                      setLecturasPersonales(clon);
+                      enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: libroSeleccionadoDetalle.libro });
+                      setLibroSeleccionadoDetalle(null);
+                      mostrarToast('Libro eliminado de la estantería');
+                    }} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold font-babydoll hover:bg-red-50">Eliminar</button>
+                    <button onClick={() => setLibroSeleccionadoDetalle(null)} className="flex-1 editorial-btn py-2 text-xs font-babydoll">Cerrar</button>
+                  </div>
+                </div>
               </div>
             )}
 
