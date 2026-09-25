@@ -978,7 +978,6 @@
 
           if (!mail || !nom) return setErrorLogin('Completa tu nombre y correo electrónico.');
 
-          // Validación estricta: Comprobar que el nombre de usuario sea único
           const nombreOcupado = usuariasClub.some(u => (u.nombre || '').trim().toLowerCase() === nom);
           if (nombreOcupado) {
             return setErrorLogin('Este nombre de usuario ya está en uso. Por favor, elige otro.');
@@ -1036,12 +1035,27 @@
 
         const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); setInputEmail(''); setInputPassword(''); };
 
+        const manejarCambioArchivoFoto = (e) => {
+          const archivo = e.target.files[0];
+          if (!archivo) return;
+
+          if (archivo.size > 2 * 1024 * 1024) {
+            mostrarToast('⚠️ La imagen es muy pesada (máx 2MB).');
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = (uploadEvent) => {
+            setInputNuevaFoto(uploadEvent.target.result);
+          };
+          reader.readAsDataURL(archivo);
+        };
+
         const guardarPerfil = () => {
           const nuevoNom = inputNuevoNombre.trim().toLowerCase();
-          const nuevaFoto = inputNuevaFoto.trim();
+          const nuevaFoto = inputNuevaFoto;
 
           if (nuevoNom && nuevoNom !== (nombreUsuarioPersonalizado || '').toLowerCase()) {
-            // Validación estricta de unicidad al cambiar nombre
             const ocupado = usuariasClub.some(u => (u.email || '').toLowerCase() !== sesion.email.toLowerCase() && (u.nombre || '').trim().toLowerCase() === nuevoNom);
             if (ocupado) {
               mostrarToast('⚠️ Ese nombre de usuario ya está ocupado.');
@@ -1052,7 +1066,7 @@
             enviarAccion('actualizar_nombre', { nombre: nuevoNom });
           }
 
-          if (nuevaFoto !== undefined) {
+          if (nuevaFoto !== undefined && nuevaFoto !== '') {
             setFotoPerfilPersonalizada(nuevaFoto);
             localStorage.setItem('gilda_foto_perfil', nuevaFoto);
             enviarAccion('actualizar_foto', { foto_perfil: nuevaFoto });
@@ -1347,8 +1361,16 @@
                       <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">URL de la foto de perfil</label>
-                      <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={inputNuevaFoto} onChange={e => setInputNuevaFoto(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Subir foto de perfil (desde dispositivo)</label>
+                      <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-[#e2e2da]">
+                        <AvatarUsuaria foto={inputNuevaFoto || fotoPerfilPersonalizada} nombre={inputNuevoNombre || nombreUsuarioPersonalizado} sizeClass="w-10 h-10" textClass="text-sm" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={manejarCambioArchivoFoto} 
+                          className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#1a1a1a] file:text-[#ffffee] hover:file:bg-[#adae1d] hover:file:text-black cursor-pointer" 
+                        />
+                      </div>
                     </div>
                   </div>
 
