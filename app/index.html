@@ -161,7 +161,6 @@
       const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
       const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
       const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
-      // URL para el calendario (puedes crear una pestaña en tu Google Sheets y poner su enlace de publicación CSV aquí, o reutilizar fechasCafe si prefieres)
       const URL_CSV_CALENDARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=200000000&single=true&output=csv';
 
       const FRASES_INICIALES = [
@@ -845,12 +844,32 @@
                 <p className="text-xs text-gray-500 font-babydoll italic text-base">el club de lectura privado</p>
                 <form onSubmit={(e) => {
                   e.preventDefault();
-                  const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === inputEmail.trim().toLowerCase());
-                  if (!socia) return setErrorLogin('Correo no registrado.');
+                  setErrorLogin('');
+                  const emailLimpio = inputEmail.trim().toLowerCase();
+                  const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailLimpio);
+                  
+                  if (!socia) {
+                    return setErrorLogin('Correo no registrado.');
+                  }
                   
                   const modUser = (socia.modalidad || '').toLowerCase().trim();
                   if (modUser.includes('nube') || modUser.includes('papel')) {
                     return setErrorLogin('Tu modalidad ("gilda de nube" o "gilda de papel") es exclusiva para correo y no tiene acceso a la aplicación web.');
+                  }
+
+                  const passwordRegistrada = (socia.password || '').trim();
+
+                  // Validación 1: Si ya tiene contraseña registrada, comprobarla
+                  if (passwordRegistrada !== '' && passwordRegistrada !== inputPassword.trim()) {
+                    return setErrorLogin('Contraseña incorrecta.');
+                  }
+
+                  // Validación 2: Si la columna está vacía (primera vez), exigir introducirla y guardarla
+                  if (passwordRegistrada === '') {
+                    if (!inputPassword.trim()) {
+                      return setErrorLogin('Es tu primera vez. Introduce una contraseña nueva para guardarla.');
+                    }
+                    enviarAccion('actualizar_password', { email: emailLimpio, password: inputPassword.trim() });
                   }
 
                   const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
