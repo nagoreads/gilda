@@ -1320,6 +1320,9 @@
                     </div>
                   )}
                   <button type="submit" className="w-full editorial-btn py-3 text-base">Entrar</button>
+                  <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="block w-full bg-[#FAF6E8] text-[#4A5028] border border-[#DCD6BE] rounded-2xl py-3 text-sm font-bold transition-all hover:bg-[#F2EBD4] text-center">
+                    Registrarse
+                  </a>
                 </form>
               </div>
             </div>
@@ -1886,7 +1889,7 @@
                                   setComentarios([...comentarios, nuevoCom]);
 
                                   enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
-                                  setTextoComentario({ ...textoComentario, [clave]: '' });
+                                  setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: '' });
                                   mostrarToast('Comentario enviado');
                                 }} className="flex gap-2 pt-1">
                                   <input 
