@@ -549,15 +549,20 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
         const [regionAbierta, setRegionAbierta] = useState(null);
 
+        // Base de datos de coordenadas locales para carga instantánea
         const COORDENADAS_PREDEFINIDAS = {
           'país vasco': [42.9896, -2.6189],
+          'euskadi': [42.9896, -2.6189],
           'cataluña': [41.5912, 1.5209],
+          'catalunya': [41.5912, 1.5209],
           'comunidad de madrid': [40.4168, -3.7038],
           'andalucía': [37.3891, -5.9845],
           'galicia': [42.5751, -8.1339],
           'comunidad valenciana': [39.4840, -0.3526],
+          'comunitat valenciana': [39.4840, -0.3526],
           'alava': [42.8467, -2.6716],
           'álava': [42.8467, -2.6716],
+          'araba': [42.8467, -2.6716],
           'gipuzkoa': [43.1500, -2.3000],
           'guipúzcoa': [43.1500, -2.3000],
           'bizkaia': [43.2630, -2.9350],
@@ -566,12 +571,41 @@
           'donostia': [43.3183, -1.9812],
           'san sebastián': [43.3183, -1.9812],
           'bilbao': [43.2630, -2.9350],
+          'eibar': [43.1843, -2.4722],
           'vitoria': [42.8467, -2.6716],
           'gasteiz': [42.8467, -2.6716],
           'madrid': [40.4168, -3.7038],
           'barcelona': [41.3851, 2.1734],
+          'girona': [41.9794, 2.8214],
+          'gerona': [41.9794, 2.8214],
+          'lleida': [41.6176, 0.6200],
+          'lérida': [41.6176, 0.6200],
+          'tarragona': [41.1189, 1.2445],
           'sevilla': [37.3891, -5.9845],
-          'valencia': [39.4699, -0.3763]
+          'málaga': [36.7213, -4.4214],
+          'malaga': [36.7213, -4.4214],
+          'cadiz': [36.5271, -6.2886],
+          'cádiz': [36.5271, -6.2886],
+          'granada': [37.1773, -3.5986],
+          'cordoba': [37.8882, -4.7794],
+          'córdoba': [37.8882, -4.7794],
+          'almería': [36.8340, -2.4637],
+          'almeria': [36.8340, -2.4637],
+          'huelva': [37.2614, -6.9447],
+          'jaén': [37.7796, -3.7849],
+          'jaen': [37.7796, -3.7849],
+          'coruña': [43.3623, -8.4115],
+          'a coruña': [43.3623, -8.4115],
+          'lugo': [43.0125, -7.5558],
+          'ourense': [42.3358, -7.8639],
+          'orense': [42.3358, -7.8639],
+          'pontevedra': [42.4310, -8.6444],
+          'valencia': [39.4699, -0.3763],
+          'valència': [39.4699, -0.3763],
+          'alicante': [38.3452, -0.4815],
+          'alacant': [38.3452, -0.4815],
+          'castellón': [39.9864, -0.0513],
+          'castelló': [39.9864, -0.0513]
         };
 
         const estructuraRegiones = useMemo(() => {
@@ -634,32 +668,31 @@
 
           setTimeout(() => {
             if (mapRef.current) mapRef.current.invalidateSize();
-          }, 250);
+          }, 200);
 
-          const pintarPinPiruleta = (lat, lon, item, boundsArray) => {
+          const pintarPinPiruletaCompacto = (lat, lon, item, boundsArray) => {
             const cant = item.usuarias.length;
             boundsArray.push([lat, lon]);
 
-            // Pin estilo Piruleta (Lollipop) en formato SVG
+            // Piruleta estilizada y mucho más pequeña (16px de ancho x 24px de alto)
             const piruletaHtml = `
-              <div style="position: relative; width: 24px; height: 34px; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 24 34" width="24" height="34" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.25));">
-                  <!-- Palo de la piruleta -->
-                  <line x1="12" y1="18" x2="12" y2="33" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
-                  <!-- Cabeza circular de la piruleta -->
-                  <circle cx="12" cy="10" r="9.5" fill="#adae1d" stroke="#1a1a1a" stroke-width="2"/>
+              <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.3));">
+                  <!-- Palo fino -->
+                  <line x1="8" y1="12" x2="8" y2="23" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/>
+                  <!-- Cabeza circular compacta -->
+                  <circle cx="8" cy="7" r="6" fill="#adae1d" stroke="#1a1a1a" stroke-width="1.5"/>
                 </svg>
-                <!-- Número de usuarias dentro del círculo -->
-                <span style="position: absolute; top: 3.5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 10px; font-family: sans-serif;">${cant}</span>
+                <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 8px; font-family: sans-serif;">${cant}</span>
               </div>
             `;
 
             const customIcon = L.divIcon({
               html: piruletaHtml,
-              className: 'custom-piruleta-gilda',
-              iconSize: [24, 34],
-              iconAnchor: [12, 33], // Ancla la punta del palo exactamente en la coordenada del mapa
-              popupAnchor: [0, -34]
+              className: 'custom-piruleta-mini',
+              iconSize: [16, 24],
+              iconAnchor: [8, 23],
+              popupAnchor: [0, -24]
             });
 
             const marker = L.marker([lat, lon], { icon: customIcon });
@@ -667,7 +700,7 @@
             marker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
               direction: 'top', 
               permanent: false,
-              offset: [0, -30]
+              offset: [0, -20]
             });
 
             marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
@@ -680,27 +713,33 @@
             const boundsArray = [];
 
             for (const item of ciudadesMap) {
-              const claveLimpia = item.nombreLocalidad.toLowerCase().trim();
+              const locNombre = item.nombreLocalidad.toLowerCase().trim();
               
-              if (COORDENADAS_PREDEFINIDAS[claveLimpia]) {
-                const [lat, lon] = COORDENADAS_PREDEFINIDAS[claveLimpia];
-                pintarPinPiruleta(lat, lon, item, boundsArray);
-                continue;
+              // 1. Coincidencia directa o parcial en la base local
+              let coor = COORDENADAS_PREDEFINIDAS[locNombre];
+
+              if (!coor) {
+                // Búsqueda inteligente de la palabra dentro de las claves
+                const claveEncontrada = Object.keys(COORDENADAS_PREDEFINIDAS).find(k => locNombre.includes(k) || k.includes(locNombre));
+                if (claveEncontrada) coor = COORDENADAS_PREDEFINIDAS[claveEncontrada];
               }
 
-              try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
-                const data = await res.json();
-                if (data && data.length > 0) {
-                  pintarPinPiruleta(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
-                }
-              } catch (e) {
-                console.error("No se pudieron obtener coordenadas para:", item.query);
+              if (coor) {
+                pintarPinPiruletaCompacto(coor[0], coor[1], item, boundsArray);
+              } else {
+                // 2. Consulta rápida solo para lugares desconocidos
+                try {
+                  const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
+                  const data = await res.json();
+                  if (data && data.length > 0) {
+                    pintarPinPiruletaCompacto(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
+                  }
+                } catch (e) {}
               }
             }
 
             if (boundsArray.length > 0 && mapRef.current) {
-              mapRef.current.fitBounds(boundsArray, { padding: [30, 30], maxZoom: 7 });
+              mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 7 });
             }
           };
 
