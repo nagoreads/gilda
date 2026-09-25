@@ -632,32 +632,34 @@
             mapRef.current = map;
           }
 
-          // Forzar refresco de dimensiones de Leaflet para corregir visibilidad inicial
           setTimeout(() => {
             if (mapRef.current) mapRef.current.invalidateSize();
           }, 250);
 
-          const pintarPin = (lat, lon, item, boundsArray) => {
+          const pintarPinPiruleta = (lat, lon, item, boundsArray) => {
             const cant = item.usuarias.length;
             boundsArray.push([lat, lon]);
 
-            // Pin estilo gota/ubicación SVG en el color primario de la app (#1a1a1a con acento #adae1d)
-            const pinHtml = `
-              <div style="position: relative; width: 28px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 24 32" width="28" height="36" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20c0-6.63-5.37-12-12-12z" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5"/>
-                  <circle cx="12" cy="11" r="5" fill="#adae1d" />
+            // Pin estilo Piruleta (Lollipop) en formato SVG
+            const piruletaHtml = `
+              <div style="position: relative; width: 24px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 34" width="24" height="34" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.25));">
+                  <!-- Palo de la piruleta -->
+                  <line x1="12" y1="18" x2="12" y2="33" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+                  <!-- Cabeza circular de la piruleta -->
+                  <circle cx="12" cy="10" r="9.5" fill="#adae1d" stroke="#1a1a1a" stroke-width="2"/>
                 </svg>
-                <span style="position: absolute; top: 5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 9px; font-family: sans-serif;">${cant}</span>
+                <!-- Número de usuarias dentro del círculo -->
+                <span style="position: absolute; top: 3.5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 10px; font-family: sans-serif;">${cant}</span>
               </div>
             `;
 
             const customIcon = L.divIcon({
-              html: pinHtml,
-              className: 'custom-pin-gilda',
-              iconSize: [28, 36],
-              iconAnchor: [14, 36], // Ancla la punta inferior del pin exactamente en la coordenada
-              popupAnchor: [0, -36]
+              html: piruletaHtml,
+              className: 'custom-piruleta-gilda',
+              iconSize: [24, 34],
+              iconAnchor: [12, 33], // Ancla la punta del palo exactamente en la coordenada del mapa
+              popupAnchor: [0, -34]
             });
 
             const marker = L.marker([lat, lon], { icon: customIcon });
@@ -665,7 +667,7 @@
             marker.bindTooltip(`<b>${item.nombreLocalidad}</b>: ${cant} lectora${cant > 1 ? 's' : ''}`, { 
               direction: 'top', 
               permanent: false,
-              offset: [0, -32]
+              offset: [0, -30]
             });
 
             marker.on('click', () => setRegionSeleccionada({ region: item.nombreLocalidad, usuarias: item.usuarias }));
@@ -682,7 +684,7 @@
               
               if (COORDENADAS_PREDEFINIDAS[claveLimpia]) {
                 const [lat, lon] = COORDENADAS_PREDEFINIDAS[claveLimpia];
-                pintarPin(lat, lon, item, boundsArray);
+                pintarPinPiruleta(lat, lon, item, boundsArray);
                 continue;
               }
 
@@ -690,14 +692,13 @@
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
                 const data = await res.json();
                 if (data && data.length > 0) {
-                  pintarPin(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
+                  pintarPinPiruleta(parseFloat(data[0].lat), parseFloat(data[0].lon), item, boundsArray);
                 }
               } catch (e) {
                 console.error("No se pudieron obtener coordenadas para:", item.query);
               }
             }
 
-            // Si hay puntos dibujados, se ajusta el encuadre para que todos los pines queden visibles a simple vista
             if (boundsArray.length > 0 && mapRef.current) {
               mapRef.current.fitBounds(boundsArray, { padding: [30, 30], maxZoom: 7 });
             }
