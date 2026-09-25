@@ -1267,7 +1267,7 @@
                             .map((pend, pIdx) => (
                               <div key={pIdx} className="bg-[#FAF6E8] p-2.5 rounded-xl border border-[#EEDFB3] text-xs flex justify-between items-center gap-2">
                                 <span className="font-babydoll font-bold text-[#232321]">{pend.evento || pend.titulo || pend.nombre}</span>
-                                <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">Por fechar</span>
+                                <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-babydoll shrink-0">recordatorio</span>
                               </div>
                             ))
                         )}
@@ -1304,6 +1304,7 @@
                             <option value="">Selecciona tipo de evento...</option>
                             <option value="Comentario del libro">Comentario del libro</option>
                             <option value="Cafecito con la autora">Cafecito con la autora</option>
+                            <option value="Último día para votar">Último día para votar</option>
                           </select>
                         </div>
 
