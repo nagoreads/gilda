@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#adae1d" />
+    <meta name="theme-color" content="#4A5028" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>gilda — club de lectura</title>
@@ -17,6 +17,11 @@
         });
       }
     </script>
+
+    <!-- Google Fonts: Caveat (Estilo Baby Doll) & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,10 +42,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
+      /* Si subes el archivo 'babydoll.ttf' a tu repositorio de GitHub, puedes descomentar la siguiente línea: */
+      /* @font-face { font-family: 'BabyDoll'; src: url('babydoll.ttf') format('truetype'); } */
+
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #adae1d;
-        color: #1a1a1a;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #FBF9F5;
+        color: #232321;
         -webkit-tap-highlight-color: transparent;
         margin: 0;
         min-height: 100vh;
@@ -50,67 +58,61 @@
         -webkit-font-smoothing: antialiased;
       }
 
-      .font-editorial-title {
-        font-family: 'Georgia', serif;
-        letter-spacing: -0.5px;
-      }
-
-      .font-modern-title {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-weight: 700;
-        letter-spacing: -1.2px;
+      .font-babydoll {
+        font-family: 'BabyDoll', 'Caveat', cursive, sans-serif;
+        letter-spacing: 0.2px;
       }
 
       .editorial-card {
-        background: #ffffee;
-        color: #1a1a1a;
-        border: 1px solid #e2e2da;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        background: #FFFFFF;
+        color: #232321;
+        border: 1px solid #E8E6DF;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
       }
 
       .editorial-input {
-        background: #ffffff;
-        border: 1px solid #e2e2da;
-        border-radius: 8px;
-        color: #1a1a1a;
+        background: #F8F7F3;
+        border: 1px solid #E8E6DF;
+        border-radius: 12px;
+        color: #232321;
         font-family: inherit;
         transition: all 0.2s ease;
       }
       .editorial-input:focus {
         outline: none;
-        background: #ffffff;
-        border-color: #adae1d;
-        box-shadow: 0 0 0 3px rgba(173, 174, 29, 0.2);
+        background: #FFFFFF;
+        border-color: #4A5028;
+        box-shadow: 0 0 0 3px rgba(74, 80, 40, 0.12);
       }
 
       .editorial-btn {
-        background: #1a1a1a;
-        color: #ffffff;
+        background: #232321;
+        color: #FBF9F5;
         border-radius: 20px;
-        font-weight: 500;
+        font-weight: 600;
         font-family: inherit;
         transition: all 0.2s ease;
       }
-      .editorial-btn:hover { background: #adae1d; color: #1a1a1a; }
+      .editorial-btn:hover { background: #4A5028; color: #FFFFFF; }
 
       .editorial-nav {
-        background: rgba(26, 26, 26, 0.95);
+        background: rgba(255, 255, 255, 0.94);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid #E8E6DF;
         padding-bottom: env(safe-area-inset-bottom, 12px);
       }
 
       .fade-in { animation: fadeIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
       @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
+        from { opacity: 0; transform: scale(0.98); }
         to { opacity: 1; transform: scale(1); }
       }
 
       @keyframes windowGlow {
-        0%, 100% { box-shadow: 0 0 4px #fffa8d; transform: scale(1); }
-        50% { box-shadow: 0 0 10px #ffffaa; transform: scale(1.03); }
+        0%, 100% { box-shadow: 0 0 6px #C5CB86; transform: scale(1); }
+        50% { box-shadow: 0 0 12px #9EA552; transform: scale(1.03); }
       }
       .ventana-novedad {
         animation: windowGlow 2s infinite ease-in-out;
@@ -126,11 +128,11 @@
         animation: floatBannerQueue 4.5s ease-in-out forwards;
       }
 
-      #mapa-gilda { height: 280px; width: 100%; border-radius: 8px; border: 1px solid #e2e2da; z-index: 1; }
+      #mapa-gilda { height: 280px; width: 100%; border-radius: 16px; border: 1px solid #E8E6DF; z-index: 1; }
 
-      ::-webkit-scrollbar { width: 3px; height: 3px; }
+      ::-webkit-scrollbar { width: 4px; height: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 2px; }
+      ::-webkit-scrollbar-thumb { background: #D0CEB3; border-radius: 2px; }
     </style>
   </head>
   <body>
@@ -286,12 +288,12 @@
                 className="w-full editorial-input p-2.5 text-xs italic pr-8"
               />
               {buscando && (
-                <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#adae1d]"></i>
+                <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#4A5028]"></i>
               )}
             </div>
 
             {mostrarDropdown && sugerencias.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 bg-[#ffffee] border border-[#e2e2da] rounded-b-lg shadow-xl max-h-56 overflow-y-auto mt-1">
+              <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#E8E6DF] rounded-b-lg shadow-xl max-h-56 overflow-y-auto mt-1">
                 {sugerencias.map((item, idx) => (
                   <div
                     key={idx}
@@ -299,15 +301,15 @@
                       onSelectLibro(item);
                       setMostrarDropdown(false);
                     }}
-                    className="flex items-center gap-2.5 p-2 hover:bg-white cursor-pointer border-b border-[#e2e2da] last:border-0 text-left"
+                    className="flex items-center gap-2.5 p-2 hover:bg-[#FBF9F5] cursor-pointer border-b border-[#E8E6DF] last:border-0 text-left"
                   >
                     {item.portada ? (
                       <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" />
                     ) : (
-                      <div className="w-7 h-10 bg-white rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#e2e2da]">Sin foto</div>
+                      <div className="w-7 h-10 bg-[#F8F7F3] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E8E6DF]">Sin foto</div>
                     )}
                     <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-[#1a1a1a] truncate leading-tight">{item.titulo}</p>
+                      <p className="text-xs font-bold text-[#232321] truncate leading-tight font-babydoll">{item.titulo}</p>
                       <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
                     </div>
                   </div>
@@ -357,10 +359,10 @@
           return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-xs shrink-0`} />;
         }
         return (
-          <div className={`${sizeClasses} bg-[#1a1a1a] text-[#ffffee] p-1.5 rounded shadow-xs border border-[#e2e2da] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
-            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#adae1d]"></div>
-            <span className="font-medium tracking-tight line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
-            <span className="text-[8px] text-[#adae1d] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
+          <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-base">{titulo || 'Sin título'}</span>
+            <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
           </div>
         );
       }
@@ -374,13 +376,13 @@
               src={foto} 
               alt={nombre || 'Socia'} 
               onError={() => setErrorImg(true)} 
-              className={`${sizeClass} rounded-full object-cover border border-[#e2e2da] shrink-0`} 
+              className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} 
             />
           );
         }
 
         return (
-          <div className={`${sizeClass} rounded-full bg-white border border-[#e2e2da] flex items-center justify-center font-editorial-title ${textClass} text-[#adae1d] shrink-0`}>
+          <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>
             {(nombre || 'Socia').charAt(0).toUpperCase()}
           </div>
         );
@@ -446,9 +448,9 @@
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
-            <h2 className="text-[28px] font-editorial-title font-medium text-center mb-1 text-white">gilda</h2>
-            <p className="text-[13px] text-white/80 text-center mb-4 leading-relaxed">
-              Selecciona una ventana para ver sus lecturas actuales.
+            <h2 className="text-[48px] font-babydoll font-bold text-center mb-0 text-[#232321] leading-none">gilda</h2>
+            <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-babydoll italic">
+              selecciona una ventana para asomarte a sus lecturas
             </p>
 
             <div className="h-8 mb-4 flex items-center justify-center">
@@ -456,9 +458,9 @@
                 <div 
                   key={notificacionActual.id + notificacionActual.texto}
                   onClick={() => setUsuariaActivaIndice(notificacionActual.indice)}
-                  className="bg-[#1a1a1a] text-[#ffffee] border border-[#adae1d] px-3 py-1 rounded-full shadow-lg text-[10px] font-medium tracking-wide notificacion-secuencial cursor-pointer flex items-center gap-2"
+                  className="bg-[#232321] text-[#FBF9F5] border border-[#4A5028] px-3.5 py-1 rounded-full shadow-md text-[11px] font-medium tracking-wide notificacion-secuencial cursor-pointer flex items-center gap-2 font-babydoll"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#adae1d] animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#A2A86E] animate-pulse"></span>
                   <span>{notificacionActual.texto}</span>
                 </div>
               )}
@@ -476,13 +478,13 @@
                   <div key={indice} className="relative flex flex-col items-center">
                     <div
                       onClick={() => setUsuariaActivaIndice(indice)}
-                      className={`w-[32px] h-[44px] rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-105 relative ${
-                        estaLeyendo ? 'bg-[#ffffee] shadow-[0_4px_12px_rgba(255,255,238,0.2)]' : 'bg-[#8e9014]'
+                      className={`w-[32px] h-[44px] rounded-[2px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${
+                        estaLeyendo ? 'bg-[#FAF6E8] border-[#DCD6BE] shadow-[0_4px_12px_rgba(230,220,180,0.3)]' : 'bg-[#E3E0D6] border-[#D0CEB3]'
                       } ${tieneNovedad ? 'ventana-novedad' : ''} ${
-                        esNotificacionActiva ? 'ring-2 ring-[#fffa8d] scale-110 z-20' : ''
-                      } ${seleccionada ? 'outline-[1.5px] outline-white outline-offset-[3px]' : ''}`}
+                        esNotificacionActiva ? 'ring-2 ring-[#4A5028] scale-110 z-20' : ''
+                      } ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}
                     ></div>
-                    <span className="text-[10px] text-white/90 font-medium tracking-tight mt-1.5 truncate max-w-[60px] text-center">
+                    <span className="text-[11px] text-gray-700 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-babydoll">
                       {nombreMostrar}
                     </span>
                   </div>
@@ -490,29 +492,29 @@
               })}
             </div>
 
-            <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in bg-[#ffffee] text-[#1a1a1a] border border-[#e2e2da]">
-              <div className="flex justify-between items-center w-full border-b border-[#e2e2da] pb-2.5 gap-2">
+            <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in">
+              <div className="flex justify-between items-center w-full border-b border-[#E8E6DF] pb-2.5 gap-2">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" />
-                  <span className="font-editorial-title text-base font-medium truncate">
+                  <span className="font-babydoll text-2xl font-bold truncate text-[#232321]">
                     la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
                   </span>
                 </div>
-                <span className="text-[10px] tracking-[0.5px] text-[#1a1a1a] font-bold whitespace-nowrap">@gilda.mailclub</span>
+                <span className="text-[10px] tracking-[0.5px] text-gray-400 font-bold whitespace-nowrap">@gilda.mailclub</span>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da]">
+                <div className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
-                    <div className="text-xs text-[#1a1a1a] overflow-hidden">
-                      <p className="font-bold truncate">{libroActual.titulo}</p>
-                      <p className="text-[11px] text-gray-600">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+                    <div className="text-xs text-[#232321] overflow-hidden">
+                      <p className="font-bold truncate font-babydoll text-base">{libroActual.titulo}</p>
+                      <p className="text-[11px] text-gray-500">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                     </div>
                   </div>
                   <button 
                     onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)}
-                    className="shrink-0 bg-[#ffffee] text-[#1a1a1a] border border-[#e2e2da] hover:bg-[#adae1d] px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
+                    className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
                     title="Añadir a mi estantería"
                   >
                     <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
@@ -520,17 +522,17 @@
                 </div>
 
                 {misLibrosPersonales.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#e2e2da]">
+                  <div key={idx} className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
-                      <div className="text-xs text-[#1a1a1a] overflow-hidden">
-                        <p className="font-bold truncate">{item.libro}</p>
-                        <p className="text-[11px] text-gray-600">pág. <b>{item.pagina || item.paginas || 0}</b></p>
+                      <div className="text-xs text-[#232321] overflow-hidden">
+                        <p className="font-bold truncate font-babydoll text-base">{item.libro}</p>
+                        <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                       </div>
                     </div>
                     <button 
                       onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')}
-                      className="shrink-0 bg-[#ffffee] text-[#1a1a1a] border border-[#e2e2da] hover:bg-[#adae1d] px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
+                      className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1"
                       title="Añadir a mi estantería"
                     >
                       <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
@@ -549,7 +551,6 @@
         const [regionSeleccionada, setRegionSeleccionada] = useState(null);
         const [regionAbierta, setRegionAbierta] = useState(null);
 
-        // Base de datos de coordenadas locales para carga instantánea
         const COORDENADAS_PREDEFINIDAS = {
           'país vasco': [42.9896, -2.6189],
           'euskadi': [42.9896, -2.6189],
@@ -674,16 +675,13 @@
             const cant = item.usuarias.length;
             boundsArray.push([lat, lon]);
 
-            // Piruleta estilizada y mucho más pequeña (16px de ancho x 24px de alto)
             const piruletaHtml = `
               <div style="position: relative; width: 16px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.3));">
-                  <!-- Palo fino -->
-                  <line x1="8" y1="12" x2="8" y2="23" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"/>
-                  <!-- Cabeza circular compacta -->
-                  <circle cx="8" cy="7" r="6" fill="#adae1d" stroke="#1a1a1a" stroke-width="1.5"/>
+                <svg viewBox="0 0 16 24" width="16" height="24" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
+                  <line x1="8" y1="12" x2="8" y2="23" stroke="#232321" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="8" cy="7" r="6" fill="#4A5028" stroke="#232321" stroke-width="1.5"/>
                 </svg>
-                <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #1a1a1a; font-weight: bold; font-size: 8px; font-family: sans-serif;">${cant}</span>
+                <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">${cant}</span>
               </div>
             `;
 
@@ -714,12 +712,9 @@
 
             for (const item of ciudadesMap) {
               const locNombre = item.nombreLocalidad.toLowerCase().trim();
-              
-              // 1. Coincidencia directa o parcial en la base local
               let coor = COORDENADAS_PREDEFINIDAS[locNombre];
 
               if (!coor) {
-                // Búsqueda inteligente de la palabra dentro de las claves
                 const claveEncontrada = Object.keys(COORDENADAS_PREDEFINIDAS).find(k => locNombre.includes(k) || k.includes(locNombre));
                 if (claveEncontrada) coor = COORDENADAS_PREDEFINIDAS[claveEncontrada];
               }
@@ -727,7 +722,6 @@
               if (coor) {
                 pintarPinPiruletaCompacto(coor[0], coor[1], item, boundsArray);
               } else {
-                // 2. Consulta rápida solo para lugares desconocidos
                 try {
                   const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.query)}&limit=1`);
                   const data = await res.json();
@@ -751,17 +745,17 @@
             <div className="relative">
               <div id="mapa-gilda"></div>
               {regionSeleccionada && (
-                <div className="absolute inset-0 z-[1000] bg-[#ffffee]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#1a1a1a]">
-                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
-                    <h3 className="font-editorial-title font-medium text-base">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-                    <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
+                <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#232321]">
+                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
+                    <h3 className="font-babydoll font-bold text-xl">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                    <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#E8E6DF] px-2 py-1 rounded">cerrar</button>
                   </div>
                   <div className="overflow-y-auto flex-grow space-y-2">
                     {regionSeleccionada.usuarias.map((u, i) => (
-                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#e2e2da] gap-2">
+                      <div key={i} className="flex justify-between items-center text-xs p-2 bg-white rounded border border-[#E8E6DF] gap-2">
                         <div className="flex items-center gap-2 overflow-hidden">
                           <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                          <span className="font-medium truncate">{u.nombre}</span>
+                          <span className="font-bold truncate font-babydoll text-sm">{u.nombre}</span>
                         </div>
                         <span className="text-gray-500 shrink-0">{u.ciudad || 'Sin localidad'}</span>
                       </div>
@@ -771,10 +765,10 @@
               )}
             </div>
 
-            <div className="bg-white p-3.5 rounded-xl border border-[#e2e2da] space-y-2">
-              <div className="flex justify-between items-center pb-2 border-b border-[#e2e2da]">
-                <h4 className="font-editorial-title text-xs font-bold text-[#1a1a1a]">Comunidades Autónomas y Municipios</h4>
-                <span className="text-[10px] text-gray-500 uppercase font-semibold">Usuarias</span>
+            <div className="bg-white p-3.5 rounded-xl border border-[#E8E6DF] space-y-2">
+              <div className="flex justify-between items-center pb-2 border-b border-[#E8E6DF]">
+                <h4 className="font-babydoll text-lg font-bold text-[#232321]">Comunidades Autónomas y Municipios</h4>
+                <span className="text-[10px] text-gray-400 uppercase font-semibold">Usuarias</span>
               </div>
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
                 {estructuraRegiones.length === 0 ? (
@@ -783,29 +777,29 @@
                   estructuraRegiones.map((item, idx) => {
                     const estaAbierta = regionAbierta === item.region;
                     return (
-                      <div key={idx} className="rounded-lg border border-[#e2e2da] overflow-hidden">
+                      <div key={idx} className="rounded-lg border border-[#E8E6DF] overflow-hidden">
                         <div 
                           onClick={() => setRegionAbierta(estaAbierta ? null : item.region)}
-                          className="flex justify-between items-center text-xs p-2.5 bg-[#ffffee] hover:bg-[#f2f2e4] cursor-pointer transition-colors"
+                          className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] hover:bg-[#F2EFE9] cursor-pointer transition-colors"
                         >
                           <div className="flex items-center gap-2">
-                            <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-500`}></i>
-                            <span className="font-medium text-[#1a1a1a] capitalize">{item.region}</span>
+                            <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-400`}></i>
+                            <span className="font-bold text-[#232321] capitalize font-babydoll text-base">{item.region}</span>
                           </div>
-                          <span className="bg-[#adae1d] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+                          <span className="bg-[#4A5028] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
                             {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
                           </span>
                         </div>
 
                         {estaAbierta && (
-                          <div className="bg-white p-2 border-t border-[#e2e2da] space-y-1">
+                          <div className="bg-white p-2 border-t border-[#E8E6DF] space-y-1">
                             {item.ciudades.map((sub, cIdx) => (
                               <div 
                                 key={cIdx} 
                                 onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
                                 className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
                               >
-                                <span className="text-gray-700 capitalize">{sub.ciudad}</span>
+                                <span className="text-gray-700 capitalize font-babydoll text-sm">{sub.ciudad}</span>
                                 <span className="text-gray-400 font-semibold">{sub.count}</span>
                               </div>
                             ))}
@@ -1338,58 +1332,59 @@
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
               <div className="editorial-card max-w-sm w-full p-8 space-y-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#adae1d] rounded-bl-full opacity-10"></div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#4A5028] rounded-bl-full opacity-10"></div>
                 
                 <div className="space-y-1 relative z-10 text-center">
-                  <h1 className="font-modern-title text-4xl text-[#1a1a1a]">gilda</h1>
+                  <h1 className="font-babydoll text-6xl text-[#232321] font-bold">gilda</h1>
+                  <p className="text-xs text-gray-500 font-babydoll italic text-base">el club de lectura privado</p>
                 </div>
 
-                <div className="bg-white border border-[#e2e2da] p-3 rounded-lg text-center text-xs text-gray-600">
-                  <span className="text-[#1a1a1a] font-bold">{usuariasClub.length}</span> lectoras
+                <div className="bg-[#FBF9F5] border border-[#E8E6DF] p-3 rounded-lg text-center text-xs text-gray-600">
+                  <span className="text-[#232321] font-bold font-babydoll text-lg">{usuariasClub.length}</span> lectoras conectadas
                 </div>
 
                 {!modoRegistro ? (
                   <form onSubmit={iniciarSesion} className="space-y-4 relative z-10">
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Correo electrónico</label>
                       <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Contraseña</label>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Contraseña</label>
                       <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
                     </div>
                     {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
                       Iniciar sesión
                     </button>
                   </form>
                 ) : (
                   <form onSubmit={registrarse} className="space-y-4 relative z-10 fade-in text-left">
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Nombre de usuario (único)</label>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Nombre de usuario (único)</label>
                       <input type="text" placeholder="tu nombre o apodo" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Correo electrónico</label>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Correo electrónico</label>
                       <input type="email" placeholder="tu@correo.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2 text-xs mt-1" />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Pueblo o Ciudad</label>
+                        <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Pueblo o Ciudad</label>
                         <input type="text" placeholder="ej. tolosa, alava..." value={regCiudad} onChange={(e) => setRegCiudad(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
                       </div>
                       <div>
-                        <label className="text-[10px] uppercase font-semibold text-gray-500 ml-1">Código Postal</label>
+                        <label className="text-[10px] uppercase font-semibold text-gray-400 ml-1">Código Postal</label>
                         <input type="text" placeholder="ej. 20400" value={regCodigoPostal} onChange={(e) => setRegCodigoPostal(e.target.value)} className="w-full editorial-input px-3 py-2 text-xs mt-1" />
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-[10px] uppercase font-bold text-[#1a1a1a] block mb-1">modalidad de gilda</label>
+                      <label className="text-[10px] uppercase font-bold text-[#232321] block mb-1">modalidad de gilda</label>
                       <select 
                         value={regModalidad} 
                         onChange={(e) => setRegModalidad(e.target.value)}
-                        className="w-full editorial-input p-2 text-xs bg-white font-medium text-[#1a1a1a]"
+                        className="w-full editorial-input p-2 text-xs bg-white font-medium text-[#232321]"
                       >
                         <optgroup label="asomarme un ratito">
                           <option value="cotilla">gilda cotilla (gratis)</option>
@@ -1405,26 +1400,26 @@
                       </select>
                     </div>
 
-                    <p className="text-[10px] text-gray-500 italic bg-white p-2.5 rounded-lg border border-[#e2e2da] leading-normal text-left">
-                      puedes cancelar tu suscripción cuando quieras, o incluso pausarla durante algún mes si no vas a poder hacer uso de gilda por cualquier cosa que te surja.
+                    <p className="text-[10px] text-gray-500 italic bg-[#FBF9F5] p-2.5 rounded-lg border border-[#E8E6DF] leading-normal text-left">
+                      Puedes cancelar tu suscripción cuando quieras o pausarla durante algún mes.
                     </p>
 
                     {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
 
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-medium tracking-wide">
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
                       {regModalidad === 'cotilla' ? 'Crear cuenta gratuita' : 'Ir al pago en Stripe'}
                     </button>
                   </form>
                 )}
 
-                <div className="pt-4 border-t border-[#e2e2da] text-center space-y-2">
+                <div className="pt-4 border-t border-[#E8E6DF] text-center space-y-2">
                   <p className="text-[11px] text-gray-500 leading-relaxed px-1">
-                    {modoRegistro ? '¿Ya tienes una cuenta registrada?' : 'por si no lo sabes, hay distintas modalidades de gilda, así que seguro que encuentras la tuya en el siguiente botón:'}
+                    {modoRegistro ? '¿Ya tienes una cuenta registrada?' : '¿Aún no eres miembro de gilda?'}:
                   </p>
                   <button 
                     type="button"
                     onClick={() => { setModoRegistro(!modoRegistro); setErrorLogin(''); }} 
-                    className="inline-block text-[11px] text-[#adae1d] font-bold hover:underline bg-transparent border-0 cursor-pointer"
+                    className="inline-block text-xs text-[#4A5028] font-bold hover:underline bg-transparent border-0 cursor-pointer font-babydoll text-base"
                   >
                     {modoRegistro ? 'iniciar sesión con mi correo' : 'quiero registrarme :)'}
                   </button>
@@ -1438,57 +1433,57 @@
           <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
             
             {toastMsg && (
-              <div className="fixed top-6 z-50 bg-[#1a1a1a] text-[#ffffee] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20">
-                <span className="w-2 h-2 rounded-full bg-[#adae1d]"></span><span>{toastMsg}</span>
+              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-sm">
+                <span className="w-2 h-2 rounded-full bg-[#A2A86E]"></span><span>{toastMsg}</span>
               </div>
             )}
 
-            <header className="w-full mb-5 flex justify-between items-center bg-[#ffffee] text-[#1a1a1a] p-3.5 rounded-xl border border-[#e2e2da] shadow-xs">
+            <header className="w-full mb-5 flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-3.5 rounded-2xl border border-[#E8E6DF] shadow-xs">
               <div className="flex items-center gap-3 overflow-hidden">
                 <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
                 <div className="overflow-hidden">
                   <div className="flex items-center gap-2">
-                    <h2 className="font-semibold text-sm leading-none truncate">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                    <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
                     <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
                       <i className="fa-solid fa-pen"></i>
                     </button>
                   </div>
-                  <span className="text-[9px] text-gray-500 uppercase block mt-0.5 truncate">{sesion.modalidad}</span>
+                  <span className="text-[9px] text-gray-400 uppercase block mt-0.5 truncate">{sesion.modalidad}</span>
                 </div>
               </div>
               <button onClick={cerrarSesion} className="text-gray-400 hover:text-black shrink-0"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
             </header>
 
             {editandoPerfil && (
-              <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in bg-[#ffffee]">
-                  <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2">
-                    <h3 className="font-editorial-title text-base font-bold">Editar mi perfil</h3>
-                    <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-500">✕</button>
+              <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in">
+                  <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
+                    <h3 className="font-babydoll text-xl font-bold">Editar mi perfil</h3>
+                    <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-400">✕</button>
                   </div>
 
                   <div className="space-y-3 text-xs">
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Nombre de usuario (único)</label>
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1">Nombre de usuario (único)</label>
                       <input type="text" value={inputNuevoNombre} onChange={e => setInputNuevoNombre(e.target.value)} className="w-full editorial-input p-2 text-xs" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase font-semibold text-gray-500 block mb-1">Subir foto de perfil (desde dispositivo)</label>
-                      <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-[#e2e2da]">
+                      <label className="text-[10px] uppercase font-semibold text-gray-400 block mb-1">Foto de perfil</label>
+                      <div className="flex items-center gap-3 bg-[#FBF9F5] p-2 rounded-xl border border-[#E8E6DF]">
                         <AvatarUsuaria foto={inputNuevaFoto || fotoPerfilPersonalizada} nombre={inputNuevoNombre || nombreUsuarioPersonalizado} sizeClass="w-10 h-10" textClass="text-sm" />
                         <input 
                           type="file" 
                           accept="image/*" 
                           onChange={manejarCambioArchivoFoto} 
-                          className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#1a1a1a] file:text-[#ffffee] hover:file:bg-[#adae1d] hover:file:text-black cursor-pointer" 
+                          className="w-full text-[11px] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#232321] file:text-[#FBF9F5] hover:file:bg-[#4A5028] hover:file:text-white cursor-pointer" 
                         />
                       </div>
                     </div>
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-white border border-[#e2e2da] text-gray-600 py-2 rounded-xl text-xs font-medium">Cancelar</button>
-                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs">Guardar cambios</button>
+                    <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-[#FBF9F5] border border-[#E8E6DF] text-gray-600 py-2 rounded-xl text-xs font-medium">Cancelar</button>
+                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-base">Guardar cambios</button>
                   </div>
                 </div>
               </div>
@@ -1496,7 +1491,7 @@
 
             <main className="w-full flex-grow space-y-4 fade-in">
               {cargandoDatos ? (
-                <div className="text-center py-20 text-xs text-white animate-pulse">Cargando volúmenes...</div>
+                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
               ) : (
                 <>
                   {seccionApp === 'inicio' && (
@@ -1505,53 +1500,53 @@
                         <div className="flex gap-4 items-center">
                           <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
                           <div className="space-y-2 w-full">
-                            <span className="text-[9px] uppercase tracking-wider text-[#adae1d] font-bold">Lectura del Club</span>
-                            <h2 className="font-editorial-title text-base font-medium leading-snug">{libroActual.titulo}</h2>
+                            <span className="text-[9px] uppercase tracking-wider text-[#4A5028] font-bold">Lectura del Club</span>
+                            <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
                             <p className="text-xs text-gray-500 italic">{libroActual.autora}</p>
                             <div className="mt-2">
-                              <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+                              <div className="flex justify-between text-[10px] text-gray-400 mb-1">
                                 <span>progreso general</span><span>{porcentajeLibro}%</span>
                               </div>
-                              <div className="w-full bg-white rounded-full h-1 border border-[#e2e2da]"><div className="bg-[#adae1d] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
+                              <div className="w-full bg-[#F8F7F3] rounded-full h-1.5 border border-[#E8E6DF]"><div className="bg-[#4A5028] h-full rounded-full transition-all" style={{width: `${porcentajeLibro}%`}}></div></div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="pt-3 border-t border-[#e2e2da] flex items-center justify-between gap-2">
-                          <span className="text-xs text-gray-500">página por la que vas:</span>
+                        <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
+                          <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
                           <div className="flex items-center gap-1">
-                            <button onClick={() => actualizarPagina(miPagina - 5)} className="bg-white border border-[#e2e2da] px-2 py-1 rounded text-xs">-5</button>
+                            <button onClick={() => actualizarPagina(miPagina - 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs">-5</button>
                             <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-12 text-center py-1 text-xs" />
-                            <button onClick={() => actualizarPagina(miPagina + 5)} className="bg-white border border-[#e2e2da] px-2 py-1 rounded text-xs">+5</button>
-                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2 py-1 text-xs">ok</button>
+                            <button onClick={() => actualizarPagina(miPagina + 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs">+5</button>
+                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2.5 py-1 text-xs font-babydoll text-sm">ok</button>
                           </div>
                         </div>
                       </div>
 
                       <div className="editorial-card p-4 space-y-2">
-                        <h3 className="font-editorial-title text-sm">Ubicación geográfica</h3>
+                        <h3 className="font-babydoll text-xl font-bold">Ubicación geográfica</h3>
                         <div className="grid grid-cols-2 gap-2">
                           <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
                           <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
                         </div>
-                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs mt-1">Actualizar ubicación</button>
+                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-base mt-1">Actualizar ubicación</button>
                       </div>
 
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-editorial-title text-sm">Notas y fragmentos</h3>
-                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-500 uppercase">
+                          <h3 className="font-babydoll text-xl font-bold">Notas y fragmentos</h3>
+                          <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-semibold">
                             {botellaAbierta ? 'ocultar' : 'descubrir cita'}
                           </button>
                         </div>
                         {botellaAbierta && (
-                          <div className="p-3 bg-white border border-[#e2e2da] rounded-lg text-xs italic font-editorial-title text-gray-700">
+                          <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">
                             "{FRASES_INICIALES[fraseActualBotella]}"
                           </div>
                         )}
-                        <div className="flex gap-2 pt-2 border-t border-[#e2e2da]">
+                        <div className="flex gap-2 pt-2 border-t border-[#E8E6DF]">
                           <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs">guardar</button>
+                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
                         </div>
                       </div>
                     </div>
@@ -1570,9 +1565,9 @@
                   {seccionApp === 'habitacion' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-4">
-                        <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2.5">
-                          <h3 className="font-editorial-title text-lg">Mi Estantería Personal</h3>
-                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#adae1d] text-black shadow-xs' : 'bg-white border border-[#e2e2da] text-gray-500'}`}>
+                        <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
+                          <h3 className="font-babydoll text-2xl font-bold">Mi Estantería Personal</h3>
+                          <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
                             {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                           </button>
                         </div>
@@ -1581,8 +1576,8 @@
                           e.preventDefault();
                           if (!libroPersonal.trim()) return;
                           guardarLibroPersonal(undefined, undefined, tabEstanteria);
-                        }} className="space-y-2 bg-white p-3.5 rounded-xl border border-[#e2e2da]">
-                          <span className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Añadir libro a esta estantería</span>
+                        }} className="space-y-2 bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E8E6DF]">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">Añadir libro a esta estantería</span>
                           
                           <BuscadorLibros
                             placeholder="Busca por título o autora..."
@@ -1597,38 +1592,38 @@
                           {tabEstanteria === 'leyendo' && (
                             <div className="flex gap-2 pt-1">
                               <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
-                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs">Guardar</button>
+                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-base">Guardar</button>
                             </div>
                           )}
                         </form>
 
-                        <div className="flex bg-white p-1 rounded-xl text-[11px] font-bold text-center border border-[#e2e2da]">
-                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#1a1a1a] text-[#ffffee]' : 'text-gray-500'}`}>
+                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
+                          <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
                             Leyendo
                           </button>
-                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#1a1a1a] text-[#ffffee]' : 'text-gray-500'}`}>
+                          <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
                             Quiero leer
                           </button>
-                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#1a1a1a] text-[#ffffee]' : 'text-gray-500'}`}>
+                          <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
                             Leídos
                           </button>
                         </div>
 
                         <div className="space-y-3 pt-1">
                           {misLibrosFiltrados.length === 0 ? (
-                            <div className="text-center py-8 bg-white rounded-xl border border-[#e2e2da]">
-                              <p className="text-xs text-gray-500 italic">No tienes libros en esta estantería todavía.</p>
+                            <div className="text-center py-8 bg-[#FBF9F5] rounded-xl border border-[#E8E6DF]">
+                              <p className="text-xs text-gray-400 italic">No tienes libros en esta estantería todavía.</p>
                             </div>
                           ) : (
                             misLibrosFiltrados.map((item, idx) => (
-                              <div key={idx} className="flex gap-3 items-center justify-between p-3 bg-white rounded-xl border border-[#e2e2da]">
+                              <div key={idx} className="flex gap-3 items-center justify-between p-3 bg-[#FBF9F5] rounded-xl border border-[#E8E6DF]">
                                 <div className="flex items-center gap-3 overflow-hidden">
                                   <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
                                   <div className="overflow-hidden text-xs">
-                                    <p className="font-bold text-[#1a1a1a] truncate">{item.libro}</p>
+                                    <p className="font-bold text-[#232321] truncate font-babydoll text-base">{item.libro}</p>
                                     <p className="text-[10px] text-gray-500 italic truncate">{item.autora || 'Autora no especificada'}</p>
                                     {item.estado === 'leyendo' && (
-                                      <p className="text-[10px] text-[#adae1d] font-bold mt-1">Página {item.pagina || item.paginas || 0}</p>
+                                      <p className="text-[10px] text-[#4A5028] font-bold mt-1">Página {item.pagina || item.paginas || 0}</p>
                                     )}
                                   </div>
                                 </div>
@@ -1673,56 +1668,56 @@
 
                         return (
                           <div key={i} className="editorial-card p-5 space-y-4">
-                            <div className="flex justify-between items-start border-b border-[#e2e2da] pb-2">
-                              <h3 className="font-editorial-title text-lg">{tituloCap}</h3>
+                            <div className="flex justify-between items-start border-b border-[#E8E6DF] pb-2">
+                              <h3 className="font-babydoll text-2xl font-bold">{tituloCap}</h3>
                               {paginaFin > 0 && (
-                                <span className="text-[10px] bg-white border border-[#e2e2da] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2">
+                                <span className="text-[10px] bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2">
                                   hasta pág. {paginaFin}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-600">{cap.descripcion}</p>
+                            <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
                             
                             {bloqueado ? (
-                              <div className="bg-white p-4 rounded-lg border border-[#e2e2da] text-center space-y-2 my-2">
-                                <i className="fa-solid fa-lock text-[#adae1d] text-base"></i>
+                              <div className="bg-[#FBF9F5] p-4 rounded-lg border border-[#E8E6DF] text-center space-y-2 my-2">
+                                <i className="fa-solid fa-lock text-[#4A5028] text-base"></i>
                                 <p className="text-xs font-bold text-gray-800">Capítulo protegido contra spoilers</p>
-                                <p className="text-[11px] text-gray-600 leading-relaxed">
-                                  Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear el contenido.
+                                <p className="text-[11px] text-gray-500 leading-relaxed">
+                                  Vas por la página <b>{miPagina}</b> y este capítulo finaliza en la página <b>{paginaFin}</b>. Avanza en tu lectura para desbloquear.
                                 </p>
                               </div>
                             ) : (
                               <>
-                                <div className="bg-white p-3 rounded-lg border border-[#e2e2da] flex gap-2">
+                                <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF] flex gap-2">
                                   <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
-                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs">guardar</button>
+                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-sm">guardar</button>
                                 </div>
 
                                 <div className="pt-2">
                                   <div className="flex gap-2 mb-4">
                                     <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
-                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs">publicar</button>
+                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-sm">publicar</button>
                                   </div>
 
                                   <div className="space-y-4">
                                     {comentarios.filter(c => c.capitulo === tituloCap && !c.parent_id).map(c => (
                                       <div key={c.id} className="space-y-2">
-                                        <div className="bg-white p-3 rounded-lg border border-[#e2e2da]">
-                                          <div className="flex justify-between mb-1 text-[10px] text-gray-500">
-                                            <span className="font-bold text-[#1a1a1a] uppercase">{c.autora}</span><span>{c.fecha}</span>
+                                        <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF]">
+                                          <div className="flex justify-between mb-1 text-[10px] text-gray-400">
+                                            <span className="font-bold text-[#232321] uppercase font-babydoll text-xs">{c.autora}</span><span>{c.fecha}</span>
                                           </div>
                                           <p className="text-xs text-gray-800">{c.texto}</p>
-                                          <div className="flex gap-3 mt-2 pt-2 border-t border-[#e2e2da] text-[11px] text-gray-400">
+                                          <div className="flex gap-3 mt-2 pt-2 border-t border-[#E8E6DF] text-[11px] text-gray-400">
                                             <button onClick={()=>setRespuestaComentario({...respuestaComentario, [c.id]:respuestaComentario[c.id]!==undefined?undefined:''})} className="hover:text-black font-medium">Responder</button>
                                             <button onClick={()=>reaccionar(c.id,'❤️')} className="hover:scale-110">❤️</button>
                                             <button onClick={()=>reaccionar(c.id,'✨')} className="hover:scale-110">✨</button>
-                                            {c.reacciones && <span className="bg-[#ffffee] text-black px-1.5 rounded border border-[#e2e2da]">{c.reacciones}</span>}
+                                            {c.reacciones && <span className="bg-white text-black px-1.5 rounded border border-[#E8E6DF]">{c.reacciones}</span>}
                                           </div>
                                         </div>
-                                        <div className="pl-6 space-y-2 border-l-2 border-[#adae1d] ml-3">
+                                        <div className="pl-6 space-y-2 border-l-2 border-[#4A5028] ml-3">
                                           {comentarios.filter(r => r.parent_id === c.id).map(r => (
-                                            <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#e2e2da]">
-                                              <span className="font-bold mr-1 text-[10px] uppercase">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
+                                            <div key={r.id} className="bg-white p-2 rounded text-xs border border-[#E8E6DF]">
+                                              <span className="font-bold mr-1 text-[10px] uppercase font-babydoll text-xs">{r.autora}:</span><span className="text-gray-600">{r.texto}</span>
                                             </div>
                                           ))}
                                           {respuestaComentario[c.id] !== undefined && (
@@ -1746,38 +1741,38 @@
 
                   {seccionApp === 'comunidad' && (
                     <div className="space-y-4 fade-in">
-                      <div className="flex bg-[#ffffee] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#e2e2da]">
-                        <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='chat'?'bg-[#1a1a1a] text-[#ffffee]':'text-gray-500'}`}>Chat</button>
-                        <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='mapa'?'bg-[#1a1a1a] text-[#ffffee]':'text-gray-500'}`}>Mapa ({usuariasClub.length})</button>
+                      <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-[10px] uppercase font-bold text-center border border-[#E8E6DF]">
+                        <button onClick={()=>setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='chat'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Chat</button>
+                        <button onClick={()=>setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg transition-all ${subTabComunidad==='mapa'?'bg-[#232321] text-[#FBF9F5]':'text-gray-400'}`}>Mapa ({usuariasClub.length})</button>
                       </div>
                       
                       {subTabComunidad === 'chat' && (
                         <div className="editorial-card h-[420px] flex flex-col justify-between relative overflow-hidden">
-                          <div onClick={() => setMostrarModalConectadas(true)} className="bg-white p-2.5 border-b border-[#e2e2da] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#fcfcf0] transition-colors">
+                          <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
                             <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-[#adae1d] animate-pulse"></span>
-                              <span className="font-editorial-title text-sm">Conversación en vivo</span>
+                              <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
+                              <span className="font-babydoll text-xl font-bold">Conversación en vivo</span>
                             </div>
-                            <span className="bg-[#ffffee] px-2 py-0.5 rounded border border-[#e2e2da] text-[#adae1d] font-bold text-[10px] flex items-center gap-1">
+                            <span className="bg-white px-2 py-0.5 rounded border border-[#E8E6DF] text-[#4A5028] font-bold text-[10px] flex items-center gap-1">
                               <i className="fa-solid fa-users text-[9px]"></i> {usuariasConectadas.length} en línea
                             </span>
                           </div>
 
                           {mostrarModalConectadas && (
-                            <div className="absolute inset-0 z-50 bg-[#ffffee]/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
-                              <div className="flex justify-between items-center border-b border-[#e2e2da] pb-2 mb-3">
-                                <h3 className="font-editorial-title font-medium text-sm text-[#1a1a1a]">Socias activas en la app</h3>
-                                <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-white border border-[#e2e2da] px-2 py-1 rounded">cerrar</button>
+                            <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
+                              <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
+                                <h3 className="font-babydoll font-bold text-xl text-[#232321]">Socias activas en la app</h3>
+                                <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded">cerrar</button>
                               </div>
                               <div className="overflow-y-auto space-y-2 flex-grow">
                                 {usuariasConectadas.map((u, i) => (
-                                  <div key={i} className="flex justify-between items-center p-2 bg-white rounded border border-[#e2e2da] text-xs text-[#1a1a1a]">
+                                  <div key={i} className="flex justify-between items-center p-2 bg-[#FBF9F5] rounded border border-[#E8E6DF] text-xs text-[#232321]">
                                     <div className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-[#adae1d]"></span>
+                                      <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
                                       <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                                      <span className="font-bold">{u.nombre || u.email}</span>
+                                      <span className="font-bold font-babydoll text-base">{u.nombre || u.email}</span>
                                     </div>
-                                    <span className="text-[10px] text-gray-500">pág. {u.pagina || 0}</span>
+                                    <span className="text-[10px] text-gray-400">pág. {u.pagina || 0}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1795,14 +1790,14 @@
                                 <div key={i} className={`flex gap-2 ${esMio ? 'flex-row-reverse ml-auto' : 'flex-row mr-auto'} text-xs max-w-[85%] items-end`}>
                                   <AvatarUsuaria foto={fotoAutor} nombre={autor} sizeClass="w-6 h-6" textClass="text-[9px]" />
                                   <div className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}>
-                                    <span className="text-[9px] text-gray-400 mb-0.5">{autor}</span>
-                                    <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#1a1a1a] text-[#ffffee]' : 'bg-white text-[#1a1a1a] border border-[#e2e2da]'}`}>{m.mensaje}</div>
+                                    <span className="text-[10px] font-babydoll text-gray-500 mb-0.5">{autor}</span>
+                                    <div className={`p-2.5 rounded-xl ${esMio ? 'bg-[#232321] text-[#FBF9F5]' : 'bg-[#FBF9F5] text-[#232321] border border-[#E8E6DF]'}`}>{m.mensaje}</div>
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
-                          <form onSubmit={enviarChat} className="p-2.5 border-t border-[#e2e2da] flex gap-2 shrink-0 bg-white rounded-b-xl">
+                          <form onSubmit={enviarChat} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 shrink-0 bg-white rounded-b-xl">
                             <input type="text" value={nuevoChat} onChange={e=>setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
                             <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                           </form>
@@ -1812,8 +1807,8 @@
                       {subTabComunidad === 'mapa' && (
                         <div className="editorial-card p-3 space-y-2">
                           <div className="flex justify-between items-center text-xs px-1">
-                            <span className="font-editorial-title">Mapa Global de Lectoras</span>
-                            <span className="text-[10px] text-[#adae1d] font-bold">{usuariasClub.length} socia(s)</span>
+                            <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                            <span className="text-[10px] text-[#4A5028] font-bold">{usuariasClub.length} socia(s)</span>
                           </div>
                           <MapaGilda usuarias={usuariasClub} />
                         </div>
@@ -1824,7 +1819,7 @@
                   {seccionApp === 'archivo' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-3">
-                        <h3 className="font-editorial-title text-base">Proponer Nueva Lectura</h3>
+                        <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
                         <form onSubmit={(e) => {
                           e.preventDefault();
                           const tit = nuevaPropuestaTitulo?.trim();
@@ -1849,19 +1844,19 @@
 
                           <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
                           <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-medium">Añadir propuesta</button>
+                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-base font-medium">Añadir propuesta</button>
                         </form>
                       </div>
 
                       <div className="editorial-card p-5">
-                        <h3 className="font-editorial-title text-base mb-3">Votación Cafecito</h3>
+                        <h3 className="font-babydoll text-xl font-bold mb-3">Votación Cafecito</h3>
                         <div className="space-y-2">
                           {fechasCafe.map((f,i) => {
                             const votantesArr = (f.votantes || "").toLowerCase().split(',').map(v=>v.trim());
                             const votado = votantesArr.includes(sesion.email.toLowerCase());
                             return (
-                              <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-white rounded-lg border border-[#e2e2da]">
-                                <span className="font-medium">{f.fecha}</span>
+                              <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] rounded-lg border border-[#E8E6DF]">
+                                <span className="font-medium font-babydoll text-base">{f.fecha}</span>
                                 <button onClick={()=>{
                                   const clon = [...fechasCafe];
                                   const item = clon.find(x => x.fecha === f.fecha);
@@ -1878,7 +1873,7 @@
                                   setFechasCafe(clon);
                                   enviarAccion('votar', { tipo: 'cafe', id: f.fecha, email: sesion.email });
                                   mostrarToast('Voto actualizado.');
-                                }} className={`px-3 py-1.5 rounded-full font-bold transition-all ${votado ? 'bg-[#adae1d] text-black shadow-xs' : 'bg-[#ffffee] text-gray-500 border border-[#e2e2da]'}`}>
+                                }} className={`px-3 py-1.5 rounded-full font-bold transition-all ${votado ? 'bg-[#4A5028] text-white shadow-xs' : 'bg-white text-gray-500 border border-[#E8E6DF]'}`}>
                                   {votado ? `Votado (${f.votos||0})` : `Votar (${f.votos||0})`}
                                 </button>
                               </div>
@@ -1888,17 +1883,17 @@
                       </div>
 
                       <div className="editorial-card p-5">
-                        <h3 className="font-editorial-title text-base mb-3">Próximas Lecturas</h3>
+                        <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
                         <div className="space-y-3">
                           {propuestas.map((p,i) => {
                             const votantesArr = (p.votantes || "").toLowerCase().split(',').map(v=>v.trim());
                             const votado = votantesArr.includes(sesion.email.toLowerCase());
                             return (
-                              <div key={i} className="flex gap-3 border border-[#e2e2da] p-3 rounded-xl bg-white">
+                              <div key={i} className="flex gap-3 border border-[#E8E6DF] p-3 rounded-xl bg-[#FBF9F5]">
                                 <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                                 <div className="flex flex-col justify-between w-full">
                                   <div>
-                                    <h4 className="font-bold text-xs leading-tight">{p.titulo}</h4>
+                                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
                                     <p className="text-[10px] text-gray-500 italic">{p.autora}</p>
                                   </div>
                                   <button onClick={()=>{
@@ -1917,7 +1912,7 @@
                                     setPropuestas(clon);
                                     enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email });
                                     mostrarToast('Voto actualizado.');
-                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold transition-all ${votado ? 'bg-[#adae1d] text-black' : 'bg-[#ffffee] text-[#1a1a1a] border border-[#e2e2da]'}`}>
+                                  }} className={`self-start mt-2 px-3 py-1 text-[10px] rounded-full font-bold transition-all ${votado ? 'bg-[#4A5028] text-white' : 'bg-white text-[#232321] border border-[#E8E6DF]'}`}>
                                     {votado ? `Votado (${p.votos||0})` : `Votar (${p.votos||0})`}
                                   </button>
                                 </div>
@@ -1931,17 +1926,17 @@
 
                   {seccionApp === 'buzon' && (
                     <div className="editorial-card p-5 space-y-3 fade-in">
-                      <h2 className="font-editorial-title text-base">Buzón privado</h2>
+                      <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
                       <p className="text-xs text-gray-500">Sugerencias y comunicación directa con la administración.</p>
                       <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
-                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs">Enviar mensaje</button>
+                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Enviar mensaje</button>
                     </div>
                   )}
                 </>
               )}
             </main>
 
-            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-xl">
+            <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-2 flex justify-around items-center max-w-md mx-auto z-40 rounded-t-2xl">
               {[
                 { id: 'inicio', icon: 'fa-house', label: 'inicio' },
                 { id: 'edificio', icon: 'fa-building', label: 'casa' },
@@ -1951,9 +1946,9 @@
                 { id: 'archivo', icon: 'fa-box-archive', label: 'archivo' },
                 { id: 'buzon', icon: 'fa-envelope', label: 'buzón' }
               ].map(tab => (
-                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#1a1a1a] font-bold bg-[#ffffee] px-2 py-1 rounded shadow-xs' : 'text-white/60 hover:text-white'}`}>
+                <button key={tab.id} onClick={() => setSeccionApp(tab.id)} className={`flex flex-col items-center gap-1 transition-all p-1 ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3] px-2 py-1 rounded shadow-xs' : 'text-gray-400 hover:text-gray-600'}`}>
                   <i className={`fa-solid ${tab.icon} text-sm`}></i>
-                  <span className="text-[7.5px] font-medium uppercase">{tab.label}</span>
+                  <span className="text-[8px] font-bold uppercase font-babydoll">{tab.label}</span>
                 </button>
               ))}
             </nav>
