@@ -567,7 +567,7 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
-        // Función estricta para obtener el nombre exclusivamente de la columna "nombre" del Google Sheets
+        // Función robusta para vincular el nombre correcto desde la columna "nombre" del Google Sheets
         const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
           if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
             if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
@@ -596,18 +596,26 @@
             const listaUsuarias = results[0].filter(u => (u.email || '').trim() !== '');
             setUsuariasClub(listaUsuarias);
             
-            // Actualizar nombre de sesión inmediatamente si ya estamos autenticados
             if (sesion && sesion.email) {
               const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
-              if (sociaActual && sociaActual.nombre && sociaActual.nombre.trim() !== '') {
-                setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
-                localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+              if (sociaActual) {
+                if (sociaActual.nombre && sociaActual.nombre.trim() !== '') {
+                  setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+                  localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+                }
+                if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
+                  setMiPagina(Number(sociaActual.pagina) || 0);
+                }
               }
             }
 
-            setCapitulos(results[1]); setComentarios(results[2]); 
-            setLecturas(results[4]); setChatMsgs(results[5]); setPropuestas(results[6]);
-            setFechasCafe(results[7]); setLecturasPersonales(results[8]);
+            setCapitulos(results[1]); 
+            setComentarios(results[2]); 
+            setLecturas(results[4]); 
+            setChatMsgs(results[5]); 
+            setPropuestas(results[6]);
+            setFechasCafe(results[7]); 
+            setLecturasPersonales(results[8]);
           });
         };
 
@@ -617,9 +625,14 @@
             setUsuariasClub(listaUsuarias);
             if (sesion && sesion.email) {
               const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
-              if (sociaActual && sociaActual.nombre && sociaActual.nombre.trim() !== '') {
-                setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
-                localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+              if (sociaActual) {
+                if (sociaActual.nombre && sociaActual.nombre.trim() !== '') {
+                  setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+                  localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+                }
+                if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
+                  setMiPagina(Number(sociaActual.pagina) || 0);
+                }
               }
             }
           }); 
@@ -627,12 +640,22 @@
 
         useEffect(() => {
           if (sesion) {
-            setCargandoDatos(true); cargarTodosLosDatos(); setCargandoDatos(false);
+            setCargandoDatos(true); 
+            cargarTodosLosDatos(); 
+            setCargandoDatos(false);
             const interval = setInterval(() => {
               parsearHoja(URL_CSV_CHAT).then(data => setChatMsgs(data));
               parsearHoja(URL_CSV_COMENTARIOS).then(data => setComentarios(data));
               parsearHoja(URL_CSV_LECTURAS_PERSONALES).then(data => setLecturasPersonales(data));
-            }, 10000);
+              parsearHoja(URL_CSV_USUARIAS).then(data => {
+                const lista = data.filter(u => (u.email || '').trim() !== '');
+                setUsuariasClub(lista);
+                const actual = lista.find(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase());
+                if (actual && actual.pagina !== undefined) {
+                  setMiPagina(Number(actual.pagina) || 0);
+                }
+              });
+            }, 8000);
             return () => clearInterval(interval);
           }
         }, [sesion]);
@@ -711,10 +734,12 @@
                   const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === inputEmail.trim().toLowerCase());
                   if (!socia) return setErrorLogin('Correo no registrado.');
                   const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
+                  const pagSocia = Number(socia.pagina || 0);
                   const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
                   localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
                   localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
                   setNombreUsuarioPersonalizado(nombreSociaSheet);
+                  setMiPagina(pagSocia);
                   setSesion(datosSesion);
                 }} className="space-y-4">
                   <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
@@ -885,7 +910,7 @@
                         
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
-                          const esDeEsteCap = cCap === identificadorCap;
+                          const esDeEsteCap = cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase();
                           const esPrincipal = !c.parent_id && !c.respuesta_a;
                           return esDeEsteCap && esPrincipal;
                         });
@@ -912,7 +937,7 @@
                                         const respuestasCom = comentarios.filter(r => {
                                           const rCap = String(r.capitulo_id || r.capitulo || '').trim().toLowerCase();
                                           const parentMatch = String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim();
-                                          return rCap === identificadorCap && parentMatch;
+                                          return (rCap === identificadorCap || rCap === String(cap.titulo || '').trim().toLowerCase()) && parentMatch;
                                         });
 
                                         const nombreAutorComentario = obtenerNombreReal(com.email, com.usuario || com.usuaria);
