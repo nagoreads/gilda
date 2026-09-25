@@ -18,7 +18,7 @@
       }
     </script>
 
-    <!-- Google Fonts: Plus Jakarta Sans, Cormorant Garamond, Inter -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Leaflet CSS y JS -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -46,11 +46,8 @@
         --bg-canvas: #FAF9F5;
         --card-bg: #FFFFFF;
         --border-color: #E6E4DF;
-        --border-subtle: #F0EEE9;
         --text-primary: #1A1A1A;
-        --text-secondary: #706E6B;
         --accent-olive: #555816;
-        --accent-olive-light: #F4F5E6;
       }
 
       body {
@@ -66,39 +63,25 @@
         -webkit-font-smoothing: antialiased;
       }
 
-      .font-serif-quote {
+      .font-editorial-title {
         font-family: 'Cormorant Garamond', Georgia, serif;
       }
 
-      .font-mono-meta {
-        font-family: 'Inter', monospace;
-        font-size: 11px;
-        letter-spacing: -0.01em;
+      .font-modern-title {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 700;
+        letter-spacing: -1.2px;
       }
 
-      /* Notion / Craft Docs / Are.na Block Styling */
-      .craft-card {
+      .editorial-card {
         background: #FFFFFF;
+        color: var(--text-primary);
         border: 1px solid var(--border-color);
-        border-radius: 14px;
+        border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.015);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-      .craft-card:hover {
-        border-color: #D8D5CE;
       }
 
-      .arena-block {
-        background: #FFFFFF;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        transition: all 0.15s ease;
-      }
-      .arena-block:hover {
-        border-color: var(--accent-olive);
-      }
-
-      .craft-input {
+      .editorial-input {
         background: #FFFFFF;
         border: 1px solid var(--border-color);
         border-radius: 8px;
@@ -106,59 +89,56 @@
         font-family: inherit;
         transition: all 0.15s ease;
       }
-      .craft-input:focus {
+      .editorial-input:focus {
         outline: none;
+        background: #FFFFFF;
         border-color: var(--accent-olive);
         box-shadow: 0 0 0 3px rgba(85, 88, 22, 0.12);
       }
 
-      .craft-btn {
+      .editorial-btn {
         background: var(--text-primary);
         color: #FFFFFF;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 12px;
+        font-family: inherit;
         transition: all 0.15s ease;
       }
-      .craft-btn:hover {
-        background: var(--accent-olive);
-        transform: translateY(-0.5px);
-      }
-      .craft-btn:active {
-        transform: translateY(0);
-      }
+      .editorial-btn:hover { background: var(--accent-olive); color: #FFFFFF; }
 
-      .craft-btn-secondary {
-        background: #FFFFFF;
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 12px;
-        transition: all 0.15s ease;
-      }
-      .craft-btn-secondary:hover {
-        background: #F6F5F0;
-        border-color: #D8D5CE;
-      }
-
-      /* Floating Dock Bar */
-      .dock-nav {
-        background: rgba(250, 249, 245, 0.88);
+      .editorial-nav {
+        background: rgba(250, 249, 245, 0.92);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(230, 228, 223, 0.8);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-top: 1px solid rgba(230, 228, 223, 0.8);
+        padding-bottom: env(safe-area-inset-bottom, 12px);
       }
 
-      /* Micro Animations */
       .fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(4px); }
         to { opacity: 1; transform: translateY(0); }
       }
 
-      #mapa-gilda { height: 260px; width: 100%; border-radius: 10px; border: 1px solid var(--border-color); z-index: 1; }
+      @keyframes windowGlow {
+        0%, 100% { box-shadow: 0 0 4px #555816; transform: scale(1); }
+        50% { box-shadow: 0 0 10px #70741c; transform: scale(1.03); }
+      }
+      .ventana-novedad {
+        animation: windowGlow 2s infinite ease-in-out;
+      }
+
+      @keyframes floatBannerQueue {
+        0% { opacity: 0; transform: translateY(-4px); }
+        12% { opacity: 1; transform: translateY(0); }
+        88% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-4px); }
+      }
+      .notificacion-secuencial {
+        animation: floatBannerQueue 4.5s ease-in-out forwards;
+      }
+
+      #mapa-gilda { height: 280px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); z-index: 1; }
 
       ::-webkit-scrollbar { width: 4px; height: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
@@ -168,517 +148,7 @@
   <body>
     <div id="root" class="w-full flex flex-col items-center"></div>
 
-    <script type="text/babel">
-      const { useState, useEffect, useMemo, useRef } = React;
-
-      const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbwjmfQLMDx1k6Tk0D1KDF1S3JCwI88x1w1HZhyyRkTbS2gsbPqMqSv9yus2CRDYbQ_S/exec';
-      const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
-      const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
-      const URL_CSV_COMENTARIOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv';
-      const URL_CSV_CAFECITOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv';
-      const URL_CSV_LECTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv';
-      const URL_CSV_CHAT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv';
-      const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
-      const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
-      const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
-
-      const ENLACES_STRIPE = {
-        satelite: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01',
-        cafe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02',
-        nube: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03',
-        virtual: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05',
-        papel: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04',
-        absoluta: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08'
-      };
-
-      const FRASES_INICIALES = [
-        "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
-        "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
-        "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
-      ];
-
-      function normalizarComunidad(nombre, ciudad = '') {
-        if (!nombre && !ciudad) return 'Sin especificar';
-        const textoCompleto = `${nombre || ''} ${ciudad || ''}`.toLowerCase().trim();
-
-        if (
-          textoCompleto.includes('gipuzkoa') || textoCompleto.includes('guipúzcoa') || 
-          textoCompleto.includes('bizkaia') || textoCompleto.includes('vizcaya') || 
-          textoCompleto.includes('araba') || textoCompleto.includes('álava') || 
-          textoCompleto.includes('país vasco') || textoCompleto.includes('euskadi') ||
-          textoCompleto.includes('tolosa') || textoCompleto.includes('eibar') ||
-          textoCompleto.includes('donostia') || textoCompleto.includes('san sebastián') ||
-          textoCompleto.includes('bilbao') || textoCompleto.includes('vitoria')
-        ) return 'País Vasco';
-
-        if (textoCompleto.includes('barcelona') || textoCompleto.includes('girona') || textoCompleto.includes('lleida') || textoCompleto.includes('tarragona') || textoCompleto.includes('catalunya') || textoCompleto.includes('cataluña')) return 'Cataluña';
-        if (textoCompleto.includes('madrid')) return 'Comunidad de Madrid';
-        if (textoCompleto.includes('sevilla') || textoCompleto.includes('málaga') || textoCompleto.includes('cadiz') || textoCompleto.includes('granada') || textoCompleto.includes('cordoba') || textoCompleto.includes('andalucía')) return 'Andalucía';
-        if (textoCompleto.includes('coruña') || textoCompleto.includes('lugo') || textoCompleto.includes('ourense') || textoCompleto.includes('pontevedra') || textoCompleto.includes('galicia')) return 'Galicia';
-        if (textoCompleto.includes('valència') || textoCompleto.includes('valencia') || textoCompleto.includes('alicante') || textoCompleto.includes('comunitat valenciana')) return 'Comunidad Valenciana';
-
-        return nombre || 'Sin especificar';
-      }
-
-      function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
-        const [sugerencias, setSugerencias] = useState([]);
-        const [buscando, setBuscando] = useState(false);
-        const [mostrarDropdown, setMostrarDropdown] = useState(false);
-
-        useEffect(() => {
-          if (!valor || valor.trim().length < 3) {
-            setSugerencias([]);
-            setMostrarDropdown(false);
-            return;
-          }
-
-          const timer = setTimeout(async () => {
-            setBuscando(true);
-            try {
-              const query = encodeURIComponent(valor.trim());
-              const [resGoogle, resOpenLib] = await Promise.allSettled([
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&langRestrict=es`),
-                fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
-              ]);
-
-              let listaCombinada = [];
-
-              if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
-                const dataG = await resGoogle.value.json();
-                if (dataG.items) {
-                  dataG.items.forEach(item => {
-                    const info = item.volumeInfo || {};
-                    listaCombinada.push({
-                      titulo: info.title || '',
-                      autora: info.authors ? info.authors.join(', ') : 'Autora desconocida',
-                      portada: info.imageLinks?.thumbnail?.replace('http:', 'https:') || ''
-                    });
-                  });
-                }
-              }
-
-              if (resOpenLib.status === 'fulfilled' && resOpenLib.value.ok) {
-                const dataOL = await resOpenLib.value.json();
-                if (dataOL.docs) {
-                  dataOL.docs.forEach(doc => {
-                    listaCombinada.push({
-                      titulo: doc.title || '',
-                      autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida',
-                      portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : ''
-                    });
-                  });
-                }
-              }
-
-              const unicos = [];
-              const titulosVistos = new Set();
-              listaCombinada.forEach(item => {
-                const tLimpio = item.titulo.toLowerCase().trim();
-                if (tLimpio && !titulosVistos.has(tLimpio)) {
-                  titulosVistos.add(tLimpio);
-                  unicos.push(item);
-                }
-              });
-
-              setSugerencias(unicos.slice(0, 6));
-              setMostrarDropdown(unicos.length > 0);
-            } catch (err) {
-              console.error("Error al consultar libros:", err);
-            } finally {
-              setBuscando(false);
-            }
-          }, 300);
-
-          return () => clearTimeout(timer);
-        }, [valor]);
-
-        return (
-          <div className="relative w-full">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder={placeholder}
-                value={valor}
-                onChange={(e) => {
-                  setValor(e.target.value);
-                  setMostrarDropdown(true);
-                }}
-                className="w-full craft-input p-2.5 text-xs pr-8"
-              />
-              {buscando && (
-                <i className="fa-solid fa-circle-notch animate-spin absolute right-3 text-xs text-[#555816]"></i>
-              )}
-            </div>
-
-            {mostrarDropdown && sugerencias.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 bg-white border border-[#E6E4DF] rounded-lg shadow-lg max-h-56 overflow-y-auto mt-1">
-                {sugerencias.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => {
-                      onSelectLibro(item);
-                      setMostrarDropdown(false);
-                    }}
-                    className="flex items-center gap-3 p-2 hover:bg-[#FAF9F5] cursor-pointer border-b border-[#F0EEE9] last:border-0 transition-colors"
-                  >
-                    {item.portada ? (
-                      <img src={item.portada} alt="" className="w-7 h-10 object-cover rounded shrink-0 border border-[#E6E4DF]" />
-                    ) : (
-                      <div className="w-7 h-10 bg-[#FAF9F5] rounded shrink-0 flex items-center justify-center text-[7px] text-gray-400 border border-[#E6E4DF]">Sin foto</div>
-                    )}
-                    <div className="overflow-hidden">
-                      <p className="text-xs font-semibold text-[#1A1A1A] truncate">{item.titulo}</p>
-                      <p className="text-[10px] text-gray-500 italic truncate">{item.autora}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
-        const [imgUrl, setImgUrl] = useState(portada || '');
-        const [errorImg, setErrorImg] = useState(false);
-
-        useEffect(() => {
-          setImgUrl(portada || '');
-          setErrorImg(false);
-
-          if ((!portada || portada.trim() === '') && titulo && titulo.trim().length > 1) {
-            let cancelado = false;
-            const query = encodeURIComponent(titulo.trim());
-            
-            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`)
-              .then(res => res.json())
-              .then(data => {
-                if (!cancelado && data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-                  setImgUrl(data.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'));
-                }
-              })
-              .catch(() => {});
-
-            return () => { cancelado = true; };
-          }
-        }, [titulo, portada]);
-
-        const sizeClasses = size === 'large' ? 'w-20 h-28 text-xs' : size === 'thumb' ? 'w-9 h-13 text-[8px]' : 'w-11 h-15 text-[8px]';
-
-        if (imgUrl && !errorImg) {
-          return <img src={imgUrl} alt={titulo} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded border border-[#E6E4DF] shrink-0`} />;
-        }
-        return (
-          <div className={`${sizeClasses} bg-[#1A1A1A] text-[#FAF9F5] p-1.5 rounded border border-[#E6E4DF] shrink-0 flex flex-col justify-between overflow-hidden relative`}>
-            <span className="font-semibold tracking-tight line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
-            <span className="text-[7px] text-[#A0A356] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
-          </div>
-        );
-      }
-
-      function AvatarUsuaria({ foto, nombre, sizeClass = "w-7 h-7", textClass = "text-xs" }) {
-        const [errorImg, setErrorImg] = useState(false);
-
-        if (foto && foto.trim() !== '' && !errorImg) {
-          return (
-            <img 
-              src={foto} 
-              alt={nombre || 'Socia'} 
-              onError={() => setErrorImg(true)} 
-              className={`${sizeClass} rounded-full object-cover border border-[#E6E4DF] shrink-0`} 
-            />
-          );
-        }
-
-        return (
-          <div className={`${sizeClass} rounded-full bg-[#F4F5E6] border border-[#E6E4DF] flex items-center justify-center font-bold ${textClass} text-[#555816] shrink-0`}>
-            {(nombre || 'Socia').charAt(0).toUpperCase()}
-          </div>
-        );
-      }
-
-      function App() {
-        const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
-        const [inputEmail, setInputEmail] = useState('');
-        const [inputPassword, setInputPassword] = useState('');
-        const [errorLogin, setErrorLogin] = useState('');
-        
-        const [modoRegistro, setModoRegistro] = useState(false);
-        const [regNombre, setRegNombre] = useState('');
-        const [regEmail, setRegEmail] = useState('');
-        const [regCiudad, setRegCiudad] = useState('');
-        const [regCodigoPostal, setRegCodigoPostal] = useState('');
-        const [regModalidad, setRegModalidad] = useState('cotilla');
-        
-        const [seccionApp, setSeccionApp] = useState('inicio');
-        const [subTabComunidad, setSubTabComunidad] = useState('chat');
-        const [tabEstanteria, setTabEstanteria] = useState('leyendo');
-        const [cargandoDatos, setCargandoDatos] = useState(false);
-        const [toastMsg, setToastMsg] = useState(null);
-        
-        const [usuariasClub, setUsuariasClub] = useState([]);
-        const [capitulos, setCapitulos] = useState([]);
-        const [comentarios, setComentarios] = useState([]);
-        const [lecturas, setLecturas] = useState([]);
-        const [chatMsgs, setChatMsgs] = useState([]);
-        const [propuestas, setPropuestas] = useState([]);
-        const [fechasCafe, setFechasCafe] = useState([]);
-        const [lecturasPersonales, setLecturasPersonales] = useState([]);
-
-        const [miPagina, setMiPagina] = useState(0);
-        const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
-        
-        const [miCiudad, setMiCiudad] = useState(() => localStorage.getItem('gilda_mi_ciudad') || '');
-        const [miCodigoPostal, setMiCodigoPostal] = useState(() => localStorage.getItem('gilda_mi_cp') || '');
-        const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
-        const [fotoPerfilPersonalizada, setFotoPerfilPersonalizada] = useState(() => localStorage.getItem('gilda_foto_perfil') || '');
-
-        const [libroPersonal, setLibroPersonal] = useState('');
-        const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
-
-        const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
-        const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
-        const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
-
-        const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
-        const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
-        
-        const [nuevoComentario, setNuevoComentario] = useState({});
-        const [nuevoChat, setNuevoChat] = useState('');
-        const [mensajeFundadora, setMensajeFundadora] = useState('');
-
-        const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 2500); };
-        
-        const parsearHoja = (url) => new Promise(resolve => {
-          Papa.parse(url, { 
-            download: true, 
-            header: true, 
-            skipEmptyLines: true, 
-            transformHeader: (h) => h.trim().toLowerCase(),
-            complete: (res) => resolve(res.data || []), 
-            error: () => resolve([]) 
-          });
-        });
-
-        const cargarTodosLosDatos = () => {
-          Promise.all([
-            parsearHoja(URL_CSV_USUARIAS),
-            parsearHoja(URL_CSV_CAPITULOS), 
-            parsearHoja(URL_CSV_COMENTARIOS), 
-            parsearHoja(URL_CSV_CAFECITOS),
-            parsearHoja(URL_CSV_LECTURAS), 
-            parsearHoja(URL_CSV_CHAT), 
-            parsearHoja(URL_CSV_PROPUESTAS),
-            parsearHoja(URL_CSV_VOTACION_CAFE), 
-            parsearHoja(URL_CSV_LECTURAS_PERSONALES)
-          ]).then(results => {
-            setUsuariasClub(results[0].filter(u => (u.email || '').trim() !== ''));
-            setCapitulos(results[1]); 
-            setComentarios(results[2].reverse()); 
-            setLecturas(results[4]); 
-            setChatMsgs(results[5]); 
-            setPropuestas(results[6]);
-            setFechasCafe(results[7]); 
-            setLecturasPersonales(results[8]);
-          });
-        };
-
-        useEffect(() => {
-          parsearHoja(URL_CSV_USUARIAS).then(data => {
-            setUsuariasClub(data.filter(u => (u.email || '').trim() !== ''));
-          });
-        }, []);
-
-        useEffect(() => {
-          if (sesion) {
-            setCargandoDatos(true);
-            cargarTodosLosDatos();
-            setCargandoDatos(false);
-          }
-        }, [sesion]);
-
-        const enviarAccion = async (action, payload) => {
-          try {
-            const nombreActual = payload.usuario || nombreUsuarioPersonalizado || sesion?.nombre || 'Socia';
-            const emailActual = payload.email || sesion?.email;
-            await fetch(GOOGLE_API_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action, usuario: nombreActual, email: emailActual, ...payload }),
-            });
-          } catch (err) { console.error(err); }
-        };
-
-        const iniciarSesion = (e) => {
-          e.preventDefault();
-          setErrorLogin('');
-          const mail = inputEmail.trim().toLowerCase();
-          const pwd = inputPassword.trim();
-          if (!mail || !pwd) return;
-
-          const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === mail);
-          if (!socia) return setErrorLogin('Este correo no está registrado.');
-
-          const nombreDef = socia.nombre || mail.split('@')[0];
-          const datosSesion = { nombre: nombreDef, email: mail, modalidad: (socia.modalidad || 'gilda').toLowerCase() };
-          localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-          localStorage.setItem('gilda_nombre_usuario', nombreDef);
-          setSesion(datosSesion);
-        };
-
-        const cerrarSesion = () => { localStorage.removeItem('gilda_sesion'); setSesion(null); };
-
-        const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
-        const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
-
-        if (!sesion) {
-          return (
-            <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
-              <div className="craft-card max-w-sm w-full p-6 space-y-5">
-                <div className="space-y-1 text-center">
-                  <h1 className="text-2xl font-bold tracking-tight text-[#1A1A1A]">gilda</h1>
-                  <p className="font-mono-meta text-gray-500">club de lectura digital</p>
-                </div>
-
-                <form onSubmit={iniciarSesion} className="space-y-3">
-                  <div>
-                    <label className="font-mono-meta text-gray-500 uppercase block mb-1">Correo electrónico</label>
-                    <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={(e) => setInputEmail(e.target.value)} required className="w-full craft-input p-2.5 text-xs" />
-                  </div>
-                  <div>
-                    <label className="font-mono-meta text-gray-500 uppercase block mb-1">Contraseña</label>
-                    <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full craft-input p-2.5 text-xs" />
-                  </div>
-                  {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
-                  <button type="submit" className="w-full craft-btn py-2.5">
-                    Acceder al club
-                  </button>
-                </form>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div className="min-h-screen flex flex-col items-center pt-5 pb-28 px-4 max-w-md w-full mx-auto relative">
-            
-            {toastMsg && (
-              <div className="fixed top-4 z-50 bg-[#1A1A1A] text-white text-xs px-3.5 py-2 rounded-lg shadow-lg fade-in flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#A0A356]"></span>
-                <span>{toastMsg}</span>
-              </div>
-            )}
-
-            {/* Header / Workspace Profile */}
-            <header className="w-full mb-4 flex justify-between items-center craft-card p-3.5">
-              <div className="flex items-center gap-2.5">
-                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-8 h-8" textClass="text-xs" />
-                <div>
-                  <h2 className="font-bold text-xs leading-none text-[#1A1A1A]">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
-                  <span className="font-mono-meta text-[#555816] uppercase block mt-0.5">{sesion.modalidad}</span>
-                </div>
-              </div>
-              <button onClick={cerrarSesion} className="text-gray-400 hover:text-[#1A1A1A] p-1 text-xs" title="Cerrar sesión">
-                <i className="fa-solid fa-arrow-right-from-bracket"></i>
-              </button>
-            </header>
-
-            <main className="w-full flex-grow space-y-3.5 fade-in">
-              {seccionApp === 'inicio' && (
-                <div className="space-y-3.5 fade-in">
-                  {/* Current Reading Block */}
-                  <div className="craft-card p-4 space-y-3">
-                    <div className="flex gap-3.5 items-center">
-                      <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
-                      <div className="space-y-1 w-full">
-                        <span className="font-mono-meta text-[#555816] bg-[#F4F5E6] px-2 py-0.5 rounded font-semibold">LECTURA EN CURSO</span>
-                        <h2 className="font-bold text-sm leading-snug text-[#1A1A1A] mt-1">{libroActual.titulo}</h2>
-                        <p className="text-xs text-gray-500">{libroActual.autora}</p>
-                        
-                        <div className="pt-2">
-                          <div className="flex justify-between font-mono-meta text-gray-500 mb-1">
-                            <span>progreso</span><span>{porcentajeLibro}%</span>
-                          </div>
-                          <div className="w-full bg-[#FAF9F5] rounded-full h-1.5 border border-[#E6E4DF] overflow-hidden">
-                            <div className="bg-[#555816] h-full rounded-full transition-all duration-300" style={{width: `${porcentajeLibro}%`}}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[#F0EEE9] flex items-center justify-between">
-                      <span className="text-xs font-medium text-gray-600">Página actual:</span>
-                      <div className="flex items-center gap-1.5">
-                        <button onClick={() => setMiPagina(Math.max(0, miPagina - 5))} className="craft-btn-secondary px-2 py-1 text-xs">-5</button>
-                        <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="craft-input w-12 text-center py-1 text-xs font-semibold" />
-                        <button onClick={() => setMiPagina(miPagina + 5)} className="craft-btn-secondary px-2 py-1 text-xs">+5</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Citas y Anotaciones Block */}
-                  <div className="craft-card p-4 space-y-2.5">
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500">Citas y Anotaciones</h3>
-                    <div className="flex gap-2">
-                      <input type="text" placeholder="Añadir cita o reflexión..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow craft-input px-3 py-1.5 text-xs" />
-                      <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); setNuevaFraseBotella(''); mostrarToast('Guardado'); }} className="craft-btn px-3 py-1.5">Guardar</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {seccionApp === 'comunidad' && (
-                <div className="space-y-3 fade-in">
-                  <div className="craft-card h-[400px] flex flex-col justify-between p-3">
-                    <div className="border-b border-[#F0EEE9] pb-2 flex items-center justify-between">
-                      <span className="font-bold text-xs text-[#1A1A1A]">Chat en vivo</span>
-                      <span className="font-mono-meta text-[#555816] bg-[#F4F5E6] px-2 py-0.5 rounded">● {usuariasClub.length} socias</span>
-                    </div>
-
-                    <div className="flex-grow my-2 overflow-y-auto space-y-2 pr-1">
-                      {chatMsgs.map((m, i) => (
-                        <div key={i} className="arena-block p-2 text-xs">
-                          <span className="font-bold text-[10px] text-gray-400 block mb-0.5">{m.usuario || m.usuaria || 'Socia'}</span>
-                          <p className="text-[#1A1A1A]">{m.mensaje}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; setChatMsgs([...chatMsgs, { usuario: sesion.nombre, mensaje: nuevoChat }]); setNuevoChat(''); }} className="flex gap-2 border-t border-[#F0EEE9] pt-2">
-                      <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow craft-input px-3 py-1.5 text-xs" placeholder="Escribir mensaje..." />
-                      <button type="submit" className="craft-btn px-3 py-1.5"><i className="fa-solid fa-paper-plane"></i></button>
-                    </form>
-                  </div>
-                </div>
-              )}
-            </main>
-
-            {/* Floating Navigation Bar (Dock Style) */}
-            <nav className="dock-nav fixed bottom-4 left-4 right-4 max-w-md mx-auto rounded-xl p-1.5 flex justify-around items-center z-40">
-              {[
-                { id: 'inicio', icon: 'fa-house', label: 'Inicio' },
-                { id: 'comunidad', icon: 'fa-comments', label: 'Chat' },
-                { id: 'habitacion', icon: 'fa-bookmark', label: 'Estantería' },
-                { id: 'capitulos', icon: 'fa-book-open', label: 'Lectura' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSeccionApp(tab.id)}
-                  className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-lg transition-all ${
-                    seccionApp === tab.id ? 'bg-[#1A1A1A] text-white' : 'text-gray-500 hover:text-[#1A1A1A]'
-                  }`}
-                >
-                  <i className={`fa-solid ${tab.icon} text-xs`}></i>
-                  <span className="text-[9px] font-semibold">{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        );
-      }
-
-      const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
-      containerRoot.render(<App />);
-    </script>
+    <!-- Carga externa del script separado con soporte Babel -->
+    <script type="text/babel" src="script.js"></script>
   </body>
 </html>
