@@ -986,7 +986,7 @@
 
         useEffect(() => {
           if (subTabComunidad === 'chat') {
-            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
           }
         }, [chatMsgs, subTabComunidad]);
 
@@ -1269,7 +1269,7 @@
           setChatMsgs(prev => [...prev, { usuario: nombreActual, mensaje: textoMsg, fecha: 'Ahora' }]);
           enviarAccion('enviar_chat', { mensaje: textoMsg });
           setNuevoChat('');
-          chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
         };
 
         const toggleLecturaLamp = () => {
