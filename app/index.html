@@ -18,10 +18,10 @@
       }
     </script>
 
-    <!-- Google Fonts: Caveat (Estilo Baby Doll) & Plus Jakarta Sans -->
+    <!-- Google Fonts: Fredoka / Comic Neue (Fallback similar) & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,8 +42,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
-      /* Si subes el archivo 'babydoll.ttf' a tu repositorio de GitHub, puedes descomentar la siguiente línea: */
-      /* @font-face { font-family: 'BabyDoll'; src: url('babydoll.ttf') format('truetype'); } */
+      /* Carga directa del archivo babydoll.ttf desde tu GitHub */
+      @font-face {
+        font-family: 'BabyDoll';
+        src: url('babydoll.ttf') format('truetype'),
+             url('babydoll.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
 
       body {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -59,8 +65,8 @@
       }
 
       .font-babydoll {
-        font-family: 'BabyDoll', 'Caveat', cursive, sans-serif;
-        letter-spacing: 0.2px;
+        font-family: 'BabyDoll', 'Fredoka', cursive, sans-serif;
+        letter-spacing: 0.3px;
       }
 
       .editorial-card {
@@ -361,7 +367,7 @@
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
-            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-base">{titulo || 'Sin título'}</span>
+            <span className="font-medium tracking-tight line-clamp-3 leading-tight font-babydoll text-sm">{titulo || 'Sin título'}</span>
             <span className="text-[8px] text-[#A2A86E] uppercase tracking-wider truncate">{autora || 'gilda'}</span>
           </div>
         );
@@ -448,7 +454,7 @@
 
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
-            <h2 className="text-[48px] font-babydoll font-bold text-center mb-0 text-[#232321] leading-none">gilda</h2>
+            <h2 className="text-[42px] font-babydoll text-center mb-0 text-[#232321] leading-none">gilda</h2>
             <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-babydoll italic">
               selecciona una ventana para asomarte a sus lecturas
             </p>
@@ -484,7 +490,7 @@
                         esNotificacionActiva ? 'ring-2 ring-[#4A5028] scale-110 z-20' : ''
                       } ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}
                     ></div>
-                    <span className="text-[11px] text-gray-700 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-babydoll">
+                    <span className="text-[12px] text-gray-700 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-babydoll">
                       {nombreMostrar}
                     </span>
                   </div>
@@ -496,7 +502,7 @@
               <div className="flex justify-between items-center w-full border-b border-[#E8E6DF] pb-2.5 gap-2">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" />
-                  <span className="font-babydoll text-2xl font-bold truncate text-[#232321]">
+                  <span className="font-babydoll text-xl font-bold truncate text-[#232321]">
                     la habitación de {(usuariaActiva.nombre || '').toLowerCase()}
                   </span>
                 </div>
@@ -508,7 +514,7 @@
                   <div className="flex items-center gap-3 overflow-hidden">
                     <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
                     <div className="text-xs text-[#232321] overflow-hidden">
-                      <p className="font-bold truncate font-babydoll text-base">{libroActual.titulo}</p>
+                      <p className="font-bold truncate font-babydoll text-sm">{libroActual.titulo}</p>
                       <p className="text-[11px] text-gray-500">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                     </div>
                   </div>
@@ -526,7 +532,7 @@
                     <div className="flex items-center gap-3 overflow-hidden">
                       <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
                       <div className="text-xs text-[#232321] overflow-hidden">
-                        <p className="font-bold truncate font-babydoll text-base">{item.libro}</p>
+                        <p className="font-bold truncate font-babydoll text-sm">{item.libro}</p>
                         <p className="text-[11px] text-gray-500">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                       </div>
                     </div>
@@ -747,7 +753,7 @@
               {regionSeleccionada && (
                 <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-sm p-4 flex flex-col rounded-lg fade-in text-[#232321]">
                   <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
-                    <h3 className="font-babydoll font-bold text-xl">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                    <h3 className="font-babydoll text-[#232321] font-bold text-lg">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
                     <button onClick={() => setRegionSeleccionada(null)} className="text-xs text-gray-500 bg-white border border-[#E8E6DF] px-2 py-1 rounded">cerrar</button>
                   </div>
                   <div className="overflow-y-auto flex-grow space-y-2">
@@ -767,7 +773,7 @@
 
             <div className="bg-white p-3.5 rounded-xl border border-[#E8E6DF] space-y-2">
               <div className="flex justify-between items-center pb-2 border-b border-[#E8E6DF]">
-                <h4 className="font-babydoll text-lg font-bold text-[#232321]">Comunidades Autónomas y Municipios</h4>
+                <h4 className="font-babydoll text-base font-bold text-[#232321]">Comunidades Autónomas y Municipios</h4>
                 <span className="text-[10px] text-gray-400 uppercase font-semibold">Usuarias</span>
               </div>
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
@@ -784,7 +790,7 @@
                         >
                           <div className="flex items-center gap-2">
                             <i className={`fa-solid fa-chevron-${estaAbierta ? 'down' : 'right'} text-[9px] text-gray-400`}></i>
-                            <span className="font-bold text-[#232321] capitalize font-babydoll text-base">{item.region}</span>
+                            <span className="font-bold text-[#232321] capitalize font-babydoll text-sm">{item.region}</span>
                           </div>
                           <span className="bg-[#4A5028] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
                             {item.total} {item.total === 1 ? 'usuaria' : 'usuarias'}
@@ -799,7 +805,7 @@
                                 onClick={() => setRegionSeleccionada({ region: sub.ciudad, usuarias: sub.usuarias })}
                                 className="flex justify-between items-center text-[11px] p-1.5 pl-5 rounded hover:bg-gray-50 cursor-pointer"
                               >
-                                <span className="text-gray-700 capitalize font-babydoll text-sm">{sub.ciudad}</span>
+                                <span className="text-gray-700 capitalize font-babydoll text-xs">{sub.ciudad}</span>
                                 <span className="text-gray-400 font-semibold">{sub.count}</span>
                               </div>
                             ))}
@@ -1335,12 +1341,12 @@
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#4A5028] rounded-bl-full opacity-10"></div>
                 
                 <div className="space-y-1 relative z-10 text-center">
-                  <h1 className="font-babydoll text-6xl text-[#232321] font-bold">gilda</h1>
-                  <p className="text-xs text-gray-500 font-babydoll italic text-base">el club de lectura privado</p>
+                  <h1 className="font-babydoll text-5xl text-[#232321] font-bold">gilda</h1>
+                  <p className="text-xs text-gray-500 font-babydoll italic text-sm">el club de lectura privado</p>
                 </div>
 
                 <div className="bg-[#FBF9F5] border border-[#E8E6DF] p-3 rounded-lg text-center text-xs text-gray-600">
-                  <span className="text-[#232321] font-bold font-babydoll text-lg">{usuariasClub.length}</span> lectoras conectadas
+                  <span className="text-[#232321] font-bold font-babydoll text-base">{usuariasClub.length}</span> lectoras conectadas
                 </div>
 
                 {!modoRegistro ? (
@@ -1354,7 +1360,7 @@
                       <input type="password" placeholder="••••••••" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm mt-1" />
                     </div>
                     {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-lg">
                       Iniciar sesión
                     </button>
                   </form>
@@ -1406,7 +1412,7 @@
 
                     {errorLogin && <p className="text-[11px] text-red-600 font-medium text-center">{errorLogin}</p>}
 
-                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-xl">
+                    <button type="submit" className="w-full editorial-btn py-3 text-sm font-semibold tracking-wide font-babydoll text-lg">
                       {regModalidad === 'cotilla' ? 'Crear cuenta gratuita' : 'Ir al pago en Stripe'}
                     </button>
                   </form>
@@ -1419,7 +1425,7 @@
                   <button 
                     type="button"
                     onClick={() => { setModoRegistro(!modoRegistro); setErrorLogin(''); }} 
-                    className="inline-block text-xs text-[#4A5028] font-bold hover:underline bg-transparent border-0 cursor-pointer font-babydoll text-base"
+                    className="inline-block text-xs text-[#4A5028] font-bold hover:underline bg-transparent border-0 cursor-pointer font-babydoll text-sm"
                   >
                     {modoRegistro ? 'iniciar sesión con mi correo' : 'quiero registrarme :)'}
                   </button>
@@ -1433,7 +1439,7 @@
           <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-md w-full mx-auto relative">
             
             {toastMsg && (
-              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-sm">
+              <div className="fixed top-6 z-50 bg-[#232321] text-[#FBF9F5] text-xs px-4 py-2.5 rounded-full shadow-lg fade-in flex items-center gap-2 border border-white/20 font-babydoll text-xs">
                 <span className="w-2 h-2 rounded-full bg-[#A2A86E]"></span><span>{toastMsg}</span>
               </div>
             )}
@@ -1443,7 +1449,7 @@
                 <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-lg" />
                 <div className="overflow-hidden">
                   <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                    <h2 className="font-bold text-base leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
                     <button onClick={() => { setInputNuevoNombre(nombreUsuarioPersonalizado || sesion.nombre); setInputNuevaFoto(fotoPerfilPersonalizada); setEditandoPerfil(true); }} className="text-gray-400 hover:text-black text-[10px] shrink-0" title="Editar perfil">
                       <i className="fa-solid fa-pen"></i>
                     </button>
@@ -1458,7 +1464,7 @@
               <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
                 <div className="editorial-card max-w-sm w-full p-5 space-y-4 fade-in">
                   <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
-                    <h3 className="font-babydoll text-xl font-bold">Editar mi perfil</h3>
+                    <h3 className="font-babydoll text-lg font-bold">Editar mi perfil</h3>
                     <button onClick={() => setEditandoPerfil(false)} className="text-xs text-gray-400">✕</button>
                   </div>
 
@@ -1483,7 +1489,7 @@
 
                   <div className="flex gap-2 pt-2">
                     <button onClick={() => setEditandoPerfil(false)} className="w-1/2 bg-[#FBF9F5] border border-[#E8E6DF] text-gray-600 py-2 rounded-xl text-xs font-medium">Cancelar</button>
-                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-base">Guardar cambios</button>
+                    <button onClick={guardarPerfil} className="w-1/2 editorial-btn py-2 text-xs font-babydoll text-sm">Guardar cambios</button>
                   </div>
                 </div>
               </div>
@@ -1491,7 +1497,7 @@
 
             <main className="w-full flex-grow space-y-4 fade-in">
               {cargandoDatos ? (
-                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-xl">Cargando la biblioteca...</div>
+                <div className="text-center py-20 text-sm text-gray-500 animate-pulse font-babydoll text-base">Cargando la biblioteca...</div>
               ) : (
                 <>
                   {seccionApp === 'inicio' && (
@@ -1501,7 +1507,7 @@
                           <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
                           <div className="space-y-2 w-full">
                             <span className="text-[9px] uppercase tracking-wider text-[#4A5028] font-bold">Lectura del Club</span>
-                            <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
+                            <h2 className="font-babydoll text-xl font-bold leading-tight">{libroActual.titulo}</h2>
                             <p className="text-xs text-gray-500 italic">{libroActual.autora}</p>
                             <div className="mt-2">
                               <div className="flex justify-between text-[10px] text-gray-400 mb-1">
@@ -1513,40 +1519,40 @@
                         </div>
 
                         <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
-                          <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
+                          <span className="text-xs text-gray-500 font-babydoll text-sm">página por la que vas:</span>
                           <div className="flex items-center gap-1">
                             <button onClick={() => actualizarPagina(miPagina - 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs">-5</button>
                             <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-12 text-center py-1 text-xs" />
                             <button onClick={() => actualizarPagina(miPagina + 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs">+5</button>
-                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2.5 py-1 text-xs font-babydoll text-sm">ok</button>
+                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2.5 py-1 text-xs font-babydoll text-xs">ok</button>
                           </div>
                         </div>
                       </div>
 
                       <div className="editorial-card p-4 space-y-2">
-                        <h3 className="font-babydoll text-xl font-bold">Ubicación geográfica</h3>
+                        <h3 className="font-babydoll text-lg font-bold">Ubicación geográfica</h3>
                         <div className="grid grid-cols-2 gap-2">
                           <input type="text" placeholder="Ciudad (ej. Tolosa, Álava)" value={miCiudad} onChange={(e) => setMiCiudad(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
                           <input type="text" placeholder="Código Postal (opcional)" value={miCodigoPostal} onChange={(e) => setMiCodigoPostal(e.target.value)} className="editorial-input px-3 py-2 text-xs" />
                         </div>
-                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-base mt-1">Actualizar ubicación</button>
+                        <button onClick={guardarMiUbicacion} className="w-full editorial-btn py-2 text-xs font-babydoll text-sm mt-1">Actualizar ubicación</button>
                       </div>
 
                       <div className="editorial-card p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                          <h3 className="font-babydoll text-xl font-bold">Notas y fragmentos</h3>
+                          <h3 className="font-babydoll text-lg font-bold">Notas y fragmentos</h3>
                           <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-[10px] text-gray-400 uppercase font-semibold">
                             {botellaAbierta ? 'ocultar' : 'descubrir cita'}
                           </button>
                         </div>
                         {botellaAbierta && (
-                          <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-sm italic font-babydoll text-gray-700">
+                          <div className="p-3 bg-[#FBF9F5] border border-[#E8E6DF] rounded-lg text-xs italic font-babydoll text-gray-700">
                             "{FRASES_INICIALES[fraseActualBotella]}"
                           </div>
                         )}
                         <div className="flex gap-2 pt-2 border-t border-[#E8E6DF]">
                           <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-base">guardar</button>
+                          <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-3 text-xs font-babydoll text-sm">guardar</button>
                         </div>
                       </div>
                     </div>
@@ -1566,7 +1572,7 @@
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-4">
                         <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2.5">
-                          <h3 className="font-babydoll text-2xl font-bold">Mi Estantería Personal</h3>
+                          <h3 className="font-babydoll text-xl font-bold">Mi Estantería Personal</h3>
                           <button onClick={toggleLecturaLamp} className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-gray-500'}`}>
                             {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
                           </button>
@@ -1592,12 +1598,12 @@
                           {tabEstanteria === 'leyendo' && (
                             <div className="flex gap-2 pt-1">
                               <input type="number" placeholder="Pág. actual" value={paginaPersonalInput || ''} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-2 text-xs" />
-                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-base">Guardar</button>
+                              <button type="submit" className="w-1/2 editorial-btn py-1.5 text-xs font-babydoll text-sm">Guardar</button>
                             </div>
                           )}
                         </form>
 
-                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-base">
+                        <div className="flex bg-[#F8F7F3] p-1 rounded-xl text-xs font-bold text-center border border-[#E8E6DF] font-babydoll text-sm">
                           <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg transition-all ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>
                             Leyendo
                           </button>
@@ -1620,7 +1626,7 @@
                                 <div className="flex items-center gap-3 overflow-hidden">
                                   <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
                                   <div className="overflow-hidden text-xs">
-                                    <p className="font-bold text-[#232321] truncate font-babydoll text-base">{item.libro}</p>
+                                    <p className="font-bold text-[#232321] truncate font-babydoll text-sm">{item.libro}</p>
                                     <p className="text-[10px] text-gray-500 italic truncate">{item.autora || 'Autora no especificada'}</p>
                                     {item.estado === 'leyendo' && (
                                       <p className="text-[10px] text-[#4A5028] font-bold mt-1">Página {item.pagina || item.paginas || 0}</p>
@@ -1669,7 +1675,7 @@
                         return (
                           <div key={i} className="editorial-card p-5 space-y-4">
                             <div className="flex justify-between items-start border-b border-[#E8E6DF] pb-2">
-                              <h3 className="font-babydoll text-2xl font-bold">{tituloCap}</h3>
+                              <h3 className="font-babydoll text-xl font-bold">{tituloCap}</h3>
                               {paginaFin > 0 && (
                                 <span className="text-[10px] bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-0.5 rounded text-gray-500 font-medium whitespace-nowrap ml-2">
                                   hasta pág. {paginaFin}
@@ -1690,13 +1696,13 @@
                               <>
                                 <div className="bg-[#FBF9F5] p-3 rounded-lg border border-[#E8E6DF] flex gap-2">
                                   <input type="text" placeholder="Cita memorable..." value={nuevaCitaCapsula[i]||''} onChange={e=>setNuevaCitaCapsula({...nuevaCitaCapsula, [i]:e.target.value})} className="flex-grow editorial-input px-2 text-xs" />
-                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-sm">guardar</button>
+                                  <button onClick={()=>{ enviarAccion('capsula',{capitulo:tituloCap, cita:nuevaCitaCapsula[i]}); setNuevaCitaCapsula({...nuevaCitaCapsula,[i]:''}); mostrarToast('Cita guardada');}} className="editorial-btn px-3 text-xs font-babydoll text-xs">guardar</button>
                                 </div>
 
                                 <div className="pt-2">
                                   <div className="flex gap-2 mb-4">
                                     <textarea placeholder="Escribe tu reflexión..." value={nuevoComentario[i]||''} onChange={e=>setNuevoComentario({...nuevoComentario, [i]:e.target.value})} className="flex-grow editorial-input p-2 text-xs h-10 resize-none"></textarea>
-                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-sm">publicar</button>
+                                    <button onClick={()=>{ if(!nuevoComentario[i])return; const n={id:Date.now().toString(), capitulo:tituloCap, autora:nombreUsuarioPersonalizado||sesion.nombre, texto:nuevoComentario[i], fecha:'Ahora'}; setComentarios([n,...comentarios]); enviarAccion('comentario',n); setNuevoComentario({...nuevoComentario,[i]:''});}} className="editorial-btn px-3 text-xs font-babydoll text-xs">publicar</button>
                                   </div>
 
                                   <div className="space-y-4">
@@ -1751,7 +1757,7 @@
                           <div onClick={() => setMostrarModalConectadas(true)} className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl shrink-0 cursor-pointer hover:bg-[#F2EFE9] transition-colors">
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-[#4A5028] animate-pulse"></span>
-                              <span className="font-babydoll text-xl font-bold">Conversación en vivo</span>
+                              <span className="font-babydoll text-lg font-bold">Conversación en vivo</span>
                             </div>
                             <span className="bg-white px-2 py-0.5 rounded border border-[#E8E6DF] text-[#4A5028] font-bold text-[10px] flex items-center gap-1">
                               <i className="fa-solid fa-users text-[9px]"></i> {usuariasConectadas.length} en línea
@@ -1761,7 +1767,7 @@
                           {mostrarModalConectadas && (
                             <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 rounded-xl flex flex-col fade-in">
                               <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
-                                <h3 className="font-babydoll font-bold text-xl text-[#232321]">Socias activas en la app</h3>
+                                <h3 className="font-babydoll font-bold text-lg text-[#232321]">Socias activas en la app</h3>
                                 <button onClick={() => setMostrarModalConectadas(false)} className="text-xs text-gray-500 bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded">cerrar</button>
                               </div>
                               <div className="overflow-y-auto space-y-2 flex-grow">
@@ -1770,7 +1776,7 @@
                                     <div className="flex items-center gap-2">
                                       <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
                                       <AvatarUsuaria foto={u.foto_perfil} nombre={u.nombre} sizeClass="w-6 h-6" textClass="text-[10px]" />
-                                      <span className="font-bold font-babydoll text-base">{u.nombre || u.email}</span>
+                                      <span className="font-bold font-babydoll text-sm">{u.nombre || u.email}</span>
                                     </div>
                                     <span className="text-[10px] text-gray-400">pág. {u.pagina || 0}</span>
                                   </div>
@@ -1807,7 +1813,7 @@
                       {subTabComunidad === 'mapa' && (
                         <div className="editorial-card p-3 space-y-2">
                           <div className="flex justify-between items-center text-xs px-1">
-                            <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                            <span className="font-babydoll text-lg font-bold">Mapa Global de Lectoras</span>
                             <span className="text-[10px] text-[#4A5028] font-bold">{usuariasClub.length} socia(s)</span>
                           </div>
                           <MapaGilda usuarias={usuariasClub} />
@@ -1819,7 +1825,7 @@
                   {seccionApp === 'archivo' && (
                     <div className="space-y-4 fade-in">
                       <div className="editorial-card p-5 space-y-3">
-                        <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
+                        <h3 className="font-babydoll text-lg font-bold">Proponer Nueva Lectura</h3>
                         <form onSubmit={(e) => {
                           e.preventDefault();
                           const tit = nuevaPropuestaTitulo?.trim();
@@ -1844,19 +1850,19 @@
 
                           <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
                           <input type="url" placeholder="URL de la portada (autocompletada)..." value={nuevaPropuestaPortada || ''} onChange={e=>setNuevaPropuestaPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-base font-medium">Añadir propuesta</button>
+                          <button type="submit" className="w-full editorial-btn py-2 text-xs font-babydoll text-sm font-medium">Añadir propuesta</button>
                         </form>
                       </div>
 
                       <div className="editorial-card p-5">
-                        <h3 className="font-babydoll text-xl font-bold mb-3">Votación Cafecito</h3>
+                        <h3 className="font-babydoll text-lg font-bold mb-3">Votación Cafecito</h3>
                         <div className="space-y-2">
                           {fechasCafe.map((f,i) => {
                             const votantesArr = (f.votantes || "").toLowerCase().split(',').map(v=>v.trim());
                             const votado = votantesArr.includes(sesion.email.toLowerCase());
                             return (
                               <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-[#FBF9F5] rounded-lg border border-[#E8E6DF]">
-                                <span className="font-medium font-babydoll text-base">{f.fecha}</span>
+                                <span className="font-medium font-babydoll text-sm">{f.fecha}</span>
                                 <button onClick={()=>{
                                   const clon = [...fechasCafe];
                                   const item = clon.find(x => x.fecha === f.fecha);
@@ -1883,7 +1889,7 @@
                       </div>
 
                       <div className="editorial-card p-5">
-                        <h3 className="font-babydoll text-xl font-bold mb-3">Próximas Lecturas</h3>
+                        <h3 className="font-babydoll text-lg font-bold mb-3">Próximas Lecturas</h3>
                         <div className="space-y-3">
                           {propuestas.map((p,i) => {
                             const votantesArr = (p.votantes || "").toLowerCase().split(',').map(v=>v.trim());
@@ -1893,7 +1899,7 @@
                                 <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                                 <div className="flex flex-col justify-between w-full">
                                   <div>
-                                    <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
+                                    <h4 className="font-bold text-sm leading-tight font-babydoll">{p.titulo}</h4>
                                     <p className="text-[10px] text-gray-500 italic">{p.autora}</p>
                                   </div>
                                   <button onClick={()=>{
@@ -1926,10 +1932,10 @@
 
                   {seccionApp === 'buzon' && (
                     <div className="editorial-card p-5 space-y-3 fade-in">
-                      <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
+                      <h2 className="font-babydoll text-xl font-bold">Buzón privado</h2>
                       <p className="text-xs text-gray-500">Sugerencias y comunicación directa con la administración.</p>
                       <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-24 resize-none"></textarea>
-                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-base">Enviar mensaje</button>
+                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2 text-xs font-babydoll text-sm">Enviar mensaje</button>
                     </div>
                   )}
                 </>
