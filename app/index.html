@@ -386,12 +386,14 @@
           return matices[Math.abs(hash) % matices.length];
         };
 
+        const tituloLibro = item.libro || item.titulo || 'libro';
+
         return (
-          <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(item.libro || 'libro') }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${item.libro} — ${item.autora || ''}`}>
+          <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(tituloLibro) }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${tituloLibro} — ${item.autora || ''}`}>
             <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
             <div className="flex flex-col h-full justify-start pt-3">
               <span className="font-babydoll font-bold text-[9px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '110px'}}>
-                {item.libro}
+                {tituloLibro}
               </span>
             </div>
           </div>
@@ -639,7 +641,16 @@
         const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
         const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || 'monstera');
 
+        // Estados para creación manual y corrección de portada
+        const [modoCreacionManual, setModoCreacionManual] = useState(false);
+        const [manualTitulo, setManualTitulo] = useState('');
+        const [manualAutora, setManualAutora] = useState('');
+        const [manualPortada, setManualPortada] = useState('');
+
         const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
+        const [editandoPortadaUrl, setEditandoPortadaUrl] = useState('');
+        const [mostrarInputCorreccionPortada, setMostrarInputCorreccionPortada] = useState(false);
+
         const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
         const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
         const [botellaAbierta, setBotellaAbierta] = useState(false);
@@ -772,18 +783,18 @@
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
-          const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+          const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
           const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
 
           const clon = [...lecturasPersonales];
-          const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+          const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
           if (idx > -1) {
             clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
             if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
           } else {
             clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
           }
-          setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput('');
+          setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
           enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloLibro, pagina: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
           mostrarToast(`Guardado: ${tituloLibro}`);
         };
@@ -855,30 +866,59 @@
               </div>
             )}
 
-            {/* Modal de Detalle de Libro */}
+            {/* Modal de Detalle de Libro con opción para corregir portada y borrar */}
             {libroSeleccionadoDetalle && (
               <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative">
-                  <button onClick={() => setLibroSeleccionadoDetalle(null)} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+                  <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); setEditandoPortadaUrl(''); }} className="absolute top-3 right-3 text-gray-400 hover:text-black">
                     <i className="fa-solid fa-xmark text-sm"></i>
                   </button>
                   <div className="flex justify-center">
-                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
+                    <PortadaLibro titulo={libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-babydoll text-xl font-bold">{libroSeleccionadoDetalle.libro}</h3>
+                    <h3 className="font-babydoll text-xl font-bold">{libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo}</h3>
                     <p className="text-xs text-gray-500 italic font-babydoll">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
                     <p className="text-[10px] text-gray-400 uppercase tracking-wider pt-1 font-babydoll">Estado: <b>{libroSeleccionadoDetalle.estado || 'leyendo'}</b></p>
                   </div>
+
+                  {mostrarInputCorreccionPortada ? (
+                    <div className="space-y-2 pt-2 border-t border-[#E8E6DF]">
+                      <input type="text" placeholder="Pega aquí la URL de la portada correcta..." value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                      <div className="flex gap-2">
+                        <button onClick={() => {
+                          const tituloBuscado = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                          const clon = [...lecturasPersonales];
+                          const itemIdx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloBuscado.toLowerCase()));
+                          if (itemIdx > -1) {
+                            clon[itemIdx].portada = editandoPortadaUrl;
+                            setLecturasPersonales(clon);
+                            setLibroSeleccionadoDetalle({ ...clon[itemIdx] });
+                            enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloBuscado, pagina: clon[itemIdx].pagina || 0, estado: clon[itemIdx].estado, autora: clon[itemIdx].autora, portada: editandoPortadaUrl });
+                            mostrarToast('Portada corregida correctamente');
+                          }
+                          setMostrarInputCorreccionPortada(false);
+                          setEditandoPortadaUrl('');
+                        }} className="flex-1 editorial-btn py-1.5 text-xs font-babydoll">Guardar</button>
+                        <button onClick={() => setMostrarInputCorreccionPortada(false)} className="flex-1 bg-gray-100 text-gray-600 rounded-xl py-1.5 text-xs font-babydoll">Cancelar</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button onClick={() => { setEditandoPortadaUrl(libroSeleccionadoDetalle.portada || ''); setMostrarInputCorreccionPortada(true); }} className="w-full bg-[#F8F7F3] border border-[#E8E6DF] text-[#4A5028] py-1.5 rounded-xl text-xs font-babydoll font-bold hover:bg-[#F2EFE9]">
+                      <i className="fa-solid fa-image mr-1"></i> Corregir portada o URL
+                    </button>
+                  )}
+
                   <div className="pt-2 border-t border-[#E8E6DF] flex gap-2">
                     <button onClick={() => {
-                      const clon = lecturasPersonales.filter(l => !(l.libro === libroSeleccionadoDetalle.libro && l.email === sesion.email));
+                      const tituloBuscado = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                      const clon = lecturasPersonales.filter(l => !((l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloBuscado.toLowerCase())));
                       setLecturasPersonales(clon);
-                      enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: libroSeleccionadoDetalle.libro });
+                      enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: tituloBuscado });
                       setLibroSeleccionadoDetalle(null);
                       mostrarToast('Libro eliminado de la estantería');
                     }} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold font-babydoll hover:bg-red-50">Eliminar</button>
-                    <button onClick={() => setLibroSeleccionadoDetalle(null)} className="flex-1 editorial-btn py-2 text-xs font-babydoll">Cerrar</button>
+                    <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); }} className="flex-1 editorial-btn py-2 text-xs font-babydoll">Cerrar</button>
                   </div>
                 </div>
               </div>
@@ -992,23 +1032,44 @@
                             <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-400'}`}>Leídos</button>
                           </div>
 
-                          <form onSubmit={(e) => { e.preventDefault(); if (!libroPersonal.trim()) return; guardarLibroPersonal(undefined, undefined, tabEstanteria); }} className="space-y-2 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
-                            <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
-                            {tabEstanteria === 'leyendo' && (
-                              <div className="flex gap-2">
-                                <input type="number" placeholder="Pág." value={paginaPersonalInput} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-1/2 editorial-input p-1.5 text-xs" />
-                                <button type="submit" className="w-1/2 editorial-btn py-1 text-xs font-babydoll">Añadir</button>
+                          {modoCreacionManual ? (
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              if (!manualTitulo.trim()) return;
+                              guardarLibroPersonal(manualTitulo, 0, tabEstanteria, manualAutora, manualPortada);
+                              setManualTitulo(''); setManualAutora(''); setManualPortada('');
+                            }} className="space-y-2 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                              <p className="text-xs font-bold font-babydoll text-[#4A5028]">Añadir libro manualmente:</p>
+                              <input type="text" placeholder="Título del libro..." value={manualTitulo} onChange={(e) => setManualTitulo(e.target.value)} required className="w-full editorial-input p-2 text-xs" />
+                              <input type="text" placeholder="Autora o autor..." value={manualAutora} onChange={(e) => setManualAutora(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                              <input type="text" placeholder="URL de la portada (opcional)..." value={manualPortada} onChange={(e) => setManualPortada(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                              {tabEstanteria === 'leyendo' && (
+                                <input type="number" placeholder="Página actual..." value={paginaPersonalInput} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-full editorial-input p-2 text-xs" />
+                              )}
+                              <div className="flex gap-2 pt-1">
+                                <button type="submit" className="flex-1 editorial-btn py-1.5 text-xs font-babydoll">Guardar libro</button>
+                                <button type="button" onClick={() => setModoCreacionManual(false)} className="flex-1 bg-white border border-[#E8E6DF] py-1.5 rounded-xl text-xs font-babydoll">Cancelar</button>
                               </div>
-                            )}
-                          </form>
+                            </form>
+                          ) : (
+                            <div className="space-y-2 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                              <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
+                              <div className="flex justify-between items-center pt-1">
+                                <span className="text-[10px] text-gray-500 font-babydoll">¿No aparece en la lista?</span>
+                                <button type="button" onClick={() => setModoCreacionManual(true)} className="text-[10px] text-[#4A5028] font-bold font-babydoll hover:underline">
+                                  + Crear libro manualmente
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
                           <div className="space-y-2">
                             {misLibrosFiltradosLista.map((item, idx) => (
                               <div key={idx} onClick={() => setLibroSeleccionadoDetalle(item)} className="flex items-center justify-between bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] cursor-pointer hover:bg-[#F2EFE9]">
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                  <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
+                                  <PortadaLibro titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
                                   <div className="overflow-hidden text-left">
-                                    <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro}</p>
+                                    <p className="font-bold text-sm text-[#232321] truncate font-babydoll">{item.libro || item.titulo}</p>
                                     <p className="text-[10px] text-gray-500 italic font-babydoll">{item.autora || ''}</p>
                                   </div>
                                 </div>
