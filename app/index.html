@@ -556,8 +556,8 @@
         const [mensajeFundadora, setMensajeFundadora] = useState('');
 
         const [textoComentario, setTextoComentario] = useState({});
-        const [respendiendoA, setRespendiendoA] = useState(null);
-        const [textoRespuesta, setTextoRespuesta] = useState('');
+        const [respondiendoA, setRespondiendoA] = useState(null);
+        const [textoRespuesta, setTextoRespuesta] = useState({});
         
         const chatEndRef = useRef(null);
 
@@ -843,9 +843,11 @@
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
-                        const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || cap.paginaminima || 0);
+                        // REVISIÓN ROBUSTA: busca cualquier propiedad de página en la hoja de capítulos
+                        const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || cap.paginaminima || cap.minima || cap.limite || 0);
                         const desbloqueado = miPagina >= paginaMinima;
                         const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
+                        
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
                           return cCap === identificadorCap;
@@ -855,51 +857,94 @@
                           <div key={i} className="editorial-card p-5 space-y-4">
                             <div className="flex justify-between items-center">
                               <h3 className="font-babydoll text-2xl font-bold">{cap.titulo}</h3>
-                              <span className="text-[10px] text-gray-400 font-babydoll">pág. {paginaMinima}</span>
+                              <span className="text-[10px] text-gray-400 font-babydoll font-bold">pág. {paginaMinima}</span>
                             </div>
                             {desbloqueado ? (
                               <div className="space-y-4">
                                 <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
 
-                                {/* COMENTARIOS Y RESPUESTAS EN EL CAPÍTULO */}
+                                {/* COMENTARIOS Y HILOS DE RESPUESTAS */}
                                 <div className="pt-4 border-t border-[#E8E6DF] space-y-3">
                                   <h4 className="font-babydoll text-sm font-bold">Comentarios de lectoras</h4>
                                   
-                                  <div className="space-y-2">
+                                  <div className="space-y-3">
                                     {comentariosCapitulo.length === 0 ? (
                                       <p className="text-[11px] text-gray-400 italic font-babydoll">Aún no hay comentarios en este capítulo. ¡Sé la primera en escribir!</p>
                                     ) : (
-                                      comentariosCapitulo.map((com, cIdx) => (
-                                        <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-1">
-                                          <div className="flex justify-between items-center">
-                                            <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
-                                            <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
-                                          </div>
-                                          <p className="text-gray-700">{com.comentario || com.mensaje}</p>
+                                      comentariosCapitulo.map((com, cIdx) => {
+                                        const idComentario = com.id || com.comentario_id || cIdx;
+                                        const respuestasCom = comentarios.filter(r => String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim());
 
-                                          {/* Hilos de respuestas si existen */}
-                                          {com.respuestas && (
-                                            <div className="pl-4 mt-2 border-l-2 border-[#DCD6BE] space-y-1.5">
-                                              {/* Aquí puedes mostrar respuestas si vienen estructuradas */}
+                                        return (
+                                          <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-2">
+                                            <div className="flex justify-between items-center">
+                                              <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
+                                              <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
                                             </div>
-                                          )}
-                                        </div>
-                                      ))
+                                            <p className="text-gray-700">{com.comentario || com.mensaje}</p>
+
+                                            <div className="flex justify-end">
+                                              <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-[10px] text-[#4A5028] font-bold font-babydoll hover:underline">
+                                                {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
+                                              </button>
+                                            </div>
+
+                                            {/* Hilos de respuestas encadenadas */}
+                                            {respuestasCom.length > 0 && (
+                                              <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
+                                                {respuestasCom.map((resp, rIdx) => (
+                                                  <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#E8E6DF] text-xs space-y-1">
+                                                    <div className="flex justify-between items-center">
+                                                      <span className="font-bold font-babydoll text-[#4A5028]">{resp.usuario || resp.usuaria || 'Socia'}</span>
+                                                      <span className="text-[9px] text-gray-400">{resp.fecha || ''}</span>
+                                                    </div>
+                                                    <p className="text-gray-700">{resp.comentario || resp.mensaje}</p>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            )}
+
+                                            {/* Formulario de respuesta a este comentario específico */}
+                                            {respondiendoA === idComentario && (
+                                              <form onSubmit={(e) => {
+                                                e.preventDefault();
+                                                const txtResp = textoRespuesta[idComentario];
+                                                if (!txtResp || !txtResp.trim()) return;
+                                                
+                                                const nuevaRespObj = { capitulo_id: identificadorCap, capitulo: identificadorCap, parent_id: idComentario, respuesta_a: idComentario, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txtResp, fecha: 'Justo ahora' };
+                                                setComentarios([...comentarios, nuevaRespObj]);
+                                                enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
+                                                setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
+                                                setRespondiendoA(null);
+                                                mostrarToast('Respuesta enviada');
+                                              }} className="flex gap-2 pt-2">
+                                                <input 
+                                                  type="text" 
+                                                  placeholder="Escribe tu respuesta..." 
+                                                  value={textoRespuesta[idComentario] || ''} 
+                                                  onChange={(e) => setTextoRespuesta({ ...textoRespuesta, [idComentario]: e.target.value })} 
+                                                  className="flex-grow editorial-input px-2.5 py-1.5 text-xs bg-white" 
+                                                />
+                                                <button type="submit" className="editorial-btn px-2.5 py-1 text-[10px] font-babydoll">Enviar</button>
+                                              </form>
+                                            )}
+                                          </div>
+                                        );
+                                      })
                                     )}
                                   </div>
 
-                                  {/* Formulario nuevo comentario */}
+                                  {/* Formulario nuevo comentario principal */}
                                   <form onSubmit={(e) => {
                                     e.preventDefault();
                                     const clave = cap.id || cap.titulo;
                                     const txt = textoComentario[clave];
                                     if (!txt || !txt.trim()) return;
                                     
-                                    // Actualización optimista local inmediata
-                                    const nuevoCom = { capitulo_id: clave, capitulo: clave, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txt, fecha: 'Justo ahora' };
+                                    const nuevoCom = { capitulo_id: identificadorCap, capitulo: identificadorCap, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txt, fecha: 'Justo ahora' };
                                     setComentarios([...comentarios, nuevoCom]);
 
-                                    enviarAccion('comentar_capitulo', { capitulo: clave, comentario: txt });
+                                    enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
                                     setTextoComentario({ ...textoComentario, [clave]: '' });
                                     mostrarToast('Comentario enviado');
                                   }} className="flex gap-2 pt-1">
