@@ -847,18 +847,28 @@
 
                       {subTabComunidad === 'chat' && (
                         <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
-                          <div className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-center text-xs rounded-t-xl font-babydoll font-bold">Chat de Lectoras</div>
-                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
-                            {chatMsgs.map((m,i) => (
-                              <div key={i} className="bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] text-xs">
-                                <span className="font-bold text-[10px] text-gray-400 font-babydoll block mb-0.5">{m.usuario || m.usuaria}</span>
-                                <span>{m.mensaje}</span>
-                              </div>
-                            ))}
+                          <div className="bg-[#FBF9F5] p-3 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl font-babydoll font-bold">
+                            <span>Chat de Lectoras</span>
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          </div>
+                          <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col">
+                            {chatMsgs.map((m, i) => {
+                              const usuarioMsg = (m.usuario || m.usuaria || '').toLowerCase().trim();
+                              const miNombre = (nombreUsuarioPersonalizado || sesion.nombre || '').toLowerCase().trim();
+                              const esMia = usuarioMsg === miNombre;
+                              return (
+                                <div key={i} className={`flex flex-col max-w-[85%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                                  <span className="text-[9px] text-gray-400 font-babydoll mb-0.5 px-1">{m.usuario || m.usuaria}</span>
+                                  <div className={`p-3 rounded-2xl text-xs leading-relaxed shadow-xs ${esMia ? 'bg-[#4A5028] text-white rounded-br-xs' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] rounded-bl-xs'}`}>
+                                    {m.mensaje}
+                                  </div>
+                                </div>
+                              );
+                            })}
                             <div ref={chatEndRef} />
                           </div>
-                          <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2 border-t border-[#E8E6DF] flex gap-2 bg-white">
-                            <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                          <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 bg-white">
+                            <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje al club..." />
                             <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                           </form>
                         </div>
