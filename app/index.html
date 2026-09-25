@@ -681,7 +681,6 @@
         const [botellaAbierta, setBotellaAbierta] = useState(false);
         const [fraseActualBotella, setFraseActualBotella] = useState(0);
 
-        // Estados para formulario de Calendario (Administradora)
         const [nuevoEventoFecha, setNuevoEventoFecha] = useState('');
         const [nuevoEventoTitulo, setNuevoEventoTitulo] = useState('');
 
@@ -722,7 +721,6 @@
           return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
         };
 
-        // Carga inicial y silenciosa en segundo plano
         useEffect(() => {
           const cargarDatosSilenciosos = () => {
             Promise.all([
@@ -828,12 +826,9 @@
           });
         }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
 
-        // Verificación de restricciones de modalidad
         const modalidadLimpia = (sesion?.modalidad || '').toLowerCase().trim();
         const esModalidadCorreo = modalidadLimpia.includes('nube') || modalidadLimpia.includes('papel');
         const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satélite');
-
-        // Verificación exacta para ti como administradora
         const esAdmin = (sesion?.email || '').toLowerCase().trim() === 'ndnagore@gmail.com';
 
         if (!sesion) {
@@ -859,12 +854,10 @@
 
                   const passwordRegistrada = (socia.password || '').trim();
 
-                  // Validación 1: Si ya tiene contraseña registrada, comprobarla
                   if (passwordRegistrada !== '' && passwordRegistrada !== inputPassword.trim()) {
                     return setErrorLogin('Contraseña incorrecta.');
                   }
 
-                  // Validación 2: Si la columna está vacía (primera vez), exigir introducirla y guardarla
                   if (passwordRegistrada === '') {
                     if (!inputPassword.trim()) {
                       return setErrorLogin('Es tu primera vez. Introduce una contraseña nueva para guardarla.');
@@ -883,7 +876,16 @@
                 }} className="space-y-4">
                   <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
                   <input type="password" placeholder="contraseña" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
-                  {errorLogin && <p className="text-xs text-red-600 font-babydoll">{errorLogin}</p>}
+                  {errorLogin && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-red-600 font-babydoll">{errorLogin}</p>
+                      {errorLogin.includes('no registrado') && (
+                        <p className="text-xs font-babydoll pt-1">
+                          ¿Aún no te has registrado? <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="text-[#4A5028] font-bold underline">Haz clic aquí para apuntarte</a>
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <button type="submit" className="w-full editorial-btn py-3 text-xl font-babydoll">Entrar</button>
                 </form>
               </div>
@@ -915,7 +917,6 @@
 
             {mostrarModalUpgrade && <ModalUpgrade onClose={() => setMostrarModalUpgrade(false)} />}
 
-            {/* Modal de Detalle de Libro con opción para corregir portada y borrar */}
             {libroSeleccionadoDetalle && (
               <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 fade-in">
                 <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative">
@@ -1032,7 +1033,6 @@
                     </div>
                   </div>
 
-                  {/* NUEVA SECCIÓN: Calendario de Fechas Importantes en el Inicio */}
                   <div className="editorial-card p-5 space-y-3">
                     <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
                       <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
@@ -1054,7 +1054,6 @@
                       )}
                     </div>
 
-                    {/* Panel exclusivo para ti (ndnagore@gmail.com) */}
                     {esAdmin && (
                       <form onSubmit={(e) => {
                         e.preventDefault();
