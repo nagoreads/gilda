@@ -168,32 +168,11 @@
       const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
       const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
 
-      const ENLACES_STRIPE = {
-        satelite: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01',
-        cafe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02',
-        nube: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03',
-        virtual: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05',
-        papel: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04',
-        absoluta: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08'
-      };
-
       const FRASES_INICIALES = [
         "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
         "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
         "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
       ];
-
-      function normalizarComunidad(nombre, ciudad = '') {
-        if (!nombre && !ciudad) return 'Sin especificar';
-        const textoCompleto = `${nombre || ''} ${ciudad || ''}`.toLowerCase().trim();
-        if (textoCompleto.includes('gipuzkoa') || textoCompleto.includes('guipúzcoa') || textoCompleto.includes('bizkaia') || textoCompleto.includes('vizcaya') || textoCompleto.includes('araba') || textoCompleto.includes('álava') || textoCompleto.includes('país vasco') || textoCompleto.includes('euskadi') || textoCompleto.includes('tolosa') || textoCompleto.includes('donostia') || textoCompleto.includes('san sebastián') || textoCompleto.includes('bilbao') || textoCompleto.includes('vitoria')) return 'País Vasco';
-        if (textoCompleto.includes('barcelona') || textoCompleto.includes('girona') || textoCompleto.includes('lleida') || textoCompleto.includes('tarragona') || textoCompleto.includes('catalunya') || textoCompleto.includes('cataluña')) return 'Cataluña';
-        if (textoCompleto.includes('madrid')) return 'Comunidad de Madrid';
-        if (textoCompleto.includes('sevilla') || textoCompleto.includes('málaga') || textoCompleto.includes('cadiz') || textoCompleto.includes('granada') || textoCompleto.includes('andalucía') || textoCompleto.includes('andalucia')) return 'Andalucía';
-        if (textoCompleto.includes('coruña') || textoCompleto.includes('lugo') || textoCompleto.includes('ourense') || textoCompleto.includes('pontevedra') || textoCompleto.includes('galicia')) return 'Galicia';
-        if (textoCompleto.includes('valència') || textoCompleto.includes('valencia') || textoCompleto.includes('alicante') || textoCompleto.includes('castellón')) return 'Comunidad Valenciana';
-        return nombre || 'Sin especificar';
-      }
 
       function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
         const [sugerencias, setSugerencias] = useState([]);
@@ -840,10 +819,18 @@
 
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
+                      <div className="editorial-card p-5 space-y-1 mb-2">
+                        <h2 className="font-babydoll text-3xl font-bold">Capítulos y entregas</h2>
+                        <p className="text-xs text-gray-500 font-babydoll">Contenido exclusivo de nuestra lectura actual.</p>
+                      </div>
                       {capitulos.map((cap, i) => (
                         <div key={i} className="editorial-card p-5 space-y-3">
-                          <h3 className="font-babydoll text-2xl font-bold">{cap.titulo}</h3>
-                          <p className="text-xs text-gray-600 leading-relaxed">{cap.descripcion}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-[#4A5028] font-babydoll">Entrega #{i + 1}</span>
+                            <span className="text-[10px] text-gray-400 font-babydoll">{cap.fecha || ''}</span>
+                          </div>
+                          <h3 className="font-babydoll text-2xl font-bold leading-tight">{cap.titulo}</h3>
+                          <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
                         </div>
                       ))}
                     </div>
@@ -860,18 +847,26 @@
 
                       {subTabComunidad === 'chat' && (
                         <div className="editorial-card h-[450px] flex flex-col justify-between relative overflow-hidden">
-                          <div className="bg-[#FBF9F5] p-2.5 border-b border-[#E8E6DF] flex items-center justify-center text-xs rounded-t-xl font-babydoll font-bold">Chat de Lectoras</div>
-                          <div className="flex-grow p-3 overflow-y-auto space-y-3 flex flex-col">
-                            {chatMsgs.map((m,i) => (
-                              <div key={i} className="bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF] text-xs">
-                                <span className="font-bold text-[10px] text-gray-400 font-babydoll block mb-0.5">{m.usuario || m.usuaria}</span>
-                                <span>{m.mensaje}</span>
-                              </div>
-                            ))}
+                          <div className="bg-[#FBF9F5] p-3 border-b border-[#E8E6DF] flex items-center justify-between text-xs rounded-t-xl font-babydoll font-bold">
+                            <span>Chat de Lectoras</span>
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          </div>
+                          <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col">
+                            {chatMsgs.map((m, i) => {
+                              const esMia = (m.usuario || m.usuaria || '').toLowerCase().trim() === (nombreUsuarioPersonalizado || sesion.nombre || '').toLowerCase().trim();
+                              return (
+                                <div key={i} className={`flex flex-col max-w-[85%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                                  <span className="text-[9px] text-gray-400 font-babydoll mb-0.5 px-1">{m.usuario || m.usuaria}</span>
+                                  <div className={`p-3 rounded-2xl text-xs leading-relaxed shadow-xs ${esMia ? 'bg-[#4A5028] text-white rounded-br-xs' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] rounded-bl-xs'}`}>
+                                    {m.mensaje}
+                                  </div>
+                                </div>
+                              );
+                            })}
                             <div ref={chatEndRef} />
                           </div>
-                          <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2 border-t border-[#E8E6DF] flex gap-2 bg-white">
-                            <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje..." />
+                          <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-2.5 border-t border-[#E8E6DF] flex gap-2 bg-white">
+                            <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe un mensaje al club..." />
                             <button type="submit" className="editorial-btn px-4 py-2 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                           </form>
                         </div>
