@@ -332,8 +332,8 @@
 
       function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-lg" }) {
         const [errorImg, setErrorImg] = useState(false);
-        if (foto && foto.trim() !== '' && !errorImg) return <img src={foto} alt={nombre || 'Socia'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
-        return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'Socia').charAt(0).toUpperCase()}</div>;
+        if (foto && foto.trim() !== '' && !errorImg) return <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
+        return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-babydoll ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
       }
 
       function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
@@ -351,7 +351,7 @@
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
                 const seleccionada = usuariaActivaIndice === indice;
-                const nombreMostrar = (usuaria.nombre || 'Socia').split(' ')[0].toLowerCase();
+                const nombreMostrar = (usuaria.nombre || 'Lector(a)').split(' ')[0].toLowerCase();
                 return (
                   <div key={indice} className="relative flex flex-col items-center">
                     <div onClick={() => setUsuariaActivaIndice(indice)} className={`w-[32px] h-[44px] rounded-[2px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${estaLeyendo ? 'bg-[#FAF6E8] border-[#DCD6BE] shadow-[0_4px_12px_rgba(230,220,180,0.3)]' : 'bg-[#E3E0D6] border-[#D0CEB3]'} ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}></div>
@@ -567,11 +567,12 @@
           Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
         });
 
-        // Función robusta para consultar el nombre directamente desde la columna del Google Sheets (usuariasClub)
+        // Función estricta para obtener el nombre exclusivamente de la columna "nombre" del Google Sheets
         const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
-          if (!emailComentario && !usuarioOriginal) return 'Socia';
-          
-          // 1. Buscar en la lista de usuarias cargadas desde el Google Sheets por correo electrónico
+          if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
+            if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
+          }
+
           if (emailComentario) {
             const encontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
             if (encontrada && encontrada.nombre && encontrada.nombre.trim() !== '') {
@@ -579,26 +580,11 @@
             }
           }
 
-          // 2. Si el registro pasado coincide con la usuaria actual de la sesión
-          if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
-            if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
-            if (sesion.nombre) return sesion.nombre;
-          }
-
-          // 3. Si el parámetro recibido ya es un nombre válido y no un correo o genérico
           if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia') {
             return usuarioOriginal;
           }
 
-          // 4. Buscar de nuevo por si el identificador recibido era el propio nombre en lugar del email
-          if (usuarioOriginal) {
-            const encontradaPorNombre = usuariasClub.find(u => (u.nombre || '').trim().toLowerCase() === usuarioOriginal.trim().toLowerCase());
-            if (encontradaPorNombre && encontradaPorNombre.nombre) {
-              return encontradaPorNombre.nombre.trim();
-            }
-          }
-
-          return usuarioOriginal || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
+          return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
         };
 
         const cargarTodosLosDatos = () => {
@@ -607,14 +593,37 @@
             parsearHoja(URL_CSV_CAFECITOS), parsearHoja(URL_CSV_LECTURAS), parsearHoja(URL_CSV_CHAT), 
             parsearHoja(URL_CSV_PROPUESTAS), parsearHoja(URL_CSV_VOTACION_CAFE), parsearHoja(URL_CSV_LECTURAS_PERSONALES)
           ]).then(results => {
-            setUsuariasClub(results[0].filter(u => (u.email || '').trim() !== '')); 
+            const listaUsuarias = results[0].filter(u => (u.email || '').trim() !== '');
+            setUsuariasClub(listaUsuarias);
+            
+            // Actualizar nombre de sesión inmediatamente si ya estamos autenticados
+            if (sesion && sesion.email) {
+              const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
+              if (sociaActual && sociaActual.nombre && sociaActual.nombre.trim() !== '') {
+                setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+                localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+              }
+            }
+
             setCapitulos(results[1]); setComentarios(results[2]); 
             setLecturas(results[4]); setChatMsgs(results[5]); setPropuestas(results[6]);
             setFechasCafe(results[7]); setLecturasPersonales(results[8]);
           });
         };
 
-        useEffect(() => { parsearHoja(URL_CSV_USUARIAS).then(data => setUsuariasClub(data.filter(u => (u.email || '').trim() !== ''))); }, []);
+        useEffect(() => { 
+          parsearHoja(URL_CSV_USUARIAS).then(data => {
+            const listaUsuarias = data.filter(u => (u.email || '').trim() !== '');
+            setUsuariasClub(listaUsuarias);
+            if (sesion && sesion.email) {
+              const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
+              if (sociaActual && sociaActual.nombre && sociaActual.nombre.trim() !== '') {
+                setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+                localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+              }
+            }
+          }); 
+        }, []);
 
         useEffect(() => {
           if (sesion) {
@@ -631,17 +640,6 @@
         useEffect(() => {
           if (subTabComunidad === 'chat') chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
         }, [chatMsgs, subTabComunidad]);
-
-        useEffect(() => {
-          if (sesion && usuariasClub.length > 0) {
-            const socia = usuariasClub.find(u => (u.email || '').toLowerCase() === sesion.email.toLowerCase());
-            if (socia) {
-              setMiPagina(Number(socia.pagina || 0));
-              if (!nombreUsuarioPersonalizado) setNombreUsuarioPersonalizado(socia.nombre || sesion.email.split('@')[0]);
-              if (!fotoPerfilPersonalizada && socia.foto_perfil) setFotoPerfilPersonalizada(socia.foto_perfil);
-            }
-          }
-        }, [sesion, usuariasClub.length]);
 
         const enviarAccion = async (action, payload) => {
           try {
@@ -689,10 +687,11 @@
           return usuariasClub.map(u => {
             const emailU = (u.email || '').toLowerCase().trim();
             const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
+            const nombreRealU = u.nombre ? u.nombre.trim() : 'Lector(a)';
             const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
             return {
               ...u,
-              nombre: esYo ? (nombreUsuarioPersonalizado || u.nombre) : (u.nombre || 'Socia'),
+              nombre: esYo ? (nombreUsuarioPersonalizado || nombreRealU) : nombreRealU,
               foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
               pagina: esYo ? miPagina : Number(u.pagina || 0),
               estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
@@ -711,8 +710,11 @@
                   e.preventDefault();
                   const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === inputEmail.trim().toLowerCase());
                   if (!socia) return setErrorLogin('Correo no registrado.');
-                  const datosSesion = { nombre: socia.nombre || inputEmail.split('@')[0], email: inputEmail, modalidad: socia.modalidad || 'gilda' };
+                  const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
+                  const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
                   localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+                  localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
+                  setNombreUsuarioPersonalizado(nombreSociaSheet);
                   setSesion(datosSesion);
                 }} className="space-y-4">
                   <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
@@ -881,7 +883,6 @@
                         const desbloqueado = miPagina >= paginaMinima;
                         const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
                         
-                        // Filtramos únicamente comentarios principales (aquellos que NO tienen parent_id o respuesta_a)
                         const comentariosCapitulo = comentarios.filter(c => {
                           const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
                           const esDeEsteCap = cCap === identificadorCap;
@@ -899,7 +900,6 @@
                               <div className="space-y-4">
                                 <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
 
-                                {/* COMENTARIOS Y HILOS DE RESPUESTAS */}
                                 <div className="pt-4 border-t border-[#E8E6DF] space-y-3">
                                   <h4 className="font-babydoll text-sm font-bold">Comentarios de lectoras</h4>
                                   
@@ -909,7 +909,6 @@
                                     ) : (
                                       comentariosCapitulo.map((com, cIdx) => {
                                         const idComentario = com.id || com.comentario_id || cIdx;
-                                        // Buscamos las respuestas asociadas a este comentario concreto
                                         const respuestasCom = comentarios.filter(r => {
                                           const rCap = String(r.capitulo_id || r.capitulo || '').trim().toLowerCase();
                                           const parentMatch = String(r.parent_id || r.respuesta_a || '').trim() === String(idComentario).trim();
@@ -932,7 +931,6 @@
                                               </button>
                                             </div>
 
-                                            {/* Hilos de respuestas encadenadas */}
                                             {respuestasCom.length > 0 && (
                                               <div className="pl-3 mt-2 border-l-2 border-[#DCD6BE] space-y-2">
                                                 {respuestasCom.map((resp, rIdx) => {
@@ -950,7 +948,6 @@
                                               </div>
                                             )}
 
-                                            {/* Formulario de respuesta a este comentario específico */}
                                             {respondiendoA === idComentario && (
                                               <form onSubmit={(e) => {
                                                 e.preventDefault();
@@ -990,7 +987,6 @@
                                     )}
                                   </div>
 
-                                  {/* Formulario nuevo comentario principal */}
                                   <form onSubmit={(e) => {
                                     e.preventDefault();
                                     const clave = cap.id || cap.titulo;
