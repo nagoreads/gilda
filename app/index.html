@@ -30,14 +30,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- React, ReactDOM y Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- PapaParse -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
@@ -54,7 +46,6 @@
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         background-color: var(--bg-canvas);
         color: var(--text-primary);
-        -webkit-tap-highlight-color: transparent;
         margin: 0;
         min-height: 100vh;
         display: flex;
@@ -67,59 +58,84 @@
         font-family: 'Cormorant Garamond', Georgia, serif;
       }
 
-      .font-modern-title {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-weight: 700;
-        letter-spacing: -1.2px;
-      }
-
-      .editorial-card {
+      .craft-card {
         background: #FFFFFF;
-        color: var(--text-primary);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.015);
       }
 
-      .editorial-input {
-        background: #FFFFFF;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        color: var(--text-primary);
-        font-family: inherit;
-        transition: all 0.15s ease;
-      }
-      .editorial-input:focus {
-        outline: none;
-        background: #FFFFFF;
-        border-color: var(--accent-olive);
-        box-shadow: 0 0 0 3px rgba(85, 88, 22, 0.12);
-      }
-
-      .editorial-btn {
+      .craft-btn {
         background: var(--text-primary);
         color: #FFFFFF;
         border-radius: 8px;
         font-weight: 600;
-        font-family: inherit;
         transition: all 0.15s ease;
       }
-      .editorial-btn:hover { background: var(--accent-olive); color: #FFFFFF; }
-
-      .editorial-nav {
-        background: rgba(250, 249, 245, 0.92);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(230, 228, 223, 0.8);
-        padding-bottom: env(safe-area-inset-bottom, 12px);
+      .craft-btn:hover {
+        background: var(--accent-olive);
       }
 
-      .fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(4px); }
-        to { opacity: 1; transform: translateY(0); }
+      /* Estilos para las ventanas interactiva */
+      .ventana {
+        width: 32px;
+        height: 44px;
+        border-radius: 3px;
+        border: 1px solid var(--border-color);
+        background: #FFFFFF;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .ventana.leyendo {
+        background: var(--accent-olive);
+        border-color: var(--accent-olive);
+        box-shadow: 0 1px 4px rgba(85, 88, 22, 0.3);
+      }
+      .ventana.pausa {
+        background: #FFFFFF;
+        border-color: var(--border-color);
+      }
+      .ventana.seleccionada {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
       }
 
+      .tooltip {
+        font-size: 10px;
+        color: #666;
+        margin-top: 6px;
+        text-align: center;
+        white-space: nowrap;
+        max-width: 70px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .libro-bloque {
+        width: 12px;
+        height: 32px;
+        border-radius: 9999px;
+        background-color: var(--accent-olive);
+        flex-shrink: 0;
+      }
+      .libro-bloque.en-pausa {
+        background-color: #D1D5DB;
+      }
+
+      /* Modo Screenshot / Captura */
+      body.modo-screenshot #btn-modo-captura,
+      body.modo-screenshot header,
+      body.modo-screenshot .craft-card:not(#habitacion-gilda) {
+        display: none !important;
+      }
+
+      body.modo-screenshot #habitacion-gilda {
+        border: 2px solid var(--accent-olive);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        margin-top: 2rem;
+      }
+
+      /* Animaciones */
       @keyframes windowGlow {
         0%, 100% { box-shadow: 0 0 4px #555816; transform: scale(1); }
         50% { box-shadow: 0 0 10px #70741c; transform: scale(1.03); }
@@ -128,27 +144,50 @@
         animation: windowGlow 2s infinite ease-in-out;
       }
 
-      @keyframes floatBannerQueue {
-        0% { opacity: 0; transform: translateY(-4px); }
-        12% { opacity: 1; transform: translateY(0); }
-        88% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-4px); }
+      #mapa-gilda { 
+        height: 280px; 
+        width: 100%; 
+        border-radius: 8px; 
+        border: 1px solid var(--border-color); 
+        z-index: 1; 
       }
-      .notificacion-secuencial {
-        animation: floatBannerQueue 4.5s ease-in-out forwards;
-      }
-
-      #mapa-gilda { height: 280px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); z-index: 1; }
-
-      ::-webkit-scrollbar { width: 4px; height: 4px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #E0DDD5; border-radius: 4px; }
     </style>
   </head>
   <body>
-    <div id="root" class="w-full flex flex-col items-center"></div>
+    <div className="w-full max-w-md mx-auto p-4 space-y-6">
+      <!-- Header -->
+      <header className="text-center space-y-1 py-4">
+        <h1 className="font-editorial-title text-4xl font-medium text-[#1A1A1A]">gilda</h1>
+        <p className="text-xs text-gray-500 font-medium">club de lectura digital</p>
+      </header>
 
-    <!-- Carga externa del script separado con soporte Babel -->
-    <script type="text/babel" src="script.js"></script>
+      <!-- Edificio -->
+      <div className="craft-card p-6 flex flex-col items-center space-y-4">
+        <h2 className="text-xs uppercase tracking-wider font-bold text-gray-400">Edificio de lectoras</h2>
+        <div id="edificio" className="grid grid-cols-3 gap-6 w-full max-w-[220px] mx-auto py-2"></div>
+      </div>
+
+      <!-- Habitación Propia -->
+      <div id="habitacion-gilda" className="craft-card p-5 space-y-3" style="display: none;">
+        <div className="border-b border-[#E6E4DF] pb-2 flex justify-between items-center">
+          <h3 id="titulo-habitacion" className="font-editorial-title text-base font-medium text-[#1A1A1A]"></h3>
+          <span className="text-[10px] text-gray-400 font-bold uppercase">@gilda</span>
+        </div>
+
+        <div className="flex items-center gap-3 bg-[#FAF9F5] p-3 rounded-lg border border-[#E6E4DF]">
+          <div id="bloque-color-libro" className="libro-bloque"></div>
+          <p id="info-progreso" className="text-xs text-[#1A1A1A] leading-normal"></p>
+        </div>
+
+        <div className="pt-2 flex justify-end">
+          <button id="btn-modo-captura" className="craft-btn px-3 py-1.5 text-[11px] font-medium flex items-center gap-1.5">
+            <i className="fa-solid fa-camera text-[10px]"></i> Modo captura
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script principal compilado de forma nativa -->
+    <script src="script.js"></script>
   </body>
 </html>
