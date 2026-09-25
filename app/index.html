@@ -183,9 +183,10 @@
             setBuscando(true);
             try {
               const query = encodeURIComponent(valor.trim());
+              // Priorizamos España (gl=es&hl=es) para obtener editoriales y portadas en castellano
               const [resGoogle, resOpenLib] = await Promise.allSettled([
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books`),
-                fetch(`https://openlibrary.org/search.json?q=${query}&limit=5`)
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=6&printType=books&langRestrict=es&gl=es&hl=es`),
+                fetch(`https://openlibrary.org/search.json?q=${query}&limit=5&language=spa`)
               ]);
               let listaCombinada = [];
               if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
@@ -259,6 +260,7 @@
       function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
         const [errorImg, setErrorImg] = useState(false);
         const [portadaDinamica, setPortadaDinamica] = useState('');
+        const [autoraEncontrada, setAutoraEncontrada] = useState('');
         const [buscandoOnline, setBuscandoOnline] = useState(false);
 
         const sizeClasses = size === 'large' ? 'w-24 h-36 text-xs' : size === 'grid' ? 'w-16 h-24 text-[9px]' : size === 'thumb' ? 'w-10 h-14 text-[8px]' : 'w-12 h-16 text-[8px]';
@@ -266,7 +268,7 @@
         const portadaOriginal = portada || cover || image || '';
         const tituloFinal = titulo || 'Sin título';
         
-        // Limpieza y validación segura de la autora para evitar que imprima la palabra literal "autora"
+        // Limpieza de etiquetas erróneas en la autora
         const autoraCruda = autora || autor || escritora || '';
         const autoraFinal = useMemo(() => {
           if (!autoraCruda || typeof autoraCruda !== 'string') return '';
@@ -278,9 +280,6 @@
           return aLimpia;
         }, [autoraCruda]);
 
-        // Búsqueda automática en segundo plano para encontrar portada e incluso autora si faltaba
-        const [autoraEncontrada, setAutoraEncontrada] = useState('');
-
         useEffect(() => {
           let activo = true;
           if ((!portadaOriginal || errorImg || !autoraFinal) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
@@ -288,8 +287,8 @@
             const query = encodeURIComponent(`${tituloFinal} ${autoraFinal}`);
             
             Promise.allSettled([
-              fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`).then(r => r.json()),
-              fetch(`https://openlibrary.org/search.json?q=${query}&limit=1`).then(r => r.json())
+              fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es&gl=es&hl=es`).then(r => r.json()),
+              fetch(`https://openlibrary.org/search.json?q=${query}&limit=1&language=spa`).then(r => r.json())
             ]).then(results => {
               if (!activo) return;
               let imgEncontrada = '';
