@@ -194,9 +194,9 @@
                   dataG.items.forEach(item => {
                     const info = item.volumeInfo || {};
                     let thumb = info.imageLinks?.thumbnail || '';
-                if (thumb) {
-                  thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
-                }
+                    if (thumb) {
+                      thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
+                    }
                     listaCombinada.push({ 
                       titulo: info.title || '', 
                       autora: info.authors ? info.authors.join(', ') : 'Desconocida', 
@@ -264,18 +264,15 @@
         const tituloFinal = titulo || 'Sin título';
         const autoraFinal = autora || autor || escritora || '';
 
-        // Procesamiento seguro de la URL para GitHub Pages
+        // Solución definitiva universal: procesar y tunelizar cualquier enlace por weserv.nl para GitHub Pages
         const urlSegura = useMemo(() => {
           if (!portadaFinal || typeof portadaFinal !== 'string') return '';
           let p = portadaFinal.trim();
           
-          // 1. Forzar HTTPS para evitar el error de Mixed Content de GitHub
           if (p.startsWith('http://')) {
             p = p.replace('http://', 'https://');
           }
 
-          // 2. Si es una imagen válida, la pasamos por un proxy CDN gratuito (Images.weserv.nl) 
-          // Esto soluciona los bloqueos CORS de GitHub Pages y optimiza la carga
           if (p.startsWith('https://')) {
             return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300&output=jpg`;
           }
@@ -301,7 +298,6 @@
           );
         }
 
-        // Si no hay imagen o falla, muestra el lomo minimalista del libro
         return (
           <div className={`${sizeClasses} bg-[#232321] text-[#FBF9F5] p-1.5 rounded shadow-xs border border-[#E8E6DF] shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[#4A5028]"></div>
@@ -310,6 +306,7 @@
           </div>
         );
       }
+
       function LomoLibroEstanteria({ item, onClick }) {
         const generarColorEditorial = (texto) => {
           let hash = 0;
