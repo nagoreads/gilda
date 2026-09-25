@@ -843,9 +843,13 @@
                   {seccionApp === 'capitulos' && (
                     <div className="space-y-4 fade-in">
                       {capitulos.map((cap, i) => {
-                        const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || 0);
+                        const paginaMinima = Number(cap.pagina_bloqueo || cap.pagina || cap.paginaminima || 0);
                         const desbloqueado = miPagina >= paginaMinima;
-                        const comentariosCapitulo = comentarios.filter(c => String(c.capitulo_id || c.capitulo || '') === String(cap.id || cap.titulo || ''));
+                        const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
+                        const comentariosCapitulo = comentarios.filter(c => {
+                          const cCap = String(c.capitulo_id || c.capitulo || c.titulo || '').trim().toLowerCase();
+                          return cCap === identificadorCap;
+                        });
 
                         return (
                           <div key={i} className="editorial-card p-5 space-y-4">
@@ -862,31 +866,41 @@
                                   <h4 className="font-babydoll text-sm font-bold">Comentarios de lectoras</h4>
                                   
                                   <div className="space-y-2">
-                                    {comentariosCapitulo.map((com, cIdx) => (
-                                      <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-1">
-                                        <div className="flex justify-between items-center">
-                                          <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
-                                          <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
-                                        </div>
-                                        <p className="text-gray-700">{com.comentario || com.mensaje}</p>
-
-                                        {/* Hilos de respuestas si existen */}
-                                        {com.respuestas && (
-                                          <div className="pl-4 mt-2 border-l-2 border-[#DCD6BE] space-y-1.5">
-                                            {/* Aquí puedes mostrar respuestas si vienen estructuradas */}
+                                    {comentariosCapitulo.length === 0 ? (
+                                      <p className="text-[11px] text-gray-400 italic font-babydoll">Aún no hay comentarios en este capítulo. ¡Sé la primera en escribir!</p>
+                                    ) : (
+                                      comentariosCapitulo.map((com, cIdx) => (
+                                        <div key={cIdx} className="bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-xs space-y-1">
+                                          <div className="flex justify-between items-center">
+                                            <span className="font-bold font-babydoll text-[#4A5028]">{com.usuario || com.usuaria || 'Socia'}</span>
+                                            <span className="text-[9px] text-gray-400">{com.fecha || ''}</span>
                                           </div>
-                                        )}
-                                      </div>
-                                    ))}
+                                          <p className="text-gray-700">{com.comentario || com.mensaje}</p>
+
+                                          {/* Hilos de respuestas si existen */}
+                                          {com.respuestas && (
+                                            <div className="pl-4 mt-2 border-l-2 border-[#DCD6BE] space-y-1.5">
+                                              {/* Aquí puedes mostrar respuestas si vienen estructuradas */}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))
+                                    )}
                                   </div>
 
                                   {/* Formulario nuevo comentario */}
                                   <form onSubmit={(e) => {
                                     e.preventDefault();
-                                    const txt = textoComentario[cap.id || cap.titulo];
+                                    const clave = cap.id || cap.titulo;
+                                    const txt = textoComentario[clave];
                                     if (!txt || !txt.trim()) return;
-                                    enviarAccion('comentar_capitulo', { capitulo: cap.id || cap.titulo, comentario: txt });
-                                    setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: '' });
+                                    
+                                    // Actualización optimista local inmediata
+                                    const nuevoCom = { capitulo_id: clave, capitulo: clave, usuario: nombreUsuarioPersonalizado || sesion.nombre, comentario: txt, fecha: 'Justo ahora' };
+                                    setComentarios([...comentarios, nuevoCom]);
+
+                                    enviarAccion('comentar_capitulo', { capitulo: clave, comentario: txt });
+                                    setTextoComentario({ ...textoComentario, [clave]: '' });
                                     mostrarToast('Comentario enviado');
                                   }} className="flex gap-2 pt-1">
                                     <input 
