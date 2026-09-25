@@ -1522,11 +1522,9 @@
 
                         <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between gap-2">
                           <span className="text-xs text-gray-500 font-babydoll text-base">página por la que vas:</span>
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => actualizarPagina(miPagina - 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs font-babydoll">-5</button>
-                            <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-12 text-center py-1 text-xs" />
-                            <button onClick={() => actualizarPagina(miPagina + 5)} className="bg-[#FBF9F5] border border-[#E8E6DF] px-2 py-1 rounded text-xs font-babydoll">+5</button>
-                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-2.5 py-1 text-xs font-babydoll text-base">ok</button>
+                          <div className="flex items-center gap-2">
+                            <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1 text-xs font-semibold" />
+                            <button onClick={() => actualizarPagina(miPagina)} className="editorial-btn px-3 py-1 text-xs font-babydoll text-base">ok</button>
                           </div>
                         </div>
                       </div>
