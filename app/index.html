@@ -1314,32 +1314,32 @@
 
         if (!sesion) {
           return (
-            <div className="min-h-screen flex items-center justify-center px-4 w-full py-8">
-              <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#4A5028]"></div>
+            <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#FBF9F5]">
+              <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#E8E6DF]">
+                {/* Detalle superior editorial */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A5028]"></div>
                 
-                <div className="space-y-1.5 pt-2">
+                <div className="space-y-2 pt-2">
                   <h1 className="font-babydoll text-6xl text-[#232321] font-bold tracking-tight">gilda</h1>
-                  <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
+                  <p className="text-[11px] uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
                 </div>
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
-                    <div className="bg-[#FBF9F5] p-6 rounded-2xl border border-[#E8E6DF] space-y-5 text-left">
+                    {/* Manifiesto / Bienvenida destacado */}
+                    <div className="bg-[#F5F2EB] p-6 rounded-2xl border border-[#E8E6DF] space-y-4 text-left shadow-2xs">
                       <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
                         un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
                       </p>
 
-                      <p className="text-xs text-gray-600 font-sans leading-relaxed text-center px-2">
+                      <p className="text-xs text-gray-600 font-sans leading-relaxed text-center px-1">
                         Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento, asómate a las ventanas de las demás y cotillea qué libros están leyendo, ubícate en el mapa para que sepa desde dónde escribes y así puedas encontrar personas cercanas a ti con tus mismos gustos, escribe tus frases favoritas, descubre otras nuevas que escriban otras personas de la comunidad, y más.
                       </p>
 
-                      <div className="flex justify-center items-center gap-3 pt-3 text-[11px] font-semibold text-[#4A5028] font-sans border-t border-[#E8E6DF] flex-wrap text-center">
-                        <span>Cafecitos con alma</span>
-                        <span>—</span>
-                        <span>Estanterías abiertas</span>
-                        <span>—</span>
-                        <span>Cartas impresas y digitales</span>
+                      <div className="flex justify-center items-center gap-2.5 pt-3 text-[10px] font-semibold text-[#4A5028] font-sans border-t border-[#E2DFD4] flex-wrap text-center">
+                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Cafecitos con alma</span>
+                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Estanterías abiertas</span>
+                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Cartas impresas y digitales</span>
                       </div>
                     </div>
 
@@ -1348,17 +1348,17 @@
                         const modGratis = modalidadGratis || modalidades[0];
                         setModalidadSeleccionada(modGratis);
                         setVistaAcceso('formulario_registro');
-                      }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2">
+                      }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
                         <span>Abrir mi puerta gratis para cotillear :)</span>
                         <i className="fa-solid fa-arrow-right text-xs"></i>
                       </button>
 
-                      <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-[#FAF6E8] text-[#4A5028] border border-[#DCD6BE] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#F2EBD4] text-center">
+                      <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-[#FAF6E8] text-[#4A5028] border border-[#DCD6BE] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#F2EBD4] text-center shadow-2xs">
                         Conocer las modalidades disponibles
                       </button>
 
-                      <div className="pt-2 border-t border-[#E8E6DF]">
-                        <button onClick={() => setVistaAcceso('login')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] font-sans">
+                      <div className="pt-3 border-t border-[#E8E6DF]">
+                        <button onClick={() => setVistaAcceso('login')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] font-sans transition-colors">
                           Inicia sesión aquí si ya formas parte de gilda
                         </button>
                       </div>
@@ -1367,10 +1367,14 @@
                 )}
 
                 {vistaAcceso === 'login' && (
-                  <div className="space-y-4 fade-in">
-                    <button onClick={() => { setVistaAcceso('menu'); setErrorLogin(''); }} className="text-xs font-semibold text-gray-500 hover:text-[#232321] flex items-center group font-sans mb-2">
+                  <div className="space-y-5 fade-in text-left">
+                    <button onClick={() => { setVistaAcceso('menu'); setErrorLogin(''); }} className="text-xs font-semibold text-gray-500 hover:text-[#232321] flex items-center group font-sans">
                       <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver
                     </button>
+                    <div className="space-y-1">
+                      <h2 className="text-2xl font-babydoll font-bold text-[#232321]">bienvenida de nuevo :)</h2>
+                      <p className="text-xs text-gray-500 font-sans">Introduce tus datos para acceder a tu habitación.</p>
+                    </div>
                     <form onSubmit={(e) => {
                       e.preventDefault();
                       setErrorLogin('');
@@ -1407,15 +1411,21 @@
                       setNombreUsuarioPersonalizado(nombreSociaSheet);
                       setMiPagina(pagSocia);
                       setSesion(datosSesion);
-                    }} className="space-y-4">
-                      <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
-                      <input type="password" placeholder="contraseña" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-sm" />
+                    }} className="space-y-4 font-sans">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Correo electrónico</label>
+                        <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" placeholder="••••••••" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
+                      </div>
                       {errorLogin && (
-                        <div className="space-y-1">
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                           <p className="text-xs text-red-600 font-sans">{errorLogin}</p>
                         </div>
                       )}
-                      <button type="submit" className="w-full editorial-btn py-3 text-base">Entrar</button>
+                      <button type="submit" className="w-full editorial-btn py-3 text-sm mt-2">Entrar</button>
                     </form>
                   </div>
                 )}
@@ -1429,27 +1439,27 @@
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                       {/* Opción Gratis */}
-                      <div className="editorial-card p-4 flex flex-col justify-between hover:border-[#4A5028] transition-all">
-                        <div className="flex justify-between items-start mb-1">
+                      <div className="editorial-card p-4 flex flex-col justify-between hover:border-[#4A5028] transition-all bg-white">
+                        <div className="flex justify-between items-start mb-1.5">
                           <h3 className="font-babydoll font-bold text-lg text-[#232321]">{modalidadGratis.nombre}</h3>
-                          <span className="text-sm font-bold text-[#4A5028] font-sans">{modalidadGratis.precio}</span>
+                          <span className="text-xs font-bold bg-[#FAF6E8] text-[#4A5028] px-2.5 py-1 rounded-full font-sans border border-[#DCD6BE]">{modalidadGratis.precio}</span>
                         </div>
-                        <p className="text-xs text-gray-500 font-sans mb-3">{modalidadGratis.descripcion}</p>
-                        <button onClick={() => { setModalidadSeleccionada(modalidadGratis); setVistaAcceso('formulario_registro'); }} className="w-full py-2 rounded-xl text-xs font-semibold bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors font-sans">
-                          seleccionar
+                        <p className="text-xs text-gray-500 font-sans mb-3.5 leading-relaxed">{modalidadGratis.descripcion}</p>
+                        <button onClick={() => { setModalidadSeleccionada(modalidadGratis); setVistaAcceso('formulario_registro'); }} className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors font-sans">
+                          Seleccionar
                         </button>
                       </div>
 
                       {/* Opciones de Pago */}
                       {modalidadesPago.map((mod, index) => (
-                        <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#4A5028] border-2 shadow-sm' : ''} hover:border-[#4A5028] transition-all`}>
-                          <div className="flex justify-between items-start mb-1">
+                        <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#4A5028] border-2 shadow-sm bg-[#FAF6E8]/30' : 'bg-white'} hover:border-[#4A5028] transition-all`}>
+                          <div className="flex justify-between items-start mb-1.5">
                             <h3 className="font-babydoll font-bold text-lg text-[#232321]">{mod.nombre}</h3>
-                            <span className="text-sm font-bold text-[#4A5028] font-sans">{mod.precio}</span>
+                            <span className="text-xs font-bold bg-[#4A5028] text-white px-2.5 py-1 rounded-full font-sans">{mod.precio}</span>
                           </div>
-                          <p className="text-xs text-gray-500 font-sans mb-3">{mod.descripcion}</p>
-                          <button onClick={() => { setModalidadSeleccionada(mod); setVistaAcceso('formulario_registro'); }} className={`w-full py-2 rounded-xl text-xs font-semibold font-sans ${mod.destacado ? 'editorial-btn' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors'}`}>
-                            seleccionar
+                          <p className="text-xs text-gray-500 font-sans mb-3.5 leading-relaxed">{mod.descripcion}</p>
+                          <button onClick={() => { setModalidadSeleccionada(mod); setVistaAcceso('formulario_registro'); }} className={`w-full py-2.5 rounded-xl text-xs font-semibold font-sans ${mod.destacado ? 'editorial-btn' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors'}`}>
+                            Seleccionar
                           </button>
                         </div>
                       ))}
@@ -1465,20 +1475,20 @@
                     <div className="border-b border-[#E8E6DF] pb-3">
                       <h2 className="text-2xl font-babydoll font-bold text-[#232321]">ya casi estás dentro</h2>
                       <p className="text-xs text-gray-500 font-sans leading-relaxed mt-1">
-                        estás a punto de abrir la puerta a gilda. déjame tus datos para preparar tu habitación.
+                        Estás a punto de abrir la puerta a <b>{modalidadSeleccionada.nombre}</b> ({modalidadSeleccionada.precio}). Déjame tus datos para preparar tu habitación.
                       </p>
                     </div>
 
                     <form onSubmit={registrarYRedirigir} className="space-y-4 font-sans">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Nombre completo *</label>
-                        <input type="text" name="Nombre" required className="w-full editorial-input px-3.5 py-2.5 text-xs" />
+                        <input type="text" name="Nombre" required placeholder="Tu nombre o alias" className="w-full editorial-input px-3.5 py-3 text-xs" />
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">Correo electrónico *</label>
-                        <input type="email" name="Email" required placeholder="hola@ejemplo.com" className="w-full editorial-input px-3.5 py-2.5 text-xs" />
+                        <input type="email" name="Email" required placeholder="hola@ejemplo.com" className="w-full editorial-input px-3.5 py-3 text-xs" />
                       </div>
-                      <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-2 flex items-center justify-center gap-2">
+                      <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-3 flex items-center justify-center gap-2 shadow-md">
                         {enviandoRegistro ? 'Procesando...' : (
                           <>
                             <span>apúntame &lt;3</span>
