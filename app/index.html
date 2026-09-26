@@ -147,7 +147,7 @@
 
         return (
           <div className="w-full space-y-6 py-6 fade-in">
-            <!-- Header & Branding -->
+            {/* Header & Branding */}
             <div className="text-center space-y-2">
               <h1 className="font-babydoll text-4xl text-[#4A5028] font-bold">gilda</h1>
               <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold">Club de Lectura</p>
@@ -156,7 +156,7 @@
               </p>
             </div>
 
-            <!-- Proof Social & Lectura Actual -->
+            {/* Proof Social & Lectura Actual */}
             <div className="editorial-card p-3.5 flex items-center gap-3 bg-[#FAF8F3]">
               <div className="flex -space-x-2 shrink-0">
                 <div className="w-7 h-7 rounded-full bg-[#4A5028] text-white flex items-center justify-center text-xs font-bold border-2 border-white">M</div>
@@ -169,7 +169,7 @@
               </div>
             </div>
 
-            <!-- Selector de Modalidades (Paso clave para resolver dudas) -->
+            {/* Selector de Modalidades */}
             {modo === 'registro' && (
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wider text-center">
@@ -193,7 +193,7 @@
                   ))}
                 </div>
 
-                <!-- Detalle de la modalidad seleccionada -->
+                {/* Detalle de la modalidad seleccionada */}
                 {MODALIDADES.filter(m => m.id === modalidadSel).map(m => (
                   <div key={m.id} className="editorial-card p-3.5 space-y-2 bg-white text-xs fade-in">
                     <p className="text-gray-700 font-medium">{m.descripcion}</p>
@@ -210,7 +210,7 @@
               </div>
             )}
 
-            <!-- Formulario de Acceso -->
+            {/* Formulario de Acceso */}
             <form onSubmit={(e) => e.preventDefault()} className="editorial-card p-5 space-y-3">
               <div className="flex border-b border-[#E8E6DF] pb-2 mb-3">
                 <button
