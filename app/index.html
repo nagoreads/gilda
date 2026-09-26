@@ -1237,6 +1237,7 @@
           try {
             await fetch(GOOGLE_API_URL, {
               method: 'POST',
+              mode: 'no-cors',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: JSON.stringify({ action, usuario: nombreUsuarioPersonalizado || sesion?.nombre, email: sesion?.email, ...payload }),
             });
@@ -1261,18 +1262,24 @@
           try {
             await fetch(GOOGLE_API_URL, {
               method: 'POST',
+              mode: 'no-cors',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: JSON.stringify(datosRegistro),
             });
           } catch (error) {
             console.error('Error guardando en Google Sheets:', error);
+          } finally {
+            setEnviandoRegistro(false);
           }
 
-          const enlaceDestino = modalidadSeleccionada.esGratis 
-            ? 'https://gildamailclub.glideos.app' 
-            : modalidadSeleccionada.enlaceStripe;
-
-          window.location.href = enlaceDestino;
+          if (modalidadSeleccionada.esGratis) {
+            setVistaAcceso('menu');
+            setTabActiva('login');
+            setInputEmail(emailSocia);
+            mostrarToast('¡Registro completado! Ya puedes entrar.');
+          } else {
+            window.location.href = modalidadSeleccionada.enlaceStripe;
+          }
         };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
