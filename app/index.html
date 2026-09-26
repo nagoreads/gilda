@@ -965,6 +965,7 @@
         }, [usuarias]);
 
         useEffect(() => {
+          if (typeof L === 'undefined') return;
           if (!mapRef.current) {
             const map = L.map('mapa-gilda', { zoomControl: false, attributionControl: false }).setView([40.4167, -3.7037], 5);
             L.control.zoom({ position: 'topright' }).addTo(map);
@@ -1049,7 +1050,7 @@
       function App() {
         const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
         
-        const [vistaAcceso, setVistaAcceso] = useState('menu'); // 'menu', 'login', 'ruta_registro', 'modalidades', 'formulario_registro'
+        const [vistaAcceso, setVistaAcceso] = useState('menu');
         const [inputEmail, setInputEmail] = useState('');
         const [inputPassword, setInputPassword] = useState('');
         const [errorLogin, setErrorLogin] = useState('');
@@ -1059,12 +1060,12 @@
 
         const modalidades = [
           { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
+          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás.' },
           { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
-          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
-          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
-          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
-          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
+          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda.' },
+          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda.' },
+          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital más acceso total a la app.' },
+          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: en papel y acceso total a la app.' }
         ];
 
         const modalidadGratis = modalidades.find((m) => m.esGratis);
@@ -1316,7 +1317,6 @@
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#FBF9F5]">
               <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#E8E6DF]">
-                <!-- Detalle superior editorial -->
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A5028]"></div>
                 
                 <div className="space-y-2 pt-2">
@@ -1326,21 +1326,14 @@
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
-                    <!-- Manifiesto / Bienvenida destacado -->
                     <div className="bg-[#F5F2EB] p-6 rounded-2xl border border-[#E8E6DF] space-y-4 text-left shadow-2xs">
                       <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
                         un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
                       </p>
 
                       <p className="text-xs text-gray-600 font-sans leading-relaxed text-center px-1">
-                        Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento, asómate a las ventanas de las demás y cotillea qué libros están leyendo, ubícate en el mapa para que sepa desde dónde escribes y así puedas encontrar personas cercanas a ti con tus mismos gustos, escribe tus frases favoritas, descubre otras nuevas que escriban otras personas de la comunidad, y más.
+                        Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento...
                       </p>
-
-                      <div className="flex justify-center items-center gap-2 pt-3 text-[10px] font-medium text-[#4A5028] font-sans border-t border-[#E2DFD4] flex-wrap text-center">
-                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">cafecitos virtuales con autoras</span>
-                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">cartas</span>
-                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">actividades creativas y más</span>
-                      </div>
                     </div>
 
                     <div className="space-y-3">
@@ -1438,7 +1431,6 @@
                     <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">elige tu favorita :)</h2>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                      <!-- Opción Gratis -->
                       <div className="editorial-card p-4 flex flex-col justify-between hover:border-[#4A5028] transition-all bg-white">
                         <div className="flex justify-between items-start mb-1.5">
                           <h3 className="font-babydoll font-bold text-lg text-[#232321]">{modalidadGratis.nombre}</h3>
@@ -1450,7 +1442,6 @@
                         </button>
                       </div>
 
-                      <!-- Opciones de Pago -->
                       {modalidadesPago.map((mod, index) => (
                         <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#4A5028] border-2 shadow-sm bg-[#FAF6E8]/30' : 'bg-white'} hover:border-[#4A5028] transition-all`}>
                           <div className="flex justify-between items-start mb-1.5">
@@ -1499,7 +1490,6 @@
                     </form>
                   </div>
                 )}
-
               </div>
             </div>
           );
