@@ -1244,7 +1244,7 @@
           } catch (err) { console.error(err); }
         };
 
-        const registrarYRedirigir = async (e) => {
+        cconst registrarYRedirigir = async (e) => {
       e.preventDefault();
       setEnviandoRegistro(true);
       const form = e.target;
@@ -1275,13 +1275,24 @@
       }
 
       if (modalidadSeleccionada.esGratis) {
-        // Autoinicio de sesión inmediato para evitar el error del CSV de Google
         const nombreSociaSheet = (nombreSocia && nombreSocia.trim() !== '') ? nombreSocia.trim() : emailSocia.split('@')[0];
         const datosSesion = { 
           nombre: nombreSociaSheet, 
           email: emailSocia, 
           modalidad: modalidadNombreCompleto 
         };
+
+        // Añadimos a la usuaria al estado local de golpe para que su ventana aparezca en la casa al instante
+        const nuevaUsuariaLocal = {
+          nombre: nombreSociaSheet,
+          email: emailSocia,
+          modalidad: modalidadNombreCompleto,
+          pagina: '0',
+          ciudad: '',
+          codigo_postal: '',
+          foto_perfil: ''
+        };
+        setUsuariasClub(prev => [...prev, nuevaUsuariaLocal]);
 
         localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
         localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
@@ -1293,7 +1304,6 @@
         window.location.href = modalidadSeleccionada.enlaceStripe;
       }
     };
-
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
