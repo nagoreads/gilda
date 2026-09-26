@@ -1245,42 +1245,54 @@
         };
 
         const registrarYRedirigir = async (e) => {
-          e.preventDefault();
-          setEnviandoRegistro(true);
-          const form = e.target;
-          const formData = new FormData(form);
-          const nombreSocia = formData.get('Nombre');
-          const emailSocia = formData.get('Email');
+      e.preventDefault();
+      setEnviandoRegistro(true);
+      const form = e.target;
+      const formData = new FormData(form);
+      const nombreSocia = formData.get('Nombre');
+      const emailSocia = formData.get('Email');
 
-          const datosRegistro = {
-            action: 'registrar_nueva_socia',
-            nombre: nombreSocia,
-            email: emailSocia,
-            modalidad: `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`
-          };
+      const modalidadNombreCompleto = `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`;
 
-          try {
-            await fetch(GOOGLE_API_URL, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify(datosRegistro),
-            });
-          } catch (error) {
-            console.error('Error guardando en Google Sheets:', error);
-          } finally {
-            setEnviandoRegistro(false);
-          }
+      const datosRegistro = {
+        action: 'registrar_nueva_socia',
+        nombre: nombreSocia,
+        email: emailSocia,
+        modalidad: modalidadNombreCompleto
+      };
 
-          if (modalidadSeleccionada.esGratis) {
-            setVistaAcceso('menu');
-            setTabActiva('login');
-            setInputEmail(emailSocia);
-            mostrarToast('¡Registro completado! Ya puedes entrar.');
-          } else {
-            window.location.href = modalidadSeleccionada.enlaceStripe;
-          }
+      try {
+        await fetch(GOOGLE_API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(datosRegistro),
+        });
+      } catch (error) {
+        console.error('Error guardando en Google Sheets:', error);
+      } finally {
+        setEnviandoRegistro(false);
+      }
+
+      if (modalidadSeleccionada.esGratis) {
+        // Autoinicio de sesión inmediato para evitar el error del CSV de Google
+        const nombreSociaSheet = (nombreSocia && nombreSocia.trim() !== '') ? nombreSocia.trim() : emailSocia.split('@')[0];
+        const datosSesion = { 
+          nombre: nombreSociaSheet, 
+          email: emailSocia, 
+          modalidad: modalidadNombreCompleto 
         };
+
+        localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+        localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
+        setNombreUsuarioPersonalizado(nombreSociaSheet);
+        setMiPagina(0);
+        setSesion(datosSesion);
+        mostrarToast('¡Registro completado! Bienvenida a gilda.');
+      } else {
+        window.location.href = modalidadSeleccionada.enlaceStripe;
+      }
+    };
 
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
