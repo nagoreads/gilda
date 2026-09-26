@@ -1316,7 +1316,7 @@
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#FBF9F5]">
               <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#E8E6DF]">
-                {/* Detalle superior editorial */}
+                <!-- Detalle superior editorial -->
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A5028]"></div>
                 
                 <div className="space-y-2 pt-2">
@@ -1326,7 +1326,7 @@
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
-                    {/* Manifiesto / Bienvenida destacado */}
+                    <!-- Manifiesto / Bienvenida destacado -->
                     <div className="bg-[#F5F2EB] p-6 rounded-2xl border border-[#E8E6DF] space-y-4 text-left shadow-2xs">
                       <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
                         un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
@@ -1336,10 +1336,10 @@
                         Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento, asómate a las ventanas de las demás y cotillea qué libros están leyendo, ubícate en el mapa para que sepa desde dónde escribes y así puedas encontrar personas cercanas a ti con tus mismos gustos, escribe tus frases favoritas, descubre otras nuevas que escriban otras personas de la comunidad, y más.
                       </p>
 
-                      <div className="flex justify-center items-center gap-2.5 pt-3 text-[10px] font-semibold text-[#4A5028] font-sans border-t border-[#E2DFD4] flex-wrap text-center">
-                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Cafecitos con alma</span>
-                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Estanterías abiertas</span>
-                        <span className="bg-white/80 px-2 py-1 rounded-md border border-[#E8E6DF]">Cartas impresas y digitales</span>
+                      <div className="flex justify-center items-center gap-2 pt-3 text-[10px] font-medium text-[#4A5028] font-sans border-t border-[#E2DFD4] flex-wrap text-center">
+                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">cafecitos virtuales con autoras</span>
+                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">cartas</span>
+                        <span className="bg-white/80 px-2.5 py-1 rounded-full border border-[#E8E6DF]">actividades creativas y más</span>
                       </div>
                     </div>
 
@@ -1438,7 +1438,7 @@
                     <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">elige tu favorita :)</h2>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                      {/* Opción Gratis */}
+                      <!-- Opción Gratis -->
                       <div className="editorial-card p-4 flex flex-col justify-between hover:border-[#4A5028] transition-all bg-white">
                         <div className="flex justify-between items-start mb-1.5">
                           <h3 className="font-babydoll font-bold text-lg text-[#232321]">{modalidadGratis.nombre}</h3>
@@ -1450,7 +1450,7 @@
                         </button>
                       </div>
 
-                      {/* Opciones de Pago */}
+                      <!-- Opciones de Pago -->
                       {modalidadesPago.map((mod, index) => (
                         <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#4A5028] border-2 shadow-sm bg-[#FAF6E8]/30' : 'bg-white'} hover:border-[#4A5028] transition-all`}>
                           <div className="flex justify-between items-start mb-1.5">
