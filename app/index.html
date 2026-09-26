@@ -1,250 +1,2197 @@
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#4A5028" />
-    <title>gilda — club de lectura</title>
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json" />
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => console.log('SW error:', err));
+    });
+  }
+</script>
 
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<!-- Fontshare: Satoshi -->
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Config adaptada para UI/UX coherente -->
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              gilda: {
-                bg: '#FBF9F5',
-                card: '#FFFFFF',
-                olive: '#4A5028',
-                'olive-dark': '#373C1E',
-                text: '#232321',
-                muted: '#6B685E',
-                border: '#E8E6DF',
-                accent: '#FAF6E8'
-              }
-            },
-            boxShadow: {
-              'soft': '0 4px 20px rgba(0, 0, 0, 0.04)',
+<!-- Tailwind CSS con Configuración Extendida -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          gilda: {
+            bg: '#FBF9F5',
+            card: '#FFFFFF',
+            olive: '#4A5028',
+            'olive-dark': '#373C1E',
+            text: '#232321',
+            muted: '#6B685E',
+            border: '#E8E6DF',
+            accent: '#FAF6E8'
+          }
+        },
+        boxShadow: {
+          'soft': '0 4px 20px rgba(0, 0, 0, 0.04)',
+        }
+      }
+    }
+  }
+</script>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- React, ReactDOM y Babel -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- PapaParse -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+  :root {
+    --color-bg-main: #FBF9F5;
+    --color-card-bg: #FFFFFF;
+    --color-olive-main: #4A5028;
+    --color-olive-dark: #373C1E;
+    --color-text-dark: #232321;
+    --color-text-muted: #6B685E;
+    --color-border: #E8E6DF;
+    --color-accent-soft: #FAF6E8;
+  }
+
+  @font-face {
+    font-family: 'BabyDoll';
+    src: url('babydoll.ttf') format('truetype'),
+         url('babydoll.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* MEJORA UI: Estilos para que en PC se vea como un móvil centrado y elegante */
+  body {
+    font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #EAE6DF; /* Fondo grisáceo para escritorio */
+    color: var(--color-text-dark);
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    background-color: var(--color-bg-main);
+    width: 100%;
+    max-width: 450px; /* Ancho de móvil */
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Bordes redondeados en pantallas grandes */
+  @media (min-width: 481px) {
+    body { padding: 2rem 0; }
+    #root {
+      min-height: calc(100vh - 4rem);
+      border-radius: 2rem;
+      border: 8px solid white;
+      overflow: hidden; /* Evita que el contenido se salga de los bordes redondeados */
+    }
+    /* Ajuste de la navegación para que se quede dentro del contenedor en PC */
+    .editorial-nav {
+      position: absolute !important;
+      bottom: 0;
+    }
+  }
+
+  .font-babydoll {
+    font-family: 'BabyDoll', cursive, sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  .editorial-card {
+    background: var(--color-card-bg);
+    color: var(--color-text-dark);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .editorial-input {
+    background: #F8F7F3;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--color-text-dark);
+    font-family: 'Satoshi', sans-serif;
+    font-size: 0.875rem; /* 14px */
+    transition: all 0.2s ease;
+  }
+  .editorial-input:focus {
+    outline: none;
+    background: #FFFFFF;
+    border-color: var(--color-olive-main);
+    box-shadow: 0 0 0 3px rgba(74, 80, 40, 0.15);
+  }
+
+  .editorial-btn {
+    background: var(--color-text-dark);
+    color: var(--color-bg-main);
+    border-radius: 20px;
+    font-weight: 600;
+    font-family: 'Satoshi', sans-serif;
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+    min-height: 44px; /* MEJORA UX: Tamaño mínimo táctil */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .editorial-btn:hover { background: var(--color-olive-main); color: #FFFFFF; }
+  .editorial-btn:active { transform: scale(0.98); }
+
+  .editorial-nav {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border);
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+
+  .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .estanteria-madera {
+    background: linear-gradient(to bottom, #F4F0E6 0%, #EAE4D2 100%);
+    border-bottom: 14px solid #C5B99E;
+    border-radius: 6px 6px 10px 10px;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.05);
+    position: relative;
+  }
+
+  .lomo-libro {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  }
+  .lomo-libro:hover, .lomo-libro:active {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 16px 30px rgba(0,0,0,0.18);
+  }
+
+  @keyframes parpadeoVela {
+    0%, 100% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+    50% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+  }
+  .vela-flama { animation: parpadeoVela 1.5s infinite ease-in-out; transform-origin: bottom center; }
+
+  @keyframes subirHumo {
+    0% { transform: translateY(0) scaleX(1); opacity: 0.8; }
+    100% { transform: translateY(-12px) scaleX(1.4); opacity: 0; }
+  }
+  .humo-taza { animation: subirHumo 2s infinite ease-out; }
+
+  #mapa-gilda { height: 280px; width: 100%; border-radius: 16px; border: 1px solid var(--color-border); z-index: 1; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D0CEB3; border-radius: 4px; }
+  
+  /* Utilidades extra para que el scroll del root funcione bien */
+  .scrollable-content {
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+</style>
+
+
+<script type="text/babel">
+  const { useState, useEffect, useMemo, useRef } = React;
+
+  const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbxAA85jNkM6_Xfnd2NNIiCm3VQcAwD4ZLpXJJsPNyj07vXaUxC5rbZWjSYJM_AU472X/exec';
+  const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
+  const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
+  const URL_CSV_COMENTARIOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv';
+  const URL_CSV_CAFECITOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv';
+  const URL_CSV_LECTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv';
+  const URL_CSV_CHAT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv';
+  const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
+  const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
+  const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
+  const URL_CSV_CALENDARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=2016923063&single=true&output=csv';
+
+  const FRASES_INICIALES = [
+    "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
+    "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
+    "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
+  ];
+
+  const formatoOracion = (texto) => {
+    if (!texto) return '';
+    const str = texto.toString().trim().toLowerCase();
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  // MEJORA UX/UI: Modal con cierre de fondo (Backdrop click)
+  function ModalUpgrade({ onClose }) {
+    return (
+      <div className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in" onClick={onClose}>
+        <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <button onClick={onClose} aria-label="Cerrar ventana" className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black rounded-full hover:bg-gray-100 transition-colors">
+            <i className="fa-solid fa-xmark text-lg"></i>
+          </button>
+          <div className="w-12 h-12 bg-[#FAF6E8] rounded-full flex items-center justify-center mx-auto text-[#4A5028]">
+            <i className="fa-solid fa-lock text-lg"></i>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-babydoll text-xl font-bold text-[#232321]">Acceso restringido</h3>
+            <p className="text-sm text-[#6B685E] font-sans leading-relaxed">
+              Tu modalidad actual no incluye acceso a esta función. Actualiza tu suscripción para disfrutar de todas las funciones de gilda.
+            </p>
+          </div>
+          <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="w-full editorial-btn py-3 text-sm text-center font-semibold">
+            Actualizar modalidad
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
+    const [sugerencias, setSugerencias] = useState([]);
+    const [buscando, setBuscando] = useState(false);
+    const [mostrarDropdown, setMostrarDropdown] = useState(false);
+
+    useEffect(() => {
+      if (!valor || valor.trim().length < 2) {
+        setSugerencias([]);
+        setMostrarDropdown(false);
+        return;
+      }
+      const timer = setTimeout(async () => {
+        setBuscando(true);
+        try {
+          const query = encodeURIComponent(valor.trim());
+          const [resGoogle, resOpenLib] = await Promise.allSettled([
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=8&printType=books&langRestrict=es`),
+            fetch(`https://openlibrary.org/search.json?q=${query}&limit=6&language=spa`)
+          ]);
+          let listaCombinada = [];
+          if (resGoogle.status === 'fulfilled' && resGoogle.value.ok) {
+            const dataG = await resGoogle.value.json();
+            if (dataG.items) {
+              dataG.items.forEach(item => {
+                const info = item.volumeInfo || {};
+                let thumb = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || '';
+                if (thumb) {
+                  thumb = thumb.replace('http:', 'https:').replace('&edge=curl', '');
+                }
+                listaCombinada.push({ 
+                  titulo: info.title || '', 
+                  autora: info.authors ? info.authors.join(', ') : '', 
+                  portada: thumb 
+                });
+              });
             }
+          }
+          if (resOpenLib.status === 'fulfilled' && resOpenLib.value.ok) {
+            const dataOL = await resOpenLib.value.json();
+            if (dataOL.docs) {
+              dataOL.docs.forEach(doc => {
+                listaCombinada.push({ 
+                  titulo: doc.title || '', 
+                  autora: doc.author_name ? doc.author_name.join(', ') : '', 
+                  portada: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : '' 
+                });
+              });
+            }
+          }
+          const unicos = [];
+          const titulosVistos = new Set();
+          listaCombinada.forEach(item => {
+            const tLimpio = item.titulo.toLowerCase().trim();
+            if (tLimpio && !titulosVistos.has(tLimpio)) { 
+              titulosVistos.add(tLimpio); 
+              unicos.push(item); 
+            }
+          });
+          setSugerencias(unicos.slice(0, 8));
+          setMostrarDropdown(unicos.length > 0);
+        } catch (err) { console.error(err); } finally { setBuscando(false); }
+      }, 300);
+      return () => clearTimeout(timer);
+    }, [valor]);
+
+    return (
+      <div className="relative w-full">
+        <div className="relative flex items-center">
+          <input type="text" placeholder={placeholder} value={valor} onChange={(e) => { setValor(e.target.value); setMostrarDropdown(true); }} className="w-full editorial-input p-3 text-sm italic pr-9" />
+          {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-3 text-sm text-[#4A5028]"></i>}
+        </div>
+        {mostrarDropdown && sugerencias.length > 0 && (
+          <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#E8E6DF] rounded-b-xl shadow-xl max-h-56 overflow-y-auto mt-1">
+            {sugerencias.map((item, idx) => (
+              <div key={idx} onClick={() => { onSelectLibro(item); setMostrarDropdown(false); }} className="flex items-center gap-3 p-2.5 hover:bg-[#FBF9F5] cursor-pointer border-b border-[#E8E6DF] last:border-0 text-left transition-colors">
+                {item.portada ? <img src={`https://images.weserv.nl/?url=${encodeURIComponent(item.portada)}&w=100&output=jpg`} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-xs" /> : <div className="w-7 h-10 bg-[#F3EFE6] rounded shrink-0 flex items-center justify-center text-[10px] text-gray-500 border border-[#E8E6DF]">Sin foto</div>}
+                <div className="overflow-hidden">
+                  <p className="text-sm font-bold text-[#232321] truncate leading-tight font-sans">{item.titulo}</p>
+                  <p className="text-xs text-[#6B685E] italic truncate font-sans mt-0.5">{item.autora || 'Autora desconocida'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
+    const [errorImg, setErrorImg] = useState(false);
+    const [portadaDinamica, setPortadaDinamica] = useState('');
+    const [autoraEncontrada, setAutoraEncontrada] = useState('');
+    const [buscandoOnline, setBuscandoOnline] = useState(false);
+
+    // MEJORA UI: Tamaños estandarizados sin micro-tipografías
+    const sizeClasses = size === 'large' ? 'w-24 h-36' : size === 'grid' ? 'w-16 h-24' : size === 'thumb' ? 'w-12 h-16' : 'w-12 h-16';
+    const fontSizeClass = size === 'large' ? 'text-xs' : 'text-[10px]';
+
+    const portadaOriginal = portada || cover || image || '';
+    const tituloFinal = titulo || 'Sin título';
+    
+    const autoraCruda = autora || autor || escritora || '';
+    const autoraFinal = useMemo(() => {
+      if (!autoraCruda || typeof autoraCruda !== 'string') return '';
+      const aLimpia = autoraCruda.trim();
+      const lower = aLimpia.toLowerCase();
+      if (['autora', 'autor', 'desconocida', 'escritora', 'undefined', 'null'].includes(lower)) {
+        return '';
+      }
+      return aLimpia;
+    }, [autoraCruda]);
+
+    useEffect(() => {
+      let activo = true;
+      if ((!portadaOriginal || errorImg || !autoraFinal) && tituloFinal && tituloFinal !== 'Sin título' && !buscandoOnline && !portadaDinamica) {
+        setBuscandoOnline(true);
+        const query = encodeURIComponent(`${tituloFinal} ${autoraFinal}`);
+        
+        Promise.allSettled([
+          fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&langRestrict=es`).then(r => r.json()),
+          fetch(`https://openlibrary.org/search.json?q=${query}&limit=1&language=spa`).then(r => r.json())
+        ]).then(results => {
+          if (!activo) return;
+          let imgEncontrada = '';
+          let autEncontrada = '';
+
+          if (results[0].status === 'fulfilled') {
+            const itemG = results[0].value.items?.[0]?.volumeInfo;
+            if (itemG) {
+              if (itemG.imageLinks?.thumbnail || itemG.imageLinks?.smallThumbnail) {
+                imgEncontrada = itemG.imageLinks.thumbnail || itemG.imageLinks.smallThumbnail;
+              }
+              if (itemG.authors && itemG.authors.length > 0) {
+                autEncontrada = itemG.authors.join(', ');
+              }
+            }
+          }
+
+          if (!imgEncontrada && results[1].status === 'fulfilled') {
+            const docOL = results[1].value.docs?.[0];
+            if (docOL) {
+              if (docOL.cover_i) {
+                imgEncontrada = `https://covers.openlibrary.org/b/id/${docOL.cover_i}-L.jpg`;
+              }
+              if (docOL.author_name && docOL.author_name.length > 0) {
+                autEncontrada = docOL.author_name.join(', ');
+              }
+            }
+          }
+
+          if (imgEncontrada) {
+            setPortadaDinamica(imgEncontrada.replace('http:', 'https:'));
+          }
+          if (autEncontrada && !autoraFinal) {
+            setAutoraEncontrada(autEncontrada);
+          }
+        }).catch(() => {}).finally(() => {
+          if (activo) setBuscandoOnline(false);
+        });
+      }
+      return () => { activo = false; };
+    }, [portadaOriginal, errorImg, tituloFinal, autoraFinal]);
+
+    const urlSegura = useMemo(() => {
+      const pFinal = portadaOriginal || portadaDinamica;
+      if (!pFinal || typeof pFinal !== 'string') return '';
+      let p = pFinal.trim();
+      
+      if (p.startsWith('data:image')) return p;
+
+      if (p.startsWith('http://')) {
+        p = p.replace('http://', 'https://');
+      }
+
+      if (p.startsWith('https://')) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300&output=jpg`;
+      }
+      
+      return '';
+    }, [portadaOriginal, portadaDinamica]);
+
+    const autoraMostrar = autoraFinal || autoraEncontrada || '';
+
+    const colorEditorialFallback = useMemo(() => {
+      let hash = 0;
+      for (let i = 0; i < tituloFinal.length; i++) { hash = tituloFinal.charCodeAt(i) + ((hash << 5) - hash); }
+      const matices = ['#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242'];
+      return matices[Math.abs(hash) % matices.length];
+    }, [tituloFinal]);
+
+    if (urlSegura !== '' && !errorImg) {
+      return (
+        <img 
+          src={urlSegura} 
+          alt={tituloFinal} 
+          onError={() => setErrorImg(true)} 
+          className={`${sizeClasses} object-cover rounded shadow-xs shrink-0 bg-gray-100`} 
+        />
+      );
+    }
+
+    return (
+      <div style={{ backgroundColor: colorEditorialFallback }} className={`${sizeClasses} text-[#FBF9F5] p-2 rounded shadow-xs border border-white/20 shrink-0 flex flex-col justify-between overflow-hidden text-left relative`}>
+        <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-white/30"></div>
+        <span className={`font-bold tracking-tight line-clamp-3 leading-tight font-sans drop-shadow-xs ${fontSizeClass}`}>
+          {tituloFinal}
+        </span>
+        <span className="text-[10px] text-white/80 uppercase tracking-wider truncate font-sans">
+          {autoraMostrar}
+        </span>
+      </div>
+    );
+  }
+
+  function LomoLibroEstanteria({ item, onClick }) {
+    const generarColorEditorial = (texto) => {
+      let hash = 0;
+      for (let i = 0; i < texto.length; i++) { hash = texto.charCodeAt(i) + ((hash << 5) - hash); }
+      const matices = ['#4A5028', '#3E4522', '#633B28', '#2B3027', '#7A4232', '#3C5868', '#684C3C', '#4C3C68', '#5C4033', '#405242', '#6A4E36', '#35424A', '#523A3A', '#4A3B5C', '#3F4E4F'];
+      return matices[Math.abs(hash) % matices.length];
+    };
+
+    const tituloLibro = item.libro || item.titulo || 'libro';
+
+    return (
+      <div onClick={onClick} style={{ backgroundColor: generarColorEditorial(tituloLibro) }} className="lomo-libro text-[#FBF9F5] w-12 h-36 shrink-0 cursor-pointer shadow-md relative rounded-t-sm overflow-hidden flex flex-col justify-start p-2 border-t border-white/20" title={`${tituloLibro} — ${item.autora || ''}`}>
+        <div className="absolute top-1 left-1.5 w-1 h-2 rounded-full bg-white/20"></div>
+        <div className="flex flex-col h-full justify-start pt-3">
+          <span className="font-sans font-bold text-[10px] leading-tight text-left text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] overflow-hidden text-ellipsis" style={{writingMode: 'vertical-rl', textOrientation: 'mixed', maxHeight: '110px'}}>
+            {tituloLibro}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  function IlustracionDecoracion({ tipo }) {
+    if (tipo === 'monstera') return (
+      <svg width="42" height="46" viewBox="0 0 42 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+        <path d="M14 34H28V44H14V34Z" fill="#D29062" stroke="#232321" strokeWidth="1.5"/><path d="M12 34H30V37H12V34Z" fill="#B87343" stroke="#232321" strokeWidth="1.5"/><path d="M21 34V16" stroke="#4A5028" strokeWidth="2" strokeLinecap="round"/><path d="M21 22C14 20 8 24 6 28C11 31 16 28 21 22Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/><path d="M21 18C28 16 34 20 36 24C31 27 26 24 21 18Z" fill="#636E31" stroke="#232321" strokeWidth="1.5"/><path d="M21 14C17 6 10 6 7 9C10 13 15 14 21 14Z" fill="#8A9945" stroke="#232321" strokeWidth="1.5"/><path d="M21 14C25 6 32 6 35 9C32 13 27 14 21 14Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/>
+      </svg>
+    );
+    if (tipo === 'maceta') return (
+      <svg width="40" height="42" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+        <path d="M10 28H30V40H10V28Z" fill="#E2D6C5" stroke="#232321" strokeWidth="1.5"/><path d="M8 25H32V29H8V25Z" fill="#F0E8DC" stroke="#232321" strokeWidth="1.5"/><path d="M20 25C15 16 11 10 9 6C15 10 18 16 20 25Z" fill="#75813C" stroke="#232321" strokeWidth="1.5"/><path d="M20 25C25 16 29 10 31 6C25 10 22 16 20 25Z" fill="#8A9945" stroke="#232321" strokeWidth="1.5"/>
+      </svg>
+    );
+    if (tipo === 'vela') return (
+      <svg width="32" height="44" viewBox="0 0 32 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+        <path d="M8 20H24V42H8V20Z" fill="#FAF6EE" stroke="#232321" strokeWidth="1.5"/><path d="M15 16H17V20H15V16Z" fill="#232321"/><path className="vela-flama" d="M16 14C19 10 18 6 16 3C14 6 13 10 16 14Z" fill="#E67E22" stroke="#232321" strokeWidth="1.2"/>
+      </svg>
+    );
+    if (tipo === 'cafe') return (
+      <svg width="40" height="38" viewBox="0 0 40 38" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+        <path d="M8 14H28V32H8V14Z" fill="#FFFFFF" stroke="#232321" strokeWidth="1.5"/><path d="M28 17H33C35 17 35 25 33 25H28" stroke="#232321" strokeWidth="1.5"/><path d="M8 14H28V18H8V14Z" fill="#633B28" stroke="#232321" strokeWidth="1.5"/><path className="humo-taza" d="M14 10C15 7 13 5 15 2" stroke="#B8A890" strokeWidth="1.5" strokeLinecap="round"/><path className="humo-taza" style={{animationDelay: '1s'}} d="M22 11C23 8 21 6 23 3" stroke="#B8A890" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    );
+    if (tipo === 'cactus') return (
+      <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
+        <path d="M10 32H26V40H10V32Z" fill="#B87343" stroke="#232321" strokeWidth="1.5"/><path d="M15 12C15 8 21 8 21 12V32H15V12Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/><path d="M10 18H15V22H10C8 22 8 18 10 18Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/><path d="M21 16H26C28 16 28 20 26 20H21V16Z" fill="#586938" stroke="#232321" strokeWidth="1.5"/>
+      </svg>
+    );
+    return null;
+  }
+
+  function AvatarUsuaria({ foto, nombre, sizeClass = "w-9 h-9", textClass = "text-base", editable = false, onFotoChange = () => {} }) {
+    const [errorImg, setErrorImg] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setErrorImg(false);
+          onFotoChange(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const renderContent = () => {
+      if (foto && foto.trim() !== '' && !errorImg) {
+        return <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#E8E6DF] shrink-0`} />;
+      }
+      return <div className={`${sizeClass} rounded-full bg-[#F8F7F3] border border-[#E8E6DF] flex items-center justify-center font-sans ${textClass} text-[#4A5028] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
+    };
+
+    if (editable) {
+      return (
+        <div className="relative group cursor-pointer" onClick={() => fileInputRef.current && fileInputRef.current.click()} title="Cambiar foto de perfil">
+          {renderContent()}
+          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i className="fa-solid fa-camera text-white text-xs"></i>
+          </div>
+          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+        </div>
+      );
+    }
+
+    return renderContent();
+  }
+
+  function CalendarioInteractivo({ eventos }) {
+    const [fechaActual, setFechaActual] = useState(new Date());
+
+    const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const nombresMeses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    const anio = fechaActual.getFullYear();
+    const mes = fechaActual.getMonth();
+
+    const primerDiaMes = new Date(anio, mes, 1);
+    const ultimoDiaMes = new Date(anio, mes + 1, 0);
+
+    let primerDiaSemanaIndice = primerDiaMes.getDay() - 1;
+    if (primerDiaSemanaIndice === -1) primerDiaSemanaIndice = 6;
+
+    const totalDiasMes = ultimoDiaMes.getDate();
+
+    const hoy = new Date();
+    const esMesActual = hoy.getFullYear() === anio && hoy.getMonth() === mes;
+
+    const parsearFechaEvento = (strFecha) => {
+      if (!strFecha) return null;
+      const s = strFecha.toString().trim().toLowerCase();
+
+      if (s.includes('-') || s.includes('/')) {
+        const partes = s.split(/[\/-]/);
+        if (partes.length >= 2) {
+          if (partes[0].length === 4) {
+            const y = parseInt(partes[0], 10);
+            const m = parseInt(partes[1], 10) - 1;
+            const d = parseInt(partes[2], 10);
+            if (!isNaN(d) && !isNaN(m)) return { dia: d, mes: m, anio: y };
+          } else {
+            const d = parseInt(partes[0], 10);
+            const m = parseInt(partes[1], 10) - 1;
+            const y = partes[2] ? parseInt(partes[2], 10) : anio;
+            if (!isNaN(d) && !isNaN(m)) return { dia: d, mes: m, anio: y };
           }
         }
       }
-    </script>
 
-    <style>
-      @font-face {
-        font-family: 'BabyDoll';
-        src: url('babydoll.ttf') format('truetype');
-        font-display: swap;
-      }
+      const matchDia = s.match(/^(\d{1,2})/);
+      if (matchDia) {
+        const diaNum = parseInt(matchDia[1], 10);
+        const mapaMeses = {
+          ene: 0, enero: 0, feb: 1, febrero: 1, mar: 2, marzo: 2, abr: 3, abril: 3,
+          may: 4, mayo: 4, jun: 5, junio: 5, jul: 6, julio: 6, ago: 7, agosto: 7,
+          sep: 8, sept: 8, septiembre: 8, oct: 9, octubre: 9, nov: 10, noviembre: 10, dic: 11, diciembre: 11
+        };
 
-      body {
-        font-family: 'Satoshi', sans-serif;
-        /* Fondo para Desktop: diferencia el canvas de la app */
-        background-color: #EAE6DF; 
-        color: theme('colors.gilda.text');
-        -webkit-tap-highlight-color: transparent;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-      }
-
-      /* Contenedor principal estilo móvil para pantallas grandes */
-      .app-container {
-        background-color: theme('colors.gilda.bg');
-        width: 100%;
-        max-width: 480px;
-        min-height: 100vh;
-        position: relative;
-        box-shadow: 0 0 40px rgba(0,0,0,0.05);
-        display: flex;
-        flex-direction: column;
-      }
-
-      @media (min-width: 481px) {
-        body { padding: 2rem 0; }
-        .app-container {
-          min-height: calc(100vh - 4rem);
-          border-radius: 2rem;
-          overflow: hidden;
-          border: 8px solid white;
-        }
-        /* Ajuste de navegación inferior para Desktop */
-        .editorial-nav {
-          position: absolute !important;
+        for (const [clave, mesIndex] of Object.entries(mapaMeses)) {
+          if (s.includes(clave)) {
+            const matchAnio = s.match(/\b(20\d{2})\b/);
+            const anioParsed = matchAnio ? parseInt(matchAnio[1], 10) : anio;
+            return { dia: diaNum, mes: mesIndex, anio: anioParsed };
+          }
         }
       }
+      return null;
+    };
 
-      .font-babydoll {
-        font-family: 'BabyDoll', cursive, sans-serif;
+    const eventosDelMes = useMemo(() => {
+      const mapa = {};
+      (eventos || []).forEach(ev => {
+        const est = (ev.estado || '').toLowerCase();
+        if (est === 'pendiente' || est === 'por definir') return;
+
+        const valFecha = ev.fecha || ev.dia || ev.date || ev.fecha_evento;
+        const parsed = parsearFechaEvento(valFecha);
+
+        if (parsed && parsed.mes === mes && parsed.anio === anio) {
+          if (!mapa[parsed.dia]) mapa[parsed.dia] = [];
+          mapa[parsed.dia].push(ev);
+        }
+      });
+      return mapa;
+    }, [eventos, mes, anio]);
+
+    const mesAnterior = () => setFechaActual(new Date(anio, mes - 1, 1));
+    const mesSiguiente = () => setFechaActual(new Date(anio, mes + 1, 1));
+
+    const celdas = [];
+    for (let i = 0; i < primerDiaSemanaIndice; i++) {
+      celdas.push(<div key={`empty-${i}`} className="h-9"></div>);
+    }
+
+    for (let dia = 1; dia <= totalDiasMes; dia++) {
+      const esHoy = esMesActual && hoy.getDate() === dia;
+      const evs = eventosDelMes[dia] || [];
+      const tieneCafecito = evs.some(e => {
+        const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
+        return t.includes('cafecito') || t.includes('café');
+      });
+      const tieneComentario = evs.some(e => {
+        const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
+        return t.includes('comentario') || t.includes('libro');
+      });
+      const tieneRecordatorio = evs.some(e => {
+        const t = (e.evento || e.titulo || e.nombre || '').toLowerCase();
+        return t.includes('votar') || t.includes('recordatorio') || t.includes('último día');
+      });
+
+      celdas.push(
+        <div
+          key={dia}
+          className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans ${
+            esHoy ? 'bg-[#4A5028] text-white font-bold shadow-xs' : 'hover:bg-[#F8F7F3] text-[#232321]'
+          }`}
+        >
+          <span>{dia}</span>
+          {evs.length > 0 && (
+            <div className="flex gap-0.5 mt-0.5">
+              {tieneCafecito && (
+                <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-amber-300' : 'bg-amber-600'}`}></span>
+              )}
+              {tieneComentario && (
+                <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
+              )}
+              {tieneRecordatorio && (
+                <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-purple-300' : 'bg-purple-600'}`}></span>
+              )}
+              {!tieneCafecito && !tieneComentario && !tieneRecordatorio && (
+                <span className={`w-1.5 h-1.5 rounded-full ${esHoy ? 'bg-white' : 'bg-[#4A5028]'}`}></span>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <div className="flex justify-between items-center bg-[#FBF9F5] p-2.5 rounded-xl border border-[#E8E6DF]">
+          <button onClick={mesAnterior} aria-label="Mes anterior" className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-[#232321] transition-colors">
+            <i className="fa-solid fa-chevron-left text-sm"></i>
+          </button>
+          <h4 className="font-babydoll text-lg font-bold text-[#232321]">
+            {nombresMeses[mes]} {anio}
+          </h4>
+          <button onClick={mesSiguiente} aria-label="Mes siguiente" className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-[#232321] transition-colors">
+            <i className="fa-solid fa-chevron-right text-sm"></i>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-center font-sans text-[10px] uppercase font-bold text-[#6B685E] pb-1 border-b border-[#E8E6DF]">
+          {diasSemana.map((d, i) => (
+            <div key={i}>{d}</div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {celdas}
+        </div>
+
+        <div className="flex items-center justify-center gap-3 pt-2 text-xs font-sans text-[#6B685E] border-t border-[#E8E6DF] flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#4A5028]"></span>
+            <span>Comentarios</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-600"></span>
+            <span>Cafecito</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+            <span>Recordatorio</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function EdificioClub({ usuarias, libroActual, onAddWantToRead }) {
+    const [usuariaActivaIndice, setUsuariaActivaIndice] = useState(0);
+    const listaUsuarias = usuarias.length > 0 ? usuarias : [];
+    const usuariaActiva = listaUsuarias[usuariaActivaIndice] || listaUsuarias[0] || {};
+    const tieneProgresoClub = Number(usuariaActiva.pagina || 0) > 0;
+    const misLibrosPersonales = usuariaActiva.misLecturasPersonales || [];
+
+    return (
+      <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
+        <h2 className="text-[48px] font-babydoll text-center mb-0 text-[#232321] leading-none">gilda</h2>
+        <p className="text-sm text-[#6B685E] text-center mb-4 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
+        <div className="grid grid-cols-3 gap-x-6 gap-y-8 w-full max-w-[220px] mx-auto mb-10">
+          {listaUsuarias.map((usuaria, indice) => {
+            const estaLeyendo = usuaria.estaLeyendo;
+            const seleccionada = usuariaActivaIndice === indice;
+            const nombreMostrar = (usuaria.nombre || 'Lector(a)').split(' ')[0].toLowerCase();
+            return (
+              <div key={indice} className="relative flex flex-col items-center">
+                <div onClick={() => setUsuariaActivaIndice(indice)} className={`w-[32px] h-[44px] rounded-[2px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${estaLeyendo ? 'bg-[#FAF6E8] border-[#DCD6BE] shadow-[0_4px_12px_rgba(230,220,180,0.3)]' : 'bg-[#E3E0D6] border-[#D0CEB3]'} ${seleccionada ? 'outline-[1.5px] outline-[#4A5028] outline-offset-[3px]' : ''}`}></div>
+                <span className="text-xs text-gray-800 font-bold tracking-tight mt-1.5 truncate max-w-[60px] text-center font-sans">{nombreMostrar}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="editorial-card w-full max-w-md p-5 flex flex-col gap-4 fade-in">
+          <div className="flex justify-between items-center w-full border-b border-[#E8E6DF] pb-2.5 gap-2">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-8 h-8" textClass="text-sm" />
+              <span className="font-babydoll text-xl font-bold truncate text-[#232321]">la habitación de {(usuariaActiva.nombre || '').toLowerCase()}</span>
+            </div>
+            <span className="text-[10px] tracking-[0.5px] text-[#6B685E] font-bold whitespace-nowrap font-sans">@gilda.mailclub</span>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
+                <div className="text-xs text-[#232321] overflow-hidden">
+                  <p className="font-bold truncate font-sans text-sm">{libroActual.titulo}</p>
+                  <p className="text-xs text-[#6B685E] font-sans mt-0.5">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+                </div>
+              </div>
+              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-3 py-2 rounded-full text-xs font-semibold transition-colors flex items-center gap-1 font-sans active:scale-95 min-h-[44px]">
+                <i className="fa-solid fa-bookmark text-xs"></i> + Guardar
+              </button>
+            </div>
+            {misLibrosPersonales.map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF]">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <PortadaLibro titulo={item.libro} autora={item.autora} portada={item.portada} size="thumb" />
+                  <div className="text-xs text-[#232321] overflow-hidden">
+                    <p className="font-bold truncate font-sans text-sm">{item.libro}</p>
+                    <p className="text-xs text-[#6B685E] font-sans mt-0.5">pág. <b>{item.pagina || item.paginas || 0}</b></p>
+                  </div>
+                </div>
+                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-3 py-2 rounded-full text-xs font-semibold transition-colors flex items-center gap-1 font-sans active:scale-95 min-h-[44px]">
+                  <i className="fa-solid fa-bookmark text-xs"></i> + Guardar
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function MapaGilda({ usuarias }) {
+    const mapRef = useRef(null);
+    const markersGroupRef = useRef(null);
+    const [regionSeleccionada, setRegionSeleccionada] = useState(null);
+
+    // ... (El mapeo de ciudades se mantiene igual)
+    const GEO_INTERNA = {
+      'madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
+      'barcelona': { coords: [41.3851, 2.1734], ca: 'Cataluña' },
+      'valencia': { coords: [39.4699, -0.3763], ca: 'Comunidad Valenciana' },
+      'sevilla': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
+      'bilbao': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
+      'zaragoza': { coords: [41.6488, -0.8891], ca: 'Aragón' },
+      'malaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+      'málaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+      'murcia': { coords: [37.9922, -1.1307], ca: 'Región de Murcia' },
+      'palma': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+      'las palmas': { coords: [28.1235, -15.4363], ca: 'Canarias' },
+      'alicante': { coords: [38.3452, -0.4810], ca: 'Comunidad Valenciana' },
+      'cordoba': { coords: [37.8882, -4.7794], ca: 'Andalucía' },
+      'córdoba': { coords: [37.8882, -4.7794], ca: 'Andalucía' },
+      'valladolid': { coords: [41.6523, -4.7245], ca: 'Castilla y León' },
+      'vigo': { coords: [42.2406, -8.7207], ca: 'Galicia' },
+      'gijon': { coords: [43.5357, -5.6615], ca: 'Asturias' },
+      'gijón': { coords: [43.5357, -5.6615], ca: 'Asturias' },
+      'hospitalet': { coords: [41.3596, 2.1003], ca: 'Cataluña' },
+      'vitoria': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+      'coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
+      'granada': { coords: [37.1773, -3.5986], ca: 'Andalucía' },
+      'elche': { coords: [38.2669, -0.6984], ca: 'Comunidad Valenciana' },
+      'oviedo': { coords: [43.3614, -5.8593], ca: 'Asturias' },
+      'badalona': { coords: [41.4500, 2.2474], ca: 'Cataluña' },
+      'terrassa': { coords: [41.5667, 2.0167], ca: 'Cataluña' },
+      'cartagena': { coords: [37.6257, -0.9966], ca: 'Región de Murcia' },
+      'jerez': { coords: [36.6850, -6.1261], ca: 'Andalucía' },
+      'sabadell': { coords: [41.5433, 2.1094], ca: 'Cataluña' },
+      'mostoles': { coords: [40.3233, -3.8678], ca: 'Comunidad de Madrid' },
+      'móstoles': { coords: [40.3233, -3.8678], ca: 'Comunidad de Madrid' },
+      'pamplona': { coords: [42.8125, -1.6458], ca: 'Navarra' },
+      'almeria': { coords: [36.8340, -2.4637], ca: 'Andalucía' },
+      'almería': { coords: [36.8340, -2.4637], ca: 'Andalucía' },
+      'londres': { coords: [51.5074, -0.1278], ca: 'Reino Unido' },
+      'paris': { coords: [48.8566, 2.3522], ca: 'Francia' },
+      'berlin': { coords: [52.5200, 13.4050], ca: 'Alemania' },
+      'roma': { coords: [41.9028, 12.4964], ca: 'Italia' },
+      'lisboa': { coords: [38.7223, -9.1393], ca: 'Portugal' },
+      'mexico': { coords: [19.4326, -99.1332], ca: 'México' },
+      'méxico': { coords: [19.4326, -99.1332], ca: 'México' },
+      'buenos aires': { coords: [-34.6037, -58.3816], ca: 'Argentina' },
+      'santiago': { coords: [-33.4489, -70.6693], ca: 'Chile' },
+      'bogota': { coords: [4.7110, -74.0721], ca: 'Colombia' },
+      'bogotá': { coords: [4.7110, -74.0721], ca: 'Colombia' }
+    };
+
+    const obtenerDatosUbicacion = (loc) => {
+      if (!loc) return { coords: [40.4168, -3.7038], ca: 'Otras regiones' };
+      const lLimpia = loc.toLowerCase().trim();
+      if (GEO_INTERNA[lLimpia]) return GEO_INTERNA[lLimpia];
+      for (const key in GEO_INTERNA) {
+        if (lLimpia.includes(key) || key.includes(lLimpia)) {
+          return GEO_INTERNA[key];
+        }
+      }
+      return { coords: [40.4168, -3.7038], ca: 'Otras regiones' };
+    };
+
+    const regionesConteo = useMemo(() => {
+      const conteo = {};
+      usuarias.forEach(u => {
+        const loc = (u.ciudad || u.provincia_region || 'Otras').trim();
+        const info = obtenerDatosUbicacion(loc);
+        const caNombre = info.ca;
+        conteo[caNombre] = (conteo[caNombre] || 0) + 1;
+      });
+      return Object.entries(conteo).sort((a, b) => b[1] - a[1]);
+    }, [usuarias]);
+
+    const usuariasConCoordenadas = useMemo(() => {
+      const mapaCoordenadasSocio = {};
+      return usuarias.map(u => {
+        const loc = (u.ciudad || u.provincia_region || '').trim();
+        const info = obtenerDatosUbicacion(loc);
+        const baseCoords = info.coords;
+        const coordKey = `${baseCoords[0].toFixed(4)},${baseCoords[1].toFixed(4)}`;
+        let coordsFinales = [...baseCoords];
+
+        if (!mapaCoordenadasSocio[coordKey]) {
+          mapaCoordenadasSocio[coordKey] = 1;
+        } else {
+          const count = mapaCoordenadasSocio[coordKey];
+          mapaCoordenadasSocio[coordKey]++;
+          const angle = count * 1.2;
+          const distance = 0.012 * Math.sqrt(count);
+          coordsFinales = [
+            baseCoords[0] + distance * Math.cos(angle),
+            baseCoords[1] + distance * Math.sin(angle)
+          ];
+        }
+
+        return {
+          ...u,
+          coords: coordsFinales,
+          regionAgrupada: info.ca
+        };
+      });
+    }, [usuarias]);
+
+    useEffect(() => {
+      if (typeof L === 'undefined') return;
+      if (!mapRef.current) {
+        const map = L.map('mapa-gilda', { zoomControl: false, attributionControl: false }).setView([40.4167, -3.7037], 5);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
+        markersGroupRef.current = L.layerGroup().addTo(map);
+        mapRef.current = map;
+      }
+      setTimeout(() => { if (mapRef.current) mapRef.current.invalidateSize(); }, 200);
+
+      const renderMarkers = async () => {
+        if (!markersGroupRef.current) return;
+        markersGroupRef.current.clearLayers();
+        const boundsArray = [];
+
+        usuariasConCoordenadas.forEach(item => {
+          const coor = item.coords;
+          boundsArray.push(coor);
+
+          const piruletaHtml = `
+            <div style="position: relative; width: 20px; height: 30px; display: flex; align-items: center; justify-content: center;" title="${item.nombre} (${item.ciudad || item.provincia_region || ''})">
+              <svg viewBox="0 0 16 24" width="20" height="30" style="filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.2));">
+                <line x1="8" y1="12" x2="8" y2="23" stroke="#232321" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="8" cy="7" r="6" fill="#4A5028" stroke="#232321" stroke-width="1.5"/>
+              </svg>
+            </div>
+          `;
+          const customIcon = L.divIcon({ html: piruletaHtml, className: 'custom-piruleta-mini', iconSize: [20, 30], iconAnchor: [10, 30], popupAnchor: [0, -30] });
+          const marker = L.marker(coor, { icon: customIcon });
+
+          const socioRegion = item.regionAgrupada;
+          const usuariasDeLaRegion = usuariasConCoordenadas.filter(u => u.regionAgrupada === socioRegion);
+
+          marker.on('click', () => setRegionSeleccionada({ region: socioRegion, usuarias: usuariasDeLaRegion }));
+          markersGroupRef.current.addLayer(marker);
+        });
+
+        if (boundsArray.length > 0 && mapRef.current) {
+          mapRef.current.fitBounds(boundsArray, { padding: [25, 25], maxZoom: 6 });
+        }
+      };
+      renderMarkers();
+    }, [usuariasConCoordenadas]);
+
+    return (
+      <div className="space-y-4">
+        <div className="relative">
+          <div id="mapa-gilda"></div>
+          {regionSeleccionada && (
+            <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-sm p-4 flex flex-col rounded-xl fade-in text-[#232321]" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2 mb-3">
+                <h3 className="font-babydoll text-[#232321] font-bold text-xl">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                <button onClick={() => setRegionSeleccionada(null)} aria-label="Cerrar detalles de región" className="w-10 h-10 flex items-center justify-center text-gray-600 bg-white border border-[#E8E6DF] rounded-full active:scale-95"><i className="fa-solid fa-xmark"></i></button>
+              </div>
+              <div className="overflow-y-auto flex-grow space-y-2">
+                {regionSeleccionada.usuarias.map((u, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm p-3 bg-white rounded-lg border border-[#E8E6DF] gap-2">
+                    <span className="font-bold font-sans">{u.nombre}</span>
+                    <span className="text-[#6B685E] font-sans text-xs">{u.ciudad || u.provincia_region || 'Sin localidad'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="editorial-card p-4 space-y-3">
+          <h4 className="font-babydoll text-lg font-bold text-[#232321]">Lectoras por Comunidad Autónoma / País</h4>
+          <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+            {regionesConteo.map(([region, cantidad], idx) => (
+              <div key={idx} className="flex justify-between items-center bg-[#FBF9F5] px-3 py-2 rounded-xl border border-[#E8E6DF] text-sm">
+                <span className="font-bold font-sans truncate pr-2 text-xs">{region}</span>
+                <span className="bg-[#4A5028] text-white px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 font-sans">{cantidad}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function App() {
+    const [sesion, setSesion] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_sesion')); } catch { return null; } });
+    
+    const [vistaAcceso, setVistaAcceso] = useState('menu');
+    const [inputEmail, setInputEmail] = useState('');
+    const [inputPassword, setInputPassword] = useState('');
+    const [errorLogin, setErrorLogin] = useState('');
+    
+    const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
+    const [enviandoRegistro, setEnviandoRegistro] = useState(false);
+
+    const modalidades = [
+      { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
+      { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás.' },
+      { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
+      { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda.' },
+      { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda.' },
+      { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital más acceso total a la app.' },
+      { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: en papel y acceso total a la app.' }
+    ];
+
+    const modalidadGratis = modalidades.find((m) => m.esGratis);
+    const modalidadesPago = modalidades.filter((m) => !m.esGratis);
+
+    const [seccionApp, setSeccionApp] = useState('inicio');
+    const [subTabComunidad, setSubTabComunidad] = useState('chat');
+    const [tabEstanteria, setTabEstanteria] = useState('leyendo');
+    const [toastMsg, setToastMsg] = useState(null);
+    const [mostrarModalUpgrade, setMostrarModalUpgrade] = useState(false);
+    
+    const [usuariasClub, setUsuariasClub] = useState([]);
+    const [capitulos, setCapitulos] = useState([]);
+    const [comentarios, setComentarios] = useState([]);
+    const [lecturas, setLecturas] = useState([]);
+    const [chatMsgs, setChatMsgs] = useState([]);
+    const [propuestas, setPropuestas] = useState([]);
+    const [fechasCafe, setFechasCafe] = useState([]);
+    const [lecturasPersonales, setLecturasPersonales] = useState([]);
+    const [eventosCalendario, setEventosCalendario] = useState([]);
+
+    const [miPagina, setMiPagina] = useState(0);
+    const [miCiudadInput, setMiCiudadInput] = useState(() => localStorage.getItem('gilda_ciudad') || '');
+    const [miCodigoPostalInput, setMiCodigoPostalInput] = useState(() => localStorage.getItem('gilda_codigo_postal') || '');
+    const [isReadingNow, setIsReadingNow] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_is_reading')) || false; } catch { return false; } });
+    
+    const [nombreUsuarioPersonalizado, setNombreUsuarioPersonalizado] = useState(() => localStorage.getItem('gilda_nombre_usuario') || '');
+    const [fotoPerfilPersonalizada, setFotoPerfilPersonalizada] = useState(() => localStorage.getItem('gilda_foto_perfil') || '');
+
+    const [libroPersonal, setLibroPersonal] = useState('');
+    const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
+    const [decoracionActual, setDecoracionActual] = useState(() => localStorage.getItem('gilda_decoracion') || 'monstera');
+
+    const [modoCreacionManual, setModoCreacionManual] = useState(false);
+    const [manualTitulo, setManualTitulo] = useState('');
+    const [manualAutora, setManualAutora] = useState('');
+    const [manualPortada, setManualPortada] = useState('');
+
+    const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
+    const [editandoPortadaUrl, setEditandoPortadaUrl] = useState('');
+    const [mostrarInputCorreccionPortada, setMostrarInputCorreccionPortada] = useState(false);
+
+    const [misCitas, setMisCitas] = useState(() => { try { return JSON.parse(localStorage.getItem('gilda_mis_citas')) || []; } catch { return []; }});
+    const [nuevaFraseBotella, setNuevaFraseBotella] = useState('');
+    const [botellaAbierta, setBotellaAbierta] = useState(false);
+    const [fraseActualBotella, setFraseActualBotella] = useState(0);
+
+    const [nuevoEventoFecha, setNuevoEventoFecha] = useState('');
+    const [nuevoEventoHora, setNuevoEventoHora] = useState('');
+    const [nuevoEventoTitulo, setNuevoEventoTitulo] = useState('');
+    const [nuevoEventoEstado, setNuevoEventoEstado] = useState('activo');
+
+    const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
+    const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
+    const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
+    const [nuevoChat, setNuevoChat] = useState('');
+    const [mensajeFundadora, setMensajeFundadora] = useState('');
+
+    const [textoComentario, setTextoComentario] = useState({});
+    const [respondiendoA, setRespondiendoA] = useState(null);
+    const [textoRespuesta, setTextoRespuesta] = useState({});
+    
+    const chatEndRef = useRef(null);
+
+    const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
+    
+    const parsearHoja = (url) => new Promise(resolve => {
+      Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: (h) => h.trim().toLowerCase(), complete: (res) => resolve(res.data || []), error: () => resolve([]) });
+    });
+
+    const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
+      if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
+        if (nombreUsuarioPersonalizado) return nombreUsuarioPersonalizado;
       }
 
-      .editorial-card {
-        background: theme('colors.gilda.card');
-        border: 1px solid theme('colors.gilda.border');
-        border-radius: 1rem; /* Consistencia en bordes */
-        box-shadow: theme('boxShadow.soft');
+      if (emailComentario) {
+        const encontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
+        if (encontrada && encontrada.nombre && encontrada.nombre.trim() !== '') {
+          return encontrada.nombre.trim();
+        }
       }
 
-      .editorial-input {
-        background: #F8F7F3;
-        border: 1px solid theme('colors.gilda.border');
-        border-radius: 0.75rem;
-        transition: all 0.2s ease;
-      }
-      
-      .editorial-input:focus {
-        outline: none;
-        background: #FFFFFF;
-        border-color: theme('colors.gilda.olive');
-        box-shadow: 0 0 0 3px rgba(74, 80, 40, 0.15);
+      if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia') {
+        return usuarioOriginal;
       }
 
-      /* Optimizado para áreas táctiles (min-height 44px) */
-      .editorial-btn {
-        background: theme('colors.gilda.text');
-        color: theme('colors.gilda.bg');
-        border-radius: 9999px; /* Pill shape */
-        font-weight: 600;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      }
-      .editorial-btn:hover, .editorial-btn:focus-visible { 
-        background: theme('colors.gilda.olive'); 
-        color: #FFFFFF; 
-        outline: none;
-      }
-      .editorial-btn:active { transform: scale(0.97); }
+      return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
+    };
 
-      .editorial-nav {
-        background: rgba(255, 255, 255, 0.90);
-        backdrop-filter: blur(12px);
-        border-top: 1px solid theme('colors.gilda.border');
-        padding-bottom: max(env(safe-area-inset-bottom), 12px);
+    const handleFotoPerfilUpdate = (base64Img) => {
+      setFotoPerfilPersonalizada(base64Img);
+      localStorage.setItem('gilda_foto_perfil', base64Img);
+      enviarAccion('actualizar_foto_perfil', { foto_perfil: base64Img });
+      mostrarToast('Foto de perfil actualizada');
+    };
+
+    useEffect(() => {
+      const cargarDatosSilenciosos = () => {
+        Promise.all([
+          parsearHoja(URL_CSV_USUARIAS), parsearHoja(URL_CSV_CAPITULOS), parsearHoja(URL_CSV_COMENTARIOS), 
+          parsearHoja(URL_CSV_CAFECITOS), parsearHoja(URL_CSV_LECTURAS), parsearHoja(URL_CSV_CHAT), 
+          parsearHoja(URL_CSV_PROPUESTAS), parsearHoja(URL_CSV_VOTACION_CAFE), parsearHoja(URL_CSV_LECTURAS_PERSONALES),
+          parsearHoja(URL_CSV_CALENDARIO)
+        ]).then(results => {
+          const listaUsuarias = results[0].filter(u => (u.email || '').trim() !== '');
+          setUsuariasClub(listaUsuarias);
+          
+          if (sesion && sesion.email) {
+            const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
+            if (sociaActual) {
+              if (sociaActual.nombre && sociaActual.nombre.trim() !== '') {
+                setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+                localStorage.setItem('gilda_nombre_usuario', sociaActual.nombre.trim());
+              }
+              if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
+                setMiPagina(Number(sociaActual.pagina) || 0);
+              }
+              if (sociaActual.ciudad && !localStorage.getItem('gilda_ciudad')) {
+                setMiCiudadInput(sociaActual.ciudad);
+              }
+              if (sociaActual.codigo_postal && !localStorage.getItem('gilda_codigo_postal')) {
+                setMiCodigoPostalInput(sociaActual.codigo_postal);
+              }
+              if (sociaActual.foto_perfil && !localStorage.getItem('gilda_foto_perfil')) {
+                setFotoPerfilPersonalizada(sociaActual.foto_perfil);
+              }
+            }
+          }
+
+          setCapitulos(results[1]); 
+          setComentarios(results[2]); 
+          setLecturas(results[4]); 
+          setChatMsgs(results[5]); 
+          setPropuestas(results[6]);
+          setFechasCafe(results[7]); 
+          setLecturasPersonales(results[8]);
+          setEventosCalendario(results[9]);
+        });
+      };
+
+      cargarDatosSilenciosos();
+      if (sesion) {
+        const interval = setInterval(cargarDatosSilenciosos, 8000); // Polling (Mantenido tal cual)
+        return () => clearInterval(interval);
       }
-    </style>
-  </head>
-  <body>
-    <!-- Scripts de React omitidos por brevedad -->
-    <div id="root" class="app-container"></div>
+    }, [sesion]);
 
-    <script type="text/babel">
-      const { useState, useEffect } = React;
+    useEffect(() => {
+      if (subTabComunidad === 'chat') chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, [chatMsgs, subTabComunidad]);
 
-      // 1. MEJORA: Modal accesible con cierre al hacer clic fuera (Backdrop click)
-      function ModalUpgrade({ onClose }) {
-        return (
-          <div 
-            className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out]"
-            onClick={onClose} // Cierra al tocar el fondo oscuro
-          >
-            <div 
-              className="editorial-card max-w-xs w-full p-6 space-y-4 text-center relative"
-              onClick={(e) => e.stopPropagation()} // Previene que el clic dentro de la tarjeta cierre el modal
-            >
-              <button 
-                onClick={onClose} 
-                aria-label="Cerrar ventana" 
-                className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black rounded-full hover:bg-gray-100 transition-colors"
-              >
+    const enviarAccion = async (action, payload) => {
+      try {
+        await fetch(GOOGLE_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, usuario: nombreUsuarioPersonalizado || sesion?.nombre, email: sesion?.email, ...payload }),
+        });
+      } catch (err) { console.error(err); }
+    };
+
+    const registrarYRedirigir = async (e) => {
+      e.preventDefault();
+      setEnviandoRegistro(true);
+      const form = e.target;
+      const formData = new FormData(form);
+      const nombreSocia = formData.get('Nombre');
+      const emailSocia = formData.get('Email');
+
+      const datosRegistro = {
+        action: 'registrar_nueva_socia',
+        nombre: nombreSocia,
+        email: emailSocia,
+        modalidad: `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`
+      };
+
+      try {
+        await fetch(GOOGLE_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(datosRegistro),
+        });
+      } catch (error) {
+        console.error('Error guardando en Google Sheets:', error);
+      }
+
+      const enlaceDestino = modalidadSeleccionada.esGratis 
+        ? 'https://gildamailclub.glideos.app' 
+        : modalidadSeleccionada.enlaceStripe;
+
+      window.location.href = enlaceDestino;
+    };
+
+    const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
+      const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
+      if (!tituloLibro) return;
+      const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
+      const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
+
+      const clon = [...lecturasPersonales];
+      const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
+      if (idx > -1) {
+        clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
+        if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
+      } else {
+        clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
+      }
+      setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
+      enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloLibro, pagina: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
+      mostrarToast(`Guardado: ${tituloLibro}`);
+    };
+
+    const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
+    const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
+    
+    const todosMisLibrosEstanteria = useMemo(() => {
+      if (!sesion) return [];
+      return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
+    }, [lecturasPersonales, sesion]);
+
+    const misLibrosFiltradosLista = useMemo(() => {
+      if (!sesion) return [];
+      return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.estado || 'leyendo') === tabEstanteria);
+    }, [lecturasPersonales, sesion, tabEstanteria]);
+
+    const miembrosEdificio = useMemo(() => {
+      return usuariasClub.map(u => {
+        const emailU = (u.email || '').toLowerCase().trim();
+        const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
+        const nombreRealU = u.nombre ? u.nombre.trim() : 'Lector(a)';
+        const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
+        return {
+          ...u,
+          nombre: esYo ? (nombreUsuarioPersonalizado || nombreRealU) : nombreRealU,
+          foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
+          pagina: esYo ? miPagina : Number(u.pagina || 0),
+          estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
+          misLecturasPersonales: misPersonales
+        };
+      });
+    }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
+
+    const modalidadLimpia = (sesion?.modalidad || '').toLowerCase().trim();
+    const esModalidadCorreo = modalidadLimpia.includes('nube') || modalidadLimpia.includes('papel');
+    const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satélite');
+    const esAdmin = (sesion?.email || '').toLowerCase().trim() === 'ndnagore@gmail.com';
+
+    if (!sesion) {
+      return (
+        <div className="flex-grow flex items-center justify-center p-4 w-full h-full bg-[#FBF9F5]">
+          <div className="editorial-card max-w-md w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#E8E6DF]">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A5028]"></div>
+            
+            <div className="space-y-2 pt-2">
+              <h1 className="font-babydoll text-6xl text-[#232321] font-bold tracking-tight">gilda</h1>
+              <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
+            </div>
+
+            {vistaAcceso === 'menu' && (
+              <div className="space-y-6 pt-2 fade-in">
+                <div className="bg-[#F5F2EB] p-6 rounded-2xl border border-[#E8E6DF] space-y-4 text-left shadow-2xs">
+                  <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
+                    un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
+                  </p>
+                  <p className="text-sm text-[#6B685E] font-sans leading-relaxed text-center px-1">
+                    Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento...
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <button onClick={() => {
+                    const modGratis = modalidadGratis || modalidades[0];
+                    setModalidadSeleccionada(modGratis);
+                    setVistaAcceso('formulario_registro');
+                  }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
+                    <span>Abrir mi puerta gratis para cotillear :)</span>
+                    <i className="fa-solid fa-arrow-right text-sm"></i>
+                  </button>
+
+                  <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-[#FAF6E8] text-[#4A5028] border border-[#DCD6BE] rounded-2xl py-3 text-sm font-bold transition-all hover:bg-[#F2EBD4] text-center shadow-2xs">
+                    Conocer las modalidades disponibles
+                  </button>
+
+                  <div className="pt-3 border-t border-[#E8E6DF]">
+                    <button onClick={() => setVistaAcceso('login')} className="text-sm font-semibold text-[#6B685E] hover:text-[#232321] font-sans transition-colors p-2">
+                      Inicia sesión aquí si ya formas parte de gilda
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {vistaAcceso === 'login' && (
+              <div className="space-y-5 fade-in text-left">
+                <button onClick={() => { setVistaAcceso('menu'); setErrorLogin(''); }} aria-label="Volver al menú principal" className="text-sm font-semibold text-[#6B685E] hover:text-[#232321] flex items-center group font-sans">
+                  <i className="fa-solid fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> volver
+                </button>
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#232321]">bienvenida de nuevo :)</h2>
+                  <p className="text-sm text-[#6B685E] font-sans">Introduce tus datos para acceder a tu habitación.</p>
+                </div>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  setErrorLogin('');
+                  const emailLimpio = inputEmail.trim().toLowerCase();
+                  const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailLimpio);
+                  
+                  if (!socia) {
+                    return setErrorLogin('Correo no registrado.');
+                  }
+                  
+                  const modUser = (socia.modalidad || '').toLowerCase().trim();
+                  if (modUser.includes('nube') || modUser.includes('papel')) {
+                    return setErrorLogin('Tu modalidad es exclusiva para correo y no incluye acceso a la aplicación web.');
+                  }
+
+                  const passwordRegistrada = (socia.password || '').trim();
+
+                  if (passwordRegistrada !== '' && passwordRegistrada !== inputPassword.trim()) {
+                    return setErrorLogin('Contraseña incorrecta.');
+                  }
+
+                  if (passwordRegistrada === '') {
+                    if (!inputPassword.trim()) {
+                      return setErrorLogin('Introduce una contraseña nueva para guardarla.');
+                    }
+                    enviarAccion('actualizar_password', { email: emailLimpio, password: inputPassword.trim() });
+                  }
+
+                  const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
+                  const pagSocia = Number(socia.pagina || 0);
+                  const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
+                  localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+                  localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
+                  setNombreUsuarioPersonalizado(nombreSociaSheet);
+                  setMiPagina(pagSocia);
+                  setSesion(datosSesion);
+                }} className="space-y-4 font-sans">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Correo electrónico</label>
+                    <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-4 py-3 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" placeholder="••••••••" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-4 py-3 text-sm" />
+                  </div>
+                  {errorLogin && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                      <p className="text-sm text-red-600 font-sans">{errorLogin}</p>
+                    </div>
+                  )}
+                  <button type="submit" className="w-full editorial-btn py-3 text-sm mt-2">Entrar</button>
+                </form>
+              </div>
+            )}
+
+            {vistaAcceso === 'modalidades' && (
+              <div className="space-y-4 fade-in text-left">
+                <button onClick={() => setVistaAcceso('menu')} aria-label="Volver al menú principal" className="text-sm font-semibold text-[#6B685E] hover:text-[#232321] flex items-center group font-sans">
+                  <i className="fa-solid fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> volver
+                </button>
+                <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">elige tu favorita :)</h2>
+                
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                  <div className="editorial-card p-4 flex flex-col justify-between hover:border-[#4A5028] transition-all bg-white">
+                    <div className="flex justify-between items-start mb-1.5">
+                      <h3 className="font-babydoll font-bold text-lg text-[#232321]">{modalidadGratis.nombre}</h3>
+                      <span className="text-xs font-bold bg-[#FAF6E8] text-[#4A5028] px-2.5 py-1 rounded-full font-sans border border-[#DCD6BE]">{modalidadGratis.precio}</span>
+                    </div>
+                    <p className="text-sm text-[#6B685E] font-sans mb-3.5 leading-relaxed">{modalidadGratis.descripcion}</p>
+                    <button onClick={() => { setModalidadSeleccionada(modalidadGratis); setVistaAcceso('formulario_registro'); }} className="w-full min-h-[44px] rounded-xl text-sm font-semibold bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors font-sans">
+                      Seleccionar
+                    </button>
+                  </div>
+
+                  {modalidadesPago.map((mod, index) => (
+                    <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#4A5028] border-2 shadow-sm bg-[#FAF6E8]/30' : 'bg-white'} hover:border-[#4A5028] transition-all`}>
+                      <div className="flex justify-between items-start mb-1.5">
+                        <h3 className="font-babydoll font-bold text-lg text-[#232321]">{mod.nombre}</h3>
+                        <span className="text-xs font-bold bg-[#4A5028] text-white px-2.5 py-1 rounded-full font-sans">{mod.precio}</span>
+                      </div>
+                      <p className="text-sm text-[#6B685E] font-sans mb-3.5 leading-relaxed">{mod.descripcion}</p>
+                      <button onClick={() => { setModalidadSeleccionada(mod); setVistaAcceso('formulario_registro'); }} className={`w-full min-h-[44px] rounded-xl text-sm font-semibold font-sans ${mod.destacado ? 'editorial-btn' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors'}`}>
+                        Seleccionar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {vistaAcceso === 'formulario_registro' && modalidadSeleccionada && (
+              <div className="space-y-4 fade-in text-left">
+                <button onClick={() => setVistaAcceso('modalidades')} aria-label="Volver a las modalidades" className="text-sm font-semibold text-[#6B685E] hover:text-[#232321] flex items-center group font-sans">
+                  <i className="fa-solid fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> volver
+                </button>
+                <div className="border-b border-[#E8E6DF] pb-3">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#232321]">ya casi estás dentro</h2>
+                  <p className="text-sm text-[#6B685E] font-sans leading-relaxed mt-1">
+                    Estás a punto de abrir la puerta a <b>{modalidadSeleccionada.nombre}</b> ({modalidadSeleccionada.precio}). Déjame tus datos para preparar tu habitación.
+                  </p>
+                </div>
+
+                <form onSubmit={registrarYRedirigir} className="space-y-4 font-sans">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
+                    <input type="text" name="Nombre" required placeholder="Tu nombre o alias" className="w-full editorial-input px-4 py-3 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Correo electrónico *</label>
+                    <input type="email" name="Email" required placeholder="hola@ejemplo.com" className="w-full editorial-input px-4 py-3 text-sm" />
+                  </div>
+                  <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-sm mt-3 flex items-center justify-center gap-2 shadow-md">
+                    {enviandoRegistro ? 'Procesando...' : (
+                      <>
+                        <span>apúntame &lt;3</span>
+                        <i className="fa-solid fa-arrow-right text-sm"></i>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (esModalidadCorreo) {
+      return (
+        <div className="flex-grow flex items-center justify-center p-4 w-full h-full">
+          <div className="editorial-card max-w-sm w-full p-8 space-y-4 text-center shadow-xl">
+            <h1 className="font-babydoll text-4xl text-[#232321] font-bold">gilda</h1>
+            <p className="text-sm text-[#6B685E] font-sans leading-relaxed">
+              Tu modalidad actual ({sesion.modalidad}) está registrada exclusivamente para el servicio por correo y no incluye acceso a la aplicación web.
+            </p>
+            <button onClick={() => { localStorage.removeItem('gilda_sesion'); setSesion(null); }} className="editorial-btn px-5 py-3 w-full text-sm">Cerrar sesión</button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col flex-grow relative w-full h-full pb-20">
+        
+        {toastMsg && (
+          <div className="fixed top-6 z-50 left-1/2 -translate-x-1/2 bg-[#232321] text-[#FBF9F5] text-sm px-5 py-3 rounded-full shadow-lg fade-in font-sans font-medium whitespace-nowrap">
+            {toastMsg}
+          </div>
+        )}
+
+        {mostrarModalUpgrade && <ModalUpgrade onClose={() => setMostrarModalUpgrade(false)} />}
+
+        {libroSeleccionadoDetalle && (
+          <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 fade-in" onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); }}>
+            <div className="editorial-card max-w-xs w-full p-6 space-y-4 text-center bg-white relative shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); setEditandoPortadaUrl(''); }} aria-label="Cerrar modal" className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black rounded-full hover:bg-gray-100 transition-colors">
                 <i className="fa-solid fa-xmark text-lg"></i>
               </button>
-              
-              <div className="w-12 h-12 bg-gilda-accent rounded-full flex items-center justify-center mx-auto text-gilda-olive">
-                <i className="fa-solid fa-lock text-xl"></i>
+              <div className="flex justify-center">
+                <PortadaLibro titulo={libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
               </div>
-              <div className="space-y-2">
-                <h3 className="font-babydoll text-2xl font-bold text-gilda-text">Acceso restringido</h3>
-                {/* MEJORA: Uso de text-sm en lugar de text-[10px] para legibilidad */}
-                <p className="text-sm text-gilda-muted leading-relaxed">
-                  Tu modalidad actual no incluye acceso a esta función. Actualiza tu suscripción para disfrutar de todas las funciones.
-                </p>
+              <div className="space-y-1">
+                <h3 className="font-babydoll text-xl font-bold">{libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo}</h3>
+                <p className="text-sm text-[#6B685E] italic font-sans">{libroSeleccionadoDetalle.autora || 'Autora desconocida'}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider pt-1 font-sans">Estado: <b>{libroSeleccionadoDetalle.estado || 'leyendo'}</b></p>
               </div>
-              <a 
-                href="https://nagoreads.github.io/gilda/" 
-                target="_blank" 
-                className="w-full editorial-btn py-3 text-sm"
-              >
-                Actualizar modalidad
-              </a>
+
+              {mostrarInputCorreccionPortada ? (
+                <div className="space-y-2 pt-2 border-t border-[#E8E6DF]">
+                  <input type="text" placeholder="Pega aquí la URL de la portada correcta..." value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} className="w-full editorial-input p-2.5 text-sm" />
+                  <div className="flex gap-2">
+                    <button onClick={() => {
+                      const tituloBuscado = (libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo || '').trim().toLowerCase();
+                      const clon = [...lecturasPersonales];
+                      const itemIdx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').trim().toLowerCase() === tituloBuscado));
+                      if (itemIdx > -1) {
+                        clon[itemIdx].portada = editandoPortadaUrl;
+                        setLecturasPersonales(clon);
+                        setLibroSeleccionadoDetalle({ ...clon[itemIdx] });
+                        enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo, pagina: clon[itemIdx].pagina || 0, estado: clon[itemIdx].estado, autora: clon[itemIdx].autora, portada: editandoPortadaUrl });
+                        mostrarToast('Portada corregida correctamente');
+                      }
+                      setMostrarInputCorreccionPortada(false);
+                      setEditandoPortadaUrl('');
+                    }} className="flex-1 editorial-btn py-2 min-h-[44px] text-sm">Guardar</button>
+                    <button onClick={() => setMostrarInputCorreccionPortada(false)} className="flex-1 bg-gray-100 text-gray-700 rounded-xl py-2 min-h-[44px] text-sm font-semibold">Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={() => { setEditandoPortadaUrl(libroSeleccionadoDetalle.portada || ''); setMostrarInputCorreccionPortada(true); }} className="w-full bg-[#F8F7F3] border border-[#E8E6DF] text-[#4A5028] min-h-[44px] rounded-xl text-sm font-semibold hover:bg-[#F2EFE9] transition-colors">
+                  <i className="fa-solid fa-image mr-1"></i> Corregir portada o URL
+                </button>
+              )}
+
+              <div className="pt-2 border-t border-[#E8E6DF] flex gap-2">
+                <button onClick={() => {
+                  const tituloBuscado = (libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo || '').trim().toLowerCase();
+                  const nombreOriginalLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                  
+                  const clon = lecturasPersonales.filter(l => {
+                    const emailItem = (l.email || '').toLowerCase().trim();
+                    const emailSesion = (sesion.email || '').toLowerCase().trim();
+                    const tituloItem = (l.libro || l.titulo || '').toLowerCase().trim();
+                    
+                    const esMismoUsuario = emailItem === emailSesion;
+                    const esMismoLibro = tituloItem === tituloBuscado;
+                    
+                    return !(esMismoUsuario && esMismoLibro);
+                  });
+
+                  setLecturasPersonales(clon);
+                  enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: nombreOriginalLibro });
+                  setLibroSeleccionadoDetalle(null);
+                  mostrarToast('Libro eliminado de la estantería');
+                }} className="flex-1 min-h-[44px] rounded-xl border border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors">Eliminar</button>
+                <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); }} className="flex-1 editorial-btn min-h-[44px] text-sm">Cerrar</button>
+              </div>
             </div>
           </div>
-        );
-      }
+        )}
 
-      // 2. MEJORA: Corrección tipográfica y semántica de componentes menores
-      function PortadaLibro({ titulo, autora, portada, size = 'normal' }) {
-        // Lógica de fallback original omitida por brevedad...
-        
-        // Tamaños basados en rem en lugar de px fijos para mejor escalabilidad
-        const sizeClasses = size === 'large' ? 'w-24 h-36' : size === 'thumb' ? 'w-12 h-16' : 'w-14 h-20';
-        
-        return (
-          <div className={`${sizeClasses} bg-gilda-accent rounded-md shadow-sm border border-gilda-border flex flex-col justify-between p-2 overflow-hidden shrink-0`}>
-             {/* Eliminadas las clases text-[7px] text-[8px]. Se usa text-xs (12px) con line-clamp para acomodar el texto legíblemente */}
-             <span className="font-bold text-xs line-clamp-3 leading-tight">{titulo || 'Sin título'}</span>
-          </div>
-        );
-      }
-
-      // 3. ESTRUCTURA PRINCIPAL REFACTORIZADA
-      function App() {
-        const [seccionApp, setSeccionApp] = useState('inicio');
-        const [mostrarModalUpgrade, setMostrarModalUpgrade] = useState(false);
-
-        return (
-          <div className="flex flex-col flex-grow relative w-full h-full pb-20">
-            {mostrarModalUpgrade && <ModalUpgrade onClose={() => setMostrarModalUpgrade(false)} />}
-            
-            <header className="sticky top-0 z-30 bg-gilda-bg/90 backdrop-blur-md px-5 py-4 border-b border-gilda-border flex justify-between items-center">
-                <h1 className="font-babydoll text-2xl m-0 leading-none">gilda</h1>
-                <button className="w-10 h-10 rounded-full bg-white border border-gilda-border flex items-center justify-center shadow-sm hover:bg-gray-50">
-                    <i className="fa-solid fa-user text-gilda-olive"></i>
-                </button>
+        <div className="scrollable-content w-full px-4 sm:px-6 pt-6 space-y-4">
+            <header className="w-full flex justify-between items-center bg-[#FFFFFF] text-[#232321] p-4 rounded-2xl border border-[#E8E6DF] shadow-xs sticky top-4 z-20">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-10 h-10" textClass="text-[#4A5028] text-lg" editable={true} onFotoChange={handleFotoPerfilUpdate} />
+                <div className="overflow-hidden">
+                  <h2 className="font-bold text-xl leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+                  <span className="text-xs text-gray-500 uppercase font-sans tracking-wider font-semibold">{sesion.modalidad}</span>
+                </div>
+              </div>
+              <button onClick={() => { localStorage.removeItem('gilda_sesion'); setSesion(null); }} aria-label="Cerrar sesión" className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black rounded-lg hover:bg-gray-100 transition-colors"><i className="fa-solid fa-arrow-right-from-bracket text-lg"></i></button>
             </header>
 
-            <main className="flex-grow p-5 space-y-6 overflow-y-auto">
-              <div className="editorial-card p-6 space-y-4">
-                <h2 className="text-xl font-bold font-babydoll">Bienvenida a tu habitación</h2>
-                <p className="text-sm text-gilda-muted">Toda la tipografía ha sido ajustada a un mínimo de 12px (text-xs) para asegurar la accesibilidad.</p>
-                <button 
-                  onClick={() => setMostrarModalUpgrade(true)}
-                  className="editorial-btn w-full"
-                >
-                  Probar Modal Accesible
-                </button>
-              </div>
-            </main>
+            <div className="w-full pb-8">
+              {seccionApp === 'inicio' && (
+                <div className="space-y-4 fade-in">
+                  <div className="editorial-card p-5 space-y-4">
+                    <div className="flex gap-4 items-center">
+                      <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+                      <div className="space-y-2 w-full">
+                        <span className="text-xs uppercase tracking-wider text-[#4A5028] font-bold font-sans">Lectura del Club</span>
+                        <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
+                        <p className="text-sm text-[#6B685E] italic font-sans">{libroActual.autora}</p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-gray-500 mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
+                          <div className="w-full bg-[#F8F7F3] rounded-full h-2.5 border border-[#E8E6DF] overflow-hidden"><div className="bg-[#4A5028] h-full rounded-full transition-all duration-300" style={{width: `${porcentajeLibro}%`}}></div></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-3 border-t border-[#E8E6DF] flex items-center justify-between">
+                      <span className="text-sm text-[#6B685E] font-sans">página actual:</span>
+                      <div className="flex items-center gap-2">
+                        <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-20 text-center py-2 text-sm font-semibold" />
+                        <button onClick={() => { 
+                          enviarAccion('actualizar_pagina', { pagina: miPagina }); 
+                          
+                          setUsuariasClub(prev => prev.map(u => {
+                            if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) {
+                              return { ...u, pagina: miPagina };
+                            }
+                            return u;
+                          }));
 
-            <nav className="editorial-nav absolute bottom-0 left-0 right-0 py-2 px-4 flex justify-between items-center z-40 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-              {[
-                { id: 'inicio', icon: 'fa-house', label: 'Inicio' },
-                { id: 'comunidad', icon: 'fa-mug-hot', label: 'Comunidad' }
-              ].map(tab => (
+                          mostrarToast('Progreso actualizado'); 
+                        }} className="editorial-btn px-4 py-2 text-sm">ok</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="editorial-card p-5 space-y-3">
+                    <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#232321]">
+                      <i className="fa-solid fa-location-dot text-[#4A5028]"></i> Tu Localización
+                    </h3>
+                    <p className="text-sm text-[#6B685E] font-sans italic">Añade tu ciudad y código postal para ubicarte en el mapa global del club.</p>
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <input 
+                        type="text" 
+                        placeholder="Ciudad..." 
+                        value={miCiudadInput} 
+                        onChange={(e) => setMiCiudadInput(e.target.value)} 
+                        className="editorial-input p-3 text-sm w-full" 
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="C. Postal..." 
+                        value={miCodigoPostalInput} 
+                        onChange={(e) => setMiCodigoPostalInput(e.target.value)} 
+                        className="editorial-input p-3 text-sm w-full" 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        localStorage.setItem('gilda_ciudad', miCiudadInput);
+                        localStorage.setItem('gilda_codigo_postal', miCodigoPostalInput);
+                        enviarAccion('actualizar_ubicacion', { ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput });
+                        setUsuariasClub(prev => prev.map(u => {
+                          if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) {
+                            return { ...u, ciudad: miCiudadInput, provincia_region: miCiudadInput };
+                          }
+                          return u;
+                        }));
+                        mostrarToast('Ubicación guardada correctamente');
+                      }} 
+                      className="w-full editorial-btn py-3 mt-2 text-sm font-semibold"
+                    >
+                      Guardar ubicación
+                    </button>
+                  </div>
+
+                  <div className="editorial-card p-5 space-y-4">
+                    <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-2">
+                      <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
+                        <i className="fa-regular fa-calendar-days text-[#4A5028]"></i> Calendario del Club
+                      </h3>
+                      <span className="text-xs text-gray-500 font-sans uppercase font-bold">
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir').length} programado(s)
+                      </span>
+                    </div>
+
+                    <CalendarioInteractivo eventos={eventosCalendario} />
+
+                    <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                      {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir').length === 0 ? (
+                        <p className="text-sm text-gray-500 italic font-sans text-center py-2">No hay fechas fijas programadas todavía.</p>
+                      ) : (
+                        eventosCalendario
+                          .filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir')
+                          .map((ev, idx) => {
+                            const tipoEvento = (ev.evento || ev.titulo || ev.nombre || '').toLowerCase();
+                            const esCafecito = tipoEvento.includes('cafecito') || tipoEvento.includes('café');
+                            const esRecordatorio = tipoEvento.includes('votar') || tipoEvento.includes('recordatorio') || tipoEvento.includes('último día');
+                            const iconoTipo = esCafecito ? 'fa-mug-hot text-[#B87343]' : esRecordatorio ? 'fa-bell text-purple-600' : 'fa-book-open text-[#4A5028]';
+                            
+                            return (
+                              <div key={idx} className="flex flex-col bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] text-sm gap-1">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold font-sans text-[#4A5028] flex items-center gap-1.5">
+                                    <i className={`fa-solid ${iconoTipo}`}></i> {ev.fecha || ev.dia || ev.date || ev.fecha_evento} {ev.hora && `• ${ev.hora}`}
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-800 font-sans">{formatoOracion(ev.evento || ev.titulo || ev.nombre)}</span>
+                                </div>
+                                <p className="text-xs text-gray-500 italic font-sans pt-1 border-t border-[#E8E6DF]/60">
+                                  * El enlace de acceso se enviará por el chat.
+                                </p>
+                              </div>
+                            );
+                          })
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-[#E8E6DF] space-y-2">
+                      <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-[#6B685E] flex items-center gap-1.5">
+                        <i className="fa-solid fa-hourglass-half text-amber-600"></i> Pendientes de fecha (en votación)
+                      </h4>
+
+                      <div className="space-y-2">
+                        {eventosCalendario.filter(e => (e.estado || '').toLowerCase() === 'pendiente' || (e.estado || '').toLowerCase() === 'por definir').length === 0 ? (
+                          <p className="text-xs text-gray-500 italic font-sans text-center py-1">No hay eventos pendientes de votación ahora mismo.</p>
+                        ) : (
+                          eventosCalendario
+                            .filter(e => (e.estado || '').toLowerCase() === 'pendiente' || (e.estado || '').toLowerCase() === 'por definir')
+                            .map((pend, pIdx) => (
+                              <div key={pIdx} className="bg-[#FAF6E8] p-3 rounded-xl border border-[#EEDFB3] text-sm flex justify-between items-center gap-2">
+                                <span className="font-sans font-semibold text-[#232321]">{formatoOracion(pend.evento || pend.titulo || pend.nombre)}</span>
+                                <span className="text-[10px] bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-sans shrink-0 font-bold uppercase">recordatorio</span>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+
+                    {esAdmin && (
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!nuevoEventoTitulo.trim()) return;
+                        const esPendienteCheck = nuevoEventoEstado === 'pendiente';
+                        const nuevoEv = { 
+                          fecha: esPendienteCheck ? 'Por definir' : (nuevoEventoFecha.trim() || 'Por definir'), 
+                          hora: esPendienteCheck ? '' : nuevoEventoHora.trim(), 
+                          evento: nuevoEventoTitulo.trim(),
+                          estado: nuevoEventoEstado || 'activo'
+                        };
+                        setEventosCalendario([...eventosCalendario, nuevoEv]);
+                        enviarAccion('agregar_evento_calendario', nuevoEv);
+                        setNuevoEventoFecha('');
+                        setNuevoEventoHora('');
+                        setNuevoEventoTitulo('');
+                        setNuevoEventoEstado('activo');
+                        mostrarToast('Evento añadido correctamente');
+                      }} className="pt-4 border-t border-[#E8E6DF] space-y-3">
+                        <p className="text-xs uppercase font-bold text-[#4A5028] font-sans">Panel de administración (Añadir evento):</p>
+                        
+                        <div className="flex gap-2">
+                          <select value={nuevoEventoEstado} onChange={(e) => setNuevoEventoEstado(e.target.value)} className="w-1/3 editorial-input p-3 text-sm font-sans font-semibold">
+                            <option value="activo">Con fecha</option>
+                            <option value="pendiente">Sin fecha (Votación)</option>
+                          </select>
+                          <select value={nuevoEventoTitulo} onChange={(e) => setNuevoEventoTitulo(e.target.value)} className="flex-grow editorial-input p-3 text-sm font-sans">
+                            <option value="">Selecciona tipo de evento...</option>
+                            <option value="Comentario del libro">Comentario del libro</option>
+                            <option value="Cafecito con la autora">Cafecito con la autora</option>
+                            <option value="Último día para votar">Último día para votar</option>
+                          </select>
+                        </div>
+
+                        {nuevoEventoEstado !== 'pendiente' && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <input type="text" placeholder="Ej: 15 Oct" value={nuevoEventoFecha} onChange={(e) => setNuevoEventoFecha(e.target.value)} className="editorial-input p-3 text-sm" />
+                            <input type="text" placeholder="Ej: 18:30h" value={nuevoEventoHora} onChange={(e) => setNuevoEventoHora(e.target.value)} className="editorial-input p-3 text-sm" />
+                          </div>
+                        )}
+
+                        <button type="submit" className="w-full editorial-btn py-3 text-sm">Publicar en el calendario</button>
+                      </form>
+                    )}
+                  </div>
+
+                  <div className="editorial-card p-4 space-y-3">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                      <span className="text-xs text-[#4A5028] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+                    </div>
+                    <MapaGilda usuarias={usuariasClub} />
+                  </div>
+
+                  <div className="editorial-card p-5 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-babydoll text-xl font-bold">Citas y notas</h3>
+                      <button onClick={() => { setBotellaAbierta(!botellaAbierta); setFraseActualBotella((prev) => (prev + 1) % FRASES_INICIALES.length); }} className="text-xs text-[#6B685E] hover:text-[#232321] uppercase font-sans font-bold py-2 px-3 rounded hover:bg-gray-100 transition-colors">descubrir</button>
+                    </div>
+                    {botellaAbierta && <div className="p-4 bg-[#FBF9F5] border border-[#E8E6DF] rounded-xl text-sm italic font-sans text-gray-800 leading-relaxed">"{FRASES_INICIALES[fraseActualBotella]}"</div>}
+                    <div className="flex gap-2 pt-3 border-t border-[#E8E6DF]">
+                      <input type="text" placeholder="Guardar cita..." value={nuevaFraseBotella} onChange={(e) => setNuevaFraseBotella(e.target.value)} className="flex-grow editorial-input px-4 py-3 text-sm" />
+                      <button onClick={() => { if(!nuevaFraseBotella)return; setMisCitas([nuevaFraseBotella, ...misCitas]); enviarAccion('frase', {frase: nuevaFraseBotella}); setNuevaFraseBotella(''); }} className="editorial-btn px-5 text-sm">guardar</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {seccionApp === 'edificio' && (
+                <div className="w-full flex justify-center fade-in">
+                  <EdificioClub usuarias={miembrosEdificio} libroActual={libroActual} onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} />
+                </div>
+              )}
+
+              {seccionApp === 'habitacion' && (
+                <div className="space-y-4 fade-in">
+                  <div className="editorial-card p-5 space-y-5">
+                    <div className="flex justify-between items-center border-b border-[#E8E6DF] pb-3">
+                      <h3 className="font-babydoll text-2xl font-bold">Mi Habitación</h3>
+                      <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); localStorage.setItem('gilda_is_reading', JSON.stringify(nuevo)); enviarAccion('estado_lectura', { leyendo: nuevo }); }} className={`px-4 py-2 text-sm rounded-full font-bold font-sans transition-colors active:scale-95 ${isReadingNow ? 'bg-[#4A5028] text-white' : 'bg-[#FBF9F5] border border-[#E8E6DF] text-[#6B685E]'}`}>
+                        {isReadingNow ? 'Luz encendida' : 'Luz apagada'}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-[#FBF9F5] p-4 rounded-xl border border-[#E8E6DF]">
+                      <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-14 h-14" textClass="text-[#4A5028] text-xl" editable={true} onFotoChange={handleFotoPerfilUpdate} />
+                      <div className="flex flex-col text-sm font-sans">
+                        <span className="font-bold text-gray-800">Foto de perfil</span>
+                        <span className="text-xs text-[#6B685E] mt-1">Haz clic sobre la foto para subir una imagen de la galería</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#FBF9F5] p-4 rounded-xl border border-[#E8E6DF] gap-3">
+                      <span className="text-sm font-bold text-gray-700 font-sans">Decoración de balda:</span>
+                      <select value={decoracionActual} onChange={(e) => { setDecoracionActual(e.target.value); localStorage.setItem('gilda_decoracion', e.target.value); }} className="editorial-input text-sm px-4 py-2 bg-white font-sans font-semibold">
+                        <option value="monstera">Plantita Monstera</option>
+                        <option value="maceta">Maceta Cerámica</option>
+                        <option value="vela">Vela Aromática</option>
+                        <option value="cafe">Taza de Café</option>
+                        <option value="cactus">Pequeño Cactus</option>
+                        <option value="ninguna">Sin decoración</option>
+                      </select>
+                    </div>
+
+                    <div className="pt-6 pb-8 px-4 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
+                      <div className="flex items-end justify-start gap-4 flex-grow">
+                        {todosMisLibrosEstanteria.length === 0 ? (
+                          <div className="w-full text-center py-10"><p className="text-sm text-[#6B685E] italic font-sans">Aún no hay libros en tu estantería...</p></div>
+                        ) : (
+                          todosMisLibrosEstanteria.map((item, idx) => <LomoLibroEstanteria key={idx} item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />)
+                        )}
+                      </div>
+                      {decoracionActual !== 'ninguna' && (
+                        <div className="shrink-0 pl-4 pb-1 flex items-end select-none">
+                          <IlustracionDecoracion tipo={decoracionActual} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-center pt-1 pb-3">
+                      <span className="text-xs font-bold text-[#6B685E] tracking-wider font-sans">@gilda.mailclub</span>
+                    </div>
+
+                    <div className="pt-5 border-t border-[#E8E6DF] space-y-4">
+                      <div className="flex bg-[#F8F7F3] p-1.5 rounded-xl text-sm font-semibold text-center border border-[#E8E6DF] font-sans">
+                        <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-2.5 rounded-lg transition-colors ${tabEstanteria === 'leyendo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Leyendo</button>
+                        <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-2.5 rounded-lg transition-colors ${tabEstanteria === 'want_to_read' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Quiero leer</button>
+                        <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-2.5 rounded-lg transition-colors ${tabEstanteria === 'leidos' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Leídos</button>
+                      </div>
+
+                      {modoCreacionManual ? (
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!manualTitulo.trim()) return;
+                          guardarLibroPersonal(manualTitulo, 0, tabEstanteria, manualAutora, manualPortada);
+                          setManualTitulo(''); setManualAutora(''); setManualPortada('');
+                        }} className="space-y-3 bg-[#FBF9F5] p-4 rounded-xl border border-[#E8E6DF]">
+                          <p className="text-sm font-bold font-sans text-[#4A5028]">Añadir libro manualmente:</p>
+                          <input type="text" placeholder="Título del libro..." value={manualTitulo} onChange={(e) => setManualTitulo(e.target.value)} required className="w-full editorial-input p-3 text-sm" />
+                          <input type="text" placeholder="Autora o autor..." value={manualAutora} onChange={(e) => setManualAutora(e.target.value)} className="w-full editorial-input p-3 text-sm" />
+                          <input type="text" placeholder="URL de la portada (opcional)..." value={manualPortada} onChange={(e) => setManualPortada(e.target.value)} className="w-full editorial-input p-3 text-sm" />
+                          {tabEstanteria === 'leyendo' && (
+                            <input type="number" placeholder="Página actual..." value={paginaPersonalInput} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-full editorial-input p-3 text-sm" />
+                          )}
+                          <div className="flex gap-2 pt-2">
+                            <button type="submit" className="flex-1 editorial-btn py-3 text-sm">Guardar libro</button>
+                            <button type="button" onClick={() => setModoCreacionManual(false)} className="flex-1 bg-white border border-[#E8E6DF] py-3 min-h-[44px] rounded-xl text-sm font-sans text-gray-700 hover:bg-gray-50">Cancelar</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="space-y-3 bg-[#FBF9F5] p-4 rounded-xl border border-[#E8E6DF]">
+                          <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
+                          <div className="flex justify-between items-center pt-2">
+                            <span className="text-xs text-[#6B685E] font-sans">¿No aparece en la lista?</span>
+                            <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#4A5028] font-bold font-sans hover:underline p-2">
+                              + Crear libro manualmente
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        {misLibrosFiltradosLista.map((item, idx) => (
+                          <div key={idx} onClick={() => setLibroSeleccionadoDetalle(item)} className="flex items-center justify-between bg-[#FBF9F5] p-3 rounded-xl border border-[#E8E6DF] cursor-pointer hover:bg-[#F2EFE9] transition-colors">
+                            <div className="flex items-center gap-4 overflow-hidden">
+                              <PortadaLibro titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
+                              <div className="overflow-hidden text-left">
+                                <p className="font-bold text-sm text-[#232321] truncate font-sans">{item.libro || item.titulo}</p>
+                                <p className="text-xs text-[#6B685E] italic font-sans mt-1">{item.autora || ''}</p>
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-500 font-sans font-semibold">pág. {item.pagina || item.paginas || 0}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {seccionApp === 'capitulos' && (
+                <div className="space-y-5 fade-in">
+                  {capitulos.map((cap, i) => {
+                    const paginaMinima = Number(cap.pagina_fin || cap.pagina_bloqueo || cap.pagina || cap.paginaminima || cap.minima || cap.limite || 0);
+                    const desbloqueado = miPagina >= paginaMinima;
+                    const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
+                    
+                    const comentariosCapitulo = comentarios.filter(c => {
+                      const cCap = String(c.capitulo || '').trim().toLowerCase();
+                      const padreId = String(c.parent_id || '').trim();
+                      const esPrincipal = !padreId || padreId === '' || padreId === 'undefined' || padreId === 'null';
+                      const coincide = !cCap || cCap === identificadorCap || cCap === String(cap.titulo || '').trim().toLowerCase() || cCap.includes(String(i + 1));
+                      return coincide && esPrincipal;
+                    });
+
+                    return (
+                      <div key={i} className="editorial-card p-6 space-y-5">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-babydoll text-2xl font-bold">{cap.titulo}</h3>
+                          <span className="text-xs text-[#6B685E] font-sans font-bold">pág. {paginaMinima}</span>
+                        </div>
+                        {desbloqueado ? (
+                          <div className="space-y-5">
+                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line font-sans">{cap.descripcion || cap.contenido}</p>
+
+                            <div className="pt-5 border-t border-[#E8E6DF] space-y-4">
+                              <h4 className="font-babydoll text-xl font-bold">Comentarios de lectoras</h4>
+                              
+                              <div className="space-y-4">
+                                {comentariosCapitulo.length === 0 ? (
+                                  <p className="text-sm text-gray-500 italic font-sans">Aún no hay comentarios en este capítulo. ¡Sé la primera en escribir!</p>
+                                ) : (
+                                  comentariosCapitulo.map((com, cIdx) => {
+                                    const idComentario = String(com.id || '').trim();
+                                    
+                                    const respuestasCom = comentarios.filter(r => {
+                                      const rPadre = String(r.parent_id || '').trim();
+                                      return rPadre && idComentario && rPadre === idComentario;
+                                    });
+
+                                    const nombreAutorComentario = obtenerNombreReal(com.autora, com.autora);
+                                    const textoComTxt = com.texto || '';
+
+                                    return (
+                                      <div key={cIdx} className="bg-[#FBF9F5] p-4 rounded-xl border border-[#E8E6DF] text-sm space-y-3">
+                                        <div className="flex justify-between items-center">
+                                          <span className="font-bold font-sans text-[#4A5028]">{nombreAutorComentario}</span>
+                                          <span className="text-[10px] text-gray-500 font-sans uppercase">{com.fecha || ''}</span>
+                                        </div>
+                                        <p className="text-gray-800 font-sans leading-relaxed">{textoComTxt}</p>
+
+                                        {!modalidadLimpia.includes('cotilla') && (
+                                          <div className="flex justify-end">
+                                            <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[#4A5028] font-bold font-sans hover:underline py-1 px-2">
+                                              {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
+                                            </button>
+                                          </div>
+                                        )}
+
+                                        {respuestasCom.length > 0 && (
+                                          <div className="pl-4 mt-3 border-l-2 border-[#DCD6BE] space-y-3">
+                                            {respuestasCom.map((resp, rIdx) => {
+                                              const nombreAutorRespuesta = obtenerNombreReal(resp.autora, resp.autora);
+                                              const textoRespTxt = resp.texto || '';
+                                              return (
+                                                <div key={rIdx} className="bg-white p-3 rounded-lg border border-[#E8E6DF] text-sm space-y-2">
+                                                  <div className="flex justify-between items-center">
+                                                    <span className="font-bold font-sans text-[#4A5028]">{nombreAutorRespuesta}</span>
+                                                    <span className="text-[10px] text-gray-500 font-sans uppercase">{resp.fecha || ''}</span>
+                                                  </div>
+                                                  <p className="text-gray-800 font-sans">{textoRespTxt}</p>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+
+                                        {respondiendoA === idComentario && !modalidadLimpia.includes('cotilla') && (
+                                          <form onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const txtResp = textoRespuesta[idComentario];
+                                            if (!txtResp || !txtResp.trim()) return;
+                                            
+                                            const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+                                            const nuevaRespObj = { 
+                                              capitulo: identificadorCap, 
+                                              parent_id: idComentario, 
+                                              autora: nombreActual, 
+                                              texto: txtResp, 
+                                              fecha: 'Justo ahora' 
+                                            };
+                                            setComentarios([...comentarios, nuevaRespObj]);
+                                            enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
+                                            setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
+                                            setRespondiendoA(null);
+                                            mostrarToast('Respuesta enviada');
+                                          }} className="flex gap-2 pt-3">
+                                            <input 
+                                              type="text" 
+                                              placeholder="Escribe tu respuesta..." 
+                                              value={textoRespuesta[idComentario] || ''} 
+                                              onChange={(e) => setTextoRespuesta({ ...textoRespuesta, [idComentario]: e.target.value })} 
+                                              className="flex-grow editorial-input px-3 py-2 text-sm bg-white" 
+                                            />
+                                            <button type="submit" className="editorial-btn px-4 py-2 text-sm min-h-[44px]">Enviar</button>
+                                          </form>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+
+                              {modalidadLimpia.includes('cotilla') ? (
+                                <div className="p-4 bg-[#F8F7F3] border border-[#E8E6DF] rounded-xl text-center">
+                                  <p className="text-sm text-[#6B685E] font-sans">
+                                    Tu modalidad actual es de solo lectura en comentarios. <button onClick={() => setMostrarModalUpgrade(true)} className="text-[#4A5028] font-bold underline p-2">Actualiza tu suscripción</button> para participar.
+                                  </p>
+                                </div>
+                              ) : (
+                                <form onSubmit={(e) => {
+                                  e.preventDefault();
+                                  const clave = cap.id || cap.titulo;
+                                  const txt = textoComentario[clave];
+                                  if (!txt || !txt.trim()) return;
+                                  
+                                  const nombreActual = nombreUsuarioPersonalizado || sesion.nombre;
+                                  const nuevoCom = { 
+                                    capitulo: identificadorCap, 
+                                    parent_id: '',
+                                    autora: nombreActual, 
+                                    texto: txt, 
+                                    fecha: 'Justo ahora' 
+                                  };
+                                  setComentarios([...comentarios, nuevoCom]);
+
+                                  enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
+                                  setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: '' });
+                                  mostrarToast('Comentario enviado');
+                                }} className="flex gap-2 pt-2">
+                                  <input 
+                                    type="text" 
+                                    placeholder="Escribe tu reflexión sobre este capítulo..." 
+                                    value={textoComentario[cap.id || cap.titulo] || ''} 
+                                    onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} 
+                                    className="flex-grow editorial-input px-4 py-3 text-sm" 
+                                  />
+                                  <button type="submit" className="editorial-btn px-5 text-sm min-h-[44px]">Comentar</button>
+                                </form>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-5 bg-[#FBF9F5] border border-[#E8E6DF] rounded-xl text-center space-y-3">
+                            <i className="fa-solid fa-lock text-[#6B685E] text-xl"></i>
+                            <p className="text-sm text-[#6B685E] font-sans">Capítulo bloqueado. Necesitas llegar a la página <b>{paginaMinima}</b> (vas por la {miPagina}).</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {seccionApp === 'comunidad' && (
+                <div className="space-y-5 fade-in">
+                  <div className="flex bg-[#F8F7F3] p-1.5 rounded-xl text-sm font-bold text-center border border-[#E8E6DF] font-sans overflow-x-auto hide-scrollbar">
+                    <button onClick={() => setSubTabComunidad('chat')} className={`flex-1 min-w-[80px] py-2.5 rounded-lg transition-colors ${subTabComunidad === 'chat' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Chat</button>
+                    <button onClick={() => setSubTabComunidad('mapa')} className={`flex-1 min-w-[100px] py-2.5 rounded-lg transition-colors ${subTabComunidad === 'mapa' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Mapa ({usuariasClub.length})</button>
+                    <button onClick={() => setSubTabComunidad('archivo')} className={`flex-1 min-w-[80px] py-2.5 rounded-lg transition-colors ${subTabComunidad === 'archivo' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Archivo</button>
+                    <button onClick={() => setSubTabComunidad('buzon')} className={`flex-1 min-w-[80px] py-2.5 rounded-lg transition-colors ${subTabComunidad === 'buzon' ? 'bg-[#232321] text-[#FBF9F5]' : 'text-gray-500 hover:text-black'}`}>Buzón</button>
+                  </div>
+
+                  {subTabComunidad === 'chat' && (
+                    <div className="editorial-card h-[500px] flex flex-col justify-between relative overflow-hidden">
+                      <div className="bg-[#FBF9F5] p-4 border-b border-[#E8E6DF] flex items-center justify-between text-sm rounded-t-xl font-sans font-bold">
+                        <span>Chat de Lectoras</span>
+                        <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse" title="Conectado"></span>
+                      </div>
+                      <div className="flex-grow p-4 overflow-y-auto space-y-4 flex flex-col">
+                        {chatMsgs.map((m, i) => {
+                          const nombreAutorChat = obtenerNombreReal(m.email, m.usuario || m.usuaria);
+                          const usuarioMsg = nombreAutorChat.toLowerCase().trim();
+                          const miNombre = (nombreUsuarioPersonalizado || sesion.nombre || '').toLowerCase().trim();
+                          const esMia = usuarioMsg === miNombre;
+                          return (
+                            <div key={i} className={`flex flex-col max-w-[85%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                              <span className="text-[10px] uppercase font-bold text-gray-500 font-sans mb-1 px-1">{nombreAutorChat}</span>
+                              <div className={`p-3.5 rounded-2xl text-sm leading-relaxed shadow-xs font-sans ${esMia ? 'bg-[#4A5028] text-white rounded-br-xs' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] rounded-bl-xs'}`}>
+                                {m.mensaje}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div ref={chatEndRef} />
+                      </div>
+                      <form onSubmit={(e) => { e.preventDefault(); if(!nuevoChat.trim())return; enviarAccion('enviar_chat', {mensaje: nuevoChat}); setNuevoChat(''); }} className="p-3 border-t border-[#E8E6DF] flex gap-2 bg-white">
+                        <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-4 py-3 text-sm" placeholder="Escribe un mensaje al club..." />
+                        <button type="submit" aria-label="Enviar mensaje" className="editorial-btn px-5 py-3 text-sm min-h-[44px]"><i className="fa-solid fa-paper-plane"></i></button>
+                      </form>
+                    </div>
+                  )}
+
+                  {subTabComunidad === 'mapa' && (
+                    <div className="editorial-card p-4 space-y-3">
+                      <div className="flex justify-between items-center text-sm px-1">
+                        <span className="font-babydoll text-xl font-bold">Mapa Global de Lectoras</span>
+                        <span className="text-xs text-[#4A5028] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+                      </div>
+                      <MapaGilda usuarias={usuariasClub} />
+                    </div>
+                  )}
+
+                  {subTabComunidad === 'archivo' && (
+                    <div className="space-y-5">
+                      <div className="editorial-card p-6 space-y-4">
+                        <h3 className="font-babydoll text-xl font-bold">Proponer Nueva Lectura</h3>
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          const tit = nuevaPropuestaTitulo?.trim();
+                          if (!tit) return;
+                          const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || '', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
+                          setPropuestas([...propuestas, nueva]);
+                          enviarAccion('propuesta', nueva);
+                          setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
+                          mostrarToast('Propuesta añadida.');
+                        }} className="space-y-3">
+                          <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+                          <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-3 text-sm" />
+                          <button type="submit" className="w-full editorial-btn py-3 text-sm mt-1">Añadir propuesta</button>
+                        </form>
+                      </div>
+
+                      <div className="editorial-card p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-babydoll text-xl font-bold">Votación del Mes</h3>
+                          <span className="text-[10px] text-gray-500 font-sans uppercase font-bold">Top 3 finalistas</span>
+                        </div>
+                        <div className="space-y-4">
+                          {[...propuestas]
+                            .sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0))
+                            .slice(0, 3)
+                            .map((p, i) => (
+                              <div key={i} className="flex gap-4 border border-[#E8E6DF] p-4 rounded-xl bg-[#FBF9F5]">
+                                <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="thumb" />
+                                <div className="flex flex-col justify-between w-full">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-bold text-[#4A5028] font-sans">#{i + 1}</span>
+                                      <h4 className="font-bold text-sm leading-tight font-sans">{p.titulo}</h4>
+                                    </div>
+                                    <p className="text-xs text-[#6B685E] italic font-sans mt-1">{p.autora}</p>
+                                  </div>
+                                  <button onClick={()=>{
+                                    const clon = [...propuestas]; const item = clon.find(x => x.titulo === p.titulo); if(!item) return;
+                                    let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
+                                    if(arr.includes(sesion.email.toLowerCase())){ arr = arr.filter(v=>v!==sesion.email.toLowerCase()); item.votos = Math.max(0, Number(item.votos||0) - 1); } else { arr.push(sesion.email.toLowerCase()); item.votos = Number(item.votos||0) + 1; }
+                                    item.votantes = arr.join(','); setPropuestas(clon); enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); mostrarToast('Voto actualizado.');
+                                  }} className="self-start mt-3 px-4 py-2 min-h-[44px] text-sm rounded-full font-bold bg-white text-[#232321] border border-[#E8E6DF] font-sans active:scale-95 hover:bg-gray-50 transition-colors">Votar ({p.votos||0})</button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {subTabComunidad === 'buzon' && (
+                    <div className="editorial-card p-6 space-y-4">
+                      <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
+                      <p className="text-sm text-[#6B685E] font-sans">Sugerencias y comunicación directa con la administración.</p>
+                      <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-4 text-sm h-32 resize-none"></textarea>
+                      <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-3 text-sm">Enviar mensaje</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+        </div>
+
+        <nav className="editorial-nav fixed bottom-0 z-40">
+          <div className="flex justify-around items-center py-2 px-3">
+            {[
+              { id: 'inicio', icon: 'fa-house', label: 'inicio' },
+              { id: 'edificio', icon: 'fa-building', label: 'casa' },
+              { id: 'habitacion', icon: 'fa-bookmark', label: 'habitación' },
+              { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
+              { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' }
+            ].map(tab => {
+              const esComunidad = tab.id === 'comunidad';
+              const bloqueado = esRestringida && esComunidad;
+
+              return (
                 <button 
                   key={tab.id} 
-                  onClick={() => setSeccionApp(tab.id)} 
-                  className={`flex flex-col items-center justify-center gap-1 min-w-[64px] min-h-[48px] rounded-xl transition-colors ${seccionApp === tab.id ? 'text-gilda-text' : 'text-gray-400 hover:text-gray-700'}`}
+                  aria-label={`Ir a la sección ${tab.label}`}
+                  onClick={() => {
+                    if (bloqueado) {
+                      setMostrarModalUpgrade(true);
+                    } else {
+                      setSeccionApp(tab.id);
+                    }
+                  }} 
+                  className={`flex flex-col items-center justify-center gap-1 transition-all min-w-[64px] min-h-[48px] rounded-xl ${seccionApp === tab.id ? 'text-[#232321] font-bold bg-[#F8F7F3]' : 'text-gray-400 hover:text-gray-600'} ${bloqueado ? 'opacity-50' : ''}`}
                 >
-                  <i className={`fa-solid ${tab.icon} text-lg`}></i>
-                  <span className="text-[10px] font-bold uppercase tracking-wide">{tab.label}</span>
+                  <i className={`fa-solid ${tab.icon} text-lg ${bloqueado ? 'fa-lock text-xs' : ''}`}></i>
+                  <span className="text-[10px] font-bold uppercase font-sans tracking-wide">{tab.label}</span>
                 </button>
-              ))}
-            </nav>
+              );
+            })}
           </div>
-        );
-      }
+        </nav>
+      </div>
+    );
+  }
 
-      const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
-      containerRoot.render(<App />);
-    </script>
-  </body>
-</html>
+  const containerRoot = ReactDOM.createRoot(document.getElementById('root'));
+  containerRoot.render(<App />);
+</script>
