@@ -199,7 +199,7 @@
               <div className="space-y-1">
                 <h3 className="font-babydoll text-xl font-bold">Acceso restringido</h3>
                 <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                  Con tu modalidad actual no tienes acceso a esta función. ¡Sube de nivel para disfrutar de toda la experiencia de gilda!
+                  Tu modalidad actual no incluye acceso a esta función. Actualiza tu suscripción para acceder a todas las secciones de gilda.
                 </p>
               </div>
               <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="block w-full editorial-btn py-2.5 text-xs text-center font-semibold">
@@ -737,7 +737,7 @@
                     </div>
                   </div>
                   <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
-                    <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
+                    <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
                   </button>
                 </div>
                 {misLibrosPersonales.map((item, idx) => (
@@ -750,7 +750,7 @@
                       </div>
                     </div>
                     <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#232321] border border-[#E8E6DF] hover:bg-[#4A5028] hover:text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
-                      <i className="fa-solid fa-bookmark text-[9px]"></i> + Want to read
+                      <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
                     </button>
                   </div>
                 ))}
@@ -1059,12 +1059,12 @@
 
         const modalidades = [
           { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
-          { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
-          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
-          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
-          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
-          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos du club.' }
+          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'participa en la comunidad y lee a tu ritmo mientras compartes y consultas las lecturas de las demás a través de la aplicación.' },
+          { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'acceso completo a la comunidad, chat y cafecitos virtuales.' },
+          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora, marcapáginas y plantillas.' },
+          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda en tu buzón, con actividades creativas, pasatiempos, pegatinas, marcapáginas y más (la anti-guía de lectura se incluye mediante código QR).' },
+          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico y acceso total a la aplicación.' },
+          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: contenido en papel en tu buzón y acceso total a la aplicación, al chat y a los cafecitos.' }
         ];
 
         const modalidadGratis = modalidades.find((m) => m.esGratis);
@@ -1320,43 +1320,43 @@
                 
                 <div className="space-y-1.5 pt-2">
                   <h1 className="font-babydoll text-6xl text-[#232321] font-bold tracking-tight">gilda</h1>
-                  <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
+                  <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">club de lectura, cartas y creatividad</p>
                 </div>
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
                     <div className="bg-[#FBF9F5] p-6 rounded-2xl border border-[#E8E6DF] space-y-5 text-left">
                       <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
-                        un lugar seguro para leer a tu ritmo, hablar sobre libros (y lo que surja) y compartir cafecitos con alma.
+                        un espacio para leer a tu ritmo, conversar sobre libros y compartir encuentros literarios.
                       </p>
 
                       <div className="space-y-2.5 pt-1">
                         <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
                           <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-lightbulb text-xs"></i></span>
                           <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Enciende tu luz</b> para que las demás sepan que estás leyendo en ese mismo instante.
+                            <b>Indicador de lectura</b> para mostrar cuando estás leyendo en ese mismo instante.
                           </p>
                         </div>
                         <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
                           <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-house-chimney-window text-xs"></i></span>
                           <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Asómate a las ventanas</b> de las demás para cotillear qué libros acompañan sus días.
+                            <b>Estanterías compartidas</b> para consultar qué libros acompañan las lecturas de las demás.
                           </p>
                         </div>
                         <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
                           <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-map-location-dot text-xs"></i></span>
                           <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Ubícate en el mapa</b> para descubrir lectoras con tus mismos gustos cerca de ti.
+                            <b>Mapa de lectoras</b> para conectar con personas afines cerca de ti.
                           </p>
                         </div>
                       </div>
 
                       <div className="flex justify-center items-center gap-4 pt-3 text-[11px] font-semibold text-[#4A5028] font-sans border-t border-[#E8E6DF]">
-                        <span>☕ Cafecitos</span>
+                        <span>Cafecitos</span>
                         <span>•</span>
-                        <span>📚 Estanterías</span>
+                        <span>Estanterías</span>
                         <span>•</span>
-                        <span>✉️ Cartas</span>
+                        <span>Cartas</span>
                       </div>
                     </div>
 
@@ -1366,17 +1366,17 @@
                         setModalidadSeleccionada(modGratis);
                         setVistaAcceso('formulario_registro');
                       }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2">
-                        <span>Abrir mi puerta gratis para cotillear :)</span>
+                        <span>Acceder de forma gratuita</span>
                         <i className="fa-solid fa-arrow-right text-xs"></i>
                       </button>
 
                       <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-[#FAF6E8] text-[#4A5028] border border-[#DCD6BE] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#F2EBD4] text-center">
-                        Conocer las distintas maneras de participar (modalidades)
+                        Conocer las modalidades disponibles
                       </button>
 
                       <div className="pt-2 border-t border-[#E8E6DF]">
                         <button onClick={() => setVistaAcceso('login')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] font-sans">
-                          Inicia sesión aquí si ya formas parte de gilda
+                          Iniciar sesión si ya formas parte de gilda
                         </button>
                       </div>
                     </div>
@@ -1400,7 +1400,7 @@
                       
                       const modUser = (socia.modalidad || '').toLowerCase().trim();
                       if (modUser.includes('nube') || modUser.includes('papel')) {
-                        return setErrorLogin('Tu modalidad ("gilda de nube" o "gilda de papel") es exclusiva para correo y no tiene acceso a la aplicación web.');
+                        return setErrorLogin('Tu modalidad es exclusiva para correo y no incluye acceso a la aplicación web.');
                       }
 
                       const passwordRegistrada = (socia.password || '').trim();
@@ -1411,7 +1411,7 @@
 
                       if (passwordRegistrada === '') {
                         if (!inputPassword.trim()) {
-                          return setErrorLogin('Es tu primera vez. Introduce una contraseña nueva para guardarla.');
+                          return setErrorLogin('Introduce una contraseña nueva para guardarla.');
                         }
                         enviarAccion('actualizar_password', { email: emailLimpio, password: inputPassword.trim() });
                       }
@@ -1442,7 +1442,7 @@
                     <button onClick={() => setVistaAcceso('menu')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] flex items-center group font-sans">
                       <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver
                     </button>
-                    <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">elige tu favorita :)</h2>
+                    <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">selecciona una modalidad</h2>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                       {/* Opción Gratis */}
@@ -1453,7 +1453,7 @@
                         </div>
                         <p className="text-xs text-gray-500 font-sans mb-3">{modalidadGratis.descripcion}</p>
                         <button onClick={() => { setModalidadSeleccionada(modalidadGratis); setVistaAcceso('formulario_registro'); }} className="w-full py-2 rounded-xl text-xs font-semibold bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors font-sans">
-                          quiero esta modalidad
+                          seleccionar
                         </button>
                       </div>
 
@@ -1466,7 +1466,7 @@
                           </div>
                           <p className="text-xs text-gray-500 font-sans mb-3">{mod.descripcion}</p>
                           <button onClick={() => { setModalidadSeleccionada(mod); setVistaAcceso('formulario_registro'); }} className={`w-full py-2 rounded-xl text-xs font-semibold font-sans ${mod.destacado ? 'editorial-btn' : 'bg-[#F8F7F3] border border-[#E8E6DF] text-[#232321] hover:bg-[#4A5028] hover:text-white transition-colors'}`}>
-                            quiero esta modalidad
+                            seleccionar
                           </button>
                         </div>
                       ))}
@@ -1480,9 +1480,9 @@
                       <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver a modalidades
                     </button>
                     <div className="border-b border-[#E8E6DF] pb-3">
-                      <h2 className="text-2xl font-babydoll font-bold text-[#232321]">ya casi lo tenemos</h2>
+                      <h2 className="text-2xl font-babydoll font-bold text-[#232321]">últimos pasos</h2>
                       <p className="text-xs text-gray-500 font-sans leading-relaxed mt-1">
-                        ya casi estás dentro. estás a punto de abrir la puerta a gilda. déjame tus datos para preparar tu habitación.
+                        introduce tus datos para completar el registro y preparar tu acceso a gilda.
                       </p>
                     </div>
 
@@ -1498,7 +1498,7 @@
                       <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-2 flex items-center justify-center gap-2">
                         {enviandoRegistro ? 'Procesando...' : (
                           <>
-                            <span>apúntame &lt;3</span>
+                            <span>Registrarse</span>
                             <i className="fa-solid fa-arrow-right text-xs"></i>
                           </>
                         )}
@@ -1518,7 +1518,7 @@
               <div className="editorial-card max-w-sm w-full p-8 space-y-4 text-center">
                 <h1 className="font-babydoll text-4xl text-[#232321] font-bold">gilda</h1>
                 <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                  Tu modalidad actual ({sesion.modalidad}) está registrada exclusivamente para el mailclub por correo y no tiene acceso a la aplicación web.
+                  Tu modalidad actual ({sesion.modalidad}) está registrada exclusivamente para el servicio por correo y no incluye acceso a la aplicación web.
                 </p>
                 <button onClick={() => { localStorage.removeItem('gilda_sesion'); setSesion(null); }} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
               </div>
@@ -2050,7 +2050,7 @@
                               {modalidadLimpia.includes('cotilla') ? (
                                 <div className="p-3 bg-[#F8F7F3] border border-[#E8E6DF] rounded-xl text-center">
                                   <p className="text-[11px] text-gray-500 font-sans">
-                                    Tu modalidad actual es de solo lectura en comentarios. <button onClick={() => setMostrarModalUpgrade(true)} className="text-[#4A5028] font-bold underline">Sube de nivel</button> para participar.
+                                    Tu modalidad actual es de solo lectura en comentarios. <button onClick={() => setMostrarModalUpgrade(true)} className="text-[#4A5028] font-bold underline">Actualiza tu suscripción</button> para participar.
                                   </p>
                                 </div>
                               ) : (
