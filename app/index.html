@@ -177,7 +177,7 @@
       const FRASES_INICIALES = [
         "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
         "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
-        "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
+        "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad di mi mente."
       ];
 
       const formatoOracion = (texto) => {
@@ -705,7 +705,7 @@
         return (
           <div className="flex flex-col items-center w-full max-w-[450px] mx-auto py-2 relative">
             <h2 className="text-[48px] font-babydoll text-center mb-0 text-[#232321] leading-none">gilda</h2>
-            <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-sans italic">selecciona una ventana para asomarte a sus lecturas</p>
+            <p className="text-[13px] text-gray-500 text-center mb-4 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
             <div className="grid grid-cols-3 gap-x-6 gap-y-8 w-full max-w-[220px] mx-auto mb-10">
               {listaUsuarias.map((usuaria, indice) => {
                 const estaLeyendo = usuaria.estaLeyendo;
@@ -1059,12 +1059,12 @@
 
         const modalidades = [
           { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'participa en la comunidad y lee a tu ritmo mientras compartes y consultas las lecturas de las demás a través de la aplicación.' },
-          { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'acceso completo a la comunidad, chat y cafecitos virtuales.' },
-          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora, marcapáginas y plantillas.' },
-          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda en tu buzón, con actividades creativas, pasatiempos, pegatinas, marcapáginas y más (la anti-guía de lectura se incluye mediante código QR).' },
-          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico y acceso total a la aplicación.' },
-          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: contenido en papel en tu buzón y acceso total a la aplicación, al chat y a los cafecitos.' }
+          { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
+          { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
+          { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
+          { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
+          { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
+          { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
         ];
 
         const modalidadGratis = modalidades.find((m) => m.esGratis);
@@ -1320,43 +1320,26 @@
                 
                 <div className="space-y-1.5 pt-2">
                   <h1 className="font-babydoll text-6xl text-[#232321] font-bold tracking-tight">gilda</h1>
-                  <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">club de lectura, cartas y creatividad</p>
+                  <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
                 </div>
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
                     <div className="bg-[#FBF9F5] p-6 rounded-2xl border border-[#E8E6DF] space-y-5 text-left">
                       <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
-                        un espacio para leer a tu ritmo, conversar sobre libros y compartir encuentros literarios.
+                        un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
                       </p>
 
-                      <div className="space-y-2.5 pt-1">
-                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
-                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-lightbulb text-xs"></i></span>
-                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Indicador de lectura</b> para mostrar cuando estás leyendo en ese mismo instante.
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
-                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-house-chimney-window text-xs"></i></span>
-                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Estanterías compartidas</b> para consultar qué libros acompañan las lecturas de las demás.
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
-                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-map-location-dot text-xs"></i></span>
-                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
-                            <b>Mapa de lectoras</b> para conectar con personas afines cerca de ti.
-                          </p>
-                        </div>
-                      </div>
+                      <p className="text-xs text-gray-600 font-sans leading-relaxed text-center px-2">
+                        Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento, asómate a las ventanas de las demás y cotillea qué libros están leyendo, ubícate en el mapa para que sepa desde dónde escribes y así puedas encontrar personas cercanas a ti con tus mismos gustos, escribe tus frases favoritas, descubre otras nuevas que escriban otras personas de la comunidad, y más.
+                      </p>
 
-                      <div className="flex justify-center items-center gap-4 pt-3 text-[11px] font-semibold text-[#4A5028] font-sans border-t border-[#E8E6DF]">
-                        <span>Cafecitos</span>
-                        <span>•</span>
-                        <span>Estanterías</span>
-                        <span>•</span>
-                        <span>Cartas</span>
+                      <div className="flex justify-center items-center gap-3 pt-3 text-[11px] font-semibold text-[#4A5028] font-sans border-t border-[#E8E6DF] flex-wrap text-center">
+                        <span>Cafecitos con alma</span>
+                        <span>—</span>
+                        <span>Estanterías abiertas</span>
+                        <span>—</span>
+                        <span>Cartas impresas y digitales</span>
                       </div>
                     </div>
 
@@ -1366,7 +1349,7 @@
                         setModalidadSeleccionada(modGratis);
                         setVistaAcceso('formulario_registro');
                       }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2">
-                        <span>Acceder de forma gratuita</span>
+                        <span>Abrir mi puerta gratis para cotillear :)</span>
                         <i className="fa-solid fa-arrow-right text-xs"></i>
                       </button>
 
@@ -1376,7 +1359,7 @@
 
                       <div className="pt-2 border-t border-[#E8E6DF]">
                         <button onClick={() => setVistaAcceso('login')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] font-sans">
-                          Iniciar sesión si ya formas parte de gilda
+                          Inicia sesión aquí si ya formas parte de gilda
                         </button>
                       </div>
                     </div>
@@ -1442,7 +1425,7 @@
                     <button onClick={() => setVistaAcceso('menu')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] flex items-center group font-sans">
                       <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver
                     </button>
-                    <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">selecciona una modalidad</h2>
+                    <h2 className="text-2xl font-babydoll font-bold text-center text-[#232321]">elige tu favorita :)</h2>
                     
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                       {/* Opción Gratis */}
@@ -1477,12 +1460,12 @@
                 {vistaAcceso === 'formulario_registro' && modalidadSeleccionada && (
                   <div className="space-y-4 fade-in text-left">
                     <button onClick={() => setVistaAcceso('modalidades')} className="text-xs font-semibold text-gray-500 hover:text-[#232321] flex items-center group font-sans">
-                      <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver a modalidades
+                      <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver
                     </button>
                     <div className="border-b border-[#E8E6DF] pb-3">
-                      <h2 className="text-2xl font-babydoll font-bold text-[#232321]">últimos pasos</h2>
+                      <h2 className="text-2xl font-babydoll font-bold text-[#232321]">ya casi estás dentro</h2>
                       <p className="text-xs text-gray-500 font-sans leading-relaxed mt-1">
-                        introduce tus datos para completar el registro y preparar tu acceso a gilda.
+                        estás a punto de abrir la puerta a gilda. déjame tus datos para preparar tu habitación.
                       </p>
                     </div>
 
@@ -1498,7 +1481,7 @@
                       <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-2 flex items-center justify-center gap-2">
                         {enviandoRegistro ? 'Procesando...' : (
                           <>
-                            <span>Registrarse</span>
+                            <span>apúntame &lt;3</span>
                             <i className="fa-solid fa-arrow-right text-xs"></i>
                           </>
                         )}
