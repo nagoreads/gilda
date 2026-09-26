@@ -1067,6 +1067,10 @@
         const [inputPassword, setInputPassword] = useState('');
         const [errorLogin, setErrorLogin] = useState('');
         
+        // Estados añadidos para las pestañas y visibilidad de contraseña
+        const [tabActiva, setTabActiva] = useState('login');
+        const [mostrarPass, setMostrarPass] = useState(false);
+        
         const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
         const [enviandoRegistro, setEnviandoRegistro] = useState(false);
 
@@ -1328,110 +1332,117 @@
         if (!sesion) {
           return (
             <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
-              <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#e6e4dc]">
+              <div className="editorial-card max-w-md w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#e6e4dc]">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#3d4220]"></div>
                 
-                <div className="space-y-2 pt-2">
-                  <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold tracking-tight">gilda</h1>
-                  <p className="text-[11px] uppercase tracking-widest text-[#3d4220] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
+                {/* Cabecera del Club */}
+                <div className="space-y-1.5 pt-2">
+                  <h1 className="font-babydoll text-5xl text-[#1c1c1a] font-bold tracking-tight">gilda</h1>
+                  <p className="text-[10px] uppercase tracking-widest text-[#3d4220] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
                 </div>
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
-                    <div className="bg-[#f5f2e6] p-6 rounded-2xl border border-[#e6e4dc] space-y-4 text-left shadow-sm">
-                      <p className="font-babydoll text-xl text-[#1c1c1a] leading-relaxed text-center">
-                        un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.
-                      </p>
-
-                      <p className="text-xs text-[#595750] font-sans leading-relaxed text-center px-1">
-                        Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento...
-                      </p>
-                    </div>
-
-                    <div className="space-y-3">
-                      <button onClick={() => {
-                        const modGratis = modalidadGratis || modalidades[0];
-                        setModalidadSeleccionada(modGratis);
-                        setVistaAcceso('formulario_registro');
-                      }} className="w-full editorial-btn py-3.5 text-sm shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
-                        <span>Abrir mi puerta gratis para cotillear :)</span>
-                        <i className="fa-solid fa-arrow-right text-xs"></i>
+                    {/* Pestañas de Navegación */}
+                    <div className="flex bg-[#f5f2e6] p-1 rounded-xl border border-[#e6e4dc] font-sans">
+                      <button 
+                        onClick={() => setTabActiva('login')} 
+                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tabActiva === 'login' ? 'bg-white text-[#1c1c1a] shadow-sm' : 'text-[#595750] hover:text-[#1c1c1a]'}`}
+                      >
+                        Ya tengo cuenta
                       </button>
-
-                      <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-[#ffffee] text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#f2ecdc] text-center shadow-sm">
-                        Conocer las modalidades disponibles
+                      <button 
+                        onClick={() => setTabActiva('registro')} 
+                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tabActiva === 'registro' ? 'bg-white text-[#1c1c1a] shadow-sm' : 'text-[#595750] hover:text-[#1c1c1a]'}`}
+                      >
+                        Unirme al club
                       </button>
-
-                      <div className="pt-3 border-t border-[#e6e4dc]">
-                        <button onClick={() => setVistaAcceso('login')} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] font-sans transition-colors">
-                          Inicia sesión aquí si ya formas parte de gilda
-                        </button>
-                      </div>
                     </div>
-                  </div>
-                )}
 
-                {vistaAcceso === 'login' && (
-                  <div className="space-y-5 fade-in text-left">
-                    <button onClick={() => { setVistaAcceso('menu'); setErrorLogin(''); }} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans">
-                      <i className="fa-solid fa-arrow-left mr-2 text-[10px] group-hover:-translate-x-1 transition-transform"></i> volver
-                    </button>
-                    <div className="space-y-1">
-                      <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a]">bienvenida de nuevo :)</h2>
-                      <p className="text-xs text-[#595750] font-sans">Introduce tus datos para acceder a tu habitación.</p>
-                    </div>
-                    <form onSubmit={(e) => {
-                      e.preventDefault();
-                      setErrorLogin('');
-                      const emailLimpio = inputEmail.trim().toLowerCase();
-                      const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailLimpio);
-                      
-                      if (!socia) {
-                        return setErrorLogin('Correo no registrado.');
-                      }
-                      
-                      const modUser = (socia.modalidad || '').toLowerCase().trim();
-                      if (modUser.includes('nube') || modUser.includes('papel')) {
-                        return setErrorLogin('Tu modalidad es exclusiva para correo y no incluye acceso a la aplicación web.');
-                      }
-
-                      const passwordRegistrada = (socia.password || '').trim();
-
-                      if (passwordRegistrada !== '' && passwordRegistrada !== inputPassword.trim()) {
-                        return setErrorLogin('Contraseña incorrecta.');
-                      }
-
-                      if (passwordRegistrada === '') {
-                        if (!inputPassword.trim()) {
-                          return setErrorLogin('Introduce una contraseña nueva para guardarla.');
+                    {tabActiva === 'login' ? (
+                      /* Formulario de Inicio de Sesión */
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        setErrorLogin('');
+                        const emailLimpio = inputEmail.trim().toLowerCase();
+                        const socia = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailLimpio);
+                        
+                        if (!socia) {
+                          return setErrorLogin('Correo no registrado.');
                         }
-                        enviarAccion('actualizar_password', { email: emailLimpio, password: inputPassword.trim() });
-                      }
+                        
+                        const modUser = (socia.modalidad || '').toLowerCase().trim();
+                        if (modUser.includes('nube') || modUser.includes('papel')) {
+                          return setErrorLogin('Tu modalidad es exclusiva para correo y no incluye acceso a la aplicación web.');
+                        }
 
-                      const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
-                      const pagSocia = Number(socia.pagina || 0);
-                      const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
-                      localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-                      localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
-                      setNombreUsuarioPersonalizado(nombreSociaSheet);
-                      setMiPagina(pagSocia);
-                      setSesion(datosSesion);
-                    }} className="space-y-4 font-sans">
-                      <div>
-                        <label className="block text-xs font-semibold text-[#1c1c1a] mb-1">Correo electrónico</label>
-                        <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-[#1c1c1a] mb-1">Contraseña</label>
-                        <input type="password" placeholder="••••••••" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
-                      </div>
-                      {errorLogin && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                          <p className="text-xs text-red-600 font-sans">{errorLogin}</p>
+                        const passwordRegistrada = (socia.password || '').trim();
+
+                        if (passwordRegistrada !== '' && passwordRegistrada !== inputPassword.trim()) {
+                          return setErrorLogin('Contraseña incorrecta.');
+                        }
+
+                        if (passwordRegistrada === '') {
+                          if (!inputPassword.trim()) {
+                            return setErrorLogin('Introduce una contraseña nueva para guardarla.');
+                          }
+                          enviarAccion('actualizar_password', { email: emailLimpio, password: inputPassword.trim() });
+                        }
+
+                        const nombreSociaSheet = (socia.nombre && socia.nombre.trim() !== '') ? socia.nombre.trim() : inputEmail.split('@')[0];
+                        const pagSocia = Number(socia.pagina || 0);
+                        const datosSesion = { nombre: nombreSociaSheet, email: inputEmail, modalidad: socia.modalidad || 'gilda' };
+                        localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+                        localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
+                        setNombreUsuarioPersonalizado(nombreSociaSheet);
+                        setMiPagina(pagSocia);
+                        setSesion(datosSesion);
+                      }} className="space-y-4 font-sans text-left">
+                        <div className="space-y-1">
+                          <label className="block text-xs font-semibold text-[#1c1c1a]">Correo electrónico</label>
+                          <input type="email" placeholder="tu@correo.com" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
                         </div>
-                      )}
-                      <button type="submit" className="w-full editorial-btn py-3 text-sm mt-2">Entrar</button>
-                    </form>
+                        <div className="space-y-1 relative">
+                          <label className="block text-xs font-semibold text-[#1c1c1a]">Contraseña</label>
+                          <div className="relative flex items-center">
+                            <input type={mostrarPass ? "text" : "password"} placeholder="••••••••" value={inputPassword} onChange={e => setInputPassword(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs pr-10" />
+                            <button type="button" onClick={() => setMostrarPass(!mostrarPass)} className="absolute right-3 text-gray-400 hover:text-black text-xs">
+                              <i className={`fa-solid ${mostrarPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </button>
+                          </div>
+                        </div>
+                        {errorLogin && (
+                          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-center">
+                            <p className="text-xs text-red-600 font-sans">{errorLogin}</p>
+                          </div>
+                        )}
+                        <button type="submit" className="w-full editorial-btn py-3 text-sm shadow-md mt-2">Entrar a mi habitación</button>
+                      </form>
+                    ) : (
+                      /* Vista de Registro / Opciones */
+                      <div className="space-y-4 text-left font-sans">
+                        <div className="bg-[#f5f2e6] p-4 rounded-2xl border border-[#e6e4dc] space-y-2 text-center">
+                          <p className="font-babydoll text-lg text-[#1c1c1a] leading-snug">
+                            un lugar seguro para leer en compañía, charlar sobre libros y disfrutar de cafecitos virtuales.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2.5 pt-1">
+                          <button onClick={() => {
+                            const modGratis = modalidadGratis || modalidades[0];
+                            setModalidadSeleccionada(modGratis);
+                            setVistaAcceso('formulario_registro');
+                          }} className="w-full editorial-btn py-3 text-xs shadow-sm flex items-center justify-center gap-2">
+                            <span>Abrir puerta gratis para cotillear :)</span>
+                            <i className="fa-solid fa-arrow-right text-[10px]"></i>
+                          </button>
+
+                          <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#faf9f5] text-center shadow-sm">
+                            Conocer las modalidades del club
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
