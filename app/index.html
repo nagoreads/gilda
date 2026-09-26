@@ -174,7 +174,7 @@
     <script type="text/babel">
       const { useState, useEffect, useMemo, useRef } = React;
 
-      const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbzxuvwBfS_S5j5nkKEhYLg6s9RaxSZDBhgm2jS6P3gbQCvIgKDByAdpAG6kKlVCmzUC/exec';
+      const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbwaO8Pkkrd7zesv9Rd2e09BCP1NmZ2pRQQBsu2GCUmG4Ph6Dp243Hy2EIaEZzEL2W5H/exec';
       const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
       const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
       const URL_CSV_COMENTARIOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv';
@@ -189,7 +189,7 @@
       const FRASES_INICIALES = [
         "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
         "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
-        "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad de mi mente."
+        "No hay barrera, cerradura ni cerrojo que puedas imponer a la libertad di mi mente."
       ];
 
       const formatoOracion = (texto) => {
@@ -1245,67 +1245,66 @@
         };
 
         const registrarYRedirigir = async (e) => {
-      e.preventDefault();
-      setEnviandoRegistro(true);
-      const form = e.target;
-      const formData = new FormData(form);
-      const nombreSocia = formData.get('Nombre');
-      const emailSocia = formData.get('Email');
+          e.preventDefault();
+          setEnviandoRegistro(true);
+          const form = e.target;
+          const formData = new FormData(form);
+          const nombreSocia = formData.get('Nombre');
+          const emailSocia = formData.get('Email');
 
-      const modalidadNombreCompleto = `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`;
+          const modalidadNombreCompleto = `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`;
 
-      const datosRegistro = {
-        action: 'registrar_nueva_socia',
-        nombre: nombreSocia,
-        email: emailSocia,
-        modalidad: modalidadNombreCompleto
-      };
+          const datosRegistro = {
+            action: 'registrar_nueva_socia',
+            nombre: nombreSocia,
+            email: emailSocia,
+            modalidad: modalidadNombreCompleto
+          };
 
-      try {
-        // Usamos URLSearchParams para asegurar que llegue correctamente al doPost de Apps Script
-        await fetch(GOOGLE_API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            postData: JSON.stringify(datosRegistro)
-          })
-        });
-      } catch (error) {
-        console.error('Error guardando en Google Sheets:', error);
-      } finally {
-        setEnviandoRegistro(false);
-      }
+          try {
+            // Envío con text/plain para que el doPost de Apps Script lo procese correctamente
+            await fetch(GOOGLE_API_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(datosRegistro)
+            });
+          } catch (error) {
+            console.error('Error guardando en Google Sheets:', error);
+          } finally {
+            setEnviandoRegistro(false);
+          }
 
-      if (modalidadSeleccionada.esGratis) {
-        const nombreSociaSheet = (nombreSocia && nombreSocia.trim() !== '') ? nombreSocia.trim() : emailSocia.split('@')[0];
-        const datosSesion = { 
-          nombre: nombreSociaSheet, 
-          email: emailSocia, 
-          modalidad: modalidadNombreCompleto 
+          if (modalidadSeleccionada.esGratis) {
+            const nombreSociaSheet = (nombreSocia && nombreSocia.trim() !== '') ? nombreSocia.trim() : emailSocia.split('@')[0];
+            const datosSesion = { 
+              nombre: nombreSociaSheet, 
+              email: emailSocia, 
+              modalidad: modalidadNombreCompleto 
+            };
+
+            const nuevaUsuariaLocal = {
+              nombre: nombreSociaSheet,
+              email: emailSocia,
+              modalidad: modalidadNombreCompleto,
+              pagina: '0',
+              ciudad: '',
+              codigo_postal: '',
+              foto_perfil: ''
+            };
+            setUsuariasClub(prev => [...prev, nuevaUsuariaLocal]);
+
+            localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
+            localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
+            setNombreUsuarioPersonalizado(nombreSociaSheet);
+            setMiPagina(0);
+            setSesion(datosSesion);
+            mostrarToast('¡Registro completado! Bienvenida a gilda.');
+          } else {
+            window.location.href = modalidadSeleccionada.enlaceStripe;
+          }
         };
 
-        const nuevaUsuariaLocal = {
-          nombre: nombreSociaSheet,
-          email: emailSocia,
-          modalidad: modalidadNombreCompleto,
-          pagina: '0',
-          ciudad: '',
-          codigo_postal: '',
-          foto_perfil: ''
-        };
-        setUsuariasClub(prev => [...prev, nuevaUsuariaLocal]);
-
-        localStorage.setItem('gilda_sesion', JSON.stringify(datosSesion));
-        localStorage.setItem('gilda_nombre_usuario', nombreSociaSheet);
-        setNombreUsuarioPersonalizado(nombreSociaSheet);
-        setMiPagina(0);
-        setSesion(datosSesion);
-        mostrarToast('¡Registro completado! Bienvenida a gilda.');
-      } else {
-        window.location.href = modalidadSeleccionada.enlaceStripe;
-      }
-    };
         const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
           const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
           if (!tituloLibro) return;
