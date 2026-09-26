@@ -1318,22 +1318,45 @@
               <div className="editorial-card max-w-lg w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#4A5028]"></div>
                 
-                <div className="space-y-2 pt-2">
+                <div className="space-y-1.5 pt-2">
                   <h1 className="font-babydoll text-6xl text-[#232321] font-bold tracking-tight">gilda</h1>
                   <p className="text-xs uppercase tracking-widest text-[#4A5028] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
                 </div>
 
                 {vistaAcceso === 'menu' && (
                   <div className="space-y-6 pt-2 fade-in">
-                    <div className="bg-[#FBF9F5] p-5 rounded-2xl border border-[#E8E6DF] space-y-3 text-left">
-                      <h3 className="font-babydoll text-lg font-bold text-[#232321] text-center">un lugar seguro para leer con otras personas, hablar sobre libros (y lo que surja) y poder tomarte un cafecito virtual con distintas autoras.</h3>
-                      <p className="text-xs text-gray-600 font-sans leading-relaxed text-center">
-                        Pasa, enciende la luz de tu propia habitación para que las demás sepan que estás leyendo en ese mismo momento, asómate a las ventanas de las demás y cotillea qué libros están leyendo, ubícate en el mapa para que sepa desde dónde escribes y así puedas encontrar personas cercanas a ti con tus mismos gustos, escribe tus frases favoritas, descubre otras nuevas que escriban otras personas de la comunidad, y más.
+                    <div className="bg-[#FBF9F5] p-6 rounded-2xl border border-[#E8E6DF] space-y-5 text-left">
+                      <p className="font-babydoll text-xl text-[#232321] leading-relaxed text-center">
+                        un lugar seguro para leer a tu ritmo, hablar sobre libros (y lo que surja) y compartir cafecitos con alma.
                       </p>
-                      <div className="grid grid-cols-3 gap-2 pt-2 text-center text-[10px] text-gray-500 font-sans border-t border-[#E8E6DF]">
-                        <div>Cafecitos con alma</div>
-                        <div>Estanterías abiertas</div>
-                        <div>Cartas impresas y digitales</div>
+
+                      <div className="space-y-2.5 pt-1">
+                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
+                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-lightbulb text-xs"></i></span>
+                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
+                            <b>Enciende tu luz</b> para que las demás sepan que estás leyendo en ese mismo instante.
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
+                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-house-chimney-window text-xs"></i></span>
+                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
+                            <b>Asómate a las ventanas</b> de las demás para cotillear qué libros acompañan sus días.
+                          </p>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-[#E8E6DF]">
+                          <span className="w-6 h-6 rounded-full bg-[#FAF6E8] flex items-center justify-center text-[#4A5028] shrink-0 mt-0.5"><i className="fa-solid fa-map-location-dot text-xs"></i></span>
+                          <p className="text-xs text-gray-600 font-sans leading-relaxed">
+                            <b>Ubícate en el mapa</b> para descubrir lectoras con tus mismos gustos cerca de ti.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center items-center gap-4 pt-3 text-[11px] font-semibold text-[#4A5028] font-sans border-t border-[#E8E6DF]">
+                        <span>☕ Cafecitos</span>
+                        <span>•</span>
+                        <span>📚 Estanterías</span>
+                        <span>•</span>
+                        <span>✉️ Cartas</span>
                       </div>
                     </div>
 
