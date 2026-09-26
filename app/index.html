@@ -1262,11 +1262,14 @@
       };
 
       try {
+        // Usamos URLSearchParams para asegurar que llegue correctamente al doPost de Apps Script
         await fetch(GOOGLE_API_URL, {
           method: 'POST',
           mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(datosRegistro),
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            postData: JSON.stringify(datosRegistro)
+          })
         });
       } catch (error) {
         console.error('Error guardando en Google Sheets:', error);
@@ -1282,7 +1285,6 @@
           modalidad: modalidadNombreCompleto 
         };
 
-        // Añadimos a la usuaria al estado local de golpe para que su ventana aparezca en la casa al instante
         const nuevaUsuariaLocal = {
           nombre: nombreSociaSheet,
           email: emailSocia,
