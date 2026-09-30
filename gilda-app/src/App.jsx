@@ -3322,7 +3322,7 @@ export default function App() {
                       </div>
                       <button
                         type="button"
-                        disabled={!cafecito.fecha}
+                        disabled={false}
                         aria-pressed={cafecito.yaVoto}
                         onClick={() => votarCafecito(cafecito)}
                         className={`w-full py-2 rounded-xl text-xs font-bold font-sans border transition-colors disabled:opacity-50 ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}
