@@ -1769,7 +1769,7 @@ export default function App() {
     setVotacionCafecitos(nuevaVotacion);
     safeSet('gilda_cache_votacion_cafe', nuevaVotacion);
     enviarAccion('votar', {
-      tipo: 'cafecito',
+      tipo: 'cafe',
       id: fecha,
       fecha,
       email,
