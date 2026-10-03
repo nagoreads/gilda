@@ -2473,7 +2473,7 @@ export default function App() {
           pagina={miPagina}
           citas={misCitas}
           decoracion={decoracionActual}
-          misLibros={todosMisLibrosEstanteria}
+          misLibros={lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase())}
           onPublicarCita={publicarCitaEnMuro}
         />
       )}
