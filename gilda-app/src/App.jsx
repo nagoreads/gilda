@@ -227,6 +227,7 @@ export default function App() {
   const URL_CSV_MURO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=802798011&single=true&output=csv';
   const URL_CSV_CAFECITOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv';
   const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
+  const URL_CSV_CITAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=71954217&single=true&output=csv';
   const FRASES_INICIALES = [
     "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
     "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
@@ -1953,6 +1954,7 @@ export default function App() {
         parsearHoja(URL_CSV_COMENTARIOS, safeGetJSON('gilda_cache_comentarios', [])),
         parsearHoja(URL_CSV_LECTURAS, safeGetJSON('gilda_cache_lecturas', [])),
         parsearHoja(URL_CSV_PROPUESTAS, safeGetJSON('gilda_cache_propuestas', [])),
+        parsearHoja(URL_CSV_CITAS, safeGetJSON('gilda_cache_citas', [])),
         parsearHoja(URL_CSV_LECTURAS_PERSONALES, safeGetJSON('gilda_cache_personales', [])),
         parsearHoja(URL_CSV_CALENDARIO, safeGetJSON('gilda_cache_calendario', [])),
         parsearHoja(URL_CSV_MURO, safeGetJSON('gilda_cache_muro', [])),
