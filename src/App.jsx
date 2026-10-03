@@ -2132,34 +2132,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) {
-      const capacitor = window.Capacitor;
-      const plataformaNativa = capacitor?.isNativePlatform?.()
-        || ['android', 'ios'].includes(capacitor?.getPlatform?.());
-      setEstadoNotificaciones(plataformaNativa ? 'desactivadas' : 'no-compatible');
-      return undefined;
-    }
-
-    let activo = true;
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => {
-        if (!activo) return;
-        const permiso = 'Notification' in window ? Notification.permission : 'default';
-        setEstadoNotificaciones(permiso === 'granted' ? 'permiso-concedido' : 'desactivadas');
-      })
-      .catch(error => {
-        console.error('No se pudo registrar el Service Worker:', error);
-        if (activo) setEstadoNotificaciones('error');
-      });
-
-    return () => {
-      activo = false;
-      pushRegistrationListenerRef.current.forEach(listener => listener.remove?.());
-      pushRegistrationListenerRef.current = [];
-    };
-  }, []);
-
-  useEffect(() => {
     if (subTabComunidad === 'chat') chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMsgs, subTabComunidad, chatModo, destinatarioPrivado, sociaEscribiendo]);
 
@@ -2524,7 +2496,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* VISTA DE CATÁLOGO COMPLETO */}
+              {/* VISTA DE CATÁLOGO COMPLETO EN BLOQUES DINÁMICOS */}
               {quizPaso === 'catalogo' && (
                 <div className="fade-in space-y-4 pt-1">
                   <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
@@ -2532,16 +2504,18 @@ export default function App() {
                     <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
                   </div>
                   
-                  <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[410px] overflow-y-auto pr-1">
                     {modalidades.map((m) => (
-                      <div key={m.id} className="editorial-card p-4 space-y-2 bg-[#ffffee] border border-[#e6e4dc] text-left">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-babydoll font-bold text-lg text-[#1c1c1a]">{m.nombre}</h3>
-                          <span className="text-xs font-bold bg-[#3d4220] text-white px-2.5 py-1 rounded-full">{m.precio}</span>
+                      <div key={m.id} className="editorial-card p-4 space-y-2.5 bg-[#ffffee] border border-[#e6e4dc] text-left flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-start gap-2">
+                            <h3 className="font-babydoll font-bold text-base text-[#1c1c1a] leading-snug">{m.nombre}</h3>
+                            <span className="text-[10px] font-bold bg-[#3d4220] text-white px-2 py-0.5 rounded-full shrink-0">{m.precio}</span>
+                          </div>
+                          <p className="text-[11px] text-[#595750] font-sans leading-relaxed line-clamp-3">{m.descripcion}</p>
                         </div>
-                        <p className="text-xs text-[#595750] font-sans leading-relaxed">{m.descripcion}</p>
-                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2 text-xs editorial-btn font-semibold">
-                          Elegir esta modalidad
+                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2 text-[11px] editorial-btn font-semibold">
+                          Elegir plan
                         </button>
                       </div>
                     ))}
