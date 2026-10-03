@@ -1599,6 +1599,14 @@ export default function App() {
 
   const [vistaAcceso, setVistaAcceso] = useState('menu');
   const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
+  
+  // -- NUEVOS ESTADOS PARA EL QUIZ --
+  const [quizPaso, setQuizPaso] = useState(1);
+  const [respuestaComunidad, setRespuestaComunidad] = useState(null);
+  const [respuestaCarta, setRespuestaCarta] = useState(null);
+  const [buscandoPlan, setBuscandoPlan] = useState(false);
+  // ---------------------------------
+  
   const [enviandoRegistro, setEnviandoRegistro] = useState(false);
   const [mostrarModalShare, setMostrarModalShare] = useState(false);
 
@@ -1614,6 +1622,38 @@ export default function App() {
 
   const modalidadGratis = modalidades.find((m) => m.esGratis);
   const modalidadesPago = modalidades.filter((m) => !m.esGratis);
+
+  // -- LOGICA DEL CRUCE DE RESPUESTAS --
+  const calcularModalidadIdeal = (comunidad, carta) => {
+    let idPlan = 'cotilla'; // Default
+    
+    if (comunidad === 'todo') {
+      if (carta === 'buzon') idPlan = 'absoluta';
+      else if (carta === 'email') idPlan = 'virtual';
+      else if (carta === 'nada') idPlan = 'cafe';
+    } 
+    else if (comunidad === 'mio') {
+      if (carta === 'buzon') idPlan = 'papel';
+      else if (carta === 'email') idPlan = 'nube';
+      else if (carta === 'nada') idPlan = 'satelite'; 
+    }
+    else if (comunidad === 'ritmo') {
+      if (carta === 'buzon') idPlan = 'papel';
+      else if (carta === 'email') idPlan = 'virtual';
+      else if (carta === 'nada') idPlan = 'satelite'; 
+    }
+
+    const planEncontrado = modalidades.find(m => m.id === idPlan);
+    
+    // Mostramos la animación de "buscando"
+    setBuscandoPlan(true);
+    setTimeout(() => {
+      setBuscandoPlan(false);
+      setModalidadSeleccionada(planEncontrado);
+      setQuizPaso(3); // Paso 3 es mostrar el resultado
+    }, 1200);
+  };
+  // ---------------------------------
 
   const [seccionApp, setSeccionApp] = useState('inicio');
   const [subTabComunidad, setSubTabComunidad] = useState('chat');
@@ -2392,30 +2432,110 @@ export default function App() {
 
           {vistaAcceso === 'modalidades' && (
             <div className="space-y-4 fade-in text-left">
-              <button onClick={() => setVistaAcceso('menu')} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans">
-                <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> Volver
+              <button 
+                onClick={() => {
+                  if (quizPaso > 1) {
+                    setQuizPaso(quizPaso - 1);
+                    if (quizPaso === 3) setModalidadSeleccionada(null);
+                  } else {
+                    setVistaAcceso('menu');
+                  }
+                }} 
+                className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]"
+              >
+                <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> volver
               </button>
-              <h2 className="text-2xl font-babydoll font-bold text-center text-[#1c1c1a]">Elige tu favorita</h2>
-              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                <div className="editorial-card p-4 flex flex-col justify-between bg-white">
-                  <div className="flex justify-between items-start mb-1.5">
-                    <h3 className="font-babydoll font-bold text-lg text-[#1c1c1a]">{modalidadGratis.nombre}</h3>
-                    <span className="text-xs font-bold bg-[#ffffee] text-[#3d4220] px-2.5 py-1 rounded-full border border-[#d4cfbc]">{modalidadGratis.precio}</span>
+              
+              {/* PASO 1: COMUNIDAD */}
+              {quizPaso === 1 && (
+                <div className="fade-in space-y-4">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cuánto te apetece interactuar con el club?</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => { setRespuestaComunidad('todo'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">lo quiero todo</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">chat, cafecitos virtuales, debates y sorteos.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaComunidad('ritmo'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">a mi ritmo</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">leer y participar lo justo sin presiones.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaComunidad('mio'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">voy a lo mío</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">no me interesa el chat, solo quiero leer.</span>
+                    </button>
                   </div>
-                  <p className="text-xs text-[#595750] font-sans mb-3.5 leading-relaxed">{modalidadGratis.descripcion}</p>
-                  <button onClick={() => { setModalidadSeleccionada(modalidadGratis); setVistaAcceso('formulario_registro'); }} className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#faf9f5] border border-[#e6e4dc] text-[#1c1c1a]">Seleccionar</button>
                 </div>
-                {modalidadesPago.map((mod, index) => (
-                  <div key={index} className={`editorial-card p-4 flex flex-col justify-between ${mod.destacado ? 'border-[#3d4220] border-2 bg-[#ffffee]/30' : 'bg-white'}`}>
-                    <div className="flex justify-between items-start mb-1.5">
-                      <h3 className="font-babydoll font-bold text-lg text-[#1c1c1a]">{mod.nombre}</h3>
-                      <span className="text-xs font-bold bg-[#3d4220] text-white px-2.5 py-1 rounded-full">{mod.precio}</span>
-                    </div>
-                    <p className="text-xs text-[#595750] font-sans mb-3.5 leading-relaxed">{mod.descripcion}</p>
-                    <button onClick={() => { setModalidadSeleccionada(mod); setVistaAcceso('formulario_registro'); }} className={`w-full py-2.5 rounded-xl text-xs font-semibold ${mod.destacado ? 'editorial-btn' : 'bg-[#faf9f5] border border-[#e6e4dc] text-[#1c1c1a]'}`}>Seleccionar</button>
+              )}
+
+              {/* PASO 2: CARTA */}
+              {quizPaso === 2 && !buscandoPlan && (
+                <div className="fade-in space-y-4">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cómo quieres recibir la carta de gilda?</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => { setRespuestaCarta('buzon'); calcularModalidadIdeal(respuestaComunidad, 'buzon'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">magia en mi buzón</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">la experiencia física en papel en tu casa.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaCarta('email'); calcularModalidadIdeal(respuestaComunidad, 'email'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">en mi email</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">digital, práctico y rápido.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaCarta('nada'); calcularModalidadIdeal(respuestaComunidad, 'nada'); }} className="w-full text-left p-5 bg-[#faf9f5] border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl opacity-90">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">sin carta, gracias</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">prefiero centrarme únicamente en la lectura.</span>
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {/* SPINNER DE BUSQUEDA */}
+              {buscandoPlan && (
+                 <div className="py-12 flex flex-col items-center justify-center space-y-4 fade-in">
+                   <i className="fa-solid fa-spinner animate-spin text-2xl text-[#3d4220]"></i>
+                   <p className="font-babydoll text-lg text-[#1c1c1a]">buscando tu rincón ideal...</p>
+                 </div>
+              )}
+
+              {/* PASO 3: RESULTADO */}
+              {quizPaso === 3 && modalidadSeleccionada && (
+                <div className="fade-in space-y-5 pt-2">
+                  <div className="text-center space-y-1">
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#3d4220] font-sans">match perfecto</span>
+                    <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a]">esta es tu gilda ideal</h2>
+                  </div>
+                  
+                  <div className="editorial-card p-6 flex flex-col justify-between border-2 border-[#3d4220] bg-[#ffffee] shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#3d4220]/5 rounded-bl-full"></div>
+                    
+                    <div className="flex justify-between items-start mb-3 relative z-10">
+                      <h3 className="font-babydoll font-bold text-2xl text-[#1c1c1a]">{modalidadSeleccionada.nombre}</h3>
+                      <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1.5 rounded-full shadow-sm">{modalidadSeleccionada.precio}</span>
+                    </div>
+                    
+                    <p className="text-sm text-[#595750] font-sans mb-6 leading-relaxed relative z-10">
+                      {modalidadSeleccionada.descripcion}
+                    </p>
+                    
+                    <button 
+                      onClick={() => setVistaAcceso('formulario_registro')} 
+                      className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2"
+                    >
+                      elegir esta modalidad <i className="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                  </div>
+
+                  <div className="text-center pt-2">
+                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans">
+                        rehacer el test
+                     </button>
+                     <p className="text-[10px] text-gray-400 mt-4">
+                       ¿prefieres ver el catálogo? <span onClick={() => {
+                         alert("El catálogo completo se ha ocultado para mejorar la conversión, pero puedes programarlo aquí.");
+                       }} className="underline cursor-pointer">ver todas</span>
+                     </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -3011,7 +3131,7 @@ export default function App() {
                                     if (!txtResp || !txtResp.trim()) return;
                                     const nuevaRespObj = { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txtResp, fecha: 'Justo ahora' };
                                     setComentarios([...comentarios, nuevaRespObj]);
-                                    enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, comentario: txtResp });
+                                    enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, comentario: txtResp });
                                     registrarActividadPresencia();
                                     setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
                                     setRespondiendoA(null);
