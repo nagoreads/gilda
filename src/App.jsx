@@ -213,14 +213,6 @@ export default function App() {
     }
   };
 
-  const safeRemove = (key) => {
-    try {
-      localStorage.removeItem(key);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbwUdeYlFYrgzTZNqWZrgSAI6eijvjlE4LMQ-Ya_I05zITgX4cfstR8y4smtXl1Gz3A_/exec';
   const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
   const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
@@ -1600,7 +1592,7 @@ export default function App() {
   const [vistaAcceso, setVistaAcceso] = useState('menu');
   const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
   
-  // -- NUEVOS ESTADOS PARA EL QUIZ --
+  // -- ESTADOS PARA EL QUIZ --
   const [quizPaso, setQuizPaso] = useState(1);
   const [respuestaComunidad, setRespuestaComunidad] = useState(null);
   const [respuestaCarta, setRespuestaCarta] = useState(null);
@@ -1610,20 +1602,18 @@ export default function App() {
   const [enviandoRegistro, setEnviandoRegistro] = useState(false);
   const [mostrarModalShare, setMostrarModalShare] = useState(false);
 
+  // DESCRIPCIONES EXACTAS DE LAS MODALIDADES
   const modalidades = [
-    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'Lee los comentarios de las demás y forma parte de lo más básico de la comunidad de forma gratuita.' },
-    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'Forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás.' },
-    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'Forma parte de la comunidad al completo, chat, cafecitos virtuales y sorteos.' },
-    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'Recibe por correo electrónico la carta sorpresa de gilda.' },
-    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'Recibe por correo postal la carta sorpresa de gilda.' },
-    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'Forma parte de la comunidad al completo y recibe todo el contenido digital.' },
-    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'Forma parte de la comunidad al completo y recibe todo en papel en tu buzón.' }
+    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
+    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
+    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
+    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
+    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
+    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
+    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
   ];
 
-  const modalidadGratis = modalidades.find((m) => m.esGratis);
-  const modalidadesPago = modalidades.filter((m) => !m.esGratis);
-
-  // -- LOGICA DEL CRUCE DE RESPUESTAS --
+  // -- LÓGICA DEL CRUCE DE RESPUESTAS --
   const calcularModalidadIdeal = (comunidad, carta) => {
     let idPlan = 'cotilla'; // Default
     
@@ -1645,12 +1635,11 @@ export default function App() {
 
     const planEncontrado = modalidades.find(m => m.id === idPlan);
     
-    // Mostramos la animación de "buscando"
     setBuscandoPlan(true);
     setTimeout(() => {
       setBuscandoPlan(false);
       setModalidadSeleccionada(planEncontrado);
-      setQuizPaso(3); // Paso 3 es mostrar el resultado
+      setQuizPaso(3); // Paso 3: Resultado del test
     }, 1200);
   };
   // ---------------------------------
@@ -1690,7 +1679,6 @@ export default function App() {
   const [muroActividad, setMuroActividad] = useState(() => safeGetJSON('gilda_cache_muro', []));
   const [cafecitos, setCafecitos] = useState(() => safeGetJSON('gilda_cache_cafecitos', []));
   const [votacionCafecitos, setVotacionCafecitos] = useState(() => safeGetJSON('gilda_cache_votacion_cafe', []));
-  const votosCafecitoEnCursoRef = useRef(new Set());
   const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
   const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
   const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
@@ -1771,6 +1759,7 @@ export default function App() {
   const [respondiendoA, setRespondiendoA] = useState(null);
   const [textoRespuesta, setTextoRespuesta] = useState({});
   const chatEndRef = useRef(null);
+  const votosCafecitoEnCursoRef = useRef(new Set());
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
   
@@ -2488,7 +2477,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* SPINNER DE BUSQUEDA */}
+              {/* SPINNER DE BÚSQUEDA */}
               {buscandoPlan && (
                  <div className="py-12 flex flex-col items-center justify-center space-y-4 fade-in">
                    <i className="fa-solid fa-spinner animate-spin text-2xl text-[#3d4220]"></i>
@@ -2512,7 +2501,7 @@ export default function App() {
                       <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1.5 rounded-full shadow-sm">{modalidadSeleccionada.precio}</span>
                     </div>
                     
-                    <p className="text-sm text-[#595750] font-sans mb-6 leading-relaxed relative z-10">
+                    <p className="text-xs text-[#595750] font-sans mb-6 leading-relaxed relative z-10">
                       {modalidadSeleccionada.descripcion}
                     </p>
                     
@@ -2524,15 +2513,38 @@ export default function App() {
                     </button>
                   </div>
 
-                  <div className="text-center pt-2">
-                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans">
+                  <div className="text-center pt-2 space-y-2">
+                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto">
                         rehacer el test
                      </button>
-                     <p className="text-[10px] text-gray-400 mt-4">
-                       ¿prefieres ver el catálogo? <span onClick={() => {
-                         alert("El catálogo completo se ha ocultado para mejorar la conversión, pero puedes programarlo aquí.");
-                       }} className="underline cursor-pointer">ver todas</span>
+                     <p className="text-xs text-[#595750] font-sans pt-2">
+                       ¿prefieres ver el catálogo? <span onClick={() => setQuizPaso('catalogo')} className="underline cursor-pointer font-bold text-[#1c1c1a]">ver todas</span>
                      </p>
+                  </div>
+                </div>
+              )}
+
+              {/* VISTA DE CATÁLOGO COMPLETO */}
+              {quizPaso === 'catalogo' && (
+                <div className="fade-in space-y-4 pt-1">
+                  <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
+                    <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
+                    <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
+                  </div>
+                  
+                  <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                    {modalidades.map((m) => (
+                      <div key={m.id} className="editorial-card p-4 space-y-2 bg-[#ffffee] border border-[#e6e4dc] text-left">
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-babydoll font-bold text-lg text-[#1c1c1a]">{m.nombre}</h3>
+                          <span className="text-xs font-bold bg-[#3d4220] text-white px-2.5 py-1 rounded-full">{m.precio}</span>
+                        </div>
+                        <p className="text-xs text-[#595750] font-sans leading-relaxed">{m.descripcion}</p>
+                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2 text-xs editorial-btn font-semibold">
+                          Elegir esta modalidad
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
