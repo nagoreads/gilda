@@ -2434,7 +2434,7 @@ export default function App() {
                   <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cómo quieres recibir la carta de gilda?</h2>
                   <div className="space-y-3">
                     <button onClick={() => { setRespuestaCarta('buzon'); calcularModalidadIdeal(respuestaComunidad, 'buzon'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
-                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">magia en mi buzón</span>
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">en el buzón de mi casa</span>
                       <span className="block text-xs text-[#595750] font-sans mt-1">la experiencia física en papel en tu casa.</span>
                     </button>
                     <button onClick={() => { setRespuestaCarta('email'); calcularModalidadIdeal(respuestaComunidad, 'email'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#1c1c1a] hover:shadow-md transition-all rounded-2xl">
