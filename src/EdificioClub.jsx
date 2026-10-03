@@ -1,4 +1,7 @@
-export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, onAbrirPrivado, sesionEmail, chatBloqueado }) {
+import { useState } from 'react';
+import PortadaLibro from './PortadaLibro';
+
+export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, onAbrirPrivado, sesionEmail, chatBloqueado, AvatarUsuaria }) {
     const [usuariaActivaEmail, setUsuariaActivaEmail] = useState('');
     const listaUsuarias = usuarias.length > 0 ? usuarias : [];
     const usuariaActiva = listaUsuarias.find(u => (u.email || '').toLowerCase().trim() === usuariaActivaEmail) || listaUsuarias[0] || {};
@@ -39,7 +42,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
           <div className="flex flex-col gap-2 w-full border-b border-[#e6e4dc] pb-2.5">
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-2 min-w-0">
-                <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" />
+                {AvatarUsuaria ? <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" /> : null}
                 <span className="font-babydoll text-lg sm:text-xl font-bold text-[#1c1c1a] leading-tight">
                   la habitación de {
                     (
@@ -69,7 +72,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
               <div className="flex items-center gap-3 overflow-hidden">
-                <PortadaLibroEstable titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
+                <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
                 <div className="text-xs text-[#1c1c1a] overflow-hidden">
                   <p className="font-bold truncate font-babydoll text-sm">{libroActual.titulo}</p>
                   <p className="text-[11px] text-[#595750] font-sans">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
@@ -82,7 +85,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
             {misLibrosPersonales.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <PortadaLibroEstable titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
+                  <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
                   <div className="text-xs text-[#1c1c1a] overflow-hidden">
                     <p className="font-bold truncate font-babydoll text-sm">{item.libro}</p>
                     <p className="text-[11px] text-[#595750] font-sans">pág. <b>{item.pagina || item.paginas || 0}</b></p>

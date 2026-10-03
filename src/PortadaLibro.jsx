@@ -1,4 +1,6 @@
-export default function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal' }) {
+import { useState, useEffect, useMemo } from 'react';
+
+export default function PortadaLibro({ titulo, autora, autor, escritora, portada, cover, image, size = 'normal', solicitarJsonExterno, googleBooksEnCooldown, solicitudesPortadaEnCurso }) {
     const [errorImg, setErrorImg] = useState(false);
     const [portadaDinamica, setPortadaDinamica] = useState('');
     const [autoraEncontrada, setAutoraEncontrada] = useState('');
@@ -47,12 +49,13 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
           const cache = leerCache()[fuente];
           if (cache?.estado === 'error') return null;
           if (cache?.estado === 'ok') return cache.datos;
-          if (fuente === 'google' && googleBooksEnCooldown()) return null;
+          if (fuente === 'google' && typeof googleBooksEnCooldown === 'function' && googleBooksEnCooldown()) return null;
 
           const solicitudKey = `${cacheKey}:${fuente}`;
-          const solicitudExistente = solicitudesPortadaEnCurso.get(solicitudKey);
+          const solicitudExistente = solicitudesPortadaEnCurso?.get(solicitudKey);
           if (solicitudExistente) return solicitudExistente;
 
+          if (typeof solicitarJsonExterno !== 'function') return null;
           const solicitud = solicitarJsonExterno(url)
             .then(datos => {
               if (datos === null) {
@@ -62,9 +65,9 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
               guardarCache(fuente, 'ok', datos);
               return datos;
             })
-            .finally(() => solicitudesPortadaEnCurso.delete(solicitudKey));
+            .finally(() => solicitudesPortadaEnCurso?.delete(solicitudKey));
 
-          solicitudesPortadaEnCurso.set(solicitudKey, solicitud);
+          solicitudesPortadaEnCurso?.set(solicitudKey, solicitud);
           return solicitud;
         };
 
@@ -93,7 +96,7 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
         }).finally(() => { if (activo) setBuscandoOnline(false); });
       }
       return () => { activo = false; };
-    }, [portadaOriginal, errorImg, tituloFinal, autoraFinal, portadaDinamica]);
+    }, [portadaOriginal, errorImg, tituloFinal, autoraFinal, portadaDinamica, solicitarJsonExterno, googleBooksEnCooldown, solicitudesPortadaEnCurso]);
 
     const urlSegura = useMemo(() => {
       const pFinal = portadaOriginal || portadaDinamica;

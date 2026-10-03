@@ -1,4 +1,6 @@
-export default function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro }) {
+import { useState, useEffect } from 'react';
+
+export default function BuscadorLibros({ placeholder, valor, setValor, onSelectLibro, solicitarJsonExterno }) {
     const [sugerencias, setSugerencias] = useState([]);
     const [buscando, setBuscando] = useState(false);
     const [mostrarDropdown, setMostrarDropdown] = useState(false);
@@ -56,7 +58,7 @@ export default function BuscadorLibros({ placeholder, valor, setValor, onSelectL
         activo = false;
         clearTimeout(timer);
       };
-    }, [valor]);
+    }, [valor, solicitarJsonExterno]);
 
     return (
       <div className="relative w-full">

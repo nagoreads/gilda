@@ -381,7 +381,7 @@ export default function App() {
                 </span>
                 
                 <div className="shadow-xl w-20 h-28 rounded overflow-hidden shrink-0 flex items-center justify-center bg-gray-100">
-                  <PortadaLibroEstable titulo={libroStory.titulo} autora={libroStory.autora} portada={libroStory.portada} size="story" />
+                  <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroStory.titulo} autora={libroStory.autora} portada={libroStory.portada} size="story" />
                 </div>
 
                 <div className="w-full max-w-[210px] space-y-1.5 pt-1">
@@ -1897,7 +1897,7 @@ export default function App() {
               <i className="fa-solid fa-xmark text-sm"></i>
             </button>
             <div className="flex justify-center">
-              <PortadaLibroEstable titulo={libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
+              <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo} autora={libroSeleccionadoDetalle.autora} portada={libroSeleccionadoDetalle.portada} size="large" />
             </div>
             <div className="space-y-1">
               <h3 className="font-babydoll text-xl font-bold">{libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo}</h3>
@@ -2038,7 +2038,7 @@ export default function App() {
             </div>
 
             <div className="flex gap-4 items-center">
-              <PortadaLibroEstable titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+              <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
               <div className="space-y-2 w-full">
                 <span className="text-xs uppercase tracking-wider text-[#3d4220] font-bold font-sans">Lectura del club</span>
                 <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
@@ -2110,8 +2110,7 @@ export default function App() {
         </div>
 
         <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="w-full flex justify-center fade-in">
-          <EdificioClub 
-            usuarias={miembrosEdificio} 
+          <EdificioClub AvatarUsuaria={AvatarUsuaria} usuarias={miembrosEdificio} 
             libroActual={libroActual} 
             sesionEmail={sesion.email}
             chatBloqueado={esRestringida}
@@ -2165,7 +2164,7 @@ export default function App() {
 
           <section className="editorial-card p-4 sm:p-5 flex items-center gap-4">
             <div className="w-16 h-24 shrink-0 overflow-hidden rounded shadow-sm border border-[#e6e4dc] bg-[#faf9f5]">
-              <PortadaLibroEstable titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="story" />
+              <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="story" />
             </div>
             <div className="min-w-0 flex-grow">
               <p className="text-[10px] uppercase font-bold text-[#6b684f] font-sans">lectura del club</p>
@@ -2294,7 +2293,7 @@ export default function App() {
                 </form>
               ) : (
                 <div className="space-y-2 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
-                  <BuscadorLibrosEstable placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
+                  <BuscadorLibrosEstable solicitarJsonExterno={solicitarJsonExterno} placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
                   <div className="flex justify-between items-center pt-1 font-sans">
                     <span className="text-xs text-[#595750]">¿No aparece?</span>
                     <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#3d4220] font-bold hover:underline">+ Crear manualmente</button>
@@ -2319,7 +2318,7 @@ export default function App() {
                       onClick={() => setLibroSeleccionadoDetalle(item)}
                       className="w-full flex items-center gap-3 py-2.5 text-left hover:bg-[#faf9f5] transition-colors"
                     >
-                      <PortadaLibroEstable titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
+                      <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
                       <span className="min-w-0 flex-grow">
                         <span className="block truncate font-babydoll text-sm font-bold text-[#232321]">{item.libro || item.titulo}</span>
                         <span className="block truncate text-[10px] italic text-[#756a58] font-sans">{item.autora || 'Autora no especificada'}</span>
@@ -2469,7 +2468,7 @@ export default function App() {
 
                   return (
                     <div key={idx} className="bg-[#ffffee] p-3.5 rounded-xl border border-[#e6e4dc] flex gap-3 items-center shadow-xs">
-                      <PortadaLibroEstable titulo={item.libro} portada={item.portada} size="thumb" />
+                      <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro} portada={item.portada} size="thumb" />
                       <div className="flex flex-col justify-between w-full space-y-1">
                         <div className="flex justify-between items-center">
                           <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : (sesion?.email ? sesion.email.split('@')[0] : 'lectora'))}</span>
@@ -2766,7 +2765,7 @@ export default function App() {
                   setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
                   mostrarToast('Propuesta añadida.');
                 }} className="space-y-2">
-                  <BuscadorLibrosEstable placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+                  <BuscadorLibrosEstable solicitarJsonExterno={solicitarJsonExterno} placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
                   <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
                   <button type="submit" className="w-full editorial-btn py-2.5 text-xs">Añadir propuesta</button>
                 </form>
@@ -2793,7 +2792,7 @@ export default function App() {
                       <div className="space-y-3">
                         {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
                           <div key={i} className="flex gap-3 border border-[#e6e4dc] p-3.5 rounded-xl bg-[#ffffee]">
-                            <PortadaLibroEstable titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                            <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                             <div className="flex flex-col justify-between w-full">
                               <div>
                                 <div className="flex items-center gap-1.5">
@@ -2916,7 +2915,7 @@ export default function App() {
                   </div>
                   {propuestas.map((propuesta, indice) => (
                     <div key={`${propuesta.titulo}-${indice}`} className="flex items-center gap-3 border-t border-[#e6e4dc] py-2.5">
-                      <PortadaLibroEstable titulo={propuesta.titulo} autora={propuesta.autora} portada={propuesta.portada} size="thumb" />
+                      <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={propuesta.titulo} autora={propuesta.autora} portada={propuesta.portada} size="thumb" />
                       <div className="min-w-0 flex-grow">
                         <p className="truncate font-babydoll text-sm font-bold">{propuesta.titulo}</p>
                         <p className="truncate text-[10px] text-[#756a58]">{propuesta.autora || 'Autora no indicada'} · {propuesta.votos || 0} votos</p>

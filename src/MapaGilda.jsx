@@ -66,7 +66,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         if (limpio.includes(clave) || clave.includes(limpio)) return val;
       }
       return null;
-    }, [GEO_INTERNA, normalizarUbicacion]);
+    }, [GEO_INTERNA]);
 
     const comunidadesEspanolas = useMemo(() => new Map([
       ['andalucia', 'Andalucía'],
@@ -154,7 +154,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         }
         return { ...u, coords: coordsFinales, paisAgrupado, regionAgrupada, consultaGeo };
       });
-    }, [usuarias, coordenadasInternacionales, buscarUbicacion, comunidadesEspanolas, normalizarUbicacion, formatearPais]);
+    }, [usuarias, coordenadasInternacionales, buscarUbicacion, comunidadesEspanolas]);
 
     const consultasGeoKey = useMemo(() => (
       JSON.stringify([...new Set(usuariasGeocodificadas.filter(u => !u.coords && u.consultaGeo).map(u => u.consultaGeo))].sort())
@@ -169,7 +169,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
           setCoordenadasInternacionales(prev => prev[key] ? prev : { ...prev, [key]: coordenadas });
         });
       });
-    }, [consultasGeoKey, geocodificarUbicacion, normalizarUbicacion]);
+    }, [consultasGeoKey]);
 
     const conteoPorPais = useMemo(() => {
       const conteo = new Map();
