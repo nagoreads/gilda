@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/push-notifications": "^6.0.0",
     "@supabase/supabase-js": "^2.39.0",
     "leaflet": "^1.9.4",
     "papaparse": "^5.4.1",
