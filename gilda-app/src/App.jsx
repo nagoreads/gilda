@@ -2154,28 +2154,38 @@ export default function App() {
     const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
     if (!tituloLibro) return;
     const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
-    const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
+  const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
 
-    const clon = [...lecturasPersonales];
-    const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
-    if (idx > -1) {
-      clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
-      if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
-    } else {
-      clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
-    }
-    setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
-    enviarAccion('actualizar_libro_personal', { 
-      email: sesion.email, 
-      nombre: nombreUsuarioPersonalizado || sesion.nombre, // <-- Añadido el nombre aquí
-      libro: tituloLibro, 
-      pagina: pagFinal, 
-      estado: estadoOpt, 
-      autora: autoraOpt, 
-      portada: portadaOpt 
-    });
-    mostrarToast(`Guardado: ${tituloLibro}`);
-  };
+  const clon = [...lecturasPersonales];
+  const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
+  if (idx > -1) {
+    clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
+    if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
+  } else {
+    clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
+  }
+  
+  setLecturasPersonales(clon); 
+  
+  // LÍNEA CLAVE: Guarda los cambios en la memoria local del navegador para que no se borren al hacer F5
+  safeSet('gilda_cache_personales', clon);
+
+  setLibroPersonal(''); 
+  setPaginaPersonalInput(''); 
+  setModoCreacionManual(false);
+
+  enviarAccion('actualizar_libro_personal', { 
+    email: sesion.email, 
+    nombre: nombreUsuarioPersonalizado || sesion.nombre, 
+    libro: tituloLibro, 
+    pagina: pagFinal, 
+    estado: estadoOpt, 
+    autora: autoraOpt, 
+    portada: portadaOpt 
+  });
+  
+  mostrarToast(`Guardado: ${tituloLibro}`);
+};
 
   const adminGuardarLecturaActiva = (event) => {
     event.preventDefault();
