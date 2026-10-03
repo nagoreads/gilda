@@ -336,7 +336,7 @@ export default function App() {
     const nombreSocia = (
       usuario && String(usuario).trim() !== '' 
         ? String(usuario).trim() 
-        : 'socia'
+        : (sesion?.email ? sesion.email.split('@')[0] : 'lectora')
     ).toLowerCase();
 
     return (
@@ -1064,7 +1064,7 @@ export default function App() {
             const estaLeyendo = usuaria.estaLeyendo;
             const usuariaKey = (usuaria.email || `usuaria-${indice}`).toLowerCase().trim();
             const seleccionada = usuariaKey === usuariaActivaKey;
-            const nombreMostrar = (usuaria.nombre || 'Lector(a)').split(' ')[0].toLowerCase();
+            const nombreMostrar = (usuaria.nombre || (usuaria.email ? usuaria.email.split('@')[0] : 'lectora')).split(' ')[0].toLowerCase();
             return (
               <div key={usuaria.email || indice} className="relative flex flex-col items-center">
                 <button
@@ -1933,10 +1933,10 @@ export default function App() {
       const encontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
       if (encontrada && encontrada.nombre && encontrada.nombre.trim() !== '') return encontrada.nombre.trim();
     }
-    if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia') {
+    if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia' && usuarioOriginal.toLowerCase() !== 'socia') {
       return usuarioOriginal;
     }
-    return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'Socia');
+    return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : (sesion?.email ? sesion.email.split('@')[0] : 'lectora'));
   };
 
   const obtenerNombreRealRef = useRef(obtenerNombreReal);
@@ -2325,7 +2325,7 @@ export default function App() {
     return usuariasClub.map(u => {
       const emailU = (u.email || '').toLowerCase().trim();
       const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
-      const nombreRealU = u.nombre ? u.nombre.trim() : 'Lector(a)';
+      const nombreRealU = u.nombre ? u.nombre.trim() : (u.email ? u.email.split('@')[0] : 'lectora');
       const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
       return {
         ...u,
@@ -3078,7 +3078,7 @@ export default function App() {
                       <PortadaLibroEstable titulo={item.libro} portada={item.portada} size="thumb" />
                       <div className="flex flex-col justify-between w-full space-y-1">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || 'Socia'}</span>
+                          <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : (sesion?.email ? sesion.email.split('@')[0] : 'lectora'))}</span>
                           <span className="text-[10px] text-[#595750] font-sans">{item.timestamp}</span>
                         </div>
                         {esCita ? (
@@ -3192,7 +3192,7 @@ export default function App() {
                 <div className="flex-grow p-4 overflow-y-auto space-y-2 bg-[#faf9f5]">
                   <p className="text-xs text-[#595750] font-sans italic pb-2">Selecciona una socia para abrir una conversación privada:</p>
                   {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== (sesion.email || '').toLowerCase().trim()).map((socia, sIdx) => {
-                    const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
+                    const nombreSociaReal = socia.nombre || (socia.email ? socia.email.split('@')[0] : 'lectora');
                     return (
                       <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e6e4dc] cursor-pointer hover:bg-[#faf9f5] transition-all shadow-xs">
                         <div className="flex items-center gap-3 overflow-hidden">
@@ -3222,7 +3222,7 @@ export default function App() {
                     </button>
                     <div className="flex items-center gap-1.5">
                       <IndicadorPresencia timestamp={destinatarioPrivado.ultima_conexion} />
-                      <span className="font-babydoll font-bold text-sm">{destinatarioPrivado.nombre || destinatarioPrivado.email}</span>
+                      <span className="font-babydoll font-bold text-sm">{destinatarioPrivado.nombre || (destinatarioPrivado.email ? destinatarioPrivado.email.split('@')[0] : 'lectora')}</span>
                     </div>
                   </div>
                   
@@ -3285,7 +3285,7 @@ export default function App() {
                         manejarTipeoChat(e.target.value);
                       }} 
                       className="flex-grow editorial-input px-3.5 py-2.5 text-xs" 
-                      placeholder={`Escribe a ${destinatarioPrivado.nombre || 'socia'}...`} 
+                      placeholder={`Escribe a ${destinatarioPrivado.nombre || (destinatarioPrivado.email ? destinatarioPrivado.email.split('@')[0] : 'socia')}...`} 
                     />
                     <button type="submit" className="editorial-btn px-4 py-2.5 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                   </form>
@@ -3503,7 +3503,7 @@ export default function App() {
                         return (
                           <div key={`${mensaje.timestamp || mensaje.email}-${indice}`} className="flex items-start gap-3 py-2.5">
                             <div className="min-w-0 flex-grow">
-                              <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || mensaje.email || 'Socia'} · {mensaje.tipo || 'global'}</p>
+                              <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || (mensaje.email ? mensaje.email.split('@')[0] : 'lectora')} · {mensaje.tipo || 'global'}</p>
                               <p className="break-words text-xs text-[#232321]">{mensaje.mensaje}</p>
                               <p className="text-[9px] text-[#756a58]">{mensaje.timestamp || mensaje.fecha || ''}</p>
                             </div>
