@@ -2467,15 +2467,24 @@ export default function App() {
       
       {mostrarModalShare && (
         <ModalCompartirStory 
-          onClose={() => setMostrarModalShare(false)}
-          usuario={nombreUsuarioPersonalizado || sesion.nombre}
-          libro={libroActual}
-          pagina={miPagina}
-          citas={misCitas}
-          decoracion={decoracionActual}
-          misLibros={lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase())}
-          onPublicarCita={publicarCitaEnMuro}
-        />
+        onClose={() => setMostrarModalShare(false)}
+        usuario={nombreUsuarioPersonalizado || sesion.nombre}
+        libro={libroActual}
+        pagina={miPagina}
+        citas={misCitas}
+        decoracion={decoracionActual}
+        misLibros={lecturasPersonales
+          .filter(l => 
+            (l.email && sesion?.email && String(l.email).toLowerCase().trim() === String(sesion.email).toLowerCase().trim()) ||
+            (l.nombre && sesion?.nombre && String(l.nombre).toLowerCase().trim() === String(sesion.nombre).toLowerCase().trim())
+          )
+          .map(l => ({
+            ...l,
+            titulo: l.titulo || l.libro
+          }))
+        }
+        onPublicarCita={publicarCitaEnMuro}
+      />
       )}
 
       {libroSeleccionadoDetalle && (
