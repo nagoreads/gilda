@@ -2165,7 +2165,15 @@ export default function App() {
       clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
     }
     setLecturasPersonales(clon); setLibroPersonal(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
-    enviarAccion('actualizar_libro_personal', { email: sesion.email, libro: tituloLibro, pagina: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
+    enviarAccion('actualizar_libro_personal', { 
+      email: sesion.email, 
+      nombre: nombreUsuarioPersonalizado || sesion.nombre, // <-- Añadido el nombre aquí
+      libro: tituloLibro, 
+      pagina: pagFinal, 
+      estado: estadoOpt, 
+      autora: autoraOpt, 
+      portada: portadaOpt 
+    });
     mostrarToast(`Guardado: ${tituloLibro}`);
   };
 
