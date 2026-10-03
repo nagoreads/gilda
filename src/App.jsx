@@ -2496,34 +2496,30 @@ export default function App() {
                 </div>
               )}
 
-              {/* VISTA DE CATÁLOGO COMPLETO EN BLOQUES DINÁMICOS */}
-              {quizPaso === 'catalogo' && (
-                <div className="fade-in space-y-4 pt-1">
-                  <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
-                    <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
-                    <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[410px] overflow-y-auto pr-1">
-                    {modalidades.map((m) => (
-                      <div key={m.id} className="editorial-card p-4 space-y-2.5 bg-[#ffffee] border border-[#e6e4dc] text-left flex flex-col justify-between hover:shadow-md transition-shadow">
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between items-start gap-2">
-                            <h3 className="font-babydoll font-bold text-base text-[#1c1c1a] leading-snug">{m.nombre}</h3>
-                            <span className="text-[10px] font-bold bg-[#3d4220] text-white px-2 py-0.5 rounded-full shrink-0">{m.precio}</span>
-                          </div>
-                          <p className="text-[11px] text-[#595750] font-sans leading-relaxed line-clamp-3">{m.descripcion}</p>
-                        </div>
-                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2 text-[11px] editorial-btn font-semibold">
-                          Elegir plan
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+              {/* VISTA DE CATÁLOGO COMPLETO */}
+{quizPaso === 'catalogo' && (
+  <div className="fade-in space-y-4 pt-1">
+    <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
+      <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
+      <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
+    </div>
+    
+    <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
+      {modalidades.map((m) => (
+        <div key={m.id} className="editorial-card p-5 space-y-3 bg-[#ffffee] border border-[#e6e4dc] text-left shadow-sm">
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-babydoll font-bold text-xl text-[#1c1c1a] leading-tight">{m.nombre}</h3>
+            <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1 rounded-full shrink-0">{m.precio}</span>
+          </div>
+          <p className="text-xs text-[#595750] font-sans leading-relaxed whitespace-normal">{m.descripcion}</p>
+          <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2.5 text-xs editorial-btn font-semibold shadow-xs">
+            Elegir esta modalidad
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
           {vistaAcceso === 'formulario_registro' && modalidadSeleccionada && (
             <div className="space-y-4 fade-in text-left">
