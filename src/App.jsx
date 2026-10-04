@@ -1252,18 +1252,16 @@ export default function App() {
   };
 
   const handleInteractuarIlustracion = (tipo) => {
-    const mensajes = {
-      monstera: "🌱 ¡Tu plantita está creciendo tan feliz como tus lecturas!",
-      maceta: "🪴 Una maceta de cerámica perfecta para inspirar tus páginas.",
-      vela: "🕯️ La vela ilumina suavemente tu rincón de lectura favorito.",
-      cafe: "☕ Un cafecito caliente para acompañar cada capítulo.",
-      cactus: "🌵 Un pequeño cactus resistente para decorar tu balda.",
-      auriculares: "🎧 Unos auriculares listos para tu playlist de lectura cozy.",
-      tocadiscos: "🎶 Sonando música suave en tu tocadiscos vintage.",
-      camara: "📷 Capturando instantes analógicos de tus libros.",
-      lampara: "💡 Iluminación perfecta para leer hasta tarde."
-    };
-    mostrarToast(mensajes[tipo] || "¡Qué bonito rincón!");
+    const opciones = ['monstera', 'maceta', 'vela', 'cafe', 'cactus', 'auriculares', 'tocadiscos', 'camara', 'lampara', 'ninguna'];
+    const indiceActual = opciones.indexOf(tipo);
+    const siguienteIndice = (indiceActual + 1) % opciones.length;
+    const nuevaDecoracion = opciones[siguienteIndice];
+
+    setDecoracionActual(nuevaDecoracion);
+    safeSet('gilda_decoracion', nuevaDecoracion);
+    registrarActividadPresencia();
+
+    if (navigator.vibrate) navigator.vibrate(40);
   };
 
   const publicarCitaEnMuro = (texto, libroCita) => {
@@ -1488,7 +1486,9 @@ export default function App() {
       autora: autoraOpt, 
       portada: portadaOpt 
     });
-    
+    if (navigator.vibrate) {
+      navigator.vibrate([30, 50, 30]); 
+    }
     mostrarToast(`Guardado: ${tituloLibro}`);
   };
 
@@ -1565,10 +1565,11 @@ export default function App() {
   const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
   const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
   
-  const todosMisLibrosEstanteria = useMemo(() => {
-    if (!sesion) return [];
-    return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
-  }, [lecturasPersonales, sesion]);
+  {todosMisLibrosEstanteria.map((item, idx) => (
+  <div key={idx} className="animacion-caida-libro shrink-0" style={{ animationDelay: `${idx * 0.05}s` }}>
+    <LomoLibroEstanteria item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />
+  </div>
+))}
 
   const librosBibliotecaVisibles = useMemo(() => (
     todosMisLibrosEstanteria.filter(item => (item.estado || 'leyendo') === tabEstanteria)
