@@ -811,6 +811,7 @@ export default function App() {
   const [supabaseSession, setSupabaseSession] = useState(null);
   const [emailLogin, setEmailLogin] = useState('');
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [esPaginaGracias] = useState(() => window.location.pathname === '/gracias');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -1312,6 +1313,32 @@ export default function App() {
   const esModalidadCorreo = modalidadNormalizada.includes('nube') || modalidadNormalizada.includes('papel');
   const esRestringida = modalidadNormalizada.includes('cotilla') || modalidadNormalizada.includes('satelite');
   const esAdministradora = String(sesion?.email || '').trim().toLowerCase() === EMAIL_ADMINISTRADORA;
+
+  if (esPaginaGracias) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
+        <div className="editorial-card max-w-md w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-xl border border-[#e6e4dc]">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#3d4220]"></div>
+          
+          <div className="space-y-3 pt-4">
+            <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold tracking-tight">gracias :)</h1>
+            <p className="text-xs uppercase tracking-widest text-[#3d4220] font-bold font-sans">tu espacio ya está listo</p>
+          </div>
+
+          <div className="editorial-card p-5 bg-[#faf9f5] text-left space-y-3 font-sans border border-[#e6e4dc]">
+            <h3 className="font-babydoll text-base font-bold text-[#1c1c1a]">¿Cómo entrar a la app ahora?</h3>
+            <p className="text-xs text-[#595750] leading-relaxed">
+              Es muy fácil: haz clic en el botón de abajo, introduce el <b>mismo correo</b> con el que has hecho el pago o registro y te enviaremos tu llave de acceso al instante.
+            </p>
+          </div>
+
+          <a href="/" className="block w-full editorial-btn py-3.5 text-xs font-bold text-center shadow-md">
+            Ir a gilda e iniciar sesión
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (!supabaseSession) {
     return (
