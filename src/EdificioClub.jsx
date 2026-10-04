@@ -24,12 +24,16 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
             return (
               <div key={usuaria.email || indice} className="relative flex flex-col items-center">
                 <button
-                  type="button"
-                  onClick={() => setUsuariaActivaEmail(usuaria.email ? usuariaKey : '')}
-                  aria-pressed={seleccionada}
-                  aria-label={`Abrir la ventana de ${usuaria.nombre || usuaria.email || 'lectora'}`}
-                  className={`w-[34px] h-[46px] rounded-[3px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${estaLeyendo ? 'bg-[#ffffee] border-[#d4cfbc] shadow-[0_4px_12px_rgba(210,200,160,0.3)]' : 'bg-[#dedbd0] border-[#c9c6b3]'} ${seleccionada ? 'outline-[1.5px] outline-[#3d4220] outline-offset-[3px]' : ''}`}
-                ></button>
+  type="button"
+  onClick={() => setUsuariaActivaEmail(usuaria.email ? usuariaKey : '')}
+  aria-pressed={seleccionada}
+  aria-label={`Abrir la ventana de ${usuaria.nombre || usuaria.email || 'lectora'}`}
+  className={`w-[34px] h-[46px] rounded-[3px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${
+    estaLeyendo 
+      ? 'bg-[#fff5cc] border-[#e6d085] shadow-[0_0_14px_rgba(255,215,120,0.9)]' 
+      : 'bg-[#dedbd0] border-[#c9c6b3]'
+  } ${seleccionada ? 'outline-[1.5px] outline-[#3d4220] outline-offset-[3px]' : ''}`}
+></button>
                 <div className="flex items-center justify-center mt-1.5">
                   <span className="text-[12px] text-[#595750] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
                 </div>
