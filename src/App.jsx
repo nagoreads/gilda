@@ -908,7 +908,7 @@ export default function App() {
       precio: '1 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', 
-      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas advancing con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
+      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas avanzando con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
     },
     { 
       id: 'cafe', 
@@ -924,7 +924,7 @@ export default function App() {
       precio: '5 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', 
-      descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' 
+      descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' 
     },
     { 
       id: 'papel', 
@@ -932,7 +932,7 @@ export default function App() {
       precio: '10 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', 
-      descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' 
+      descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora (esto lo recibirás a través de un QR monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' 
     },
     { 
       id: 'virtual', 
