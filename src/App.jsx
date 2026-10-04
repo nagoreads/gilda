@@ -451,7 +451,7 @@ export default function App() {
              Cerrar
            </button>
            <p className="text-center text-white/70 text-xs px-4 pt-1 leading-relaxed">
-             Consejo: También puedes hacer captura de pantalla para subirla directamente a tus Stories.
+             Consejo: También puedes hacer captura de pantalla para subirla directamente à tus Stories.
            </p>
         </div>
       </div>
@@ -1035,6 +1035,31 @@ export default function App() {
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
   
+  // NUEVO: Función para geolocalización automática
+  const obtenerUbicacionActual = () => {
+    if (!navigator.geolocation) {
+      mostrarToast('La geolocalización no es compatible con tu navegador.');
+      return;
+    }
+    mostrarToast('Obteniendo tu ubicación...');
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+        const data = await res.json();
+        const ciudad = data.address?.city || data.address?.town || data.address?.village || data.address?.state || '';
+        const cp = data.address?.postcode || '';
+        if (ciudad) setMiCiudadInput(ciudad);
+        if (cp) setMiCodigoPostalInput(cp);
+        mostrarToast('¡Ubicación detectada con éxito!');
+      } catch {
+        mostrarToast('No se pudo determinar la ciudad exacta.');
+      }
+    }, () => {
+      mostrarToast('No se pudo obtener la posición. Revisa los permisos.');
+    });
+  };
+
   const parsearHoja = (url, datosLocales = []) => new Promise(resolve => {
     if ((reintentarCsvTras.get(url) || 0) > Date.now()) {
       resolve(csvCorrectoPorUrl.get(url) || datosLocales);
@@ -1517,7 +1542,6 @@ export default function App() {
   const adminEliminarMensajeChat = (indice) => {
     if (!esAdministradora || !chatMsgs[indice]) return;
     
-    // NUEVO: Pide confirmación antes de proceder
     if (!window.confirm("¿Estás segura de que deseas retirar este mensaje del chat?")) return;
 
     const mensaje = chatMsgs[indice];
@@ -1537,7 +1561,6 @@ export default function App() {
   const adminEliminarPropuesta = (indice) => {
     if (!esAdministradora || !propuestas[indice]) return;
     
-    // NUEVO: Pide confirmación antes de proceder
     if (!window.confirm("¿Estás segura de que deseas retirar esta propuesta del club?")) return;
 
     const propuesta = propuestas[indice];
@@ -2033,27 +2056,44 @@ export default function App() {
                 </div>
               </div>
             </div>
+            
+            {/* MEJORA 2: Autoguardado sin botón "ok" */}
             <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-between">
               <span className="text-xs text-[#595750] font-sans">página actual:</span>
               <div className="flex items-center gap-2">
-                <input type="number" value={miPagina} onChange={(e) => setMiPagina(Number(e.target.value))} className="editorial-input w-16 text-center py-1.5 text-xs font-semibold" />
-                <button onClick={() => { 
-                  enviarAccion('actualizar_pagina', { pagina: miPagina }); 
-                  registrarActividadPresencia();
-                  setUsuariasClub(prev => prev.map(u => {
-                    if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) return { ...u, pagina: miPagina };
-                    return u;
-                  }));
-                  mostrarToast('Progreso actualizado'); 
-                }} className="editorial-btn px-3.5 py-1.5 text-xs">ok</button>
+                <input 
+                  type="number" 
+                  value={miPagina} 
+                  onChange={(e) => setMiPagina(Number(e.target.value))} 
+                  onBlur={() => {
+                    enviarAccion('actualizar_pagina', { pagina: miPagina }); 
+                    registrarActividadPresencia();
+                    setUsuariasClub(prev => prev.map(u => {
+                      if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) return { ...u, pagina: miPagina };
+                      return u;
+                    }));
+                    mostrarToast('Progreso guardado automáticamente');
+                  }}
+                  className="editorial-input w-20 text-center py-1.5 text-xs font-semibold" 
+                />
               </div>
             </div>
           </div>
 
+          {/* MEJORA 1: Geolocalización automática en la tarjeta de localización */}
           <div className="editorial-card p-5 space-y-3">
-            <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">
-              <i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">
+                <i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización
+              </h3>
+              <button 
+                type="button" 
+                onClick={obtenerUbicacionActual}
+                className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl shadow-sm hover:bg-[#2d3216] transition-all flex items-center gap-1.5"
+              >
+                <i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual
+              </button>
+            </div>
             <p className="text-xs text-[#595750] font-sans italic">Añade tu ciudad y código postal para ubicarte en el mapa global del club.</p>
             <div className="grid grid-cols-2 gap-2 pt-1">
               <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={(e) => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
@@ -2191,10 +2231,35 @@ export default function App() {
                 <option value="ninguna">Sin decoración</option>
               </select>
             </div>
+
+            {/* MEJORA 3: Interruptor real (Toggle Switch) para "Activar avisos" (WCAG) */}
             <div className="editorial-card p-3 flex flex-col justify-center gap-2">
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-bell text-[#8b6040] text-sm"></i>
-                <span className="text-xs font-bold text-[#1c1c1a] font-sans">Avisos del club</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-bell text-[#8b6040] text-sm"></i>
+                  <span className="text-xs font-bold text-[#1c1c1a] font-sans">Avisos del club</span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)}
+                  onClick={activarNotificaciones}
+                  disabled={['comprobando', 'solicitando', 'push-activadas', 'nativas-activadas', 'no-compatible'].includes(estadoNotificaciones)}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer ${
+                    ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)
+                      ? 'bg-[#3d4220]'
+                      : 'bg-[#d8cdb8]'
+                  }`}
+                  title="Activar o desactivar notificaciones"
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                      ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)
+                        ? 'translate-x-6'
+                        : 'translate-x-0'
+                    }`}
+                  ></div>
+                </button>
               </div>
               <p className="text-[10px] leading-relaxed text-[#756a58] font-sans">
                 {estadoNotificaciones === 'comprobando' ? 'Preparando notificaciones…' :
@@ -2205,14 +2270,6 @@ export default function App() {
                   estadoNotificaciones === 'error' ? 'No se pudo preparar el servicio de notificaciones.' :
                   'Recibe avisos cuando haya novedades del club.'}
               </p>
-              <button
-                type="button"
-                onClick={activarNotificaciones}
-                disabled={['comprobando', 'solicitando', 'push-activadas', 'nativas-activadas', 'permiso-concedido', 'no-compatible'].includes(estadoNotificaciones)}
-                className="w-full px-2.5 py-2 text-[10px] rounded-lg font-bold font-sans border border-[#d8cdb8] bg-white text-[#3d4220] hover:bg-[#f3eadb] disabled:opacity-50"
-              >
-                {estadoNotificaciones === 'push-activadas' || estadoNotificaciones === 'nativas-activadas' ? 'Activadas' : 'Activar avisos'}
-              </button>
             </div>
           </div>
 
