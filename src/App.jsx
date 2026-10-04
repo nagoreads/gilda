@@ -1157,29 +1157,39 @@ export default function App() {
     const emailSocia = String(formData.get('Email') || '').trim().toLowerCase();
     const modalidadNombreCompleto = `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`;
 
-    if (modalidadSeleccionada.esGratis) {
-      await supabase.from('profiles').upsert([{
-        email: emailSocia,
-        nombre: nombreSocia || emailSocia.split('@')[0],
-        modalidad: modalidadNombreCompleto,
-        pagina: 0,
-        ultima_conexion: new Date().toISOString()
-      }], { onConflict: 'email' });
+    try {
+      if (modalidadSeleccionada.esGratis) {
+        // 1. Guardar o actualizar el perfil en la tabla profiles
+        const { error: profileError } = await supabase.from('profiles').upsert([{
+          email: emailSocia,
+          nombre: nombreSocia || emailSocia.split('@')[0],
+          modalidad: modalidadNombreCompleto,
+          pagina: 0,
+          ultima_conexion: new Date().toISOString()
+        }], { onConflict: 'email' });
 
-      setEnviandoRegistro(false);
-      setNombreUsuarioPersonalizado(nombreSocia || emailSocia.split('@')[0]);
-      setMiPagina(0);
-      restablecerNavegacion();
-      mostrarToast('¡Registro completado! Bienvenida a gilda.');
-    } else {
-      try {
+        if (profileError) throw profileError;
+
+        // 2. Enviar el enlace mágico de acceso para crear la sesión de Supabase Auth
+        const { error: authError } = await supabase.auth.signInWithOtp({
+          email: emailSocia,
+          options: { emailRedirectTo: window.location.origin },
+        });
+
+        if (authError) throw authError;
+
+        setEnviandoRegistro(false);
+        alert('¡Registro completado! Te hemos enviado un enlace mágico a tu correo para acceder.');
+        setVistaAcceso('menu');
+      } else {
+        // Redirección automática a Stripe para las modalidades de pago
         const enlaceStripe = new URL(modalidadSeleccionada.enlaceStripe);
         enlaceStripe.searchParams.set('prefilled_email', emailSocia);
         window.location.assign(enlaceStripe.toString());
-      } catch {
-        setEnviandoRegistro(false);
-        mostrarToast('No se pudo abrir el pago.');
       }
+    } catch (err) {
+      setEnviandoRegistro(false);
+      alert('Hubo un error en el registro: ' + err.message);
     }
   };
 
