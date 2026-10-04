@@ -814,12 +814,42 @@ export default function App() {
   const [esPaginaGracias] = useState(() => window.location.pathname === '/gracias');
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSupabaseSession(session);
+      if (session?.user) {
+        const emailUser = session.user.email.toLowerCase().trim();
+        const meta = session.user.user_metadata;
+        const { data: existente } = await supabase.from('profiles').select('*').eq('email', emailUser).maybeSingle();
+        if (!existente) {
+          await supabase.from('profiles').upsert([{
+            email: emailUser,
+            nombre: meta?.nombre || emailUser.split('@')[0],
+            modalidad: meta?.modalidad || 'gilda cotilla (Gratis)',
+            pagina: 0,
+            ultima_conexion: new Date().toISOString()
+          }], { onConflict: 'email' });
+          cargarDatosSupabase();
+        }
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSupabaseSession(session);
+      if (session?.user) {
+        const emailUser = session.user.email.toLowerCase().trim();
+        const meta = session.user.user_metadata;
+        const { data: existente } = await supabase.from('profiles').select('*').eq('email', emailUser).maybeSingle();
+        if (!existente) {
+          await supabase.from('profiles').upsert([{
+            email: emailUser,
+            nombre: meta?.nombre || emailUser.split('@')[0],
+            modalidad: meta?.modalidad || 'gilda cotilla (Gratis)',
+            pagina: 0,
+            ultima_conexion: new Date().toISOString()
+          }], { onConflict: 'email' });
+          cargarDatosSupabase();
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -1160,21 +1190,16 @@ export default function App() {
 
     try {
       if (modalidadSeleccionada.esGratis) {
-        // 1. Guardar o actualizar el perfil en la tabla profiles
-        const { error: profileError } = await supabase.from('profiles').upsert([{
-          email: emailSocia,
-          nombre: nombreSocia || emailSocia.split('@')[0],
-          modalidad: modalidadNombreCompleto,
-          pagina: 0,
-          ultima_conexion: new Date().toISOString()
-        }], { onConflict: 'email' });
-
-        if (profileError) throw profileError;
-
-        // 2. Enviar el enlace mágico de acceso para crear la sesión de Supabase Auth
+        // Solicitamos el enlace mágico y guardamos el nombre y modalidad en los metadatos de auth
         const { error: authError } = await supabase.auth.signInWithOtp({
           email: emailSocia,
-          options: { emailRedirectTo: window.location.origin },
+          options: { 
+            emailRedirectTo: window.location.origin,
+            data: {
+              nombre: nombreSocia || emailSocia.split('@')[0],
+              modalidad: modalidadNombreCompleto
+            }
+          },
         });
 
         if (authError) throw authError;
