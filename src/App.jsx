@@ -7,7 +7,6 @@ import PortadaLibro from './PortadaLibro';
 import MapaGilda from './MapaGilda';
 import EdificioClub from './EdificioClub';
 
-// Inicializar Supabase adaptado a Vite
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -184,7 +183,6 @@ export default function App() {
   const PortadaLibroEstable = useMemo(() => PortadaLibro, []);
   const MapaGildaEstable = useMemo(() => MapaGilda, []);
 
-  // Utilidades seguras para localStorage
   const safeGet = (key, fallback) => {
     try {
       const val = localStorage.getItem(key);
@@ -549,10 +547,6 @@ export default function App() {
     );
   }
 
-  
-
-  
-
   function LomoLibroEstanteria({ item, onClick }) {
     const generarColorEditorial = (texto) => {
       let hash = 0;
@@ -830,11 +824,6 @@ export default function App() {
     );
   }
 
-  
-
-  
-
-  // Estados de autenticación con Supabase
   const [supabaseSession, setSupabaseSession] = useState(null);
   const [emailLogin, setEmailLogin] = useState('');
   const [loadingAuth, setLoadingAuth] = useState(false);
@@ -853,7 +842,6 @@ export default function App() {
 
   const [usuariasClub, setUsuariasClub] = useState(() => safeGetJSON('gilda_cache_usuarias', []));
 
-  // Derivar la sesión unificada de la app combinando Supabase Auth y la lista de usuarias
   const sesion = useMemo(() => {
     if (!supabaseSession) return null;
     const emailUser = supabaseSession.user.email.toLowerCase().trim();
@@ -882,17 +870,14 @@ export default function App() {
   const [vistaAcceso, setVistaAcceso] = useState('menu');
   const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
   
-  // -- ESTADOS PARA EL QUIZ --
   const [quizPaso, setQuizPaso] = useState(1);
   const [respuestaComunidad, setRespuestaComunidad] = useState(null);
   const [respuestaCarta, setRespuestaCarta] = useState(null);
   const [buscandoPlan, setBuscandoPlan] = useState(false);
-  // ---------------------------------
   
   const [enviandoRegistro, setEnviandoRegistro] = useState(false);
   const [mostrarModalShare, setMostrarModalShare] = useState(false);
 
-  // DESCRIPCIONES EXACTAS DE LAS MODALIDADES
   const modalidades = [
     { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
     { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
@@ -903,9 +888,8 @@ export default function App() {
     { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
   ];
 
-  // -- LÓGICA DEL CRUCE DE RESPUESTAS --
   const calcularModalidadIdeal = (comunidad, carta) => {
-    let idPlan = 'cotilla'; // Default
+    let idPlan = 'cotilla';
     
     if (comunidad === 'todo') {
       if (carta === 'buzon') idPlan = 'absoluta';
@@ -929,10 +913,9 @@ export default function App() {
     setTimeout(() => {
       setBuscandoPlan(false);
       setModalidadSeleccionada(planEncontrado);
-      setQuizPaso(3); // Paso 3: Resultado del test
+      setQuizPaso(3);
     }, 1200);
   };
-  // ---------------------------------
 
   const [seccionApp, setSeccionApp] = useState('inicio');
   const [subTabComunidad, setSubTabComunidad] = useState('chat');
@@ -951,7 +934,6 @@ export default function App() {
   
   const [chatModo, setChatModo] = useState('global');
   const [destinatarioPrivado, setDestinatarioPrivado] = useState(null);
-  const [nuevoChatPrivado, setNuevoChatPrivado] = useState('');
 
   const [tabEstanteria, setTabEstanteria] = useState('leyendo');
   const [toastMsg, setToastMsg] = useState(null);
@@ -1639,7 +1621,6 @@ export default function App() {
   const esRestringida = modalidadNormalizada.includes('cotilla') || modalidadNormalizada.includes('satelite');
   const esAdministradora = String(sesion?.email || '').trim().toLowerCase() === EMAIL_ADMINISTRADORA;
 
-  // Si la usuaria no ha iniciado sesión con Supabase Auth
   if (!supabaseSession) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
@@ -1697,7 +1678,6 @@ export default function App() {
                 <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> volver
               </button>
               
-              {/* PASO 1: COMUNIDAD */}
               {quizPaso === 1 && (
                 <div className="fade-in space-y-4">
                   <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cuánto te apetece interactuar con el club?</h2>
@@ -1718,7 +1698,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* PASO 2: CARTA */}
               {quizPaso === 2 && !buscandoPlan && (
                 <div className="fade-in space-y-4">
                   <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cómo quieres recibir la carta de gilda?</h2>
@@ -1739,7 +1718,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* SPINNER DE BÚSQUEDA */}
               {buscandoPlan && (
                  <div className="py-12 flex flex-col items-center justify-center space-y-4 fade-in">
                    <i className="fa-solid fa-spinner animate-spin text-2xl text-[#3d4220]"></i>
@@ -1747,7 +1725,6 @@ export default function App() {
                  </div>
               )}
 
-              {/* PASO 3: RESULTADO */}
               {quizPaso === 3 && modalidadSeleccionada && (
                 <div className="fade-in space-y-5 pt-2">
                   <div className="text-center space-y-1">
@@ -1786,7 +1763,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* VISTA DE CATÁLOGO COMPLETO */}
               {quizPaso === 'catalogo' && (
                 <div className="fade-in space-y-4 pt-1">
                   <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
