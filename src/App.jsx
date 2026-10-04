@@ -1205,8 +1205,7 @@ export default function App() {
         if (authError) throw authError;
 
         setEnviandoRegistro(false);
-        alert('¡Registro completado! Te hemos enviado un enlace mágico a tu correo para acceder.');
-        setVistaAcceso('menu');
+        window.location.assign('/gracias');
       } else {
         // Redirección automática a Stripe para las modalidades de pago
         const enlaceStripe = new URL(modalidadSeleccionada.enlaceStripe);
