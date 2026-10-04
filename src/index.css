@@ -112,3 +112,7 @@ body {
 .animacion-caida-libro {
   animation: dropBounce 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
+.edificio-ventana-activa, [data-online="true"] {
+  box-shadow: 0 0 10px rgba(255, 210, 120, 0.7);
+  background-color: rgba(255, 247, 220, 0.95) !important;
+}
