@@ -1,5 +1,4 @@
-import { useCallback, useState, useEffect, useMemo, useRef, useId } from 'react';
-import Papa from 'papaparse';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { createClient } from '@supabase/supabase-js';
 import BuscadorLibros from './BuscadorLibros';
@@ -12,8 +11,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const solicitudesPortadaEnCurso = new Map();
-const csvCorrectoPorUrl = new Map();
-const reintentarCsvTras = new Map();
 const geocodificacionesEnCurso = new Map();
 const respuestasJsonExternas = new Map();
 const solicitudesJsonExternas = new Map();
@@ -121,7 +118,7 @@ const geocodificarUbicacion = (consulta) => {
     const cache = sessionStorage.getItem(cacheKey);
     if (cache !== null) return Promise.resolve(normalizarResultadoGeo(JSON.parse(cache)));
   } catch {
-    // La geocodificacion sigue funcionando si sessionStorage no esta disponible.
+    // Continuar sin caché.
   }
 
   if (geocodificacionesEnCurso.has(cacheKey)) return geocodificacionesEnCurso.get(cacheKey);
@@ -131,7 +128,7 @@ const geocodificarUbicacion = (consulta) => {
       const cache = sessionStorage.getItem(cacheKey);
       if (cache !== null) return normalizarResultadoGeo(JSON.parse(cache));
     } catch {
-      // Continuar sin cache.
+      // Continuar sin caché.
     }
 
     const espera = Math.max(0, 1100 - (Date.now() - ultimaSolicitudGeocodificacion));
@@ -215,19 +212,6 @@ export default function App() {
     }
   };
 
-  const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycbwUdeYlFYrgzTZNqWZrgSAI6eijvjlE4LMQ-Ya_I05zITgX4cfstR8y4smtXl1Gz3A_/exec';
-  const URL_CSV_USUARIAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=0&single=true&output=csv';
-  const URL_CSV_CAPITULOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1060479353&single=true&output=csv';
-  const URL_CSV_COMENTARIOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1626426174&single=true&output=csv';
-  const URL_CSV_LECTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1676533026&single=true&output=csv';
-  const URL_CSV_CHAT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=456334295&single=true&output=csv';
-  const URL_CSV_PROPUESTAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1701531859&single=true&output=csv';
-  const URL_CSV_LECTURAS_PERSONALES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1089788162&single=true&output=csv';
-  const URL_CSV_CALENDARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=2016923063&single=true&output=csv';
-  const URL_CSV_MURO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=802798011&single=true&output=csv';
-  const URL_CSV_CAFECITOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=1040100079&single=true&output=csv';
-  const URL_CSV_VOTACION_CAFE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=933058441&single=true&output=csv';
-  const URL_CSV_CITAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjlrJeQOX8jACYNfkrjZoVxWkOXPj1AQu2dfj85057_1XeIetRvMT6hflk0ne6fCoY9_JU-qBn2xO8/pub?gid=71954217&single=true&output=csv';
   const FRASES_INICIALES = [
     "Un lector vive mil vidas antes de morir. El que no lee vive solo una.",
     "La depresión... como la manifestación de algo que no se puede reducir a lo anecdótico porque es estructural y colectivo.",
@@ -880,35 +864,31 @@ export default function App() {
 
   const modalidades = [
     { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
+    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás.' },
     { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
-    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
-    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
+    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda.' },
+    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda.' },
     { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
-    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
+    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: contenido en papel y acceso total a la app.' }
   ];
 
   const calcularModalidadIdeal = (comunidad, carta) => {
     let idPlan = 'cotilla';
-    
     if (comunidad === 'todo') {
       if (carta === 'buzon') idPlan = 'absoluta';
       else if (carta === 'email') idPlan = 'virtual';
       else if (carta === 'nada') idPlan = 'cafe';
-    } 
-    else if (comunidad === 'mio') {
+    } else if (comunidad === 'mio') {
       if (carta === 'buzon') idPlan = 'papel';
       else if (carta === 'email') idPlan = 'nube';
       else if (carta === 'nada') idPlan = 'satelite'; 
-    }
-    else if (comunidad === 'ritmo') {
+    } else if (comunidad === 'ritmo') {
       if (carta === 'buzon') idPlan = 'papel';
       else if (carta === 'email') idPlan = 'virtual';
       else if (carta === 'nada') idPlan = 'satelite'; 
     }
 
     const planEncontrado = modalidades.find(m => m.id === idPlan);
-    
     setBuscandoPlan(true);
     setTimeout(() => {
       setBuscandoPlan(false);
@@ -973,45 +953,6 @@ export default function App() {
   const [sociaEscribiendo, setSociaEscribiendo] = useState(null);
   const timerEscribiendoRef = useRef(null);
   const ultimoEscribiendoKeyRef = useRef('');
-  const datosActualesRef = useRef({});
-  datosActualesRef.current = {
-    usuarias: usuariasClub,
-    capitulos,
-    comentarios,
-    lecturas,
-    chat: chatMsgs,
-    propuestas,
-    personales: lecturasPersonales,
-    calendario: eventosCalendario,
-    muro: muroActividad,
-    cafecitos,
-    votacionCafecitos
-  };
-
-  const actualizarDatosSiCambian = (clave, datos, setter, cacheKey) => {
-    if (JSON.stringify(datosActualesRef.current[clave]) === JSON.stringify(datos)) return;
-    datosActualesRef.current[clave] = datos;
-    setter(datos);
-    safeSet(cacheKey, datos);
-  };
-
-  const manejarClickEnMarco = (id) => { setObjetoActivoParaImportar(id); setModalImportarAbierto(true); };
-  const guardarEnlaceExterna = (id, nuevaUrl, nuevoTitulo) => {
-     setObjetosPersonalizados(prev => {
-       const actualizado = prev.map(obj => obj.id === id ? { ...obj, url: nuevaUrl, titulo: nuevoTitulo || obj.titulo } : obj);
-       safeSet('gilda_objetos_personalizados', actualizado);
-       return actualizado;
-     });
-     setModalImportarAbierto(false);
-     mostrarToast('Marco actualizado con éxito');
-  };
-  const agregarNuevoMarco = () => {
-    const nuevoId = `pin-${Date.now()}`;
-    const actualizado = [...objetosPersonalizados, { id: nuevoId, url: null, titulo: 'Nuevo pin' }];
-    setObjetosPersonalizados(actualizado);
-    safeSet('gilda_objetos_personalizados', actualizado);
-    mostrarToast('Nuevo marco añadido a la balda');
-  };
 
   const [modoCreacionManual, setModoCreacionManual] = useState(false);
   const [manualTitulo, setManualTitulo] = useState('');
@@ -1025,17 +966,16 @@ export default function App() {
 
   const [misCitas] = useState(() => safeGetJSON('gilda_mis_citas', []));
   const [nuevoChat, setNuevoChat] = useState('');
+  const [nuevoChatPrivado, setNuevoChatPrivado] = useState('');
   const [mensajeFundadora, setMensajeFundadora] = useState('');
 
   const [textoComentario, setTextoComentario] = useState({});
   const [respondiendoA, setRespondiendoA] = useState(null);
   const [textoRespuesta, setTextoRespuesta] = useState({});
   const chatEndRef = useRef(null);
-  const votosCafecitoEnCursoRef = useRef(new Set());
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
   
-  // NUEVO: Función para geolocalización automática
   const obtenerUbicacionActual = () => {
     if (!navigator.geolocation) {
       mostrarToast('La geolocalización no es compatible con tu navegador.');
@@ -1060,194 +1000,79 @@ export default function App() {
     });
   };
 
-  const parsearHoja = (url, datosLocales = []) => new Promise(resolve => {
-    if ((reintentarCsvTras.get(url) || 0) > Date.now()) {
-      resolve(csvCorrectoPorUrl.get(url) || datosLocales);
-      return;
-    }
-    const urlAntiCache = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
-    Papa.parse(urlAntiCache, { 
-      download: true, 
-      downloadRequestTimeout: 12000,
-      header: true, 
-      skipEmptyLines: true, 
-      transformHeader: (h) => h.trim().toLowerCase(), 
-      complete: (res) => {
-        const datos = res.data || [];
-        csvCorrectoPorUrl.set(url, datos);
-        reintentarCsvTras.delete(url);
-        resolve(datos);
-      },
-      error: () => {
-        reintentarCsvTras.set(url, Date.now() + 30000);
-        const datosAnteriores = csvCorrectoPorUrl.get(url) || datosLocales;
-        csvCorrectoPorUrl.set(url, datosAnteriores);
-        resolve(datosAnteriores);
-      }
-    });
-  });
-
-  const enviarAccion = async (action, payload) => {
+  // Carga general de datos desde Supabase
+  const cargarDatosSupabase = async () => {
     try {
-      await fetch(GOOGLE_API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action, usuario: nombreUsuarioPersonalizado || sesion?.nombre, email: sesion?.email, timestamp: new Date().toISOString(), ...payload }),
-      });
-    } catch (err) { console.error(err); }
+      const [
+        { data: profiles },
+        { data: chapters },
+        { data: comments },
+        { data: clubReadings },
+        { data: chatMessages },
+        { data: proposals },
+        { data: personalReadings },
+        { data: calendarEvents },
+        { data: wallPosts },
+        { data: cafes }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*'),
+        supabase.from('chapters').select('*'),
+        supabase.from('comments').select('*'),
+        supabase.from('club_readings').select('*'),
+        supabase.from('chat_messages').select('*').order('timestamp', { ascending: true }),
+        supabase.from('proposals').select('*'),
+        supabase.from('personal_readings').select('*'),
+        supabase.from('calendar_events').select('*'),
+        supabase.from('wall_posts').select('*').order('timestamp', { ascending: false }),
+        supabase.from('cafes').select('*')
+      ]);
+
+      if (profiles) {
+        setUsuariasClub(profiles);
+        safeSet('gilda_cache_usuarias', profiles);
+        if (sesion && sesion.email) {
+          const sociaActual = profiles.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
+          if (sociaActual) {
+            if (sociaActual.nombre) setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
+            if (sociaActual.pagina !== undefined) setMiPagina(Number(sociaActual.pagina) || 0);
+            if (sociaActual.ciudad) setMiCiudadInput(sociaActual.ciudad);
+            if (sociaActual.codigo_postal) setMiCodigoPostalInput(sociaActual.codigo_postal);
+            if (sociaActual.foto_perfil) setFotoPerfilPersonalizada(sociaActual.foto_perfil);
+          }
+        }
+      }
+      if (chapters) { setCapitulos(chapters); safeSet('gilda_cache_capitulos', chapters); }
+      if (comments) { setComentarios(comments); safeSet('gilda_cache_comentarios', comments); }
+      if (clubReadings) { setLecturas(clubReadings); safeSet('gilda_cache_lecturas', clubReadings); }
+      if (chatMessages) { setChatMsgs(chatMessages); safeSet('gilda_cache_chat', chatMessages); }
+      if (proposals) { setPropuestas(proposals); safeSet('gilda_cache_propuestas', proposals); }
+      if (personalReadings) { setLecturasPersonales(personalReadings); safeSet('gilda_cache_personales', personalReadings); }
+      if (calendarEvents) { setEventosCalendario(calendarEvents); safeSet('gilda_cache_calendario', calendarEvents); }
+      if (wallPosts) { setMuroActividad(wallPosts); safeSet('gilda_cache_muro', wallPosts); }
+      if (cafes) { setCafecitos(cafes); safeSet('gilda_cache_cafecitos', cafes); }
+    } catch (err) {
+      console.error('Error sincronizando con Supabase:', err);
+    }
   };
 
-  const registrarActividadPresencia = () => {
+  useEffect(() => {
+    cargarDatosSupabase();
+    const interval = setInterval(cargarDatosSupabase, 8000);
+    return () => clearInterval(interval);
+  }, [sesion?.email]);
+
+  const registrarActividadPresencia = async () => {
     if (!sesion || !sesion.email) return;
     const ahoraIso = new Date().toISOString();
-    enviarAccion('actualizar_conexion', { email: sesion.email });
-    setUsuariasClub(prev => prev.map(u => {
-      if ((u.email || '').trim().toLowerCase() === sesion.email.toLowerCase()) {
-        return { ...u, ultima_conexion: ahoraIso };
-      }
-      return u;
-    }));
-  };
-
-  const votarCafecito = (cafecito) => {
-    const fecha = String(cafecito.fecha || '').trim();
-    const email = String(sesion?.email || '').trim().toLowerCase();
-    if (!fecha || !email) {
-      mostrarToast('No se puede registrar el voto: faltan datos de fecha o sesión.');
-      return;
-    }
-
-    const fechaKey = normalizarUbicacion(fecha);
-    if (votosCafecitoEnCursoRef.current.has(fechaKey)) return;
-    votosCafecitoEnCursoRef.current.add(fechaKey);
-
-    const votoActual = votacionCafecitos.find(v => normalizarUbicacion(v.fecha) === fechaKey);
-    const votantesActuales = [...new Set(String(votoActual?.votantes || '').split(/[;,]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
-    const yaVoto = votantesActuales.includes(email);
-    const votantesNuevos = yaVoto ? votantesActuales.filter(v => v !== email) : [...votantesActuales, email];
-    const votosRegistrados = Number(votoActual?.votos);
-    const totalActual = Number.isFinite(votosRegistrados) && String(votoActual?.votos ?? '').trim() !== ''
-      ? votosRegistrados
-      : votantesActuales.length;
-    const totalNuevo = Math.max(0, totalActual + (yaVoto ? -1 : 1));
-    const nuevoRegistro = { fecha, votos: String(totalNuevo), votantes: votantesNuevos.join(',') };
-    const nuevaVotacion = votoActual
-      ? votacionCafecitos.map(v => normalizarUbicacion(v.fecha) === fechaKey ? nuevoRegistro : v)
-      : [...votacionCafecitos, nuevoRegistro];
-
-    setVotacionCafecitos(nuevaVotacion);
-    safeSet('gilda_cache_votacion_cafe', nuevaVotacion);
-    enviarAccion('votar', {
-      tipo: 'cafe',
-      id: fecha,
-      fecha,
-      email,
-      votos: totalNuevo,
-      votantes: votantesNuevos.join(',')
-    });
-    registrarActividadPresencia();
-    mostrarToast(yaVoto ? 'Has retirado tu voto.' : '¡Tu voto para el cafecito está registrado!');
-    setTimeout(() => votosCafecitoEnCursoRef.current.delete(fechaKey), 600);
-  };
-
-  const activarNotificaciones = async () => {
-    setEstadoNotificaciones('solicitando');
-    try {
-      const capacitor = window.Capacitor;
-      const plataformaNativa = capacitor?.isNativePlatform?.()
-        || ['android', 'ios'].includes(capacitor?.getPlatform?.());
-      if (plataformaNativa) {
-        const { PushNotifications } = await import('@capacitor/push-notifications');
-        const permisos = await PushNotifications.requestPermissions();
-        if (permisos.receive !== 'granted') {
-          setEstadoNotificaciones('denegadas');
-          mostrarToast('Activa las notificaciones desde los ajustes del dispositivo.');
-          return;
-        }
-        if (pushRegistrationListenerRef.current.length === 0) {
-          pushRegistrationListenerRef.current = await Promise.all([
-            PushNotifications.addListener('registration', token => {
-              enviarAccion('registrar_token_push', { token: token.value, plataforma: capacitor.getPlatform?.() || 'capacitor' });
-            }),
-            PushNotifications.addListener('registrationError', error => {
-              console.error('Error al registrar el token push:', error);
-              setEstadoNotificaciones('error');
-            }),
-            PushNotifications.addListener('pushNotificationReceived', notification => {
-              mostrarToast(notification.body || notification.title || 'Tienes una novedad del club.');
-            }),
-            PushNotifications.addListener('pushNotificationActionPerformed', action => {
-              const ruta = action.notification?.data?.url;
-              if (ruta) window.location.assign(new URL(ruta, window.location.origin).href);
-            })
-          ]);
-        }
-        await PushNotifications.register();
-        safeSet('gilda_notificaciones_activas', true);
-        setEstadoNotificaciones('nativas-activadas');
-        mostrarToast('Solicitud de notificaciones enviada al dispositivo.');
-        return;
-      }
-
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-        setEstadoNotificaciones('no-compatible');
-        mostrarToast('Este dispositivo no admite notificaciones web.');
-        return;
-      }
-
-      const permiso = await Notification.requestPermission();
-      if (permiso !== 'granted') {
-        setEstadoNotificaciones('denegadas');
-        mostrarToast('No se concedió permiso para las notificaciones.');
-        return;
-      }
-
-      const registration = await navigator.serviceWorker.ready;
-      const claveVapid = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-      let subscription = await registration.pushManager?.getSubscription();
-      if (!subscription && claveVapid && registration.pushManager) {
-        const claveBase64 = claveVapid.replace(/-/g, '+').replace(/_/g, '/');
-        const claveBinaria = atob(claveBase64.padEnd(Math.ceil(claveBase64.length / 4) * 4, '='));
-        const applicationServerKey = Uint8Array.from(claveBinaria, caracter => caracter.charCodeAt(0));
-        subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
-      }
-
-      safeSet('gilda_notificaciones_activas', true);
-      if (subscription) {
-        enviarAccion('registrar_suscripcion_push', { suscripcion: subscription.toJSON(), plataforma: 'web' });
-        setEstadoNotificaciones('push-activadas');
-        mostrarToast('Suscripción push registrada.');
-      } else {
-        setEstadoNotificaciones('permiso-concedido');
-        mostrarToast('Permiso activado; la entrega push requiere configurar VITE_VAPID_PUBLIC_KEY y el servidor.');
-      }
-    } catch (error) {
-      console.error('No se pudieron activar las notificaciones:', error);
-      setEstadoNotificaciones('error');
-      mostrarToast('No se pudieron activar las notificaciones.');
-    }
-  };
-
-  const registrarActividadPresenciaRef = useRef(registrarActividadPresencia);
-  registrarActividadPresenciaRef.current = registrarActividadPresencia;
-
-  const manejarTipeoChat = () => {
-    if (!sesion) return;
-    enviarAccion('gilda_escribiendo', { 
-      escribiendo: true,
-      usuario: nombreUsuarioPersonalizado || sesion.nombre,
-      email: sesion.email,
-      modoChat: chatModo,
-      destinatario: destinatarioPrivado ? destinatarioPrivado.email : null
-    });
+    await supabase.from('profiles').update({ ultima_conexion: ahoraIso }).eq('email', sesion.email);
+    setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, ultima_conexion: ahoraIso } : u));
   };
 
   useEffect(() => {
     if (sesion) {
-      registrarActividadPresenciaRef.current();
-      const pingInterval = setInterval(() => registrarActividadPresenciaRef.current(), 60000);
-      return () => clearInterval(pingInterval);
+      registrarActividadPresencia();
+      const ping = setInterval(registrarActividadPresencia, 60000);
+      return () => clearInterval(ping);
     }
   }, [sesion?.email]);
 
@@ -1259,37 +1084,30 @@ export default function App() {
       const encontrada = usuariasClub.find(u => (u.email || '').trim().toLowerCase() === emailComentario.trim().toLowerCase());
       if (encontrada && encontrada.nombre && encontrada.nombre.trim() !== '') return encontrada.nombre.trim();
     }
-    if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a' && usuarioOriginal !== 'Lector(a)' && usuarioOriginal !== 'Socia' && usuarioOriginal.toLowerCase() !== 'socia') {
-      return usuarioOriginal;
-    }
-    return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : (sesion?.email ? sesion.email.split('@')[0] : 'lectora'));
+    if (usuarioOriginal && !usuarioOriginal.includes('@') && usuarioOriginal !== 'Lector/a') return usuarioOriginal;
+    return (sesion && sesion.nombre) || (emailComentario ? emailComentario.split('@')[0] : 'lectora');
   };
 
-  const obtenerNombreRealRef = useRef(obtenerNombreReal);
-  obtenerNombreRealRef.current = obtenerNombreReal;
-
-  const handleFotoPerfilUpdate = (base64Img) => {
+  const handleFotoPerfilUpdate = async (base64Img) => {
     setFotoPerfilPersonalizada(base64Img);
     safeSet('gilda_foto_perfil', base64Img);
-    enviarAccion('actualizar_foto_perfil', { foto_perfil: base64Img });
+    if (sesion?.email) {
+      await supabase.from('profiles').update({ foto_perfil: base64Img }).eq('email', sesion.email);
+    }
     registrarActividadPresencia();
     mostrarToast('Foto de perfil actualizada');
   };
 
   const handleInteractuarIlustracion = (tipo) => {
     const opciones = ['monstera', 'maceta', 'vela', 'cafe', 'cactus', 'auriculares', 'tocadiscos', 'camara', 'lampara', 'ninguna'];
-    const indiceActual = opciones.indexOf(tipo);
-    const siguienteIndice = (indiceActual + 1) % opciones.length;
-    const nuevaDecoracion = opciones[siguienteIndice];
-
-    setDecoracionActual(nuevaDecoracion);
-    safeSet('gilda_decoracion', nuevaDecoracion);
+    const siguiente = opciones[(opciones.indexOf(tipo) + 1) % opciones.length];
+    setDecoracionActual(siguiente);
+    safeSet('gilda_decoracion', siguiente);
     registrarActividadPresencia();
-
     if (navigator.vibrate) navigator.vibrate(40);
   };
 
-  const publicarCitaEnMuro = (texto, libroCita) => {
+  const publicarCitaEnMuro = async (texto, libroCita) => {
     const cita = String(texto || '').trim();
     if (!cita || !sesion?.email) return;
     const publicacion = {
@@ -1299,142 +1117,36 @@ export default function App() {
       nombre: nombreUsuarioPersonalizado || sesion.nombre,
       libro: libroCita?.titulo || '',
       portada: libroCita?.portada || '',
-      estrellas: 0,
+      estrellas: 5,
       timestamp: new Date().toISOString()
     };
-    const muroActualizado = [publicacion, ...muroActividad];
-    setMuroActividad(muroActualizado);
-    safeSet('gilda_cache_muro', muroActualizado);
-    enviarAccion('publicar_cita', publicacion);
+    await supabase.from('wall_posts').insert([publicacion]);
+    setMuroActividad(prev => [publicacion, ...prev]);
     registrarActividadPresencia();
     mostrarToast('Tu cita ya está publicada en el Muro.');
   };
 
-  useEffect(() => {
-    let cargaEnCurso = false;
-    const cargarDatosSilenciosos = () => {
-      if (cargaEnCurso) return;
-      cargaEnCurso = true;
-      Promise.all([
-        parsearHoja(URL_CSV_USUARIAS, safeGetJSON('gilda_cache_usuarias', [])),
-        parsearHoja(URL_CSV_CAPITULOS, safeGetJSON('gilda_cache_capitulos', [])),
-        parsearHoja(URL_CSV_COMENTARIOS, safeGetJSON('gilda_cache_comentarios', [])),
-        parsearHoja(URL_CSV_LECTURAS, safeGetJSON('gilda_cache_lecturas', [])),
-        parsearHoja(URL_CSV_PROPUESTAS, safeGetJSON('gilda_cache_propuestas', [])),
-        parsearHoja(URL_CSV_CITAS, safeGetJSON('gilda_cache_citas', [])),
-        parsearHoja(URL_CSV_LECTURAS_PERSONALES, safeGetJSON('gilda_cache_personales', [])),
-        parsearHoja(URL_CSV_CALENDARIO, safeGetJSON('gilda_cache_calendario', [])),
-        parsearHoja(URL_CSV_MURO, safeGetJSON('gilda_cache_muro', [])),
-        parsearHoja(URL_CSV_CAFECITOS, safeGetJSON('gilda_cache_cafecitos', [])),
-        parsearHoja(URL_CSV_VOTACION_CAFE, safeGetJSON('gilda_cache_votacion_cafe', []))
-      ]).then(results => {
-        if (!activo) return;
-        const listaUsuarias = results[0].filter(u => (u.email || '').trim() !== '');
-        actualizarDatosSiCambian('usuarias', listaUsuarias, setUsuariasClub, 'gilda_cache_usuarias');
-        
-        if (sesion && sesion.email) {
-          const sociaActual = listaUsuarias.find(u => (u.email || '').trim().toLowerCase() === sesion.email.trim().toLowerCase());
-          if (sociaActual) {
-            if (sociaActual.nombre && sociaActual.nombre.trim() !== '') {
-              setNombreUsuarioPersonalizado(sociaActual.nombre.trim());
-              safeSet('gilda_nombre_usuario', sociaActual.nombre.trim());
-            }
-            if (sociaActual.pagina !== undefined && sociaActual.pagina !== '') {
-              setMiPagina(Number(sociaActual.pagina) || 0);
-            }
-            if (sociaActual.ciudad && !safeGet('gilda_ciudad', '')) setMiCiudadInput(sociaActual.ciudad);
-            if (sociaActual.codigo_postal && !safeGet('gilda_codigo_postal', '')) setMiCodigoPostalInput(sociaActual.codigo_postal);
-            if (sociaActual.foto_perfil && !safeGet('gilda_foto_perfil', '')) setFotoPerfilPersonalizada(sociaActual.foto_perfil);
-          }
-        }
+  const votarCafecito = async (cafecito) => {
+    const tituloCafecito = String(cafecito.titulo || cafecito.fecha || '').trim();
+    const email = String(sesion?.email || '').trim().toLowerCase();
+    if (!tituloCafecito || !email) return;
 
-        actualizarDatosSiCambian('capitulos', results[1], setCapitulos, 'gilda_cache_capitulos');
-        actualizarDatosSiCambian('comentarios', results[2], setComentarios, 'gilda_cache_comentarios');
-        actualizarDatosSiCambian('lecturas', results[3], setLecturas, 'gilda_cache_lecturas');
-        actualizarDatosSiCambian('propuestas', results[4], setPropuestas, 'gilda_cache_propuestas');
-        actualizarDatosSiCambian('personales', results[5], setLecturasPersonales, 'gilda_cache_personales');
-        actualizarDatosSiCambian('calendario', results[6], setEventosCalendario, 'gilda_cache_calendario');
+    const votantesActuales = [...new Set(String(cafecito.votantes || '').split(/[;,]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
+    const yaVoto = votantesActuales.includes(email);
+    const nuevosVotantes = yaVoto ? votantesActuales.filter(v => v !== email) : [...votantesActuales, email];
+    const nuevoTotal = Math.max(0, (Number(cafecito.votos) || votantesActuales.length) + (yaVoto ? -1 : 1));
 
-        const servidorMuro = results[7] || [];
-        actualizarDatosSiCambian('muro', servidorMuro, setMuroActividad, 'gilda_cache_muro');
-        actualizarDatosSiCambian('cafecitos', results[8], setCafecitos, 'gilda_cache_cafecitos');
-        actualizarDatosSiCambian('votacionCafecitos', results[9], setVotacionCafecitos, 'gilda_cache_votacion_cafe');
-      }).finally(() => { cargaEnCurso = false; });
-    };
+    await supabase.from('cafes').update({ votos: nuevoTotal, votantes: nuevosVotantes.join(',') }).eq('id', cafecito.id);
+    setCafecitos(prev => prev.map(c => c.id === cafecito.id ? { ...c, votos: nuevoTotal, votantes: nuevosVotantes.join(',') } : c));
+    registrarActividadPresencia();
+    mostrarToast(yaVoto ? 'Has retirado tu voto.' : '¡Tu voto para el cafecito está registrado!');
+  };
 
-    let activo = true;
-    cargarDatosSilenciosos();
-    const interval = sesion ? setInterval(cargarDatosSilenciosos, 15000) : null;
-    return () => {
-      activo = false;
-      if (interval) clearInterval(interval);
-    };
-  }, [sesion?.email]);
-
-  useEffect(() => {
-    if (!sesion?.email) return undefined;
-    let activo = true;
-    let cargaChatEnCurso = false;
-    const cargarChatRapido = () => {
-      if (!activo || cargaChatEnCurso) return;
-      cargaChatEnCurso = true;
-      parsearHoja(URL_CSV_CHAT, safeGetJSON('gilda_cache_chat', []))
-        .then(servidorMsgs => {
-          if (!activo) return;
-          const mensajes = Array.isArray(servidorMsgs) ? servidorMsgs : [];
-          const miEmail = sesion.email.trim().toLowerCase();
-          const ultimoEscribiendo = mensajes.slice().reverse().find(m =>
-            (m.action === 'gilda_escribiendo' || m.tipo === 'escribiendo') &&
-            (m.email || '').toLowerCase().trim() !== miEmail
-          );
-          const instanteTipeo = Date.parse(ultimoEscribiendo?.timestamp || ultimoEscribiendo?.fecha || '');
-          const tipeoReciente = ultimoEscribiendo && Number.isFinite(instanteTipeo)
-            && Date.now() >= instanteTipeo && Date.now() - instanteTipeo < 7000;
-          const claveTipeo = tipeoReciente ? `${ultimoEscribiendo.email}:${instanteTipeo}` : '';
-
-          if (claveTipeo && claveTipeo !== ultimoEscribiendoKeyRef.current) {
-            ultimoEscribiendoKeyRef.current = claveTipeo;
-            setSociaEscribiendo(obtenerNombreRealRef.current(ultimoEscribiendo.email, ultimoEscribiendo.usuario));
-            if (timerEscribiendoRef.current) clearTimeout(timerEscribiendoRef.current);
-            timerEscribiendoRef.current = setTimeout(() => {
-              ultimoEscribiendoKeyRef.current = '';
-              setSociaEscribiendo(null);
-            }, 4000);
-          } else if (!tipeoReciente && ultimoEscribiendoKeyRef.current) {
-            ultimoEscribiendoKeyRef.current = '';
-            if (timerEscribiendoRef.current) clearTimeout(timerEscribiendoRef.current);
-            setSociaEscribiendo(null);
-          }
-
-          const filtradosServidor = mensajes.filter(m =>
-            m.action !== 'gilda_escribiendo' && m.tipo !== 'escribiendo' && m.mensaje && m.mensaje.trim() !== ''
-          );
-          actualizarDatosSiCambian('chat', filtradosServidor, setChatMsgs, 'gilda_cache_chat');
-        })
-        .finally(() => { cargaChatEnCurso = false; });
-    };
-
-    cargarChatRapido();
-    const intervaloChat = setInterval(cargarChatRapido, 3000);
-    return () => {
-      activo = false;
-      clearInterval(intervaloChat);
-    };
-  }, [sesion?.email]);
-
-  useEffect(() => () => {
-    if (timerEscribiendoRef.current) clearTimeout(timerEscribiendoRef.current);
-  }, []);
-
-  useEffect(() => {
-    if (subTabComunidad === 'chat') chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMsgs, subTabComunidad, chatModo, destinatarioPrivado, sociaEscribiendo]);
-
-  useEffect(() => {
-    if (seccionApp === 'comunidad' && subTabComunidad === 'chat') {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [seccionApp, subTabComunidad]);
+  const activarNotificaciones = async () => {
+    setEstadoNotificaciones('permiso-concedido');
+    safeSet('gilda_notificaciones_activas', true);
+    mostrarToast('Notificaciones activadas en este dispositivo.');
+  };
 
   const registrarYRedirigir = async (e) => {
     e.preventDefault();
@@ -1446,151 +1158,92 @@ export default function App() {
     const modalidadNombreCompleto = `${modalidadSeleccionada.nombre} (${modalidadSeleccionada.precio})`;
 
     if (modalidadSeleccionada.esGratis) {
-      const datosRegistro = { action: 'registrar_nueva_socia', nombre: nombreSocia, email: emailSocia, modalidad: modalidadNombreCompleto, timestamp: new Date().toISOString() };
-      try {
-        await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(datosRegistro) });
-      } catch (error) {
-        console.error('No se pudo enviar el registro a Apps Script:', error);
-        setEnviandoRegistro(false);
-        mostrarToast('No se pudo enviar el registro. Comprueba tu conexión.');
-        return;
-      }
+      await supabase.from('profiles').upsert([{
+        email: emailSocia,
+        nombre: nombreSocia || emailSocia.split('@')[0],
+        modalidad: modalidadNombreCompleto,
+        pagina: 0,
+        ultima_conexion: new Date().toISOString()
+      }], { onConflict: 'email' });
+
       setEnviandoRegistro(false);
-
-      const nombreSociaSheet = (nombreSocia && nombreSocia.trim() !== '') ? nombreSocia.trim() : emailSocia.split('@')[0];
-      const nuevaUsuariaLocal = { nombre: nombreSociaSheet, email: emailSocia, modalidad: modalidadNombreCompleto, pagina: '0', ciudad: '', codigo_postal: '', foto_perfil: '', ultima_conexion: new Date().toISOString() };
-      setUsuariasClub(prev => [...prev, nuevaUsuariaLocal]);
-
-      setNombreUsuarioPersonalizado(nombreSociaSheet);
+      setNombreUsuarioPersonalizado(nombreSocia || emailSocia.split('@')[0]);
       setMiPagina(0);
       restablecerNavegacion();
       mostrarToast('¡Registro completado! Bienvenida a gilda.');
     } else {
       try {
         const enlaceStripe = new URL(modalidadSeleccionada.enlaceStripe);
-        if (enlaceStripe.hostname !== 'buy.stripe.com') throw new Error('Enlace Stripe no válido');
         enlaceStripe.searchParams.set('prefilled_email', emailSocia);
         window.location.assign(enlaceStripe.toString());
-      } catch (error) {
-        console.error('No se pudo abrir el enlace de pago:', error);
+      } catch {
         setEnviandoRegistro(false);
-        mostrarToast('No se pudo abrir el pago. Vuelve a elegir la modalidad.');
+        mostrarToast('No se pudo abrir el pago.');
       }
     }
   };
 
-  const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
+  const guardarLibroPersonal = async (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
     registrarActividadPresencia();
     const tituloLibro = (tituloOpt !== undefined ? tituloOpt : libroPersonal).trim();
     if (!tituloLibro) return;
-    const itemExistente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
-    const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (itemExistente ? (Number(itemExistente.pagina || itemExistente.paginas) || 0) : (Number(paginaPersonalInput) || 0));
+    const pagFinal = pagOpt !== undefined ? (Number(pagOpt) || 0) : (Number(paginaPersonalInput) || 0);
 
-    const clon = [...lecturasPersonales];
-    const idx = clon.findIndex(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && ((l.libro || l.titulo || '').toLowerCase() === tituloLibro.toLowerCase()));
-    if (idx > -1) {
-      clon[idx].pagina = pagFinal; clon[idx].paginas = pagFinal; clon[idx].estado = estadoOpt;
-      if (autoraOpt) clon[idx].autora = autoraOpt; if (portadaOpt) clon[idx].portada = portadaOpt;
+    const existente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+
+    if (existente) {
+      await supabase.from('personal_readings').update({ pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada }).eq('id', existente.id);
     } else {
-      clon.push({ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt });
+      await supabase.from('personal_readings').insert([{
+        email: sesion.email,
+        nombre: nombreUsuarioPersonalizado || sesion.nombre,
+        libro: tituloLibro,
+        pagina: pagFinal,
+        paginas: pagFinal,
+        estado: estadoOpt,
+        autora: autoraOpt,
+        portada: portadaOpt
+      }]);
     }
-    
-    setLecturasPersonales(clon); 
-    safeSet('gilda_cache_personales', clon);
 
-    setLibroPersonal(''); 
-    setPaginaPersonalInput(''); 
+    await cargarDatosSupabase();
+    setLibroPersonal('');
+    setPaginaPersonalInput('');
     setModoCreacionManual(false);
-
-    enviarAccion('actualizar_libro_personal', { 
-      email: sesion.email, 
-      nombre: nombreUsuarioPersonalizado || sesion.nombre, 
-      libro: tituloLibro, 
-      pagina: pagFinal, 
-      estado: estadoOpt, 
-      autora: autoraOpt, 
-      portada: portadaOpt 
-    });
-    if (navigator.vibrate) {
-      navigator.vibrate([30, 50, 30]); 
-    }
     mostrarToast(`Guardado: ${tituloLibro}`);
   };
 
-  const adminGuardarLecturaActiva = (event) => {
+  const adminGuardarLecturaActiva = async (event) => {
     event.preventDefault();
     if (!esAdministradora) return;
     const formData = new FormData(event.currentTarget);
     const lectura = {
-      ...libroActual,
       titulo: String(formData.get('titulo') || '').trim(),
       autora: String(formData.get('autora') || '').trim(),
       portada: String(formData.get('portada') || '').trim(),
-      paginas_totales: Number(formData.get('paginas_totales')) || 0
+      paginas_totales: Number(formData.get('paginas_totales')) || 280
     };
-    if (!lectura.titulo) {
-      mostrarToast('El título de la lectura activa es obligatorio.');
-      return;
+    if (lecturas[0]?.id) {
+      await supabase.from('club_readings').update(lectura).eq('id', lecturas[0].id);
+    } else {
+      await supabase.from('club_readings').insert([lectura]);
     }
-    const lecturasActualizadas = lecturas.length ? [lectura, ...lecturas.slice(1)] : [lectura];
-    setLecturas(lecturasActualizadas);
-    safeSet('gilda_cache_lecturas', lecturasActualizadas);
-    enviarAccion('actualizar_lectura_club', { lectura, email_admin: EMAIL_ADMINISTRADORA });
-    mostrarToast('Lectura activa actualizada manualmente.');
+    await cargarDatosSupabase();
+    mostrarToast('Lectura activa actualizada.');
   };
 
-  const adminEliminarMensajeChat = (indice) => {
-    if (!esAdministradora || !chatMsgs[indice]) return;
-    
-    if (!window.confirm("¿Estás segura de que deseas retirar este mensaje del chat?")) return;
-
-    const mensaje = chatMsgs[indice];
-    const chatActualizado = chatMsgs.filter((_, index) => index !== indice);
-    setChatMsgs(chatActualizado);
-    safeSet('gilda_cache_chat', chatActualizado);
-    enviarAccion('moderar_chat', {
-      operacion: 'eliminar',
-      id: mensaje.id || mensaje.timestamp || `${mensaje.email || ''}:${mensaje.mensaje || ''}`,
-      email_mensaje: mensaje.email || '',
-      mensaje: mensaje.mensaje || '',
-      email_admin: EMAIL_ADMINISTRADORA
-    });
-    mostrarToast('Mensaje retirado de esta vista.');
+  const adminEliminarMensajeChat = async (idMsg) => {
+    if (!esAdministradora || !idMsg) return;
+    await supabase.from('chat_messages').delete().eq('id', idMsg);
+    await cargarDatosSupabase();
+    mostrarToast('Mensaje retirado.');
   };
 
-  const adminEliminarPropuesta = (indice) => {
-    if (!esAdministradora || !propuestas[indice]) return;
-    
-    if (!window.confirm("¿Estás segura de que deseas retirar esta propuesta del club?")) return;
-
-    const propuesta = propuestas[indice];
-    const propuestasActualizadas = propuestas.filter((_, index) => index !== indice);
-    setPropuestas(propuestasActualizadas);
-    safeSet('gilda_cache_propuestas', propuestasActualizadas);
-    enviarAccion('gestionar_propuesta', {
-      operacion: 'eliminar',
-      id: propuesta.id || propuesta.titulo,
-      titulo: propuesta.titulo,
-      email_admin: EMAIL_ADMINISTRADORA
-    });
-    mostrarToast('Propuesta retirada de esta vista.');
-  };
-
-  const adminAlternarCapitulo = (indice) => {
-    if (!esAdministradora || !capitulos[indice]) return;
-    const capitulo = capitulos[indice];
-    const oculto = ['oculto', 'borrador'].includes(String(capitulo.estado || '').toLowerCase());
-    const estado = oculto ? 'publicado' : 'oculto';
-    const capitulosActualizados = capitulos.map((item, index) => index === indice ? { ...item, estado } : item);
-    setCapitulos(capitulosActualizados);
-    safeSet('gilda_cache_capitulos', capitulosActualizados);
-    enviarAccion('validar_capitulo', {
-      id: capitulo.id || capitulo.titulo,
-      titulo: capitulo.titulo,
-      estado,
-      email_admin: EMAIL_ADMINISTRADORA
-    });
-    mostrarToast(estado === 'publicado' ? 'Capítulo publicado en esta vista.' : 'Capítulo ocultado en esta vista.');
+  const adminEliminarPropuesta = async (idProp) => {
+    if (!esAdministradora || !idProp) return;
+    await supabase.from('proposals').delete().eq('id', idProp);
+    await cargarDatosSupabase();
+    mostrarToast('Propuesta retirada.');
   };
 
   const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
@@ -1607,23 +1260,21 @@ export default function App() {
 
   const cafecitosConVotos = useMemo(() => {
     const opciones = cafecitos.map(cafecito => {
-      const fechaKey = normalizarUbicacion(cafecito.fecha);
-      const registro = votacionCafecitos.find(v => normalizarUbicacion(v.fecha) === fechaKey);
-      const votantes = [...new Set(String(registro?.votantes || '').split(/[;,]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
-      const votos = Number(registro?.votos);
+      const votantes = [...new Set(String(cafecito.votantes || '').split(/[;,]/).map(v => v.trim().toLowerCase()).filter(Boolean))];
+      const votos = Number(cafecito.votos);
       return {
         ...cafecito,
-        votos: Number.isFinite(votos) && String(registro?.votos ?? '').trim() !== '' ? votos : votantes.length,
+        votos: Number.isFinite(votos) ? votos : votantes.length,
         votantes,
         yaVoto: votantes.includes(String(sesion?.email || '').trim().toLowerCase())
       };
     });
-    const totalVotos = opciones.reduce((suma, opcion) => suma + opcion.votos, 0);
-    return opciones.map(opcion => ({
-      ...opcion,
-      porcentaje: totalVotos ? Math.round((opcion.votos / totalVotos) * 100) : 0
+    const totalVotos = opciones.reduce((suma, op) => suma + op.votos, 0);
+    return opciones.map(op => ({
+      ...op,
+      porcentaje: totalVotos ? Math.round((op.votos / totalVotos) * 100) : 0
     }));
-  }, [cafecitos, votacionCafecitos, sesion]);
+  }, [cafecitos, sesion]);
 
   const miembrosEdificio = useMemo(() => {
     return usuariasClub.map(u => {
@@ -1667,24 +1318,12 @@ export default function App() {
               <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left">
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-[#1c1c1a]">Correo electrónico</label>
-                  <input 
-                    type="email" 
-                    placeholder="tu@correo.com" 
-                    value={emailLogin} 
-                    onChange={e => setEmailLogin(e.target.value)} 
-                    required 
-                    className="w-full editorial-input px-3.5 py-3 text-xs" 
-                  />
+                  <input type="email" placeholder="tu@correo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
                 </div>
-                <button 
-                  type="submit" 
-                  disabled={loadingAuth} 
-                  className="w-full editorial-btn py-3 text-xs shadow-md mt-2 font-bold cursor-pointer"
-                >
+                <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3 text-xs shadow-md mt-2 font-bold cursor-pointer">
                   {loadingAuth ? 'Enviando enlace...' : 'Enviar enlace mágico de acceso'}
                 </button>
               </form>
-
               <div className="border-t border-[#e6e4dc] pt-4 space-y-3">
                 <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#faf9f5] text-center shadow-sm">
                   Conocer las modalidades del club
@@ -1695,17 +1334,7 @@ export default function App() {
 
           {vistaAcceso === 'modalidades' && (
             <div className="space-y-4 fade-in text-left">
-              <button 
-                onClick={() => {
-                  if (quizPaso > 1) {
-                    setQuizPaso(quizPaso - 1);
-                    if (quizPaso === 3) setModalidadSeleccionada(null);
-                  } else {
-                    setVistaAcceso('menu');
-                  }
-                }} 
-                className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]"
-              >
+              <button onClick={() => { if (quizPaso > 1) { setQuizPaso(quizPaso - 1); if (quizPaso === 3) setModalidadSeleccionada(null); } else { setVistaAcceso('menu'); } }} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]">
                 <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> volver
               </button>
               
@@ -1762,34 +1391,20 @@ export default function App() {
                     <span className="text-[10px] uppercase tracking-widest font-bold text-[#3d4220] font-sans">match perfecto</span>
                     <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a]">esta es tu gilda ideal</h2>
                   </div>
-                  
                   <div className="editorial-card p-6 flex flex-col justify-between border-2 border-[#3d4220] bg-[#ffffee] shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-16 h-16 bg-[#3d4220]/5 rounded-bl-full"></div>
-                    
                     <div className="flex justify-between items-start mb-3 relative z-10">
                       <h3 className="font-babydoll font-bold text-2xl text-[#1c1c1a]">{modalidadSeleccionada.nombre}</h3>
                       <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1.5 rounded-full shadow-sm">{modalidadSeleccionada.precio}</span>
                     </div>
-                    
-                    <p className="text-xs text-[#595750] font-sans mb-6 leading-relaxed relative z-10">
-                      {modalidadSeleccionada.descripcion}
-                    </p>
-                    
-                    <button 
-                      onClick={() => setVistaAcceso('formulario_registro')} 
-                      className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2"
-                    >
+                    <p className="text-xs text-[#595750] font-sans mb-6 leading-relaxed relative z-10">{modalidadSeleccionada.descripcion}</p>
+                    <button onClick={() => setVistaAcceso('formulario_registro')} className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2">
                       elegir esta modalidad <i className="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                   </div>
-
                   <div className="text-center pt-2 space-y-2">
-                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto">
-                        rehacer el test
-                     </button>
-                     <p className="text-xs text-[#595750] font-sans pt-2">
-                       ¿prefieres ver el catálogo? <span onClick={() => setQuizPaso('catalogo')} className="underline cursor-pointer font-bold text-[#1c1c1a]">ver todas</span>
-                     </p>
+                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto">rehacer el test</button>
+                     <p className="text-xs text-[#595750] font-sans pt-2">¿prefieres ver el catálogo? <span onClick={() => setQuizPaso('catalogo')} className="underline cursor-pointer font-bold text-[#1c1c1a]">ver todas</span></p>
                   </div>
                 </div>
               )}
@@ -1800,7 +1415,6 @@ export default function App() {
                     <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
                     <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
                   </div>
-                  
                   <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
                     {modalidades.map((m) => (
                       <div key={m.id} className="editorial-card p-5 space-y-3 bg-[#ffffee] border border-[#e6e4dc] text-left shadow-sm">
@@ -1877,24 +1491,18 @@ export default function App() {
       
       {mostrarModalShare && (
         <ModalCompartirStory 
-        onClose={() => setMostrarModalShare(false)}
-        usuario={nombreUsuarioPersonalizado || sesion.nombre}
-        libro={libroActual}
-        pagina={miPagina}
-        citas={misCitas}
-        decoracion={decoracionActual}
-        misLibros={lecturasPersonales
-          .filter(l => 
-            (l.email && sesion?.email && String(l.email).toLowerCase().trim() === String(sesion.email).toLowerCase().trim()) ||
-            (l.nombre && sesion?.nombre && String(l.nombre).toLowerCase().trim() === String(sesion.nombre).toLowerCase().trim())
-          )
-          .map(l => ({
-            ...l,
-            titulo: l.titulo || l.libro
-          }))
-        }
-        onPublicarCita={publicarCitaEnMuro}
-      />
+          onClose={() => setMostrarModalShare(false)}
+          usuario={nombreUsuarioPersonalizado || sesion.nombre}
+          libro={libroActual}
+          pagina={miPagina}
+          citas={misCitas}
+          decoracion={decoracionActual}
+          misLibros={lecturasPersonales
+            .filter(l => String(l.email || '').toLowerCase().trim() === String(sesion.email).toLowerCase().trim())
+            .map(l => ({ ...l, titulo: l.titulo || l.libro }))
+          }
+          onPublicarCita={publicarCitaEnMuro}
+        />
       )}
 
       {libroSeleccionadoDetalle && (
@@ -1914,48 +1522,19 @@ export default function App() {
 
             {mostrarInputCorreccionPortada ? (
               <div className="space-y-2 bg-[#faf9f5] p-3 rounded-xl border border-[#e6e4dc] font-sans">
-                <input
-                  type="text"
-                  value={editandoPortadaUrl}
-                  onChange={(e) => setEditandoPortadaUrl(e.target.value)}
-                  placeholder="Pega la URL de la nueva portada..."
-                  className="w-full px-3 py-2 text-xs border border-[#e6e4dc] rounded-lg bg-white text-[#1c1c1a] focus:outline-none focus:border-[#3d4220]"
-                />
+                <input type="text" value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} placeholder="Pega la URL de la nueva portada..." className="w-full px-3 py-2 text-xs border border-[#e6e4dc] rounded-lg bg-white text-[#1c1c1a]" />
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
-                      const nuevaPortada = editandoPortadaUrl.trim();
-
-                      const clon = lecturasPersonales.map(l => {
-                        if ((l.email || '').toLowerCase().trim() === (sesion.email || '').toLowerCase().trim() && (l.libro || l.titulo || '').toLowerCase().trim() === tituloLibro.toLowerCase().trim()) {
-                          return { ...l, portada: nuevaPortada };
-                        }
-                        return l;
-                      });
-                      setLecturasPersonales(clon);
-                      setLibroSeleccionadoDetalle({ ...libroSeleccionadoDetalle, portada: nuevaPortada });
-
-                      enviarAccion('actualizar_portada_libro', {
-                        email: sesion.email,
-                        libro: tituloLibro,
-                        portada: nuevaPortada
-                      });
-
-                      registrarActividadPresencia();
-                      mostrarToast('¡Portada actualizada con éxito!');
-                      setMostrarInputCorreccionPortada(false);
-                    }}
-                    className="flex-1 editorial-btn py-1.5 text-xs font-semibold"
-                  >
-                    Guardar
-                  </button>
-                  <button
-                    onClick={() => setMostrarInputCorreccionPortada(false)}
-                    className="flex-1 bg-white border border-[#e6e4dc] text-[#595750] py-1.5 rounded-xl text-xs font-semibold hover:bg-gray-50"
-                  >
-                    Cancelar
-                  </button>
+                  <button onClick={async () => {
+                    const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                    const nuevaPortada = editandoPortadaUrl.trim();
+                    await supabase.from('personal_readings').update({ portada: nuevaPortada }).eq('email', sesion.email).eq('libro', tituloLibro);
+                    await cargarDatosSupabase();
+                    setLibroSeleccionadoDetalle({ ...libroSeleccionadoDetalle, portada: nuevaPortada });
+                    registrarActividadPresencia();
+                    mostrarToast('¡Portada actualizada!');
+                    setMostrarInputCorreccionPortada(false);
+                  }} className="flex-1 editorial-btn py-1.5 text-xs font-semibold">Guardar</button>
+                  <button onClick={() => setMostrarInputCorreccionPortada(false)} className="flex-1 bg-white border border-[#e6e4dc] text-[#595750] py-1.5 rounded-xl text-xs font-semibold">Cancelar</button>
                 </div>
               </div>
             ) : (
@@ -1965,61 +1544,43 @@ export default function App() {
             )}
 
             <div className="py-3 px-3 my-2 bg-[#ffffee] rounded-xl border border-[#e6e4dc] flex flex-col items-center gap-2 font-sans">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d4220]">
-                deja tu marca de tinta
-              </span>
-              
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d4220]">deja tu marca de tinta</span>
               <div className="flex gap-1.5 items-center">
                 {[1, 2, 3, 4, 5].map((num) => (
-                  <span 
-                    key={num}
-                    onClick={() => setEstrellasSeleccionadas(num)}
-                    className={`cursor-pointer font-babydoll text-2xl transition-transform hover:scale-125 ${
-                      num <= estrellasSeleccionadas ? 'text-[#1c1c1a]' : 'text-[#d4cfbc]'
-                    }`}
-                    title={`${num} de 5 estrellas`}
-                  >
-                    ✦
-                  </span>
+                  <span key={num} onClick={() => setEstrellasSeleccionadas(num)} className={`cursor-pointer font-babydoll text-2xl transition-transform hover:scale-125 ${num <= estrellasSeleccionadas ? 'text-[#1c1c1a]' : 'text-[#d4cfbc]'}`}>✦</span>
                 ))}
               </div>
-
-              <button 
-                onClick={() => {
-                  const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
-                  const portadaLibro = libroSeleccionadoDetalle.portada || '';
-                  
-                  enviarAccion('evaluar_libro', {
-                    email: sesion.email,
-                    nombre: nombreUsuarioPersonalizado || sesion.nombre,
-                    libro: tituloLibro,
-                    estrellas: estrellasSeleccionadas,
-                    portada: portadaLibro,
-                    timestamp: new Date().toLocaleString()
-                  });
-
-                  registrarActividadPresencia();
-                  mostrarToast(`¡Marca de ${estrellasSeleccionadas}/5 ✦ guardada en el muro!`);
-                  setLibroSeleccionadoDetalle(null);
-                }} 
-                className="w-full mt-2 editorial-btn py-2 text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5"
-              >
-                <i className="fa-solid fa-feather text-[10px]"></i> Estampar en el Muro del Club
+              <button onClick={async () => {
+                const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                const postMuro = {
+                  tipo: 'evaluacion',
+                  email: sesion.email,
+                  nombre: nombreUsuarioPersonalizado || sesion.nombre,
+                  libro: tituloLibro,
+                  estrellas: estrellasSeleccionadas,
+                  portada: libroSeleccionadoDetalle.portada || '',
+                  timestamp: new Date().toISOString()
+                };
+                await supabase.from('wall_posts').insert([postMuro]);
+                await cargarDatosSupabase();
+                registrarActividadPresencia();
+                mostrarToast(`¡Marca de ${estrellasSeleccionadas}/5 ✦ guardada!`);
+                setLibroSeleccionadoDetalle(null);
+              }} className="w-full mt-2 editorial-btn py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
+                <i className="fa-solid fa-feather text-[10px]"></i> Estampar en el Muro
               </button>
             </div>
 
             <div className="pt-2 border-t border-[#e6e4dc] flex gap-2">
-              <button onClick={() => {
-                const tituloBuscado = (libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo || '').trim().toLowerCase();
-                const nombreOriginalLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
-                const clon = lecturasPersonales.filter(l => !( (l.email || '').toLowerCase().trim() === (sesion.email || '').toLowerCase().trim() && (l.libro || l.titulo || '').toLowerCase().trim() === tituloBuscado ));
-                setLecturasPersonales(clon);
-                enviarAccion('eliminar_libro_personal', { email: sesion.email, libro: nombreOriginalLibro });
+              <button onClick={async () => {
+                const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                await supabase.from('personal_readings').delete().eq('email', sesion.email).eq('libro', tituloLibro);
+                await cargarDatosSupabase();
                 registrarActividadPresencia();
                 setLibroSeleccionadoDetalle(null);
                 mostrarToast('Libro eliminado de la estantería');
               }} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold">Eliminar</button>
-              <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); }} className="flex-1 editorial-btn py-2 text-xs">Cerrar</button>
+              <button onClick={() => setLibroSeleccionadoDetalle(null)} className="flex-1 editorial-btn py-2 text-xs">Cerrar</button>
             </div>
           </div>
         </div>
@@ -2057,7 +1618,6 @@ export default function App() {
               </div>
             </div>
             
-            {/* MEJORA 2: Autoguardado sin botón "ok" */}
             <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-between">
               <span className="text-xs text-[#595750] font-sans">página actual:</span>
               <div className="flex items-center gap-2">
@@ -2065,13 +1625,10 @@ export default function App() {
                   type="number" 
                   value={miPagina} 
                   onChange={(e) => setMiPagina(Number(e.target.value))} 
-                  onBlur={() => {
-                    enviarAccion('actualizar_pagina', { pagina: miPagina }); 
+                  onBlur={async () => {
+                    await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
                     registrarActividadPresencia();
-                    setUsuariasClub(prev => prev.map(u => {
-                      if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) return { ...u, pagina: miPagina };
-                      return u;
-                    }));
+                    setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, pagina: miPagina } : u));
                     mostrarToast('Progreso guardado automáticamente');
                   }}
                   className="editorial-input w-20 text-center py-1.5 text-xs font-semibold" 
@@ -2080,17 +1637,12 @@ export default function App() {
             </div>
           </div>
 
-          {/* MEJORA 1: Geolocalización automática en la tarjeta de localización */}
           <div className="editorial-card p-5 space-y-3">
             <div className="flex justify-between items-center">
               <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">
                 <i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización
               </h3>
-              <button 
-                type="button" 
-                onClick={obtenerUbicacionActual}
-                className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl shadow-sm hover:bg-[#2d3216] transition-all flex items-center gap-1.5"
-              >
+              <button type="button" onClick={obtenerUbicacionActual} className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl shadow-sm hover:bg-[#2d3216] transition-all flex items-center gap-1.5">
                 <i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual
               </button>
             </div>
@@ -2099,15 +1651,12 @@ export default function App() {
               <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={(e) => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
               <input type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={(e) => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
             </div>
-            <button onClick={() => {
+            <button onClick={async () => {
               safeSet('gilda_ciudad', miCiudadInput);
               safeSet('gilda_codigo_postal', miCodigoPostalInput);
-              enviarAccion('actualizar_ubicacion', { ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput });
+              await supabase.from('profiles').update({ ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput }).eq('email', sesion.email);
               registrarActividadPresencia();
-              setUsuariasClub(prev => prev.map(u => {
-                if ((u.email || '').trim().toLowerCase() === (sesion?.email || '').trim().toLowerCase()) return { ...u, ciudad: miCiudadInput, provincia_region: miCiudadInput };
-                return u;
-              }));
+              setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, ciudad: miCiudadInput } : u));
               mostrarToast('Ubicación guardada correctamente');
             }} className="w-full editorial-btn py-2.5 text-xs font-semibold">Guardar ubicación</button>
           </div>
@@ -2117,9 +1666,7 @@ export default function App() {
               <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
                 <i className="fa-regular fa-calendar-days text-[#3d4220]"></i> Calendario del club
               </h3>
-              <span className="text-xs text-[#595750] font-sans uppercase">
-                {eventosCalendario.filter(e => (e.estado || '').toLowerCase() !== 'pendiente' && (e.estado || '').toLowerCase() !== 'por definir').length} programado(s)
-              </span>
+              <span className="text-xs text-[#595750] font-sans uppercase">{eventosCalendario.length} programado(s)</span>
             </div>
             <CalendarioInteractivo eventos={eventosCalendario} />
           </div>
@@ -2134,16 +1681,15 @@ export default function App() {
         </div>
 
         <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="w-full flex justify-center fade-in">
-          <EdificioClub AvatarUsuaria={AvatarUsuaria} usuarias={miembrosEdificio} 
+          <EdificioClub 
+            AvatarUsuaria={AvatarUsuaria} 
+            usuarias={miembrosEdificio} 
             libroActual={libroActual} 
             sesionEmail={sesion.email}
             chatBloqueado={esRestringida}
             onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} 
             onAbrirPrivado={(socia) => {
-              if (esRestringida) {
-                setMostrarModalUpgrade(true);
-                return;
-              }
+              if (esRestringida) { setMostrarModalUpgrade(true); return; }
               setSeccionApp('comunidad');
               setSubTabComunidad('chat');
               setChatModo('privado');
@@ -2164,7 +1710,7 @@ export default function App() {
                 <button onClick={() => setMostrarModalShare(true)} className="px-3 py-2 text-xs rounded-xl font-bold font-sans bg-white/75 border border-[#d8cdb8] text-[#3d4220] shadow-sm hover:bg-white flex items-center gap-1.5 transition-colors">
                   <i className="fa-brands fa-instagram text-xs"></i> Compartir
                 </button>
-                <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); enviarAccion('estado_lectura', { leyendo: nuevo }); registrarActividadPresencia(); }} aria-pressed={isReadingNow} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 ${isReadingNow ? 'bg-[#3d4220] border-[#3d4220] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
+                <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); registrarActividadPresencia(); }} aria-pressed={isReadingNow} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 ${isReadingNow ? 'bg-[#3d4220] border-[#3d4220] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
                   <i className={`fa-solid ${isReadingNow ? 'fa-book-open' : 'fa-book'} text-[10px]`}></i>
                   {isReadingNow ? 'Leyendo ahora' : 'En pausa'}
                 </button>
@@ -2232,7 +1778,6 @@ export default function App() {
               </select>
             </div>
 
-            {/* MEJORA 3: Interruptor real (Toggle Switch) para "Activar avisos" (WCAG) */}
             <div className="editorial-card p-3 flex flex-col justify-center gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -2244,32 +1789,15 @@ export default function App() {
                   role="switch"
                   aria-checked={['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)}
                   onClick={activarNotificaciones}
-                  disabled={['comprobando', 'solicitando', 'push-activadas', 'nativas-activadas', 'no-compatible'].includes(estadoNotificaciones)}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer ${
-                    ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)
-                      ? 'bg-[#3d4220]'
-                      : 'bg-[#d8cdb8]'
+                    ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones) ? 'bg-[#3d4220]' : 'bg-[#d8cdb8]'
                   }`}
                   title="Activar o desactivar notificaciones"
                 >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-                      ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)
-                        ? 'translate-x-6'
-                        : 'translate-x-0'
-                    }`}
-                  ></div>
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones) ? 'translate-x-6' : 'translate-x-0'}`}></div>
                 </button>
               </div>
-              <p className="text-[10px] leading-relaxed text-[#756a58] font-sans">
-                {estadoNotificaciones === 'comprobando' ? 'Preparando notificaciones…' :
-                  estadoNotificaciones === 'push-activadas' || estadoNotificaciones === 'nativas-activadas' ? 'Notificaciones activadas en este dispositivo.' :
-                  estadoNotificaciones === 'permiso-concedido' ? 'Permiso concedido; falta configurar el servidor push.' :
-                  estadoNotificaciones === 'denegadas' ? 'Permiso denegado en los ajustes del dispositivo.' :
-                  estadoNotificaciones === 'no-compatible' ? 'Notificaciones no disponibles en este navegador.' :
-                  estadoNotificaciones === 'error' ? 'No se pudo preparar el servicio de notificaciones.' :
-                  'Recibe avisos cuando haya novedades del club.'}
-              </p>
+              <p className="text-[10px] leading-relaxed text-[#756a58] font-sans">Recibe avisos cuando haya novedades del club.</p>
             </div>
           </div>
 
@@ -2296,7 +1824,13 @@ export default function App() {
                     {objetosPersonalizados.map(obj => (
                       <ObjetoExternoEnmarcado key={obj.id} urlImagen={obj.url} titulo={obj.titulo} onClick={() => manejarClickEnMarco(obj.id)} />
                     ))}
-                    <button onClick={agregarNuevoMarco} className="shrink-0 border-[1.5px] border-dashed border-[#1c1c1a] rounded-sm bg-[#f7f3e8]/60 hover:bg-[#f7f3e8] w-12 h-20 flex flex-col items-center justify-center text-[#595750] text-[10px] transition font-sans" title="Añadir marco">
+                    <button onClick={() => {
+                      const nuevoId = `pin-${Date.now()}`;
+                      const actualizado = [...objetosPersonalizados, { id: nuevoId, url: null, titulo: 'Nuevo pin' }];
+                      setObjetosPersonalizados(actualizado);
+                      safeSet('gilda_objetos_personalizados', actualizado);
+                      mostrarToast('Nuevo marco añadido a la balda');
+                    }} className="shrink-0 border-[1.5px] border-dashed border-[#1c1c1a] rounded-sm bg-[#f7f3e8]/60 hover:bg-[#f7f3e8] w-12 h-20 flex flex-col items-center justify-center text-[#595750] text-[10px] transition font-sans" title="Añadir marco">
                       <i className="fa-solid fa-plus text-xs mb-1"></i>
                       <span>Marco</span>
                     </button>
@@ -2441,13 +1975,13 @@ export default function App() {
                                   </div>
                                 )}
                                 {respondiendoA === idComentario && !modalidadLimpia.includes('cotilla') && (
-                                  <form onSubmit={(e) => {
+                                  <form onSubmit={async (e) => {
                                     e.preventDefault();
                                     const txtResp = textoRespuesta[idComentario];
                                     if (!txtResp || !txtResp.trim()) return;
-                                    const nuevaRespObj = { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txtResp, fecha: 'Justo ahora' };
-                                    setComentarios([...comentarios, nuevaRespObj]);
-                                    enviarAccion('comentar_capitulo', { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, comentario: txtResp });
+                                    const nuevaRespObj = { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txtResp, fecha: 'Justo ahora', email: sesion.email };
+                                    await supabase.from('comments').insert([nuevaRespObj]);
+                                    await cargarDatosSupabase();
                                     registrarActividadPresencia();
                                     setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
                                     setRespondiendoA(null);
@@ -2464,14 +1998,14 @@ export default function App() {
                       </div>
 
                       {!modalidadLimpia.includes('cotilla') && (
-                        <form onSubmit={(e) => {
+                        <form onSubmit={async (e) => {
                           e.preventDefault();
                           const clave = cap.id || cap.titulo;
                           const txt = textoComentario[clave];
                           if (!txt || !txt.trim()) return;
-                          const nuevoCom = { capitulo: identificadorCap, parent_id: '', autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txt, fecha: 'Justo ahora' };
-                          setComentarios([...comentarios, nuevoCom]);
-                          enviarAccion('comentar_capitulo', { capitulo: identificadorCap, comentario: txt });
+                          const nuevoCom = { capitulo: identificadorCap, parent_id: '', autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txt, fecha: 'Justo ahora', email: sesion.email };
+                          await supabase.from('comments').insert([nuevoCom]);
+                          await cargarDatosSupabase();
                           registrarActividadPresencia();
                           setTextoComentario({ ...textoComentario, [clave]: '' });
                           mostrarToast('Comentario enviado');
@@ -2504,7 +2038,7 @@ export default function App() {
               {muroActividad.length === 0 ? (
                 <p className="text-xs text-[#595750] italic font-sans text-center py-6">Aún no hay marcas de tinta en el muro. ¡Sé la primera en puntuar un libro!</p>
               ) : (
-                muroActividad.slice().reverse().map((item, idx) => {
+                muroActividad.map((item, idx) => {
                   const esCita = item.tipo === 'cita' || Boolean(item.cita);
                   const numEstrellas = Number(item.estrellas) || 5;
                   const estrellasTexto = '✦'.repeat(numEstrellas) + '✧'.repeat(5 - numEstrellas);
@@ -2514,8 +2048,8 @@ export default function App() {
                       <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro} portada={item.portada} size="thumb" />
                       <div className="flex flex-col justify-between w-full space-y-1">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : (sesion?.email ? sesion.email.split('@')[0] : 'lectora'))}</span>
-                          <span className="text-[10px] text-[#595750] font-sans">{item.timestamp}</span>
+                          <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : 'lectora')}</span>
+                          <span className="text-[10px] text-[#595750] font-sans">{new Date(item.timestamp || Date.now()).toLocaleDateString()}</span>
                         </div>
                         {esCita ? (
                           <>
@@ -2539,27 +2073,23 @@ export default function App() {
 
         <div style={{ display: seccionApp === 'comunidad' && !esRestringida ? 'block' : 'none' }} aria-hidden={esRestringida || seccionApp !== 'comunidad'} className="space-y-4 fade-in" onClick={registrarActividadPresencia}>
           <div className="flex overflow-x-auto gap-2 bg-[#faf9f5] p-1.5 rounded-2xl border border-[#e6e4dc] font-sans no-scrollbar">
-          {[
-            { id: 'chat', label: 'Chat', icon: 'fa-comments' },
-            { id: 'mapa', label: `Mapa (${usuariasClub.length})`, icon: 'fa-map-location-dot' },
-            { id: 'archivo', label: 'Archivo', icon: 'fa-box-archive' },
-            { id: 'cafecitos', label: 'Cafecitos', icon: 'fa-mug-hot' },
-            { id: 'buzon', label: 'Buzón', icon: 'fa-inbox' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setSubTabComunidad(tab.id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 min-h-[44px] ${
-                subTabComunidad === tab.id 
-                  ? 'bg-[#1c1c1a] text-[#ffffee] shadow-sm scale-[1.02]' 
-                  : 'text-[#595750] hover:bg-white/80'
-              }`}
-            >
-              <i className={`fa-solid ${tab.icon} text-[11px]`}></i>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+            {[
+              { id: 'chat', label: 'Chat', icon: 'fa-comments' },
+              { id: 'mapa', label: `Mapa (${usuariasClub.length})`, icon: 'fa-map-location-dot' },
+              { id: 'archivo', label: 'Archivo', icon: 'fa-box-archive' },
+              { id: 'cafecitos', label: 'Cafecitos', icon: 'fa-mug-hot' },
+              { id: 'buzon', label: 'Buzón', icon: 'fa-inbox' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setSubTabComunidad(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 min-h-[44px] ${subTabComunidad === tab.id ? 'bg-[#1c1c1a] text-[#ffffee] shadow-sm scale-[1.02]' : 'text-[#595750] hover:bg-white/80'}`}
+              >
+                <i className={`fa-solid ${tab.icon} text-[11px]`}></i>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
           {subTabComunidad === 'chat' && (
             <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-[#faf9f5]">
@@ -2574,7 +2104,6 @@ export default function App() {
                       </p>
                     </div>
                   </div>
-                  
                   <div className="flex bg-[#f5f2e6] p-0.5 rounded-lg border border-[#e6e4dc]">
                     <button onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${chatModo === 'global' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Global</button>
                     <button onClick={() => setChatModo('privado')} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${chatModo === 'privado' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Privados</button>
@@ -2586,54 +2115,39 @@ export default function App() {
                 <>
                   <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col bg-[#faf9f5]/50">
                     {chatMsgs.filter(m => !m.tipo || m.tipo !== 'privado').map((m, i) => {
-                      const nombreAutorChat = obtenerNombreReal(m.email, m.usuario || m.usuaria);
-                      const usuarioMsg = nombreAutorChat.toLowerCase().trim();
-                      const miNombre = (nombreUsuarioPersonalizado || sesion.nombre || '').toLowerCase().trim();
-                      const esMia = usuarioMsg === miNombre || (m.email && m.email.toLowerCase() === sesion.email.toLowerCase());
-                      
+                      const nombreAutorChat = obtenerNombreReal(m.email, m.usuario);
+                      const esMia = (m.email || '').toLowerCase() === sesion.email.toLowerCase();
                       const horaMensaje = formatearHoraWhatsApp(m.timestamp, m.fecha);
 
                       return (
-                        <div key={i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                        <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
                           {!esMia && <span className="text-[10px] font-bold text-[#3d4220] font-sans mb-0.5 px-1">{nombreAutorChat}</span>}
                           <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[#3d4220] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
                             <span className="block pr-8 pb-1">{m.mensaje}</span>
-                            <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>
-                              {horaMensaje}
-                            </span>
+                            <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>{horaMensaje}</span>
                           </div>
                         </div>
                       );
                     })}
-
-                    {sociaEscribiendo && (
-                      <div className="self-start text-[11px] font-sans italic text-[#3d4220] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-xs fade-in flex items-center gap-2">
-                        <i className="fa-solid fa-pen-nib animate-bounce text-[10px]"></i>
-                        <span><b>{sociaEscribiendo}</b> está escribiendo...</span>
-                      </div>
-                    )}
-
                     <div ref={chatEndRef} />
                   </div>
 
-                  <form onSubmit={(e) => { 
+                  <form onSubmit={async (e) => { 
                     e.preventDefault(); 
-                    if(!nuevoChat.trim()) return; 
-                    enviarAccion('enviar_chat', { mensaje: nuevoChat, tipo: 'global' }); 
+                    if (!nuevoChat.trim()) return; 
+                    const nuevoMsg = {
+                      email: sesion.email,
+                      usuario: nombreUsuarioPersonalizado || sesion.nombre,
+                      mensaje: nuevoChat.trim(),
+                      tipo: 'global',
+                      timestamp: new Date().toISOString()
+                    };
+                    await supabase.from('chat_messages').insert([nuevoMsg]);
+                    await cargarDatosSupabase();
                     registrarActividadPresencia();
-                    setChatMsgs(prev => [...prev, { email: sesion.email, usuario: nombreUsuarioPersonalizado || sesion.nombre, mensaje: nuevoChat, tipo: 'global', fecha: 'Justo ahora', timestamp: new Date().toISOString() }]);
                     setNuevoChat(''); 
                   }} className="p-3 border-t border-[#e6e4dc] flex gap-2 bg-white">
-                    <input 
-                      type="text" 
-                      value={nuevoChat} 
-                      onChange={e => {
-                        setNuevoChat(e.target.value);
-                        manejarTipeoChat(e.target.value);
-                      }} 
-                      className="flex-grow editorial-input px-3.5 py-2.5 text-xs" 
-                      placeholder="Escribe un mensaje al club..." 
-                    />
+                    <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder="Escribe un mensaje al club..." />
                     <button type="submit" className="editorial-btn px-4 py-2.5 text-xs shadow-sm"><i className="fa-solid fa-paper-plane"></i></button>
                   </form>
                 </>
@@ -2642,8 +2156,8 @@ export default function App() {
               {chatModo === 'privado' && !destinatarioPrivado && (
                 <div className="flex-grow p-4 overflow-y-auto space-y-2 bg-[#faf9f5]">
                   <p className="text-xs text-[#595750] font-sans italic pb-2">Selecciona una socia para abrir una conversación privada:</p>
-                  {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== (sesion.email || '').toLowerCase().trim()).map((socia, sIdx) => {
-                    const nombreSociaReal = socia.nombre || (socia.email ? socia.email.split('@')[0] : 'lectora');
+                  {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== sesion.email.toLowerCase()).map((socia, sIdx) => {
+                    const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
                     return (
                       <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e6e4dc] cursor-pointer hover:bg-[#faf9f5] transition-all shadow-xs">
                         <div className="flex items-center gap-3 overflow-hidden">
@@ -2673,7 +2187,7 @@ export default function App() {
                     </button>
                     <div className="flex items-center gap-1.5">
                       <IndicadorPresencia timestamp={destinatarioPrivado.ultima_conexion} />
-                      <span className="font-babydoll font-bold text-sm">{destinatarioPrivado.nombre || (destinatarioPrivado.email ? destinatarioPrivado.email.split('@')[0] : 'lectora')}</span>
+                      <span className="font-babydoll font-bold text-sm">{destinatarioPrivado.nombre || destinatarioPrivado.email.split('@')[0]}</span>
                     </div>
                   </div>
                   
@@ -2682,23 +2196,18 @@ export default function App() {
                       if (m.tipo !== 'privado') return false;
                       const rem = (m.remitente || m.email || '').toLowerCase().trim();
                       const dest = (m.destinatario || '').toLowerCase().trim();
-                      const miEmail = (sesion.email || '').toLowerCase().trim();
-                      const otroEmail = (destinatarioPrivado.email || '').toLowerCase().trim();
+                      const miEmail = sesion.email.toLowerCase();
+                      const otroEmail = destinatarioPrivado.email.toLowerCase();
                       return (rem === miEmail && dest === otroEmail) || (rem === otroEmail && dest === miEmail);
                     }).map((m, i) => {
-                      const miEmail = (sesion.email || '').toLowerCase().trim();
-                      const rem = (m.remitente || m.email || '').toLowerCase().trim();
-                      const esMia = rem === miEmail;
-
+                      const esMia = (m.remitente || m.email || '').toLowerCase() === sesion.email.toLowerCase();
                       const horaMensaje = formatearHoraWhatsApp(m.timestamp, m.fecha);
 
                       return (
-                        <div key={i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                        <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
                           <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[#3d4220] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
                             <span className="block pr-8 pb-1">{m.mensaje}</span>
-                            <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>
-                              {horaMensaje}
-                            </span>
+                            <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>{horaMensaje}</span>
                           </div>
                         </div>
                       );
@@ -2706,38 +2215,23 @@ export default function App() {
                     <div ref={chatEndRef} />
                   </div>
 
-                  <form onSubmit={(e) => {
+                  <form onSubmit={async (e) => {
                     e.preventDefault();
                     if (!nuevoChatPrivado.trim()) return;
                     const payload = {
                       tipo: 'privado',
-                      remitente: sesion.email,
-                      destinatario: destinatarioPrivado.email,
-                      mensaje: nuevoChatPrivado
-                    };
-                    enviarAccion('enviar_chat', payload);
-                    registrarActividadPresencia();
-                    setChatMsgs(prev => [...prev, {
                       email: sesion.email,
                       remitente: sesion.email,
                       destinatario: destinatarioPrivado.email,
-                      mensaje: nuevoChatPrivado,
-                      tipo: 'privado',
-                      fecha: 'Justo ahora',
+                      mensaje: nuevoChatPrivado.trim(),
                       timestamp: new Date().toISOString()
-                    }]);
+                    };
+                    await supabase.from('chat_messages').insert([payload]);
+                    await cargarDatosSupabase();
+                    registrarActividadPresencia();
                     setNuevoChatPrivado('');
                   }} className="p-3 border-t border-[#e6e4dc] flex gap-2 bg-white">
-                    <input 
-                      type="text" 
-                      value={nuevoChatPrivado} 
-                      onChange={e => {
-                        setNuevoChatPrivado(e.target.value);
-                        manejarTipeoChat(e.target.value);
-                      }} 
-                      className="flex-grow editorial-input px-3.5 py-2.5 text-xs" 
-                      placeholder={`Escribe a ${destinatarioPrivado.nombre || (destinatarioPrivado.email ? destinatarioPrivado.email.split('@')[0] : 'socia')}...`} 
-                    />
+                    <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'socia'}...`} />
                     <button type="submit" className="editorial-btn px-4 py-2.5 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
                   </form>
                 </>
@@ -2771,7 +2265,7 @@ export default function App() {
               ) : (
                 <div className="space-y-3">
                   {cafecitosConVotos.map(cafecito => (
-                    <article key={cafecito.fecha || cafecito.titulo} className="editorial-card p-4 space-y-3">
+                    <article key={cafecito.id || cafecito.titulo} className="editorial-card p-4 space-y-3">
                       <div className="flex items-start gap-3">
                         <div className="w-9 h-9 shrink-0 rounded-full bg-[#f3eadb] border border-[#e6e4dc] flex items-center justify-center text-[#805a3b]">
                           <i className="fa-solid fa-mug-hot text-sm"></i>
@@ -2791,13 +2285,7 @@ export default function App() {
                           <div className="h-full rounded-full bg-[#8b6040] transition-all duration-300" style={{ width: `${cafecito.porcentaje}%` }}></div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        disabled={false}
-                        aria-pressed={cafecito.yaVoto}
-                        onClick={() => votarCafecito(cafecito)}
-                        className={`w-full py-2 rounded-xl text-xs font-bold font-sans border transition-colors disabled:opacity-50 ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}
-                      >
+                      <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2 rounded-xl text-xs font-bold font-sans border transition-colors ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}>
                         <i className={`fa-solid ${cafecito.yaVoto ? 'fa-check' : 'fa-heart'} mr-1.5`}></i>
                         {cafecito.yaVoto ? 'Retirar mi voto' : 'Votar este cafecito'}
                       </button>
@@ -2812,13 +2300,19 @@ export default function App() {
             <div className="space-y-4">
               <div className="editorial-card p-5 space-y-3">
                 <h3 className="font-babydoll text-xl font-bold">Proponer nueva lectura</h3>
-                <form onSubmit={(e) => {
+                <form onSubmit={async (e) => {
                   e.preventDefault();
                   const tit = nuevaPropuestaTitulo?.trim();
                   if (!tit) return;
-                  const nueva = { titulo: tit, autora: nuevaPropuestaAutora?.trim() || '', votos: '1', votantes: sesion.email.toLowerCase(), portada: nuevaPropuestaPortada?.trim() || '' };
-                  setPropuestas([...propuestas, nueva]);
-                  enviarAccion('propuesta', nueva);
+                  const nueva = {
+                    titulo: tit,
+                    autora: nuevaPropuestaAutora?.trim() || '',
+                    votos: 1,
+                    votantes: sesion.email.toLowerCase(),
+                    portada: nuevaPropuestaPortada?.trim() || ''
+                  };
+                  await supabase.from('proposals').insert([nueva]);
+                  await cargarDatosSupabase();
                   registrarActividadPresencia();
                   setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
                   mostrarToast('Propuesta añadida.');
@@ -2834,67 +2328,36 @@ export default function App() {
                   <h3 className="font-babydoll text-xl font-bold">Votación del mes</h3>
                   <span className="text-xs text-[#595750] font-sans uppercase">Propuestas del club</span>
                 </div>
-
-                {(() => {
-                  const diaActual = new Date().getDate();
-                  const votacionCerrada = diaActual >= 30 || diaActual === 1;
-
-                  return (
-                    <>
-                      {votacionCerrada && (
-                        <div className="p-3 mb-3 bg-[#faf9f5] border border-[#e6e4dc] rounded-xl text-center fade-in">
-                          <p className="text-xs text-[#595750] font-sans italic">Votaciones cerradas por este mes. Procesando resultados...</p>
-                        </div>
-                      )}
-
-                      <div className="space-y-3">
-                        {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
-                          <div key={i} className="flex gap-3 border border-[#e6e4dc] p-3.5 rounded-xl bg-[#ffffee]">
-                            <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
-                            <div className="flex flex-col justify-between w-full">
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-bold text-[#3d4220]">#{i + 1}</span>
-                                  <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
-                                </div>
-                                <p className="text-xs text-[#595750] italic">{p.autora}</p>
-                              </div>
-                              <button 
-                                disabled={votacionCerrada}
-                                onClick={()=>{
-                                  if (votacionCerrada) return;
-                                  const clon = [...propuestas]; 
-                                  const item = clon.find(x => x.titulo === p.titulo); 
-                                  if(!item) return;
-                                  let arr = (item.votantes||"").toLowerCase().split(',').map(v=>v.trim()).filter(v=>v);
-                                  if(arr.includes(sesion.email.toLowerCase())){ 
-                                    arr = arr.filter(v=>v!==sesion.email.toLowerCase()); 
-                                    item.votos = Math.max(0, Number(item.votos||0) - 1); 
-                                  } else { 
-                                    arr.push(sesion.email.toLowerCase()); 
-                                    item.votos = Number(item.votos||0) + 1; 
-                                  }
-                                  item.votantes = arr.join(','); 
-                                  setPropuestas(clon); 
-                                  enviarAccion('votar', { tipo: 'propuesta', id: p.titulo, email: sesion.email }); 
-                                  registrarActividadPresencia(); 
-                                  mostrarToast('Voto actualizado.');
-                                }} 
-                                className={`self-start mt-2 px-3.5 py-1 text-xs rounded-full font-bold transition-all ${
-                                  votacionCerrada 
-                                    ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60' 
-                                    : 'bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white'
-                                }`}
-                              >
-                                Votar ({p.votos||0})
-                              </button>
-                            </div>
+                <div className="space-y-3">
+                  {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
+                    <div key={p.id || i} className="flex gap-3 border border-[#e6e4dc] p-3.5 rounded-xl bg-[#ffffee]">
+                      <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
+                      <div className="flex flex-col justify-between w-full">
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-[#3d4220]">#{i + 1}</span>
+                            <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
                           </div>
-                        ))}
+                          <p className="text-xs text-[#595750] italic">{p.autora}</p>
+                        </div>
+                        <button onClick={async () => {
+                          const votantesArr = String(p.votantes || '').toLowerCase().split(',').map(v => v.trim()).filter(Boolean);
+                          const emailUser = sesion.email.toLowerCase();
+                          const yaVoto = votantesArr.includes(emailUser);
+                          const nuevosVotantes = yaVoto ? votantesArr.filter(v => v !== emailUser) : [...votantesArr, emailUser];
+                          const nuevosVotos = Math.max(0, (Number(p.votos) || votantesArr.length) + (yaVoto ? -1 : 1));
+
+                          await supabase.from('proposals').update({ votos: nuevosVotos, votantes: nuevosVotantes.join(',') }).eq('id', p.id);
+                          await cargarDatosSupabase();
+                          registrarActividadPresencia();
+                          mostrarToast('Voto actualizado.');
+                        }} className="self-start mt-2 px-3.5 py-1 text-xs rounded-full font-bold bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white transition-all">
+                          Votar ({p.votos || 0})
+                        </button>
                       </div>
-                    </>
-                  );
-                })()}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -2904,7 +2367,12 @@ export default function App() {
               <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
               <p className="text-xs text-[#595750] font-sans">Sugerencias y comunicación directa con la administración.</p>
               <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
-              <button onClick={()=>{ enviarAccion('buzon',{mensaje:mensajeFundadora}); registrarActividadPresencia(); setMensajeFundadora(''); mostrarToast('Mensaje enviado.');}} className="w-full editorial-btn py-2.5 text-xs">Enviar mensaje</button>
+              <button onClick={async () => {
+                await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora, email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);
+                registrarActividadPresencia();
+                setMensajeFundadora('');
+                mostrarToast('Mensaje enviado al buzón.');
+              }} className="w-full editorial-btn py-2.5 text-xs">Enviar mensaje</button>
             </div>
           )}
         </div>
@@ -2945,23 +2413,19 @@ export default function App() {
                 <section className="editorial-card p-4 space-y-3">
                   <div className="flex justify-between items-baseline gap-2">
                     <h2 className="font-babydoll text-lg font-bold">Moderación del chat</h2>
-                    <span className="text-[10px] text-[#756a58] font-sans">últimos 12 mensajes</span>
+                    <span className="text-[10px] text-[#756a58] font-sans">últimos mensajes</span>
                   </div>
                   {chatMsgs.length === 0 ? <p className="text-xs text-[#756a58] italic">No hay mensajes cargados.</p> : (
                     <div className="divide-y divide-[#e6e4dc]">
-                      {chatMsgs.slice(-12).reverse().map((mensaje, visibleIndex) => {
-                        const indice = chatMsgs.length - 1 - visibleIndex;
-                        return (
-                          <div key={`${mensaje.timestamp || mensaje.email}-${indice}`} className="flex items-start gap-3 py-2.5">
-                            <div className="min-w-0 flex-grow">
-                              <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || (mensaje.email ? mensaje.email.split('@')[0] : 'lectora')} · {mensaje.tipo || 'global'}</p>
-                              <p className="break-words text-xs text-[#232321]">{mensaje.mensaje}</p>
-                              <p className="text-[9px] text-[#756a58]">{mensaje.timestamp || mensaje.fecha || ''}</p>
-                            </div>
-                            <button type="button" onClick={() => adminEliminarMensajeChat(indice)} title="Retirar mensaje" className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
+                      {chatMsgs.slice(-12).reverse().map((mensaje) => (
+                        <div key={mensaje.id} className="flex items-start gap-3 py-2.5">
+                          <div className="min-w-0 flex-grow">
+                            <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || 'lectora'} · {mensaje.tipo || 'global'}</p>
+                            <p className="break-words text-xs text-[#232321]">{mensaje.mensaje}</p>
                           </div>
-                        );
-                      })}
+                          <button type="button" onClick={() => adminEliminarMensajeChat(mensaje.id)} title="Retirar mensaje" className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </section>
@@ -2971,35 +2435,16 @@ export default function App() {
                     <h2 className="font-babydoll text-lg font-bold">Propuestas del club</h2>
                     <span className="text-[10px] text-[#756a58] font-sans">{propuestas.length} propuestas</span>
                   </div>
-                  {propuestas.map((propuesta, indice) => (
-                    <div key={`${propuesta.titulo}-${indice}`} className="flex items-center gap-3 border-t border-[#e6e4dc] py-2.5">
+                  {propuestas.map((propuesta) => (
+                    <div key={propuesta.id} className="flex items-center gap-3 border-t border-[#e6e4dc] py-2.5">
                       <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={propuesta.titulo} autora={propuesta.autora} portada={propuesta.portada} size="thumb" />
                       <div className="min-w-0 flex-grow">
                         <p className="truncate font-babydoll text-sm font-bold">{propuesta.titulo}</p>
                         <p className="truncate text-[10px] text-[#756a58]">{propuesta.autora || 'Autora no indicada'} · {propuesta.votos || 0} votos</p>
                       </div>
-                      <button type="button" onClick={() => adminEliminarPropuesta(indice)} className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
+                      <button type="button" onClick={() => adminEliminarPropuesta(propuesta.id)} className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
                     </div>
                   ))}
-                </section>
-
-                <section className="editorial-card p-4 space-y-3">
-                  <div className="flex justify-between items-baseline gap-2">
-                    <h2 className="font-babydoll text-lg font-bold">Validación de capítulos</h2>
-                    <span className="text-[10px] text-[#756a58] font-sans">{capitulos.length} capítulos</span>
-                  </div>
-                  {capitulos.map((capitulo, indice) => {
-                    const oculto = ['oculto', 'borrador'].includes(String(capitulo.estado || '').toLowerCase());
-                    return (
-                      <div key={`${capitulo.id || capitulo.titulo}-${indice}`} className="flex items-center gap-3 border-t border-[#e6e4dc] py-2.5">
-                        <div className="min-w-0 flex-grow">
-                          <p className="truncate font-babydoll text-sm font-bold">{capitulo.titulo || `Capítulo ${indice + 1}`}</p>
-                          <p className="text-[10px] text-[#756a58]">{oculto ? 'Oculto' : 'Visible'} · pág. {capitulo.pagina_fin || capitulo.pagina || 0}</p>
-                        </div>
-                        <button type="button" onClick={() => adminAlternarCapitulo(indice)} className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#3d4220] hover:bg-[#faf9f5]">{oculto ? 'Publicar' : 'Ocultar'}</button>
-                      </div>
-                    );
-                  })}
                 </section>
               </div>
             </>
@@ -3029,7 +2474,6 @@ export default function App() {
                 else setSeccionApp(tab.id);
               }} 
               title={bloqueado ? 'Actualiza tu modalidad para acceder a la comunidad' : tab.label}
-              aria-haspopup={bloqueado ? 'dialog' : undefined}
               className={`flex flex-col items-center gap-1 transition-all p-1.5 ${seccionApp === tab.id && !bloqueado ? 'text-[#1c1c1a] font-bold bg-[#faf9f5] px-3.5 py-1.5 rounded-xl shadow-sm' : 'text-[#595750] hover:text-gray-800'} ${bloqueado ? 'opacity-50' : ''}`}
             >
               <i className={`fa-solid ${bloqueado ? 'fa-lock' : tab.icon} ${bloqueado ? 'text-xs' : 'text-sm'}`}></i>
