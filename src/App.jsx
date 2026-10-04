@@ -435,7 +435,7 @@ export default function App() {
              Cerrar
            </button>
            <p className="text-center text-white/70 text-xs px-4 pt-1 leading-relaxed">
-             Consejo: También puedes hacer captura de pantalla para subirla directamente à tus Stories.
+             Consejo: También puedes hacer captura de pantalla para subirla directamente a tus Stories.
            </p>
         </div>
       </div>
@@ -894,13 +894,63 @@ export default function App() {
   const [mostrarModalShare, setMostrarModalShare] = useState(false);
 
   const modalidades = [
-    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás.' },
-    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
-    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda.' },
-    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal la carta sorpresa de gilda.' },
-    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, destacado: true, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
-    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: contenido en papel y acceso total a la app.' }
+    { 
+      id: 'cotilla', 
+      nombre: 'gilda cotilla', 
+      precio: 'Gratis', 
+      esGratis: true, 
+      enlaceStripe: '', 
+      descripcion: 'tu pase libre para cotillear: asómate, lee los comentarios y debates de las demás y descubre la comunidad desde dentro de forma totalmente gratuita.' 
+    },
+    { 
+      id: 'satelite', 
+      nombre: 'gilda satélite', 
+      precio: '1 €/mes', 
+      esGratis: false, 
+      enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', 
+      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas avanzando con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
+    },
+    { 
+      id: 'cafe', 
+      nombre: 'gilda de café', 
+      precio: '5 €/mes', 
+      esGratis: false, 
+      enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', 
+      descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' 
+    },
+    { 
+      id: 'nube', 
+      nombre: 'gilda de nube', 
+      precio: '5 €/mes', 
+      esGratis: false, 
+      enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', 
+      descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' 
+    },
+    { 
+      id: 'papel', 
+      nombre: 'gilda de papel', 
+      precio: '10 €/mes', 
+      esGratis: false, 
+      enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', 
+      descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' 
+    },
+    { 
+      id: 'virtual', 
+      nombre: 'gilda virtual', 
+      precio: '8 €/mes', 
+      esGratis: false, 
+      destacado: true, 
+      enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', 
+      descripcion: 'recibe todo el contenido digital en tu correo electrónico y acceso total a la app.' 
+    },
+    { 
+      id: 'absoluta', 
+      nombre: 'gilda absoluta', 
+      precio: '12 €/mes', 
+      esGratis: false, 
+      enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', 
+      descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' 
+    }
   ];
 
   const calcularModalidadIdeal = (comunidad, carta) => {
@@ -1006,7 +1056,23 @@ export default function App() {
   const chatEndRef = useRef(null);
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
-  
+
+  const manejarClickEnMarco = (id) => {
+    setObjetoActivoParaImportar(id);
+    setModalImportarAbierto(true);
+  };
+
+  const guardarEnlaceExterna = (id, url, titulo) => {
+    const actualizado = objetosPersonalizados.map(obj => 
+      obj.id === id ? { ...obj, url, titulo: titulo || obj.titulo } : obj
+    );
+    setObjetosPersonalizados(actualizado);
+    safeSet('gilda_objetos_personalizados', actualizado);
+    setModalImportarAbierto(false);
+    setObjetoActivoParaImportar(null);
+    mostrarToast('Marco actualizado');
+  };
+
   const obtenerUbicacionActual = () => {
     if (!navigator.geolocation) {
       mostrarToast('La geolocalización no es compatible con tu navegador.');
@@ -1190,7 +1256,6 @@ export default function App() {
 
     try {
       if (modalidadSeleccionada.esGratis) {
-        // Solicitamos el enlace mágico y guardamos el nombre y modalidad en los metadatos de auth
         const { error: authError } = await supabase.auth.signInWithOtp({
           email: emailSocia,
           options: { 
@@ -1207,7 +1272,6 @@ export default function App() {
         setEnviandoRegistro(false);
         window.location.assign('/gracias');
       } else {
-        // Redirección automática a Stripe para las modalidades de pago
         const enlaceStripe = new URL(modalidadSeleccionada.enlaceStripe);
         enlaceStripe.searchParams.set('prefilled_email', emailSocia);
         window.location.assign(enlaceStripe.toString());
