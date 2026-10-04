@@ -231,10 +231,10 @@ export default function App() {
 
   const IndicadorPresencia = ({ timestamp }) => {
     const estado = calcularEstadoConexion(timestamp);
-    if (estado === 'desconectada') return <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block shrink-0" title="Desconectada"></span>;
+    if (estado === 'desconectada') return <span className="w-3 h-3 rounded-full bg-gray-300 inline-block shrink-0" title="Desconectada"></span>;
     const color = estado === 'conectada' ? 'bg-green-500 animate-pulse' : 'bg-amber-400';
     const titulo = estado === 'conectada' ? 'Conectada ahora' : 'Ausente';
-    return <span className={`w-2.5 h-2.5 rounded-full ${color} inline-block shrink-0`} title={titulo}></span>;
+    return <span className={`w-3 h-3 rounded-full ${color} inline-block shrink-0`} title={titulo}></span>;
   };
 
   const formatearHoraWhatsApp = (timestampOrStr, fechaFallback) => {
@@ -320,9 +320,9 @@ export default function App() {
     return (
       <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-start pt-6 pb-6 px-4 fade-in overflow-y-auto">
         <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-full mb-4 border border-white/20 shadow-lg shrink-0">
-           <button onClick={() => setModo('progreso')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors ${modo==='progreso' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Progreso</button>
-           <button onClick={() => setModo('cita')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors ${modo==='cita' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Cita</button>
-           <button onClick={() => setModo('habitacion')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors ${modo==='habitacion' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Habitación</button>
+           <button onClick={() => setModo('progreso')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors min-h-[44px] ${modo==='progreso' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Progreso</button>
+           <button onClick={() => setModo('cita')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors min-h-[44px] ${modo==='cita' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Cita</button>
+           <button onClick={() => setModo('habitacion')} className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors min-h-[44px] ${modo==='habitacion' ? 'bg-white text-[#1c1c1a] shadow-sm':'text-white hover:bg-white/10'}`}>Habitación</button>
         </div>
 
         {librosStory.length > 0 && (
@@ -336,7 +336,7 @@ export default function App() {
 
         <div 
           id="gilda-story-card" 
-          className="relative w-[310px] h-[551px] shadow-2xl rounded-2xl flex flex-col justify-between items-center p-6 bg-[#ffffee] border border-[#e6e4dc] shrink-0 box-border overflow-hidden" 
+          className="relative w-[310px] h-[551px] shadow-2xl rounded-2xl flex flex-col justify-between items-center p-6 bg-[#ffffee] border border-[#e6e4dc] shrink-0 box-border overflow-hidden modal-pop" 
         >
           <div className="w-full text-center pt-2 pb-2 shrink-0">
             <h2 className="font-babydoll text-xl text-[#1c1c1a] leading-tight tracking-wide">
@@ -348,7 +348,7 @@ export default function App() {
             {modo === 'cita' && (
               <div className="w-full px-2 text-center flex flex-col items-center justify-center space-y-3">
                 <textarea aria-label="Texto de la cita para Stories" value={textoCita} onChange={e => setTextoCita(e.target.value)} maxLength={360} className="w-full min-h-36 resize-none border border-[#e6e4dc] rounded-xl bg-white/70 p-3 font-babydoll text-base text-[#1c1c1a] leading-relaxed text-center focus:outline-none focus:ring-2 focus:ring-[#8b6040]" />
-                <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[#3d4220] bg-white border border-[#e6e4dc] rounded-full px-3 py-1.5">Otra cita</button>
+                <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[#3d4220] bg-white border border-[#e6e4dc] rounded-full px-3 py-1.5 min-h-[44px]">Otra cita</button>
                 {libroStory?.titulo && <span className="font-sans text-[10px] text-[#595750]">{libroStory.titulo}{libroStory.autora ? ` · ${libroStory.autora}` : ''}</span>}
                 <span className="font-sans text-xs font-semibold text-[#3d4220] tracking-wide block lowercase">
                   @gilda.mailclub
@@ -423,15 +423,15 @@ export default function App() {
                    setPublicandoCita(false);
                  }
                }}
-               className="w-full bg-[#3d4220] text-white font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 disabled:opacity-50"
+               className="w-full bg-[#3d4220] text-white font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
              >
                <i className="fa-solid fa-feather"></i> {publicandoCita ? 'Publicando...' : 'Publicar en el Muro'}
              </button>
            )}
-           <button onClick={handleDownload} className="w-full bg-white text-[#1c1c1a] font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
+           <button onClick={handleDownload} className="w-full bg-white text-[#1c1c1a] font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform min-h-[44px]">
              <i className="fa-solid fa-download"></i> Descargar imagen
            </button>
-           <button onClick={onClose} className="w-full bg-transparent text-white font-bold py-3.5 rounded-2xl text-xs border border-white/20 hover:bg-white/10 transition-colors">
+           <button onClick={onClose} className="w-full bg-transparent text-white font-bold py-3.5 rounded-2xl text-xs border border-white/20 hover:bg-white/10 transition-colors min-h-[44px]">
              Cerrar
            </button>
            <p className="text-center text-white/70 text-xs px-4 pt-1 leading-relaxed">
@@ -445,8 +445,8 @@ export default function App() {
   function ModalUpgrade({ onClose }) {
     return (
       <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-        <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative">
-          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+        <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative modal-pop">
+          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
             <i className="fa-solid fa-xmark text-sm"></i>
           </button>
           <div className="w-12 h-12 bg-[#ffffee] rounded-full flex items-center justify-center mx-auto text-[#3d4220] border border-[#e6e4dc]">
@@ -458,7 +458,7 @@ export default function App() {
               Tu modalidad actual no incluye acceso a esta función. Actualiza tu suscripción para acceder a todas las secciones de gilda.
             </p>
           </div>
-          <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="block w-full editorial-btn py-2.5 text-xs text-center font-semibold">
+          <a href="https://nagoreads.github.io/gilda/" target="_blank" rel="noopener noreferrer" className="block w-full editorial-btn py-3 text-xs text-center font-semibold min-h-[44px] flex items-center justify-center">
             Actualizar modalidad
           </a>
         </div>
@@ -500,8 +500,8 @@ export default function App() {
 
     return (
       <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-        <div className="editorial-card max-w-sm w-full p-6 space-y-4 bg-white relative">
-          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+        <div className="editorial-card max-w-sm w-full p-6 space-y-4 bg-white relative modal-pop">
+          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
             <i className="fa-solid fa-xmark text-sm"></i>
           </button>
           <h3 className="font-babydoll text-xl font-bold">Añadir pin o imagen externa</h3>
@@ -519,10 +519,10 @@ export default function App() {
             </div>
           </div>
           <div className="flex gap-2 pt-2">
-            <button onClick={() => { if (urlInput.trim()) { onSave(urlInput.trim(), tituloInput.trim()); } }} className="flex-1 editorial-btn py-2.5 text-xs font-semibold">
+            <button onClick={() => { if (urlInput.trim()) { onSave(urlInput.trim(), tituloInput.trim()); } }} className="flex-1 editorial-btn py-2.5 text-xs font-semibold min-h-[44px]">
               Guardar marco
             </button>
-            <button onClick={onClose} className="flex-1 bg-gray-100 text-[#595750] rounded-xl py-2.5 text-xs font-semibold hover:bg-gray-200 font-sans">
+            <button onClick={onClose} className="flex-1 bg-gray-100 text-[#595750] rounded-xl py-2.5 text-xs font-semibold hover:bg-gray-200 font-sans min-h-[44px]">
               Cancelar
             </button>
           </div>
@@ -772,9 +772,9 @@ export default function App() {
     return (
       <div className="space-y-3">
         <div className="flex justify-between items-center bg-[#ffffee] p-2.5 rounded-xl border border-[#e6e4dc]">
-          <button onClick={mesAnterior} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a]"><i className="fa-solid fa-chevron-left text-xs"></i></button>
+          <button onClick={mesAnterior} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-left text-xs"></i></button>
           <h4 className="font-babydoll text-base font-bold text-[#1c1c1a]">{nombresMeses[mes]} {anio}</h4>
-          <button onClick={mesSiguiente} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a]"><i className="fa-solid fa-chevron-right text-xs"></i></button>
+          <button onClick={mesSiguiente} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-right text-xs"></i></button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center font-sans text-[10px] uppercase font-semibold text-[#595750] pb-1 border-b border-[#e6e4dc]">
           {diasSemana.map((d, i) => <div key={i}>{d}</div>)}
@@ -787,7 +787,7 @@ export default function App() {
               <span className="font-babydoll font-bold text-sm text-[#1c1c1a]">
                 Eventos del {diaSeleccionado.dia} de {nombresMeses[mes]}
               </span>
-              <button onClick={() => setDiaSeleccionado(null)} className="text-xs text-[#595750] hover:text-black p-1">
+              <button onClick={() => setDiaSeleccionado(null)} className="text-xs text-[#595750] hover:text-black p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -908,7 +908,7 @@ export default function App() {
       precio: '1 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', 
-      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas avanzando con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
+      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas advancing con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
     },
     { 
       id: 'cafe', 
@@ -979,9 +979,11 @@ export default function App() {
   };
 
   const [seccionApp, setSeccionApp] = useState('inicio');
+  const [subTabInicio, setSubTabInicio] = useState('progreso');
   const [subTabComunidad, setSubTabComunidad] = useState('chat');
   const restablecerNavegacion = () => {
     setSeccionApp('inicio');
+    setSubTabInicio('progreso');
     setSubTabComunidad('chat');
     setChatModo('global');
     setDestinatarioPrivado(null);
@@ -999,7 +1001,6 @@ export default function App() {
   const [tabEstanteria, setTabEstanteria] = useState('leyendo');
   const [toastMsg, setToastMsg] = useState(null);
   const [estadoNotificaciones, setEstadoNotificaciones] = useState('comprobando');
-  const pushRegistrationListenerRef = useRef([]);
   const [mostrarModalUpgrade, setMostrarModalUpgrade] = useState(false);
   
   const [capitulos, setCapitulos] = useState(() => safeGetJSON('gilda_cache_capitulos', []));
@@ -1011,7 +1012,6 @@ export default function App() {
   const [eventosCalendario, setEventosCalendario] = useState(() => safeGetJSON('gilda_cache_calendario', []));
   const [muroActividad, setMuroActividad] = useState(() => safeGetJSON('gilda_cache_muro', []));
   const [cafecitos, setCafecitos] = useState(() => safeGetJSON('gilda_cache_cafecitos', []));
-  const [votacionCafecitos, setVotacionCafecitos] = useState(() => safeGetJSON('gilda_cache_votacion_cafe', []));
   const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
   const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
   const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
@@ -1031,16 +1031,13 @@ export default function App() {
   const [modalImportarAbierto, setModalImportarAbierto] = useState(false);
   const [objetoActivoParaImportar, setObjetoActivoParaImportar] = useState(null);
 
-  const [sociaEscribiendo, setSociaEscribiendo] = useState(null);
-  const timerEscribiendoRef = useRef(null);
-  const ultimoEscribiendoKeyRef = useRef('');
-
   const [modoCreacionManual, setModoCreacionManual] = useState(false);
   const [manualTitulo, setManualTitulo] = useState('');
   const [manualAutora, setManualAutora] = useState('');
   const [manualPortada, setManualPortada] = useState('');
 
   const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false);
   const [editandoPortadaUrl, setEditandoPortadaUrl] = useState('');
   const [mostrarInputCorreccionPortada, setMostrarInputCorreccionPortada] = useState(false);
   const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState(5);
@@ -1097,7 +1094,6 @@ export default function App() {
     });
   };
 
-  // Carga general de datos desde Supabase
   const cargarDatosSupabase = async () => {
     try {
       const [
@@ -1445,12 +1441,12 @@ export default function App() {
                   <label className="block text-xs font-semibold text-[#1c1c1a]">Correo electrónico</label>
                   <input type="email" placeholder="tu@correo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required className="w-full editorial-input px-3.5 py-3 text-xs" />
                 </div>
-                <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3 text-xs shadow-md mt-2 font-bold cursor-pointer">
+                <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3 text-xs shadow-md mt-2 font-bold cursor-pointer min-h-[44px]">
                   {loadingAuth ? 'Enviando enlace...' : 'Enviar enlace mágico de acceso'}
                 </button>
               </form>
               <div className="border-t border-[#e6e4dc] pt-4 space-y-3">
-                <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#faf9f5] text-center shadow-sm">
+                <button onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3 text-xs font-bold transition-all hover:bg-[#faf9f5] text-center shadow-sm min-h-[44px]">
                   Conocer las modalidades del club
                 </button>
               </div>
@@ -1523,12 +1519,12 @@ export default function App() {
                       <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1.5 rounded-full shadow-sm">{modalidadSeleccionada.precio}</span>
                     </div>
                     <p className="text-xs text-[#595750] font-sans mb-6 leading-relaxed relative z-10">{modalidadSeleccionada.descripcion}</p>
-                    <button onClick={() => setVistaAcceso('formulario_registro')} className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2">
+                    <button onClick={() => setVistaAcceso('formulario_registro')} className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2 min-h-[44px]">
                       elegir esta modalidad <i className="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                   </div>
                   <div className="text-center pt-2 space-y-2">
-                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto">rehacer el test</button>
+                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto p-2">rehacer el test</button>
                      <p className="text-xs text-[#595750] font-sans pt-2">¿prefieres ver el catálogo? <span onClick={() => setQuizPaso('catalogo')} className="underline cursor-pointer font-bold text-[#1c1c1a]">ver todas</span></p>
                   </div>
                 </div>
@@ -1538,7 +1534,7 @@ export default function App() {
                 <div className="fade-in space-y-4 pt-1">
                   <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
                     <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
-                    <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans">ver mi match</button>
+                    <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans p-2">ver mi match</button>
                   </div>
                   <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
                     {modalidades.map((m) => (
@@ -1548,7 +1544,7 @@ export default function App() {
                           <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1 rounded-full shrink-0">{m.precio}</span>
                         </div>
                         <p className="text-xs text-[#595750] font-sans leading-relaxed whitespace-normal">{m.descripcion}</p>
-                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2.5 text-xs editorial-btn font-semibold shadow-xs">
+                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2.5 text-xs editorial-btn font-semibold shadow-xs min-h-[44px]">
                           Elegir esta modalidad
                         </button>
                       </div>
@@ -1561,7 +1557,7 @@ export default function App() {
 
           {vistaAcceso === 'formulario_registro' && modalidadSeleccionada && (
             <div className="space-y-4 fade-in text-left">
-              <button onClick={() => setVistaAcceso('modalidades')} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans">
+              <button onClick={() => setVistaAcceso('modalidades')} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]">
                 <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> Volver
               </button>
               <div className="border-b border-[#e6e4dc] pb-3">
@@ -1577,7 +1573,7 @@ export default function App() {
                   <label className="block text-xs font-semibold text-[#1c1c1a] mb-1">Correo electrónico *</label>
                   <input type="email" name="Email" required placeholder="hola@ejemplo.com" className="w-full editorial-input px-3.5 py-3 text-xs" />
                 </div>
-                <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-3 flex items-center justify-center gap-2 shadow-md">
+                <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-3 flex items-center justify-center gap-2 shadow-md min-h-[44px]">
                   {enviandoRegistro ? 'Procesando...' : (<><span>Apúntame</span><i className="fa-solid fa-arrow-right text-xs"></i></>)}
                 </button>
               </form>
@@ -1594,7 +1590,7 @@ export default function App() {
         <div className="editorial-card max-w-sm w-full p-8 space-y-4 text-center">
           <h1 className="font-babydoll text-4xl text-[#1c1c1a] font-bold">gilda</h1>
           <p className="text-xs text-[#595750] font-sans leading-relaxed">Tu modalidad actual ({sesion.modalidad}) está registrada exclusivamente para correo y no incluye acceso web.</p>
-          <button onClick={cerrarSesion} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
+          <button onClick={cerrarSesion} className="editorial-btn px-4 py-2 text-xs min-h-[44px]">Cerrar sesión</button>
         </div>
       </div>
     );
@@ -1632,8 +1628,8 @@ export default function App() {
 
       {libroSeleccionadoDetalle && (
         <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-          <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative">
-            <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); setEditandoPortadaUrl(''); }} className="absolute top-3 right-3 text-gray-400 hover:text-black">
+          <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative modal-pop">
+            <button onClick={() => { setLibroSeleccionadoDetalle(null); setMostrarInputCorreccionPortada(false); setEditandoPortadaUrl(''); setConfirmandoEliminar(false); }} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
               <i className="fa-solid fa-xmark text-sm"></i>
             </button>
             <div className="flex justify-center">
@@ -1658,21 +1654,27 @@ export default function App() {
                     registrarActividadPresencia();
                     mostrarToast('¡Portada actualizada!');
                     setMostrarInputCorreccionPortada(false);
-                  }} className="flex-1 editorial-btn py-1.5 text-xs font-semibold">Guardar</button>
-                  <button onClick={() => setMostrarInputCorreccionPortada(false)} className="flex-1 bg-white border border-[#e6e4dc] text-[#595750] py-1.5 rounded-xl text-xs font-semibold">Cancelar</button>
+                  }} className="flex-1 editorial-btn py-1.5 text-xs font-semibold min-h-[44px]">Guardar</button>
+                  <button onClick={() => setMostrarInputCorreccionPortada(false)} className="flex-1 bg-white border border-[#e6e4dc] text-[#595750] py-1.5 rounded-xl text-xs font-semibold min-h-[44px]">Cancelar</button>
                 </div>
               </div>
             ) : (
-              <button onClick={() => { setEditandoPortadaUrl(libroSeleccionadoDetalle.portada || ''); setMostrarInputCorreccionPortada(true); }} className="w-full bg-[#faf9f5] border border-[#e6e4dc] text-[#3d4220] py-2 rounded-xl text-xs font-semibold">
+              <button onClick={() => { setEditandoPortadaUrl(libroSeleccionadoDetalle.portada || ''); setMostrarInputCorreccionPortada(true); }} className="w-full bg-[#faf9f5] border border-[#e6e4dc] text-[#3d4220] py-2 rounded-xl text-xs font-semibold min-h-[44px]">
                 <i className="fa-solid fa-image mr-1"></i> Corregir portada o URL
               </button>
             )}
 
             <div className="py-3 px-3 my-2 bg-[#ffffee] rounded-xl border border-[#e6e4dc] flex flex-col items-center gap-2 font-sans">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d4220]">deja tu marca de tinta</span>
-              <div className="flex gap-1.5 items-center">
+              <div className="flex gap-1 items-center">
                 {[1, 2, 3, 4, 5].map((num) => (
-                  <span key={num} onClick={() => setEstrellasSeleccionadas(num)} className={`cursor-pointer font-babydoll text-2xl transition-transform hover:scale-125 ${num <= estrellasSeleccionadas ? 'text-[#1c1c1a]' : 'text-[#d4cfbc]'}`}>✦</span>
+                  <span 
+                    key={num} 
+                    onClick={() => setEstrellasSeleccionadas(num)} 
+                    className={`cursor-pointer font-babydoll text-2xl transition-transform hover:scale-125 p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center ${num <= estrellasSeleccionadas ? 'text-[#1c1c1a]' : 'text-[#d4cfbc]'}`}
+                  >
+                    ✦
+                  </span>
                 ))}
               </div>
               <button onClick={async () => {
@@ -1691,21 +1693,34 @@ export default function App() {
                 registrarActividadPresencia();
                 mostrarToast(`¡Marca de ${estrellasSeleccionadas}/5 ✦ guardada!`);
                 setLibroSeleccionadoDetalle(null);
-              }} className="w-full mt-2 editorial-btn py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
+              }} className="w-full mt-2 editorial-btn py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 min-h-[44px]">
                 <i className="fa-solid fa-feather text-[10px]"></i> Estampar en el Muro
               </button>
             </div>
 
-            <div className="pt-2 border-t border-[#e6e4dc] flex gap-2">
-              <button onClick={async () => {
-                const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
-                await supabase.from('personal_readings').delete().eq('email', sesion.email).eq('libro', tituloLibro);
-                await cargarDatosSupabase();
-                registrarActividadPresencia();
-                setLibroSeleccionadoDetalle(null);
-                mostrarToast('Libro eliminado de la estantería');
-              }} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold">Eliminar</button>
-              <button onClick={() => setLibroSeleccionadoDetalle(null)} className="flex-1 editorial-btn py-2 text-xs">Cerrar</button>
+            <div className="pt-2 border-t border-[#e6e4dc] flex flex-col gap-2">
+              {confirmandoEliminar ? (
+                <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-center space-y-2.5 fade-in font-sans">
+                  <p className="text-xs font-bold text-red-800">¿Segura que quieres eliminar este libro de tu estantería?</p>
+                  <div className="flex gap-2">
+                    <button onClick={async () => {
+                      const tituloLibro = libroSeleccionadoDetalle.libro || libroSeleccionadoDetalle.titulo;
+                      await supabase.from('personal_readings').delete().eq('email', sesion.email).eq('libro', tituloLibro);
+                      await cargarDatosSupabase();
+                      registrarActividadPresencia();
+                      setLibroSeleccionadoDetalle(null);
+                      setConfirmandoEliminar(false);
+                      mostrarToast('Libro eliminado de la estantería');
+                    }} className="flex-1 py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-700 min-h-[44px]">Sí, eliminar</button>
+                    <button onClick={() => setConfirmandoEliminar(false)} className="flex-1 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 min-h-[44px]">Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => setConfirmandoEliminar(true)} className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50 transition-colors min-h-[44px]">Eliminar</button>
+                  <button onClick={() => { setLibroSeleccionadoDetalle(null); setConfirmandoEliminar(false); }} className="flex-1 editorial-btn py-2 text-xs min-h-[44px]">Cerrar</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1719,90 +1734,160 @@ export default function App() {
             <span className="text-xs text-[#595750] uppercase font-sans tracking-wider">{sesion.modalidad}</span>
           </div>
         </div>
-        <button onClick={cerrarSesion} className="text-[#595750] hover:text-black p-2"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+        <div className="flex items-center gap-1">
+          {esAdministradora && (
+            <button
+              onClick={() => setSeccionApp('admin')}
+              title="Panel de Administración"
+              className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[#3d4220] text-white border-[#3d4220]' : 'bg-[#faf9f5] text-[#3d4220] border-[#e6e4dc] hover:bg-gray-100'}`}
+            >
+              <i className="fa-solid fa-screwdriver-wrench text-xs"></i>
+            </button>
+          )}
+          <button onClick={cerrarSesion} title="Cerrar sesión" className="text-[#595750] hover:text-black p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <i className="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
       </header>
 
       <main className="w-full flex-grow space-y-4">
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 fade-in">
-          <div className="editorial-card p-5 space-y-4" onClick={registrarActividadPresencia}>
-            <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2.5 mb-2">
-               <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">Progreso actual</h3>
-               <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans flex items-center gap-1.5 text-[#3d4220] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-sm hover:bg-[#faf9f5] transition-all"><i className="fa-brands fa-instagram text-[#3d4220]"></i> Compartir en Stories</button>
-            </div>
+          <div className="flex bg-[#faf9f5] p-1 rounded-xl text-xs font-semibold border border-[#e6e4dc] font-sans mb-3">
+            <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-2 rounded-lg transition-all min-h-[44px] ${subTabInicio === 'progreso' ? 'bg-[#1c1c1a] text-[#ffffee] shadow-xs' : 'text-[#595750]'}`}>Mi actividad y lecturas</button>
+            <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-2 rounded-lg transition-all min-h-[44px] ${subTabInicio === 'muro' ? 'bg-[#1c1c1a] text-[#ffffee] shadow-xs' : 'text-[#595750]'}`}>Muro del club</button>
+          </div>
 
-            <div className="flex gap-4 items-center">
-              <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
-              <div className="space-y-2 w-full">
-                <span className="text-xs uppercase tracking-wider text-[#3d4220] font-bold font-sans">Lectura del club</span>
-                <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
-                <p className="text-xs text-[#595750] italic font-sans">{libroActual.autora}</p>
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs text-[#595750] mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
-                  <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e6e4dc]"><div className="bg-[#3d4220] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
+          {subTabInicio === 'progreso' && (
+            <>
+              <div className="editorial-card p-5 space-y-4" onClick={registrarActividadPresencia}>
+                <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2.5 mb-2">
+                   <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">Progreso actual</h3>
+                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans flex items-center gap-1.5 text-[#3d4220] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-sm hover:bg-[#faf9f5] transition-all min-h-[44px]"><i className="fa-brands fa-instagram text-[#3d4220]"></i> Compartir en Stories</button>
+                </div>
+
+                <div className="flex gap-4 items-center">
+                  <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+                  <div className="space-y-2 w-full">
+                    <span className="text-xs uppercase tracking-wider text-[#3d4220] font-bold font-sans">Lectura del club</span>
+                    <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
+                    <p className="text-xs text-[#595750] italic font-sans">{libroActual.autora}</p>
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-[#595750] mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
+                      <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e6e4dc]"><div className="bg-[#3d4220] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-between">
+                  <span className="text-xs text-[#595750] font-sans">página actual:</span>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="number" 
+                      value={miPagina} 
+                      onChange={(e) => setMiPagina(Number(e.target.value))} 
+                      onBlur={async () => {
+                        await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
+                        registrarActividadPresencia();
+                        setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, pagina: miPagina } : u));
+                        mostrarToast('Progreso guardado automáticamente');
+                      }}
+                      className="editorial-input w-20 text-center py-1.5 text-xs font-semibold" 
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-between">
-              <span className="text-xs text-[#595750] font-sans">página actual:</span>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="number" 
-                  value={miPagina} 
-                  onChange={(e) => setMiPagina(Number(e.target.value))} 
-                  onBlur={async () => {
-                    await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
-                    registrarActividadPresencia();
-                    setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, pagina: miPagina } : u));
-                    mostrarToast('Progreso guardado automáticamente');
-                  }}
-                  className="editorial-input w-20 text-center py-1.5 text-xs font-semibold" 
-                />
+
+              <div className="editorial-card p-5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">
+                    <i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización
+                  </h3>
+                  <button type="button" onClick={obtenerUbicacionActual} className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl shadow-sm hover:bg-[#2d3216] transition-all flex items-center gap-1.5 min-h-[44px]">
+                    <i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual
+                  </button>
+                </div>
+                <p className="text-xs text-[#595750] font-sans italic">Añade tu ciudad y código postal para ubicarte en el mapa global del club.</p>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={(e) => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={(e) => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                </div>
+                <button onClick={async () => {
+                  safeSet('gilda_ciudad', miCiudadInput);
+                  safeSet('gilda_codigo_postal', miCodigoPostalInput);
+                  await supabase.from('profiles').update({ ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput }).eq('email', sesion.email);
+                  registrarActividadPresencia();
+                  setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, ciudad: miCiudadInput } : u));
+                  mostrarToast('Ubicación guardada correctamente');
+                }} className="w-full editorial-btn py-2.5 text-xs font-semibold min-h-[44px]">Guardar ubicación</button>
+              </div>
+
+              <div className="editorial-card p-5 space-y-4">
+                <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
+                  <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
+                    <i className="fa-regular fa-calendar-days text-[#3d4220]"></i> Calendario del club
+                  </h3>
+                  <span className="text-xs text-[#595750] font-sans uppercase">{eventosCalendario.length} programado(s)</span>
+                </div>
+                <CalendarioInteractivo eventos={eventosCalendario} />
+              </div>
+
+              <div className="editorial-card p-4 space-y-3">
+                <div className="flex justify-between items-center text-xs px-1">
+                  <span className="font-babydoll text-xl font-bold">Mapa global de lectoras</span>
+                  <span className="text-xs text-[#3d4220] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+                </div>
+                <MapaGildaEstable usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
+              </div>
+            </>
+          )}
+
+          {subTabInicio === 'muro' && (
+            <div className="editorial-card p-5 space-y-4">
+              <div className="border-b border-[#e6e4dc] pb-2">
+                <h3 className="font-babydoll text-2xl font-bold text-[#1c1c1a]">el muro del club</h3>
+                <p className="text-xs text-[#595750] font-sans italic">el rastro de tinta y lecturas compartidas de todas las socias</p>
+              </div>
+
+              <div className="space-y-3">
+                {muroActividad.length === 0 ? (
+                  <div className="w-full flex flex-col items-center justify-center py-8 text-center bg-[#faf9f5] rounded-xl border border-[#e6e4dc]">
+                    <i className="fa-solid fa-feather-pointed text-2xl text-[#d4cfbc] mb-2"></i>
+                    <p className="font-babydoll text-sm font-bold text-[#1c1c1a]">Aún no hay marcas de tinta</p>
+                    <p className="text-xs text-[#756a58] italic font-sans mt-0.5">¡Sé la primera en compartir tu opinión de un libro!</p>
+                  </div>
+                ) : (
+                  muroActividad.map((item, idx) => {
+                    const esCita = item.tipo === 'cita' || Boolean(item.cita);
+                    const numEstrellas = Number(item.estrellas) || 5;
+                    const estrellasTexto = '✦'.repeat(numEstrellas) + '✧'.repeat(5 - numEstrellas);
+
+                    return (
+                      <div key={idx} className="bg-[#ffffee] p-3.5 rounded-xl border border-[#e6e4dc] flex gap-3 items-center shadow-xs">
+                        <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro} portada={item.portada} size="thumb" />
+                        <div className="flex flex-col justify-between w-full space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : 'lectora')}</span>
+                            <span className="text-[10px] text-[#595750] font-sans">{new Date(item.timestamp || Date.now()).toLocaleDateString()}</span>
+                          </div>
+                          {esCita ? (
+                            <>
+                              <p className="text-[10px] text-[#6b684f] font-sans">Ha compartido una cita de <b>{item.libro || 'su lectura'}</b>:</p>
+                              <blockquote className="border-l-2 border-[#8b6040] pl-2.5 font-babydoll text-sm leading-relaxed text-[#232321]">“{item.cita || item.libro}”</blockquote>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-xs text-[#1c1c1a] font-sans leading-relaxed">Ha dejado su marca en <b>{item.libro}</b>:</p>
+                              <span className="font-babydoll text-base tracking-widest text-[#1c1c1a]">{estrellasTexto} ({numEstrellas}/5)</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
-          </div>
-
-          <div className="editorial-card p-5 space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="font-babydoll text-xl font-bold flex items-center gap-2 text-[#1c1c1a]">
-                <i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización
-              </h3>
-              <button type="button" onClick={obtenerUbicacionActual} className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl shadow-sm hover:bg-[#2d3216] transition-all flex items-center gap-1.5">
-                <i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación actual
-              </button>
-            </div>
-            <p className="text-xs text-[#595750] font-sans italic">Añade tu ciudad y código postal para ubicarte en el mapa global del club.</p>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={(e) => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
-              <input type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={(e) => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
-            </div>
-            <button onClick={async () => {
-              safeSet('gilda_ciudad', miCiudadInput);
-              safeSet('gilda_codigo_postal', miCodigoPostalInput);
-              await supabase.from('profiles').update({ ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput }).eq('email', sesion.email);
-              registrarActividadPresencia();
-              setUsuariasClub(prev => prev.map(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase() ? { ...u, ciudad: miCiudadInput } : u));
-              mostrarToast('Ubicación guardada correctamente');
-            }} className="w-full editorial-btn py-2.5 text-xs font-semibold">Guardar ubicación</button>
-          </div>
-
-          <div className="editorial-card p-5 space-y-4">
-            <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
-              <h3 className="font-babydoll text-xl font-bold flex items-center gap-2">
-                <i className="fa-regular fa-calendar-days text-[#3d4220]"></i> Calendario del club
-              </h3>
-              <span className="text-xs text-[#595750] font-sans uppercase">{eventosCalendario.length} programado(s)</span>
-            </div>
-            <CalendarioInteractivo eventos={eventosCalendario} />
-          </div>
-
-          <div className="editorial-card p-4 space-y-3">
-            <div className="flex justify-between items-center text-xs px-1">
-              <span className="font-babydoll text-xl font-bold">Mapa global de lectoras</span>
-              <span className="text-xs text-[#3d4220] font-bold font-sans">{usuariasClub.length} socia(s)</span>
-            </div>
-            <MapaGildaEstable usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
-          </div>
+          )}
         </div>
 
         <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="w-full flex justify-center fade-in">
@@ -1832,10 +1917,10 @@ export default function App() {
                 <p className="mt-1 text-xs text-[#6b6255] font-sans">Un espacio propio para tus libros y lecturas.</p>
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
-                <button onClick={() => setMostrarModalShare(true)} className="px-3 py-2 text-xs rounded-xl font-bold font-sans bg-white/75 border border-[#d8cdb8] text-[#3d4220] shadow-sm hover:bg-white flex items-center gap-1.5 transition-colors">
+                <button onClick={() => setMostrarModalShare(true)} className="px-3 py-2 text-xs rounded-xl font-bold font-sans bg-white/75 border border-[#d8cdb8] text-[#3d4220] shadow-sm hover:bg-white flex items-center gap-1.5 transition-colors min-h-[44px]">
                   <i className="fa-brands fa-instagram text-xs"></i> Compartir
                 </button>
-                <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); registrarActividadPresencia(); }} aria-pressed={isReadingNow} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 ${isReadingNow ? 'bg-[#3d4220] border-[#3d4220] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
+                <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); registrarActividadPresencia(); }} aria-pressed={isReadingNow} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 min-h-[44px] ${isReadingNow ? 'bg-[#3d4220] border-[#3d4220] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
                   <i className={`fa-solid ${isReadingNow ? 'fa-book-open' : 'fa-book'} text-[10px]`}></i>
                   {isReadingNow ? 'Leyendo ahora' : 'En pausa'}
                 </button>
@@ -1914,7 +1999,7 @@ export default function App() {
                   role="switch"
                   aria-checked={['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones)}
                   onClick={activarNotificaciones}
-                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer ${
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer min-h-[44px] ${
                     ['push-activadas', 'nativas-activadas', 'permiso-concedido'].includes(estadoNotificaciones) ? 'bg-[#3d4220]' : 'bg-[#d8cdb8]'
                   }`}
                   title="Activar o desactivar notificaciones"
@@ -1938,7 +2023,12 @@ export default function App() {
             <div className="pt-4 pb-6 px-3 estanteria-madera min-h-[225px] flex items-end justify-between overflow-x-auto">
               <div className="flex items-end justify-start gap-3.5 flex-grow">
                 {todosMisLibrosEstanteria.length === 0 && objetosPersonalizados.length === 0 ? (
-                  <div className="w-full text-center py-10"><p className="text-xs text-[#7A7565] italic font-sans">Aún no hay libros ni marcos en tu estantería...</p></div>
+                  <div className="w-full flex flex-col items-center justify-center py-8 text-center">
+                    <i className="fa-solid fa-book-bookmark text-2xl text-[#d4cfbc] mb-2"></i>
+                    <p className="font-babydoll text-sm font-bold text-[#1c1c1a]">Tu balda está descansando</p>
+                    <p className="text-[11px] text-[#756a58] font-sans italic mb-3">Añade tu primera lectura o marco a la colección</p>
+                    <button type="button" onClick={() => setModoCreacionManual(true)} className="editorial-btn px-3 py-2 text-xs font-semibold min-h-[44px]">+ Añadir primer libro</button>
+                  </div>
                 ) : (
                   <>
                     {todosMisLibrosEstanteria.map((item, idx) => (
@@ -1971,9 +2061,9 @@ export default function App() {
 
             <div className="pt-4 border-t border-[#e6e4dc] space-y-3">
               <div className="flex bg-[#faf9f5] p-1 rounded-xl text-xs font-semibold text-center border border-[#e6e4dc] font-sans">
-                <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leyendo' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Leyendo</button>
-                <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'want_to_read' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Quiero leer</button>
-                <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-1.5 rounded-lg ${tabEstanteria === 'leidos' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Leídos</button>
+                <button onClick={() => setTabEstanteria('leyendo')} className={`flex-1 py-2 rounded-lg min-h-[44px] ${tabEstanteria === 'leyendo' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Leyendo</button>
+                <button onClick={() => setTabEstanteria('want_to_read')} className={`flex-1 py-2 rounded-lg min-h-[44px] ${tabEstanteria === 'want_to_read' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Quiero leer</button>
+                <button onClick={() => setTabEstanteria('leidos')} className={`flex-1 py-2 rounded-lg min-h-[44px] ${tabEstanteria === 'leidos' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Leídos</button>
               </div>
 
               {modoCreacionManual ? (
@@ -1989,8 +2079,8 @@ export default function App() {
                   <input type="text" placeholder="URL portada..." value={manualPortada} onChange={(e) => setManualPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
                   {tabEstanteria === 'leyendo' && <input type="number" placeholder="Página actual..." value={paginaPersonalInput} onChange={(e) => setPaginaPersonalInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />}
                   <div className="flex gap-2 pt-1">
-                    <button type="submit" className="flex-1 editorial-btn py-2 text-xs">Guardar libro</button>
-                    <button type="button" onClick={() => setModoCreacionManual(false)} className="flex-1 bg-white border border-[#e6e4dc] py-2 rounded-xl text-xs">Cancelar</button>
+                    <button type="submit" className="flex-1 editorial-btn py-2 text-xs min-h-[44px]">Guardar libro</button>
+                    <button type="button" onClick={() => setModoCreacionManual(false)} className="flex-1 bg-white border border-[#e6e4dc] py-2 rounded-xl text-xs min-h-[44px]">Cancelar</button>
                   </div>
                 </form>
               ) : (
@@ -1998,7 +2088,7 @@ export default function App() {
                   <BuscadorLibrosEstable solicitarJsonExterno={solicitarJsonExterno} placeholder="Buscar libro..." valor={libroPersonal} setValor={setLibroPersonal} onSelectLibro={(l) => { setLibroPersonal(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); }} />
                   <div className="flex justify-between items-center pt-1 font-sans">
                     <span className="text-xs text-[#595750]">¿No aparece?</span>
-                    <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#3d4220] font-bold hover:underline">+ Crear manualmente</button>
+                    <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#3d4220] font-bold hover:underline min-h-[44px] flex items-center">+ Crear manualmente</button>
                   </div>
                 </div>
               )}
@@ -2010,7 +2100,11 @@ export default function App() {
                 <span className="text-[10px] font-bold text-[#756a58] font-sans">{librosBibliotecaVisibles.length} {librosBibliotecaVisibles.length === 1 ? 'libro' : 'libros'}</span>
               </div>
               {librosBibliotecaVisibles.length === 0 ? (
-                <p className="py-2 text-xs text-[#756a58] italic font-sans">Todavía no hay libros en esta lista.</p>
+                <div className="p-5 text-center bg-[#faf9f5] rounded-xl border border-[#e6e4dc] my-2">
+                  <i className="fa-solid fa-feather-pointed text-xl text-[#d4cfbc] mb-1"></i>
+                  <p className="font-babydoll text-sm font-bold text-[#1c1c1a]">Sin libros en este estado</p>
+                  <p className="text-xs text-[#756a58] italic font-sans mt-0.5">Añade un título desde el buscador de arriba.</p>
+                </div>
               ) : (
                 <div className="divide-y divide-[#e6e4dc]">
                   {librosBibliotecaVisibles.map((item, idx) => (
@@ -2018,7 +2112,7 @@ export default function App() {
                       key={`${item.email || sesion.email}-${item.libro || item.titulo}-${idx}`}
                       type="button"
                       onClick={() => setLibroSeleccionadoDetalle(item)}
-                      className="w-full flex items-center gap-3 py-2.5 text-left hover:bg-[#faf9f5] transition-colors"
+                      className="w-full flex items-center gap-3 py-2.5 text-left hover:bg-[#faf9f5] transition-colors min-h-[44px]"
                     >
                       <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
                       <span className="min-w-0 flex-grow">
@@ -2081,7 +2175,7 @@ export default function App() {
                                 <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{com.texto || ''}</p>
                                 {!modalidadLimpia.includes('cotilla') && (
                                   <div className="flex justify-end">
-                                    <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[#3d4220] font-bold hover:underline">
+                                    <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[#3d4220] font-bold hover:underline min-h-[44px]">
                                       {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
                                     </button>
                                   </div>
@@ -2113,7 +2207,7 @@ export default function App() {
                                     mostrarToast('Respuesta enviada');
                                   }} className="flex gap-2 pt-2">
                                     <input type="text" placeholder="Responde..." value={textoRespuesta[idComentario] || ''} onChange={(e) => setTextoRespuesta({ ...textoRespuesta, [idComentario]: e.target.value })} className="flex-grow editorial-input px-2.5 py-1.5 text-xs bg-white" />
-                                    <button type="submit" className="editorial-btn px-2.5 py-1 text-xs">Enviar</button>
+                                    <button type="submit" className="editorial-btn px-2.5 py-1 text-xs min-h-[44px]">Enviar</button>
                                   </form>
                                 )}
                               </div>
@@ -2136,7 +2230,7 @@ export default function App() {
                           mostrarToast('Comentario enviado');
                         }} className="flex gap-2 pt-1">
                           <input type="text" placeholder="Escribe tu reflexión..." value={textoComentario[cap.id || cap.titulo] || ''} onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                          <button type="submit" className="editorial-btn px-3 text-xs">Comentar</button>
+                          <button type="submit" className="editorial-btn px-3 text-xs min-h-[44px]">Comentar</button>
                         </form>
                       )}
                     </div>
@@ -2150,50 +2244,6 @@ export default function App() {
               </div>
             );
           })}
-        </div>
-
-        <div style={{ display: seccionApp === 'muro' ? 'block' : 'none' }} className="space-y-4 fade-in">
-          <div className="editorial-card p-5 space-y-4">
-            <div className="border-b border-[#e6e4dc] pb-2">
-              <h3 className="font-babydoll text-2xl font-bold text-[#1c1c1a]">el muro del club</h3>
-              <p className="text-xs text-[#595750] font-sans italic">el rastro de tinta y lecturas compartidas de todas las socias</p>
-            </div>
-
-            <div className="space-y-3">
-              {muroActividad.length === 0 ? (
-                <p className="text-xs text-[#595750] italic font-sans text-center py-6">Aún no hay marcas de tinta en el muro. ¡Sé la primera en puntuar un libro!</p>
-              ) : (
-                muroActividad.map((item, idx) => {
-                  const esCita = item.tipo === 'cita' || Boolean(item.cita);
-                  const numEstrellas = Number(item.estrellas) || 5;
-                  const estrellasTexto = '✦'.repeat(numEstrellas) + '✧'.repeat(5 - numEstrellas);
-
-                  return (
-                    <div key={idx} className="bg-[#ffffee] p-3.5 rounded-xl border border-[#e6e4dc] flex gap-3 items-center shadow-xs">
-                      <PortadaLibroEstable solicitarJsonExterno={solicitarJsonExterno} googleBooksEnCooldown={googleBooksEnCooldown} solicitudesPortadaEnCurso={solicitudesPortadaEnCurso} titulo={item.libro} portada={item.portada} size="thumb" />
-                      <div className="flex flex-col justify-between w-full space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || (item.email ? item.email.split('@')[0] : 'lectora')}</span>
-                          <span className="text-[10px] text-[#595750] font-sans">{new Date(item.timestamp || Date.now()).toLocaleDateString()}</span>
-                        </div>
-                        {esCita ? (
-                          <>
-                            <p className="text-[10px] text-[#6b684f] font-sans">Ha compartido una cita de <b>{item.libro || 'su lectura'}</b>:</p>
-                            <blockquote className="border-l-2 border-[#8b6040] pl-2.5 font-babydoll text-sm leading-relaxed text-[#232321]">“{item.cita || item.libro}”</blockquote>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-xs text-[#1c1c1a] font-sans leading-relaxed">Ha dejado su marca en <b>{item.libro}</b>:</p>
-                            <span className="font-babydoll text-base tracking-widest text-[#1c1c1a]">{estrellasTexto} ({numEstrellas}/5)</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
         </div>
 
         <div style={{ display: seccionApp === 'comunidad' && !esRestringida ? 'block' : 'none' }} aria-hidden={esRestringida || seccionApp !== 'comunidad'} className="space-y-4 fade-in" onClick={registrarActividadPresencia}>
@@ -2230,8 +2280,8 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex bg-[#f5f2e6] p-0.5 rounded-lg border border-[#e6e4dc]">
-                    <button onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${chatModo === 'global' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Global</button>
-                    <button onClick={() => setChatModo('privado')} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${chatModo === 'privado' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Privados</button>
+                    <button onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all min-h-[44px] ${chatModo === 'global' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Global</button>
+                    <button onClick={() => setChatModo('privado')} className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all min-h-[44px] ${chatModo === 'privado' ? 'bg-white text-[#1c1c1a] shadow-xs' : 'text-[#595750]'}`}>Privados</button>
                   </div>
                 </div>
               </div>
@@ -2273,7 +2323,7 @@ export default function App() {
                     setNuevoChat(''); 
                   }} className="p-3 border-t border-[#e6e4dc] flex gap-2 bg-white">
                     <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder="Escribe un mensaje al club..." />
-                    <button type="submit" className="editorial-btn px-4 py-2.5 text-xs shadow-sm"><i className="fa-solid fa-paper-plane"></i></button>
+                    <button type="submit" className="editorial-btn px-4 py-2.5 text-xs shadow-sm min-h-[44px]"><i className="fa-solid fa-paper-plane"></i></button>
                   </form>
                 </>
               )}
@@ -2284,7 +2334,7 @@ export default function App() {
                   {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== sesion.email.toLowerCase()).map((socia, sIdx) => {
                     const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
                     return (
-                      <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e6e4dc] cursor-pointer hover:bg-[#faf9f5] transition-all shadow-xs">
+                      <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e6e4dc] cursor-pointer hover:bg-[#faf9f5] transition-all shadow-xs min-h-[44px]">
                         <div className="flex items-center gap-3 overflow-hidden">
                           <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-8 h-8" textClass="text-xs" />
                           <div className="overflow-hidden">
@@ -2307,7 +2357,7 @@ export default function App() {
               {chatModo === 'privado' && destinatarioPrivado && (
                 <>
                   <div className="bg-[#FFFFFF] p-2.5 border-b border-[#e6e4dc] flex items-center justify-between text-xs shadow-xs">
-                    <button onClick={() => setDestinatarioPrivado(null)} className="text-[#3d4220] font-bold flex items-center gap-1">
+                    <button onClick={() => setDestinatarioPrivado(null)} className="text-[#3d4220] font-bold flex items-center gap-1 p-2 min-h-[44px]">
                       <i className="fa-solid fa-arrow-left"></i> Volver
                     </button>
                     <div className="flex items-center gap-1.5">
@@ -2357,7 +2407,7 @@ export default function App() {
                     setNuevoChatPrivado('');
                   }} className="p-3 border-t border-[#e6e4dc] flex gap-2 bg-white">
                     <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'socia'}...`} />
-                    <button type="submit" className="editorial-btn px-4 py-2.5 text-xs"><i className="fa-solid fa-paper-plane"></i></button>
+                    <button type="submit" className="editorial-btn px-4 py-2.5 text-xs min-h-[44px]"><i className="fa-solid fa-paper-plane"></i></button>
                   </form>
                 </>
               )}
@@ -2410,7 +2460,7 @@ export default function App() {
                           <div className="h-full rounded-full bg-[#8b6040] transition-all duration-300" style={{ width: `${cafecito.porcentaje}%` }}></div>
                         </div>
                       </div>
-                      <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2 rounded-xl text-xs font-bold font-sans border transition-colors ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}>
+                      <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2.5 rounded-xl text-xs font-bold font-sans border transition-colors min-h-[44px] ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}>
                         <i className={`fa-solid ${cafecito.yaVoto ? 'fa-check' : 'fa-heart'} mr-1.5`}></i>
                         {cafecito.yaVoto ? 'Retirar mi voto' : 'Votar este cafecito'}
                       </button>
@@ -2444,7 +2494,7 @@ export default function App() {
                 }} className="space-y-2">
                   <BuscadorLibrosEstable solicitarJsonExterno={solicitarJsonExterno} placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
                   <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-                  <button type="submit" className="w-full editorial-btn py-2.5 text-xs">Añadir propuesta</button>
+                  <button type="submit" className="w-full editorial-btn py-2.5 text-xs min-h-[44px]">Añadir propuesta</button>
                 </form>
               </div>
 
@@ -2476,7 +2526,7 @@ export default function App() {
                           await cargarDatosSupabase();
                           registrarActividadPresencia();
                           mostrarToast('Voto actualizado.');
-                        }} className="self-start mt-2 px-3.5 py-1 text-xs rounded-full font-bold bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white transition-all">
+                        }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white transition-all min-h-[44px]">
                           Votar ({p.votos || 0})
                         </button>
                       </div>
@@ -2497,7 +2547,7 @@ export default function App() {
                 registrarActividadPresencia();
                 setMensajeFundadora('');
                 mostrarToast('Mensaje enviado al buzón.');
-              }} className="w-full editorial-btn py-2.5 text-xs">Enviar mensaje</button>
+              }} className="w-full editorial-btn py-2.5 text-xs min-h-[44px]">Enviar mensaje</button>
             </div>
           )}
         </div>
@@ -2529,7 +2579,7 @@ export default function App() {
                     <label className="space-y-1 text-[10px] font-bold text-[#595750] font-sans">Páginas totales
                       <input name="paginas_totales" type="number" min="1" defaultValue={libroActual.paginas_totales || 280} className="editorial-input w-full p-2.5 text-xs font-normal" />
                     </label>
-                    <button type="submit" className="sm:col-span-2 editorial-btn py-2.5 text-xs">Guardar lectura activa</button>
+                    <button type="submit" className="sm:col-span-2 editorial-btn py-2.5 text-xs min-h-[44px]">Guardar lectura activa</button>
                   </form>
                 </div>
               </section>
@@ -2548,7 +2598,7 @@ export default function App() {
                             <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || 'lectora'} · {mensaje.tipo || 'global'}</p>
                             <p className="break-words text-xs text-[#232321]">{mensaje.mensaje}</p>
                           </div>
-                          <button type="button" onClick={() => adminEliminarMensajeChat(mensaje.id)} title="Retirar mensaje" className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
+                          <button type="button" onClick={() => adminEliminarMensajeChat(mensaje.id)} title="Retirar mensaje" className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1] min-h-[44px]">Retirar</button>
                         </div>
                       ))}
                     </div>
@@ -2567,7 +2617,7 @@ export default function App() {
                         <p className="truncate font-babydoll text-sm font-bold">{propuesta.titulo}</p>
                         <p className="truncate text-[10px] text-[#756a58]">{propuesta.autora || 'Autora no indicada'} · {propuesta.votos || 0} votos</p>
                       </div>
-                      <button type="button" onClick={() => adminEliminarPropuesta(propuesta.id)} className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1]">Retirar</button>
+                      <button type="button" onClick={() => adminEliminarPropuesta(propuesta.id)} className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1] min-h-[44px]">Retirar</button>
                     </div>
                   ))}
                 </section>
@@ -2577,15 +2627,13 @@ export default function App() {
         </div>
       </main>
 
-      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl shadow-lg">
+      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl shadow-lg">
         {[
           { id: 'inicio', icon: 'fa-house', label: 'inicio' },
           { id: 'edificio', icon: 'fa-building', label: 'casa' },
           { id: 'habitacion', icon: 'fa-bookmark', label: 'habitación' },
           { id: 'capitulos', icon: 'fa-book-open', label: 'capítulos' },
-          { id: 'muro', icon: 'fa-feather', label: 'muro' },
-          { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' },
-          ...(esAdministradora ? [{ id: 'admin', icon: 'fa-screwdriver-wrench', label: 'admin' }] : [])
+          { id: 'comunidad', icon: 'fa-mug-hot', label: 'comunidad' }
         ].map(tab => {
           const esComunidad = tab.id === 'comunidad';
           const bloqueado = esRestringida && esComunidad;
@@ -2599,7 +2647,7 @@ export default function App() {
                 else setSeccionApp(tab.id);
               }} 
               title={bloqueado ? 'Actualiza tu modalidad para acceder a la comunidad' : tab.label}
-              className={`flex flex-col items-center gap-1 transition-all p-1.5 ${seccionApp === tab.id && !bloqueado ? 'text-[#1c1c1a] font-bold bg-[#faf9f5] px-3.5 py-1.5 rounded-xl shadow-sm' : 'text-[#595750] hover:text-gray-800'} ${bloqueado ? 'opacity-50' : ''}`}
+              className={`flex flex-col items-center justify-center gap-1 transition-all p-1.5 min-w-[48px] min-h-[48px] ${seccionApp === tab.id && !bloqueado ? 'text-[#1c1c1a] font-bold bg-[#faf9f5] px-3.5 py-1.5 rounded-xl shadow-sm' : 'text-[#595750] hover:text-gray-800'} ${bloqueado ? 'opacity-50' : ''}`}
             >
               <i className={`fa-solid ${bloqueado ? 'fa-lock' : tab.icon} ${bloqueado ? 'text-xs' : 'text-sm'}`}></i>
               <span className="text-[9px] font-bold lowercase font-sans">{tab.label}</span>
