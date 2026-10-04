@@ -1573,11 +1573,10 @@ export default function App() {
   const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
   const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
   
-  {todosMisLibrosEstanteria.map((item, idx) => (
-  <div key={idx} className="animacion-caida-libro shrink-0" style={{ animationDelay: `${idx * 0.05}s` }}>
-    <LomoLibroEstanteria item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />
-  </div>
-))}
+  const todosMisLibrosEstanteria = useMemo(() => {
+    if (!sesion) return [];
+    return lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase());
+  }, [lecturasPersonales, sesion]);
 
   const librosBibliotecaVisibles = useMemo(() => (
     todosMisLibrosEstanteria.filter(item => (item.estado || 'leyendo') === tabEstanteria)
@@ -2233,7 +2232,9 @@ export default function App() {
                 ) : (
                   <>
                     {todosMisLibrosEstanteria.map((item, idx) => (
-                      <LomoLibroEstanteria key={idx} item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />
+                      <div key={idx} className="animacion-caida-libro shrink-0" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <LomoLibroEstanteria item={item} onClick={() => setLibroSeleccionadoDetalle(item)} />
+                      </div>
                     ))}
                     {objetosPersonalizados.map(obj => (
                       <ObjetoExternoEnmarcado key={obj.id} urlImagen={obj.url} titulo={obj.titulo} onClick={() => manejarClickEnMarco(obj.id)} />
