@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarUbicacion, formatearPais }) {
     const mapRef = useRef(null);
     const leafletRef = useRef(null);
