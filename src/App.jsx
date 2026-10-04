@@ -1516,6 +1516,10 @@ export default function App() {
 
   const adminEliminarMensajeChat = (indice) => {
     if (!esAdministradora || !chatMsgs[indice]) return;
+    
+    // NUEVO: Pide confirmación antes de proceder
+    if (!window.confirm("¿Estás segura de que deseas retirar este mensaje del chat?")) return;
+
     const mensaje = chatMsgs[indice];
     const chatActualizado = chatMsgs.filter((_, index) => index !== indice);
     setChatMsgs(chatActualizado);
@@ -1532,6 +1536,10 @@ export default function App() {
 
   const adminEliminarPropuesta = (indice) => {
     if (!esAdministradora || !propuestas[indice]) return;
+    
+    // NUEVO: Pide confirmación antes de proceder
+    if (!window.confirm("¿Estás segura de que deseas retirar esta propuesta del club?")) return;
+
     const propuesta = propuestas[indice];
     const propuestasActualizadas = propuestas.filter((_, index) => index !== indice);
     setPropuestas(propuestasActualizadas);
