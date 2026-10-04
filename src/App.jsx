@@ -1224,7 +1224,7 @@ export default function App() {
       const pingInterval = setInterval(() => registrarActividadPresenciaRef.current(), 60000);
       return () => clearInterval(pingInterval);
     }
-  }, [sesion]);
+  }, [sesion?.email]);
 
   const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
     if (sesion && sesion.email && emailComentario && sesion.email.toLowerCase() === emailComentario.toLowerCase()) {
@@ -1346,7 +1346,7 @@ export default function App() {
       activo = false;
       if (interval) clearInterval(interval);
     };
-  }, [sesion]);
+  }, [sesion?.email]);
 
   useEffect(() => {
     if (!sesion?.email) return undefined;
@@ -1397,7 +1397,7 @@ export default function App() {
       activo = false;
       clearInterval(intervaloChat);
     };
-  }, [sesion]);
+  }, [sesion?.email]);
 
   useEffect(() => () => {
     if (timerEscribiendoRef.current) clearTimeout(timerEscribiendoRef.current);
