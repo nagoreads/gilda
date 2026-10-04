@@ -900,7 +900,7 @@ export default function App() {
       precio: 'Gratis', 
       esGratis: true, 
       enlaceStripe: '', 
-      descripcion: 'tu pase libre para cotillear: asómate, lee los comentarios y debates de las demás y descubre la comunidad desde dentro de forma totalmente gratuita.' 
+      descripcion: 'para asomarte y curiosear: puedes leer todos los comentarios y debates para ver cómo es el club desde dentro.' 
     },
     { 
       id: 'satelite', 
@@ -908,7 +908,7 @@ export default function App() {
       precio: '1 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', 
-      descripcion: 'lleva el control de tus lecturas y comenta los capítulos que irás desbloqueando a medida que vayas avanzando con el libro del mes. Ideal si buscas un acompañamiento básico en tus lecturas.' 
+      descripcion: 'para leer a tu ritmo: control de tus lecturas y comentarios en los capítulos del libro del mes (no incluye chat de comunidad ni carta).' 
     },
     { 
       id: 'cafe', 
@@ -916,7 +916,7 @@ export default function App() {
       precio: '5 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', 
-      descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' 
+      descripcion: 'toda la comunidad: acceso a la app, al chat con las demás socias y a los cafecitos virtuales en directo (no incluye carta).' 
     },
     { 
       id: 'nube', 
@@ -924,7 +924,7 @@ export default function App() {
       precio: '5 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', 
-      descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' 
+      descripcion: 'carta digital: recibes cada mes en tu email la carta con actividades, pegatinas, la anti-guía de autora y plantillas (no incluye app ni chat).' 
     },
     { 
       id: 'papel', 
@@ -932,7 +932,7 @@ export default function App() {
       precio: '10 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', 
-      descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti-guía de lectura de autora (esto lo recibirás a través de un QR monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' 
+      descripcion: 'carta en papel: te llega al buzón la carta física escrita a mano con marcapáginas, pegatinas y la anti-guía en un QR (no incluye app ni chat).' 
     },
     { 
       id: 'virtual', 
@@ -941,7 +941,7 @@ export default function App() {
       esGratis: false, 
       destacado: true, 
       enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', 
-      descripcion: 'recibe todo el contenido digital en tu correo electrónico y acceso total a la app.' 
+      descripcion: 'combo digital: la carta mensual en tu correo + acceso total a la app, al chat de lectoras y a los cafecitos.' 
     },
     { 
       id: 'absoluta', 
@@ -949,7 +949,7 @@ export default function App() {
       precio: '12 €/mes', 
       esGratis: false, 
       enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', 
-      descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' 
+      descripcion: 'todo incluido: tu carta en papel en el buzón de casa + acceso total a la app, al chat y a los cafecitos.' 
     }
   ];
 
