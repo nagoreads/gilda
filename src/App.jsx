@@ -2472,13 +2472,28 @@ export default function App() {
         </div>
 
         <div style={{ display: seccionApp === 'comunidad' && !esRestringida ? 'block' : 'none' }} aria-hidden={esRestringida || seccionApp !== 'comunidad'} className="space-y-4 fade-in" onClick={registrarActividadPresencia}>
-          <div className="flex bg-[#faf9f5] p-1 rounded-xl text-xs font-bold text-center border border-[#e6e4dc] font-sans">
-            <button onClick={() => setSubTabComunidad('chat')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'chat' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Chat</button>
-            <button onClick={() => setSubTabComunidad('mapa')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'mapa' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Mapa ({usuariasClub.length})</button>
-            <button onClick={() => setSubTabComunidad('archivo')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'archivo' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Archivo</button>
-            <button onClick={() => setSubTabComunidad('cafecitos')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'cafecitos' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Cafecitos</button>
-            <button onClick={() => setSubTabComunidad('buzon')} className={`flex-1 py-1.5 rounded-lg ${subTabComunidad === 'buzon' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Buzón</button>
-          </div>
+          <div className="flex overflow-x-auto gap-2 bg-[#faf9f5] p-1.5 rounded-2xl border border-[#e6e4dc] font-sans no-scrollbar">
+          {[
+            { id: 'chat', label: 'Chat', icon: 'fa-comments' },
+            { id: 'mapa', label: `Mapa (${usuariasClub.length})`, icon: 'fa-map-location-dot' },
+            { id: 'archivo', label: 'Archivo', icon: 'fa-box-archive' },
+            { id: 'cafecitos', label: 'Cafecitos', icon: 'fa-mug-hot' },
+            { id: 'buzon', label: 'Buzón', icon: 'fa-inbox' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setSubTabComunidad(tab.id)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 min-h-[44px] ${
+                subTabComunidad === tab.id 
+                  ? 'bg-[#1c1c1a] text-[#ffffee] shadow-sm scale-[1.02]' 
+                  : 'text-[#595750] hover:bg-white/80'
+              }`}
+            >
+              <i className={`fa-solid ${tab.icon} text-[11px]`}></i>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
           {subTabComunidad === 'chat' && (
             <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-[#faf9f5]">
