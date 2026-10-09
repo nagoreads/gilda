@@ -14,7 +14,8 @@
     "leaflet": "^1.9.4",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "stripe": "^23.0.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
