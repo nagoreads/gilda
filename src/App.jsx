@@ -807,8 +807,7 @@ export default function App() {
       </div>
     );
   }
-
-  const [supabaseSession, setSupabaseSession] = useState(null);
+const [supabaseSession, setSupabaseSession] = useState(null);
   const [emailLogin, setEmailLogin] = useState('');
   const [loadingAuth, setLoadingAuth] = useState(false);
   const [esPaginaGracias] = useState(() => window.location.pathname === '/gracias');
@@ -881,6 +880,208 @@ export default function App() {
     }
     setLoadingAuth(false);
   };
+
+  const [vistaAcceso, setVistaAcceso] = useState('menu');
+  const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
+  
+  const [quizPaso, setQuizPaso] = useState(1);
+  const [respuestaComunidad, setRespuestaComunidad] = useState(null);
+  const [respuestaCarta, setRespuestaCarta] = useState(null);
+  const [buscandoPlan, setBuscandoPlan] = useState(false);
+  
+  const [enviandoRegistro, setEnviandoRegistro] = useState(false);
+  const [mostrarModalShare, setMostrarModalShare] = useState(false);
+
+  if (!supabaseSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] fade-in">
+        <div className="editorial-card max-w-md w-full p-8 sm:p-10 space-y-6 text-center relative overflow-hidden shadow-2xl border border-[#e6e4dc]">
+          
+          {/* Detalle verde oliva en la parte superior */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#3d4220]"></div>
+
+          <div className="space-y-2 pt-2">
+            <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold tracking-tight">gilda</h1>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-[#3d4220] font-bold font-sans">
+              comunidad de lectura, cartas y creatividad
+            </p>
+          </div>
+
+          {vistaAcceso === 'menu' && (
+            <div className="space-y-6 pt-2 fade-in">
+              <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-[#1c1c1a] ml-0.5">
+                    Correo electrónico
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="tuemail@ejemplo.com"
+                    value={emailLogin}
+                    onChange={e => setEmailLogin(e.target.value)}
+                    required
+                    className="w-full editorial-input px-4 py-3 text-xs placeholder-[#a09a8a]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loadingAuth}
+                  className="w-full editorial-btn py-3.5 text-xs shadow-md mt-2 font-bold cursor-pointer min-h-[46px] flex items-center justify-center gap-2 active:scale-[0.98]"
+                >
+                  {loadingAuth ? (
+                    <>
+                      <i className="fa-solid fa-spinner animate-spin text-xs"></i>
+                      <span>Enviando enlace...</span>
+                    </>
+                  ) : (
+                    <span>Enviar enlace mágico de acceso</span>
+                  )}
+                </button>
+              </form>
+
+              <div className="border-t border-[#e6e4dc] pt-5">
+                <button
+                  onClick={() => setVistaAcceso('modalidades')}
+                  className="w-full bg-white text-[#3d4220] hover:text-[#1c1c1a] border border-[#d4cfbc] hover:border-[#3d4220] rounded-2xl py-3.5 text-xs font-bold transition-all hover:bg-[#faf9f5] text-center shadow-xs min-h-[46px] flex items-center justify-center gap-2 active:scale-[0.98]"
+                >
+                  <span>Conocer las modalidades del club</span>
+                  <i className="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {vistaAcceso === 'modalidades' && (
+            <div className="space-y-4 fade-in text-left">
+              <button onClick={() => { if (quizPaso > 1) { setQuizPaso(quizPaso - 1); if (quizPaso === 3) setModalidadSeleccionada(null); } else { setVistaAcceso('menu'); } }} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]">
+                <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> volver
+              </button>
+              
+              {quizPaso === 1 && (
+                <div className="fade-in space-y-4">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cuánto te apetece interactuar con el club?</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => { setRespuestaComunidad('todo'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">lo quiero todo</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">chat, cafecitos virtuales, debates y sorteos.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaComunidad('ritmo'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">a mi ritmo</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">leer y participar lo justo sin presiones.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaComunidad('mio'); setQuizPaso(2); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">voy a lo mío</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">no me interesa el chat, solo quiero leer.</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {quizPaso === 2 && !buscandoPlan && (
+                <div className="fade-in space-y-4">
+                  <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a] leading-tight">¿cómo quieres recibir la carta de gilda?</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => { setRespuestaCarta('buzon'); calcularModalidadIdeal(respuestaComunidad, 'buzon'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">en el buzón de mi casa</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">la experiencia física en papel en tu casa.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaCarta('email'); calcularModalidadIdeal(respuestaComunidad, 'email'); }} className="w-full text-left p-5 bg-white border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">en mi email</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">digital, práctico y rápido.</span>
+                    </button>
+                    <button onClick={() => { setRespuestaCarta('nada'); calcularModalidadIdeal(respuestaComunidad, 'nada'); }} className="w-full text-left p-5 bg-[#faf9f5] border border-[#e6e4dc] hover:border-[#3d4220] hover:shadow-md transition-all rounded-2xl opacity-90 active:scale-[0.99]">
+                      <span className="block font-babydoll text-lg font-bold text-[#1c1c1a]">sin carta, gracias</span>
+                      <span className="block text-xs text-[#595750] font-sans mt-1">prefiero centrarme únicamente en la lectura.</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {buscandoPlan && (
+                 <div className="py-12 flex flex-col items-center justify-center space-y-4 fade-in">
+                   <i className="fa-solid fa-spinner animate-spin text-2xl text-[#3d4220]"></i>
+                   <p className="font-babydoll text-lg text-[#1c1c1a]">buscando tu rincón ideal...</p>
+                 </div>
+              )}
+
+              {quizPaso === 3 && modalidadSeleccionada && (
+                <div className="fade-in space-y-5 pt-2">
+                  <div className="text-center space-y-1">
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#3d4220] font-sans">match perfecto</span>
+                    <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a]">esta es tu gilda ideal</h2>
+                  </div>
+                  <div className="editorial-card p-6 flex flex-col justify-between border-2 border-[#3d4220] bg-[#ffffee] shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#3d4220]/5 rounded-bl-full"></div>
+                    <div className="flex justify-between items-start mb-3 relative z-10">
+                      <h3 className="font-babydoll font-bold text-2xl text-[#1c1c1a]">{modalidadSeleccionada.nombre}</h3>
+                      <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1.5 rounded-full shadow-sm">{modalidadSeleccionada.precio}</span>
+                    </div>
+                    <p className="text-xs text-[#595750] font-sans mb-6 leading-relaxed relative z-10">{modalidadSeleccionada.descripcion}</p>
+                    <button onClick={() => setVistaAcceso('formulario_registro')} className="w-full py-3.5 rounded-xl text-sm font-bold editorial-btn shadow-md flex items-center justify-center gap-2 min-h-[44px]">
+                      elegir esta modalidad <i className="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                  </div>
+                  <div className="text-center pt-2 space-y-2">
+                     <button onClick={() => setQuizPaso(1)} className="text-xs text-[#595750] underline font-sans block mx-auto p-2">rehacer el test</button>
+                     <p className="text-xs text-[#595750] font-sans pt-2">¿prefieres ver el catálogo? <span onClick={() => setQuizPaso('catalogo')} className="underline cursor-pointer font-bold text-[#1c1c1a]">ver todas</span></p>
+                  </div>
+                </div>
+              )}
+
+              {quizPaso === 'catalogo' && (
+                <div className="fade-in space-y-4 pt-1">
+                  <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
+                    <h2 className="text-xl font-babydoll font-bold text-[#1c1c1a]">catálogo completo</h2>
+                    <button onClick={() => setQuizPaso(3)} className="text-xs text-[#595750] underline font-sans p-2">ver mi match</button>
+                  </div>
+                  <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
+                    {modalidades.map((m) => (
+                      <div key={m.id} className="editorial-card p-5 space-y-3 bg-[#ffffee] border border-[#e6e4dc] text-left shadow-sm">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-babydoll font-bold text-xl text-[#1c1c1a] leading-tight">{m.nombre}</h3>
+                          <span className="text-xs font-bold bg-[#3d4220] text-white px-3 py-1 rounded-full shrink-0">{m.precio}</span>
+                        </div>
+                        <p className="text-xs text-[#595750] font-sans leading-relaxed whitespace-normal">{m.descripcion}</p>
+                        <button onClick={() => { setModalidadSeleccionada(m); setVistaAcceso('formulario_registro'); }} className="w-full mt-2 py-2.5 text-xs editorial-btn font-semibold shadow-xs min-h-[44px]">
+                          Elegir esta modalidad
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {vistaAcceso === 'formulario_registro' && modalidadSeleccionada && (
+            <div className="space-y-4 fade-in text-left">
+              <button onClick={() => setVistaAcceso('modalidades')} className="text-xs font-semibold text-[#595750] hover:text-[#1c1c1a] flex items-center group font-sans min-h-[44px]">
+                <i className="fa-solid fa-arrow-left mr-2 text-xs"></i> Volver
+              </button>
+              <div className="border-b border-[#e6e4dc] pb-3">
+                <h2 className="text-2xl font-babydoll font-bold text-[#1c1c1a]">Ya casi estás dentro</h2>
+                <p className="text-xs text-[#595750] font-sans leading-relaxed mt-1">Estás a punto de abrir la puerta a <b>{modalidadSeleccionada.nombre}</b> ({modalidadSeleccionada.precio}).</p>
+              </div>
+              <form onSubmit={registrarYRedirigir} className="space-y-4 font-sans">
+                <div>
+                  <label className="block text-xs font-semibold text-[#1c1c1a] mb-1">Nombre completo *</label>
+                  <input type="text" name="Nombre" required placeholder="Tu nombre o alias" className="w-full editorial-input px-3.5 py-3 text-xs" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#1c1c1a] mb-1">Correo electrónico *</label>
+                  <input type="email" name="Email" required placeholder="hola@ejemplo.com" className="w-full editorial-input px-3.5 py-3 text-xs" />
+                </div>
+                <button type="submit" disabled={enviandoRegistro} className="w-full editorial-btn py-3 text-xs mt-3 flex items-center justify-center gap-2 shadow-md min-h-[44px]">
+                  {enviandoRegistro ? 'Procesando...' : (<><span>Apúntame</span><i className="fa-solid fa-arrow-right text-xs"></i></>)}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const [vistaAcceso, setVistaAcceso] = useState('menu');
   const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
