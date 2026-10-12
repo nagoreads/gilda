@@ -1083,17 +1083,6 @@ const [supabaseSession, setSupabaseSession] = useState(null);
     );
   }
 
-  const [vistaAcceso, setVistaAcceso] = useState('menu');
-  const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
-  
-  const [quizPaso, setQuizPaso] = useState(1);
-  const [respuestaComunidad, setRespuestaComunidad] = useState(null);
-  const [respuestaCarta, setRespuestaCarta] = useState(null);
-  const [buscandoPlan, setBuscandoPlan] = useState(false);
-  
-  const [enviandoRegistro, setEnviandoRegistro] = useState(false);
-  const [mostrarModalShare, setMostrarModalShare] = useState(false);
-
   const modalidades = [
     { 
       id: 'cotilla', 
