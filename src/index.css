@@ -164,3 +164,41 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #3d4220;
 }
+/* RETOQUES DE ESTILO Y MEJORAS VISUALES */
+
+/* Contenedor estilo App Móvil para pantallas grandes */
+.app-container {
+  max-width: 512px;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 100vh;
+  background-color: #ffffee;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.03);
+}
+
+/* Efecto de ventana encendida en el edificio */
+.ventana-casa {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
+  border: 1px solid #e6e4dc;
+  background-color: #dedbd0;
+}
+
+.ventana-casa.leyendo {
+  background-color: #fff5cc !important;
+  border-color: #e6d085 !important;
+  box-shadow: 0 0 16px rgba(255, 215, 120, 0.8);
+}
+
+.ventana-casa:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Transición suave para todos los botones de la app */
+button {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:active {
+  transform: scale(0.97);
+}
