@@ -17,6 +17,9 @@ export default async function handler(req, res) {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const event = req.body;
 
+    // -------------------------------------------------------------
+    // 1. NUEVA ALTA / PRIMERA COMPRA (checkout.session.completed)
+    // -------------------------------------------------------------
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const email = session.customer_details?.email || session.customer_email;
@@ -45,11 +48,11 @@ export default async function handler(req, res) {
       }
 
       if (email) {
-        // 1. Guardar/actualizar en la tabla profiles
+        // 1. Guardar/actualizar en la tabla profiles (marcando estado 'activo')
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert(
-            { email, nombre, modalidad },
+            { email, nombre, modalidad, estado: 'activo' },
             { onConflict: 'email' }
           );
 
@@ -73,12 +76,93 @@ export default async function handler(req, res) {
 
         if (logError) {
           console.error('Error insertando en payment_log:', logError.message);
-          // Registramos el error en consola sin bloquear la respuesta de Stripe
         } else {
           console.log(`Pago registrado en payment_log para ${email}`);
         }
 
         console.log(`Socio/a registrado/a con éxito: ${email} -> ${modalidad}`);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. COBRO MENSUAL DE RENOVACIÓN (invoice.payment_succeeded)
+    // -------------------------------------------------------------
+    if (event.type === 'invoice.payment_succeeded') {
+      const invoice = event.data.object;
+      
+      // Solo registrar si es un ciclo de renovación automática
+      if (invoice.billing_reason === 'subscription_cycle') {
+        const email = invoice.customer_email;
+        const amount = (invoice.amount_paid || 0) / 100;
+
+        if (email) {
+          // Consultar modalidad actual del perfil
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('modalidad')
+            .eq('email', email)
+            .maybeSingle();
+
+          const modalidad = profile?.modalidad || 'gilda de café';
+
+          // Insertar la nueva renovación mensual en payment_log
+          const { error: logError } = await supabase
+            .from('payment_log')
+            .insert([
+              {
+                email: email,
+                amount: amount,
+                modalidad: modalidad,
+                stripe_session_id: invoice.id,
+                created_at: new Date().toISOString()
+              }
+            ]);
+
+          if (logError) {
+            console.error('Error insertando renovación en payment_log:', logError.message);
+          } else {
+            console.log(`Renovación mensual registrada en payment_log para ${email}`);
+          }
+
+          // Asegurar que su estado sigue siendo activo
+          await supabase
+            .from('profiles')
+            .update({ estado: 'activo' })
+            .eq('email', email);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3. BAJA / CANCELACIÓN DE SUSCRIPCIÓN (customer.subscription.deleted)
+    // -------------------------------------------------------------
+    if (event.type === 'customer.subscription.deleted') {
+      const subscription = event.data.object;
+      const customerId = subscription.customer;
+
+      if (customerId && process.env.STRIPE_SECRET_KEY) {
+        try {
+          const response = await fetch(`https://api.stripe.com/v1/customers/${customerId}`, {
+            headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` }
+          });
+          const customerData = await response.json();
+          const email = customerData.email;
+
+          if (email) {
+            const { error: cancelError } = await supabase
+              .from('profiles')
+              .update({ estado: 'cancelado' })
+              .eq('email', email);
+
+            if (cancelError) {
+              console.error('Error actualizando estado a cancelado:', cancelError.message);
+            } else {
+              console.log(`Suscripción cancelada para: ${email}`);
+            }
+          }
+        } catch (fetchErr) {
+          console.error('Error obteniendo cliente de Stripe:', fetchErr.message);
+        }
       }
     }
 
