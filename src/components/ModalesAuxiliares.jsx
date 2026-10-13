@@ -8,7 +8,7 @@ export function ModalUpgrade({ onClose }) {
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
           <i className="fa-solid fa-xmark text-sm"></i>
         </button>
-        <div className="w-12 h-12 bg-[#ffffee] rounded-full flex items-center justify-center mx-auto text-[#3d4220] border border-[#e6e4dc]">
+        <div className="w-12 h-12 bg-[#ffffee] rounded-full flex items-center justify-center mx-auto text-[var(--primary-olive)] border border-[#e6e4dc]">
           <i className="fa-solid fa-lock text-lg"></i>
         </div>
         <div className="space-y-1">
@@ -112,13 +112,13 @@ export function ModalDetalleLibro({
             </div>
           </div>
         ) : (
-          <button onClick={() => { setEditandoPortadaUrl(libro.portada || ''); setMostrarInputCorreccion(true); }} className="w-full bg-[#faf9f5] border border-[#e6e4dc] text-[#3d4220] py-2 rounded-xl text-xs font-semibold min-h-[44px]">
+          <button onClick={() => { setEditandoPortadaUrl(libro.portada || ''); setMostrarInputCorreccion(true); }} className="w-full bg-[#faf9f5] border border-[#e6e4dc] text-[var(--primary-olive)] py-2 rounded-xl text-xs font-semibold min-h-[44px]">
             <i className="fa-solid fa-image mr-1"></i> Corregir portada o URL
           </button>
         )}
 
         <div className="py-3 px-3 my-2 bg-[#ffffee] rounded-xl border border-[#e6e4dc] flex flex-col items-center gap-2 font-sans">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#3d4220]">deja tu marca de tinta</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--primary-olive)]">deja tu marca de tinta</span>
           <div className="flex gap-1 items-center">
             {[1, 2, 3, 4, 5].map((num) => (
               <span 

@@ -64,7 +64,7 @@ export default function BuscadorLibros({ placeholder, valor, setValor, onSelectL
       <div className="relative w-full">
         <div className="relative flex items-center">
           <input type="text" placeholder={placeholder} value={valor} onChange={(e) => { setValor(e.target.value); setMostrarDropdown(true); }} className="w-full editorial-input p-2.5 text-xs italic pr-8" />
-          {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[#3d4220]"></i>}
+          {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[var(--primary-olive)]"></i>}
         </div>
         {mostrarDropdown && sugerencias.length > 0 && (
           <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#e6e4dc] rounded-b-xl shadow-xl max-h-56 overflow-y-auto mt-1">

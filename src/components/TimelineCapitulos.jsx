@@ -24,7 +24,7 @@ export default function TimelineCapitulos({
         <p className="text-xs text-[#595750] font-sans italic">tu viaje de lectura capítulo a capítulo</p>
       </div>
 
-      <div className="relative border-l-2 border-[#3d4220]/30 ml-4 pl-6 space-y-6 my-4">
+      <div className="relative border-l-2 border-[var(--primary-olive)]/30 ml-4 pl-6 space-y-6 my-4">
         {capitulos.map((cap, i) => {
           if (['oculto', 'borrador'].includes(String(cap.estado || '').toLowerCase())) return null;
           const paginaMinima = Number(cap.pagina_fin || cap.pagina_bloqueo || cap.pagina || cap.paginaminima || 0);
@@ -42,7 +42,7 @@ export default function TimelineCapitulos({
             <div key={i} className="relative group">
               <div className={`absolute -left-[35px] top-1.5 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] font-bold shadow-xs transition-all ${
                 desbloqueado 
-                  ? 'bg-[#3d4220] border-white text-white scale-110' 
+                  ? 'bg-[var(--primary-olive)] border-white text-white scale-110' 
                   : 'bg-[#e6e4dc] border-[#d4cfbc] text-[#595750]'
               }`}>
                 {desbloqueado ? (i + 1) : <i className="fa-solid fa-lock text-[8px]"></i>}
@@ -71,13 +71,13 @@ export default function TimelineCapitulos({
                             return (
                               <div key={cIdx} className="bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc] text-xs space-y-2">
                                 <div className="flex justify-between items-center">
-                                  <span className="font-bold font-sans text-[#3d4220]">{nombreAutorComentario}</span>
+                                  <span className="font-bold font-sans text-[var(--primary-olive)]">{nombreAutorComentario}</span>
                                   <span className="text-[10px] text-[#595750]">{com.fecha || ''}</span>
                                 </div>
                                 <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{com.texto || ''}</p>
                                 {!modalidadLimpia.includes('cotilla') && (
                                   <div className="flex justify-end">
-                                    <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[#3d4220] font-bold hover:underline min-h-[44px]">
+                                    <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[var(--primary-olive)] font-bold hover:underline min-h-[44px]">
                                       {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
                                     </button>
                                   </div>
@@ -87,7 +87,7 @@ export default function TimelineCapitulos({
                                     {respuestasCom.map((resp, rIdx) => (
                                       <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#e6e4dc] text-xs space-y-1">
                                         <div className="flex justify-between items-center">
-                                          <span className="font-bold text-[#3d4220]">{obtenerNombreReal(resp.autora, resp.autora)}</span>
+                                          <span className="font-bold text-[var(--primary-olive)]">{obtenerNombreReal(resp.autora, resp.autora)}</span>
                                           <span className="text-[10px] text-[#595750]">{resp.fecha || ''}</span>
                                         </div>
                                         <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{resp.texto || ''}</p>

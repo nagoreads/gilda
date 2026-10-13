@@ -82,10 +82,10 @@ export default function CalendarioInteractivo({ eventos }) {
           if (tieneEventos) setDiaSeleccionado({ dia, eventos: evs });
           else setDiaSeleccionado(null);
         }}
-        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[#3d4220] text-white font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#1c1c1a]'} ${tieneEventos && !esHoy ? 'border border-[#3d4220]/40 font-bold bg-[#ffffee]' : ''}`}
+        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[var(--primary-olive)] text-white font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#1c1c1a]'} ${tieneEventos && !esHoy ? 'border border-[var(--primary-olive)]/40 font-bold bg-[#ffffee]' : ''}`}
       >
         <span>{dia}</span>
-        {tieneEventos && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${esHoy ? 'bg-amber-300' : 'bg-[#3d4220]'}`}></span>}
+        {tieneEventos && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${esHoy ? 'bg-amber-300' : 'bg-[var(--primary-olive)]'}`}></span>}
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function CalendarioInteractivo({ eventos }) {
               <div key={idx} className="bg-white p-2.5 rounded-lg border border-[#e6e4dc] text-xs space-y-1">
                 <p className="font-bold text-[#1c1c1a] font-babydoll text-sm">{ev.evento || ev.titulo || 'Evento del club'}</p>
                 <div className="flex items-center gap-1.5 text-[10px] text-[#595750] font-sans">
-                  <i className="fa-regular fa-clock text-[#3d4220]"></i>
+                  <i className="fa-regular fa-clock text-[var(--primary-olive)]"></i>
                   <span>{ev.hora && ev.hora.trim() !== '' ? ev.hora : 'Durante todo el día'}</span>
                 </div>
               </div>

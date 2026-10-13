@@ -112,7 +112,7 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
     const colorEditorialFallback = useMemo(() => {
       let hash = 0;
       for (let i = 0; i < tituloFinal.length; i++) { hash = tituloFinal.charCodeAt(i) + ((hash << 5) - hash); }
-      const matices = ['#3d4220', '#34381b', '#523021', '#232820', '#633528', '#324854', '#543d30', '#3d3054', '#4a3429', '#324235'];
+      const matices = ['var(--primary-olive)', '#34381b', '#523021', '#232820', '#633528', '#324854', '#543d30', '#3d3054', '#4a3429', '#324235'];
       return matices[Math.abs(hash) % matices.length];
     }, [tituloFinal]);
 

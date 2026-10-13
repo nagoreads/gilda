@@ -83,7 +83,7 @@ export default function SeccionAdmin({
               {chatMsgs.slice(-12).reverse().map((mensaje) => (
                 <div key={mensaje.id} className="flex items-start gap-3 py-2.5">
                   <div className="min-w-0 flex-grow">
-                    <p className="text-[10px] font-bold text-[#3d4220]">{mensaje.usuario || 'lectora'} · {mensaje.tipo || 'global'}</p>
+                    <p className="text-[10px] font-bold text-[var(--primary-olive)]">{mensaje.usuario || 'lectora'} · {mensaje.tipo || 'global'}</p>
                     <p className="break-words text-xs text-[#232321]">{mensaje.mensaje}</p>
                   </div>
                   <button type="button" onClick={() => adminEliminarMensajeChat(mensaje.id)} title="Retirar mensaje" className="shrink-0 rounded-lg border border-[#e6e4dc] px-2.5 py-1.5 text-[10px] font-bold text-[#8b4038] hover:bg-[#fff4f1] min-h-[44px]">Retirar</button>

@@ -103,9 +103,9 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
           {modo === 'cita' && (
             <div className="w-full px-2 text-center flex flex-col items-center justify-center space-y-3">
               <textarea aria-label="Texto de la cita para Stories" value={textoCita} onChange={e => setTextoCita(e.target.value)} maxLength={360} className="w-full min-h-36 resize-none border border-[#e6e4dc] rounded-xl bg-white/70 p-3 font-babydoll text-base text-[#1c1c1a] leading-relaxed text-center focus:outline-none focus:ring-2 focus:ring-[#8b6040]" />
-              <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[#3d4220] bg-white border border-[#e6e4dc] rounded-full px-3 py-1.5 min-h-[44px]">Otra cita</button>
+              <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[var(--primary-olive)] bg-white border border-[#e6e4dc] rounded-full px-3 py-1.5 min-h-[44px]">Otra cita</button>
               {libroStory?.titulo && <span className="font-sans text-[10px] text-[#595750]">{libroStory.titulo}{libroStory.autora ? ` · ${libroStory.autora}` : ''}</span>}
-              <span className="font-sans text-xs font-semibold text-[#3d4220] tracking-wide block lowercase">
+              <span className="font-sans text-xs font-semibold text-[var(--primary-olive)] tracking-wide block lowercase">
                 @gilda.mailclub
               </span>
             </div>
@@ -113,7 +113,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
           
           {modo === 'progreso' && (
             <div className="w-full flex flex-col items-center text-center space-y-3">
-              <span className="font-sans text-xs font-semibold text-[#3d4220] tracking-wide block lowercase">
+              <span className="font-sans text-xs font-semibold text-[var(--primary-olive)] tracking-wide block lowercase">
                 @gilda.mailclub
               </span>
               
@@ -128,7 +128,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
                 
                 <div className="w-full bg-[#e6e4dc] h-[4px] rounded-full overflow-hidden my-1">
                   <div 
-                    className="bg-[#3d4220] h-full rounded-full" 
+                    className="bg-[var(--primary-olive)] h-full rounded-full" 
                     style={{ width: `${Math.min(100, Math.max(5, (paginaStory / (libroStory.paginas_totales || libro.paginas_totales || 280)) * 100))}%` }}
                   ></div>
                 </div>
@@ -154,7 +154,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
                   </div>
                 )}
                 
-                <span className="absolute bottom-1 right-2 font-sans text-[10px] font-bold text-[#3d4220] tracking-wide block lowercase z-10">
+                <span className="absolute bottom-1 right-2 font-sans text-[10px] font-bold text-[var(--primary-olive)] tracking-wide block lowercase z-10">
                   @gilda.mailclub
                 </span>
               </div>
@@ -178,7 +178,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
                  setPublicandoCita(false);
                }
              }}
-             className="w-full bg-[#3d4220] text-white font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
+             className="w-full bg-[var(--primary-olive)] text-white font-bold py-3.5 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
            >
              <i className="fa-solid fa-feather"></i> {publicandoCita ? 'Publicando...' : 'Publicar en el Muro'}
            </button>

@@ -18,7 +18,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
         {/* Fachada/Marco de Edificio Vintage */}
         <div className="w-full bg-[#f3eadb] border-2 border-[#d8cdb8] rounded-3xl p-5 shadow-sm relative overflow-hidden mb-6">
           <div className="flex justify-center items-center mb-4 pb-2 border-b border-[#d8cdb8]/60">
-            <span className="font-babydoll text-xl font-bold text-[#3d4220] tracking-wide flex items-center gap-2">
+            <span className="font-babydoll text-xl font-bold text-[var(--primary-olive)] tracking-wide flex items-center gap-2">
               ✦ residencia gilda ✦
             </span>
           </div>
@@ -42,7 +42,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
                       estaLeyendo 
                         ? 'bg-[#fff8d6] border-[#e5c158] shadow-[0_0_16px_rgba(255,215,80,0.85)] text-[#8b6040]' 
                         : 'bg-[#d8d5c9] border-[#b8b5a3] text-[#757263]'
-                    } ${seleccionada ? 'ring-2 ring-[#3d4220] ring-offset-2 scale-105' : ''}`}
+                    } ${seleccionada ? 'ring-2 ring-[var(--primary-olive)] ring-offset-2 scale-105' : ''}`}
                   >
                     {/* Cuadrícula de ventana vintage */}
                     <div className="w-full h-1/2 border-b border-current opacity-25 flex">
@@ -86,7 +86,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
               <div className="flex justify-end pt-0.5">
                 <button 
                   onClick={() => onAbrirPrivado(usuariaActiva)} 
-                  className="bg-[#3d4220] text-white px-3 py-1 rounded-xl text-[10px] font-bold font-sans flex items-center gap-1.5 hover:bg-black transition-colors shadow-xs"
+                  className="bg-[var(--primary-olive)] text-white px-3 py-1 rounded-xl text-[10px] font-bold font-sans flex items-center gap-1.5 hover:bg-black transition-colors shadow-xs"
                   title={chatBloqueado ? 'Mejora tu modalidad para usar el chat' : 'Enviar privado'}
                 >
                   <i className={`fa-solid ${chatBloqueado ? 'fa-lock' : 'fa-envelope'} text-[9px]`}></i> {chatBloqueado ? 'Mejorar modalidad' : 'Enviar privado'}
@@ -104,7 +104,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
                   <p className="text-[11px] text-[#595750] font-sans">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                 </div>
               </div>
-              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
+              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
                 <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
               </button>
             </div>
@@ -117,7 +117,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
                     <p className="text-[11px] text-[#595750] font-sans">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                   </div>
                 </div>
-                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
+                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
                   <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
                 </button>
               </div>

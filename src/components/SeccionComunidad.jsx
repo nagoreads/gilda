@@ -119,8 +119,8 @@ export default function SeccionComunidad({
 
                   return (
                     <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
-                      {!esMia && <span className="text-[10px] font-bold text-[#3d4220] font-sans mb-0.5 px-1">{nombreAutorChat}</span>}
-                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[#3d4220] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
+                      {!esMia && <span className="text-[10px] font-bold text-[var(--primary-olive)] font-sans mb-0.5 px-1">{nombreAutorChat}</span>}
+                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[var(--primary-olive)] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
                         <span className="block pr-8 pb-1">{m.mensaje}</span>
                         <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>{horaMensaje}</span>
                       </div>
@@ -167,7 +167,7 @@ export default function SeccionComunidad({
                         <p className="text-xs text-[#595750] truncate font-sans font-medium">{socia.modalidad || 'socia de gilda'}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-[#3d4220] font-bold bg-[#ffffee] px-3 py-1.5 rounded-xl border border-[#e6e4dc] shadow-xs flex items-center gap-1">
+                    <span className="text-xs text-[var(--primary-olive)] font-bold bg-[#ffffee] px-3 py-1.5 rounded-xl border border-[#e6e4dc] shadow-xs flex items-center gap-1">
                       <i className="fa-solid fa-envelope text-xs"></i> Chat
                     </span>
                   </div>
@@ -179,7 +179,7 @@ export default function SeccionComunidad({
           {chatModo === 'privado' && destinatarioPrivado && (
             <>
               <div className="bg-white p-2.5 border-b border-[#e6e4dc] flex items-center justify-between text-xs shadow-xs">
-                <button onClick={() => setDestinatarioPrivado(null)} className="text-[#3d4220] font-bold flex items-center gap-1 p-2 min-h-[44px]">
+                <button onClick={() => setDestinatarioPrivado(null)} className="text-[var(--primary-olive)] font-bold flex items-center gap-1 p-2 min-h-[44px]">
                   <i className="fa-solid fa-arrow-left"></i> Volver
                 </button>
                 <div className="flex items-center gap-1.5">
@@ -202,7 +202,7 @@ export default function SeccionComunidad({
 
                   return (
                     <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
-                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[#3d4220] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
+                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${esMia ? 'bg-[var(--primary-olive)] text-white rounded-[18px] rounded-br-[4px]' : 'bg-white border border-[#e6e4dc] text-[#1c1c1a] rounded-[18px] rounded-bl-[4px]'}`}>
                         <span className="block pr-8 pb-1">{m.mensaje}</span>
                         <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-white/70' : 'text-[#595750]'}`}>{horaMensaje}</span>
                       </div>
@@ -240,7 +240,7 @@ export default function SeccionComunidad({
         <div className="editorial-card p-4 space-y-3">
           <div className="flex justify-between items-center text-xs px-1">
             <span className="font-babydoll text-xl font-bold">Mapa global de lectoras</span>
-            <span className="text-xs text-[#3d4220] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+            <span className="text-xs text-[var(--primary-olive)] font-bold font-sans">{usuariasClub.length} socia(s)</span>
           </div>
           <MapaGilda usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
         </div>
@@ -285,7 +285,7 @@ export default function SeccionComunidad({
                         <div className="h-full rounded-full bg-[#8b6040] transition-all duration-300" style={{ width: `${pct}%` }}></div>
                       </div>
                     </div>
-                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2.5 rounded-xl text-xs font-bold font-sans border transition-colors min-h-[44px] ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[#3d4220] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}>
+                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2.5 rounded-xl text-xs font-bold font-sans border transition-colors min-h-[44px] ${cafecito.yaVoto ? 'bg-[#f3eadb] text-[#6f4e37] border-[#d8cdb8]' : 'bg-white text-[var(--primary-olive)] border-[#e6e4dc] hover:bg-[#faf9f5]'}`}>
                       <i className={`fa-solid ${cafecito.yaVoto ? 'fa-check' : 'fa-heart'} mr-1.5`}></i>
                       {cafecito.yaVoto ? 'Retirar mi voto' : 'Votar este cafecito'}
                     </button>
@@ -336,7 +336,7 @@ export default function SeccionComunidad({
                   <div className="flex flex-col justify-between w-full">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-[#3d4220]">#{i + 1}</span>
+                        <span className="text-xs font-bold text-[var(--primary-olive)]">#{i + 1}</span>
                         <h4 className="font-bold text-base leading-tight font-babydoll">{p.titulo}</h4>
                       </div>
                       <p className="text-xs text-[#595750] italic">{p.autora}</p>
@@ -351,7 +351,7 @@ export default function SeccionComunidad({
                       await supabase.from('proposals').update({ votos: nuevosVotos, votantes: nuevosVotantes.join(',') }).eq('id', p.id);
                       await cargarDatosSupabase();
                       mostrarToast('Voto actualizado.');
-                    }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-white text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[#3d4220] hover:text-white transition-all min-h-[44px]">
+                    }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-white text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[var(--primary-olive)] hover:text-white transition-all min-h-[44px]">
                       Votar ({p.votos || 0})
                     </button>
                   </div>

@@ -50,10 +50,10 @@ export default function SeccionHabitacion({
             <p className="mt-1 text-xs text-[#6b6255] font-sans">Un espacio propio para tus libros y lecturas.</p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <button onClick={() => setMostrarModalShare(true)} className="px-3 py-2 text-xs rounded-xl font-bold font-sans bg-white/75 border border-[#d8cdb8] text-[#3d4220] shadow-sm hover:bg-white flex items-center gap-1.5 transition-colors min-h-[44px]">
+            <button onClick={() => setMostrarModalShare(true)} className="px-3 py-2 text-xs rounded-xl font-bold font-sans bg-white/75 border border-[#d8cdb8] text-[var(--primary-olive)] shadow-sm hover:bg-white flex items-center gap-1.5 transition-colors min-h-[44px]">
               <i className="fa-brands fa-instagram text-xs"></i> Compartir
             </button>
-            <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); registrarActividadPresencia(); }} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 min-h-[44px] ${isReadingNow ? 'bg-[#3d4220] border-[#3d4220] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
+            <button onClick={() => { const nuevo = !isReadingNow; setIsReadingNow(nuevo); safeSet('gilda_is_reading', nuevo); registrarActividadPresencia(); }} className={`px-3 py-2 text-xs rounded-xl font-bold font-sans border transition-colors flex items-center gap-1.5 min-h-[44px] ${isReadingNow ? 'bg-[var(--primary-olive)] border-[var(--primary-olive)] text-white' : 'bg-white/75 border-[#d8cdb8] text-[#595750] hover:bg-white'}`}>
               <i className={`fa-solid ${isReadingNow ? 'fa-book-open' : 'fa-book'} text-[10px]`}></i>
               {isReadingNow ? 'Leyendo ahora' : 'En pausa'}
             </button>
@@ -86,7 +86,7 @@ export default function SeccionHabitacion({
           <p className="text-xs text-[#595750] italic font-sans truncate">{libroActual.autora}</p>
           <div className="mt-2 flex items-center gap-2">
             <div className="h-1.5 flex-grow rounded-full bg-[#e6e4dc] overflow-hidden">
-              <div className="h-full rounded-full bg-[#3d4220]" style={{ width: `${porcentajeLibro}%` }}></div>
+              <div className="h-full rounded-full bg-[var(--primary-olive)]" style={{ width: `${porcentajeLibro}%` }}></div>
             </div>
             <span className="text-[10px] font-bold text-[#595750] font-sans">{porcentajeLibro}%</span>
           </div>
@@ -186,7 +186,7 @@ export default function SeccionHabitacion({
               guardarLibroPersonal(manualTitulo, paginaPersonalInput, tabEstanteria, manualAutora, manualPortada);
               setManualTitulo(''); setManualAutora(''); setManualPortada(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
             }} className="space-y-2 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
-              <p className="text-xs font-bold font-sans text-[#3d4220]">Añadir libro manualmente:</p>
+              <p className="text-xs font-bold font-sans text-[var(--primary-olive)]">Añadir libro manualmente:</p>
               <input type="text" placeholder="Título..." value={manualTitulo} onChange={(e) => setManualTitulo(e.target.value)} required className="w-full editorial-input p-2.5 text-xs" />
               <input type="text" placeholder="Autora..." value={manualAutora} onChange={(e) => setManualAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
               <input type="text" placeholder="URL portada..." value={manualPortada} onChange={(e) => setManualPortada(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
@@ -201,7 +201,7 @@ export default function SeccionHabitacion({
               <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonalInput} setValor={setLibroPersonalInput} onSelectLibro={(l) => { setLibroPersonalInput(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); setLibroPersonalInput(''); }} />
               <div className="flex justify-between items-center pt-1 font-sans">
                 <span className="text-xs text-[#595750]">¿No aparece?</span>
-                <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#3d4220] font-bold hover:underline min-h-[44px] flex items-center">+ Crear manualmente</button>
+                <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[var(--primary-olive)] font-bold hover:underline min-h-[44px] flex items-center">+ Crear manualmente</button>
               </div>
             </div>
           )}

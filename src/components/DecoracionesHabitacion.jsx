@@ -4,7 +4,7 @@ export function LomoLibroEstanteria({ item, onClick }) {
   const generarColorEditorial = (texto) => {
     let hash = 0;
     for (let i = 0; i < texto.length; i++) { hash = texto.charCodeAt(i) + ((hash << 5) - hash); }
-    const matices = ['#3d4220', '#34381b', '#523021', '#232820', '#633528', '#324854', '#543d30', '#3d3054', '#4a3429', '#324235', '#523c2a', '#2c363d', '#422e2e', '#3a2e4a', '#323d3e'];
+    const matices = ['var(--primary-olive)', '#34381b', '#523021', '#232820', '#633528', '#324854', '#543d30', '#3d3054', '#4a3429', '#324235', '#523c2a', '#2c363d', '#422e2e', '#3a2e4a', '#323d3e'];
     return matices[Math.abs(hash) % matices.length];
   };
   const tituloLibro = item.libro || item.titulo || 'libro';
@@ -69,7 +69,7 @@ export function IlustracionDecoracion({ tipo, onInteractuar }) {
   if (tipo === 'monstera') return (
     <div onClick={handleClick} className={wrapperClass} title="¡Haz clic en tu plantita!">
       <svg width="44" height="48" viewBox="0 0 42 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
-        <path d="M14 34H28V44H14V34Z" fill="#b8784f" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M12 34H30V37H12V34Z" fill="#9e6037" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 34V16" stroke="#3d4220" strokeWidth="2" strokeLinecap="round"/><path d="M21 22C14 20 8 24 6 28C11 31 16 28 21 22Z" fill="#616c31" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 18C28 16 34 20 36 24C31 27 26 24 21 18Z" fill="#525c27" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 14C17 6 10 6 7 9C10 13 15 14 21 14Z" fill="#758237" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 14C25 6 32 6 35 9C32 13 27 14 21 14Z" fill="#616c31" stroke="#1c1c1a" strokeWidth="1.5"/>
+        <path d="M14 34H28V44H14V34Z" fill="#b8784f" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M12 34H30V37H12V34Z" fill="#9e6037" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 34V16" stroke="var(--primary-olive)" strokeWidth="2" strokeLinecap="round"/><path d="M21 22C14 20 8 24 6 28C11 31 16 28 21 22Z" fill="#616c31" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 18C28 16 34 20 36 24C31 27 26 24 21 18Z" fill="#525c27" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 14C17 6 10 6 7 9C10 13 15 14 21 14Z" fill="#758237" stroke="#1c1c1a" strokeWidth="1.5"/><path d="M21 14C25 6 32 6 35 9C32 13 27 14 21 14Z" fill="#616c31" stroke="#1c1c1a" strokeWidth="1.5"/>
       </svg>
     </div>
   );
@@ -127,7 +127,7 @@ export function IlustracionDecoracion({ tipo, onInteractuar }) {
         <rect x="4" y="10" width="32" height="20" rx="3" fill="#595750" stroke="#1c1c1a" strokeWidth="1.5"/>
         <path d="M12 10V7H28V10" fill="#f7f3e8" stroke="#1c1c1a" strokeWidth="1.5"/>
         <circle cx="20" cy="20" r="6" fill="#f7f3e8" stroke="#1c1c1a" strokeWidth="1.5"/>
-        <circle cx="20" cy="20" r="3" fill="#3d4220"/>
+        <circle cx="20" cy="20" r="3" fill="var(--primary-olive)"/>
         <circle cx="10" cy="15" r="1.5" fill="#ffffee" stroke="#1c1c1a" strokeWidth="1"/>
       </svg>
     </div>
@@ -137,7 +137,7 @@ export function IlustracionDecoracion({ tipo, onInteractuar }) {
       <svg width="36" height="46" viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-sm">
         <path d="M12 40H22" stroke="#1c1c1a" strokeWidth="2" strokeLinecap="round"/>
         <path d="M17 40V22L9 12" stroke="#595750" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M6 12H16L19 6H9L6 12Z" fill="#3d4220" stroke="#1c1c1a" strokeWidth="1.5"/>
+        <path d="M6 12H16L19 6H9L6 12Z" fill="var(--primary-olive)" stroke="#1c1c1a" strokeWidth="1.5"/>
       </svg>
     </div>
   );

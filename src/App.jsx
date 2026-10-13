@@ -247,7 +247,7 @@ export default function App() {
 
     const content = (foto && foto.trim() !== '' && !errorImg)
       ? <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#e6e4dc] shrink-0`} />
-      : <div className={`${sizeClass} rounded-full bg-[#faf9f5] border border-[#e6e4dc] flex items-center justify-center font-babydoll ${textClass} text-[#3d4220] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
+      : <div className={`${sizeClass} rounded-full bg-[#faf9f5] border border-[#e6e4dc] flex items-center justify-center font-babydoll ${textClass} text-[var(--primary-olive)] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
 
     if (editable) {
       return (
@@ -344,7 +344,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
         <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 shadow-xl border border-[#e6e4dc]">
           <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold">gracias :)</h1>
-          <p className="text-xs uppercase font-bold text-[#3d4220] font-sans">tu espacio ya está listo</p>
+          <p className="text-xs uppercase font-bold text-[var(--primary-olive)] font-sans">tu espacio ya está listo</p>
           <a href="/" className="block w-full editorial-btn py-3.5 text-xs font-bold text-center">Ir a gilda e iniciar sesión</a>
         </div>
       </div>
@@ -356,14 +356,14 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] fade-in">
         <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e6e4dc]">
           <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold">gilda</h1>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[#3d4220] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--primary-olive)] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
 
           {vistaAcceso === 'menu' && (
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
               <label className="block text-xs font-semibold text-[#1c1c1a]">Correo electrónico</label>
               <input type="email" placeholder="tuemail@ejemplo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required className="w-full editorial-input px-4 py-3 text-xs" />
               <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3.5 text-xs shadow-md font-bold">{loadingAuth ? 'Enviando...' : 'Enviar enlace mágico'}</button>
-              <button type="button" onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#3d4220] border border-[#d4cfbc] rounded-2xl py-3.5 text-xs font-bold mt-3">Ver modalidades del club</button>
+              <button type="button" onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[var(--primary-olive)] border border-[#d4cfbc] rounded-2xl py-3.5 text-xs font-bold mt-3">Ver modalidades del club</button>
             </form>
           )}
 
@@ -373,7 +373,7 @@ export default function App() {
               <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                 {modalidades.map(m => (
                   <div key={m.id} className="editorial-card p-4 space-y-2 bg-[#ffffee] border border-[#e6e4dc]">
-                    <div className="flex justify-between items-center"><h3 className="font-babydoll font-bold text-lg">{m.nombre}</h3><span className="text-xs font-bold bg-[#3d4220] text-white px-2.5 py-1 rounded-full">{m.precio}</span></div>
+                    <div className="flex justify-between items-center"><h3 className="font-babydoll font-bold text-lg">{m.nombre}</h3><span className="text-xs font-bold bg-[var(--primary-olive)] text-white px-2.5 py-1 rounded-full">{m.precio}</span></div>
                     <p className="text-xs text-[#595750] font-sans">{m.descripcion}</p>
                     <a href={m.esGratis ? '#' : m.enlaceStripe} onClick={e => { if (m.esGratis) setVistaAcceso('menu'); }} className="block w-full mt-2 py-2 text-center text-xs editorial-btn font-semibold">{m.esGratis ? 'Probar gratis' : 'Elegir esta modalidad'}</a>
                   </div>
@@ -430,7 +430,7 @@ export default function App() {
         </div>
         <div className="flex items-center gap-1">
           {esAdministradora && (
-            <button onClick={() => setSeccionApp('admin')} className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[#3d4220] text-white' : 'bg-[#faf9f5] text-[#3d4220] border-[#e6e4dc]'}`}>
+            <button onClick={() => setSeccionApp('admin')} className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[var(--primary-olive)] text-white' : 'bg-[#faf9f5] text-[var(--primary-olive)] border-[#e6e4dc]'}`}>
               <i className="fa-solid fa-screwdriver-wrench text-xs"></i>
             </button>
           )}
@@ -452,17 +452,17 @@ export default function App() {
               <div className="editorial-card p-5 space-y-4">
                 <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
                    <h3 className="font-babydoll text-xl font-bold">Progreso actual</h3>
-                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans text-[#3d4220] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-xs"><i className="fa-brands fa-instagram"></i> Compartir</button>
+                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans text-[var(--primary-olive)] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-xs"><i className="fa-brands fa-instagram"></i> Compartir</button>
                 </div>
                 <div className="flex gap-4 items-center">
                   <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
                   <div className="space-y-2 w-full">
-                    <span className="text-xs uppercase tracking-wider text-[#3d4220] font-bold font-sans">Lectura del club</span>
+                    <span className="text-xs uppercase tracking-wider text-[var(--primary-olive)] font-bold font-sans">Lectura del club</span>
                     <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
                     <p className="text-xs text-[#595750] italic font-sans">{libroActual.autora}</p>
                     <div>
                       <div className="flex justify-between text-xs text-[#595750] mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
-                      <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e6e4dc]"><div className="bg-[#3d4220] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
+                      <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e6e4dc]"><div className="bg-[var(--primary-olive)] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
                     </div>
                   </div>
                 </div>
@@ -478,8 +478,8 @@ export default function App() {
 
               <div className="editorial-card p-5 space-y-3">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-babydoll text-xl font-bold flex items-center gap-2"><i className="fa-solid fa-location-dot text-[#3d4220]"></i> Tu localización</h3>
-                  <button type="button" onClick={obtenerUbicacionActual} className="text-[10px] font-bold font-sans bg-[#3d4220] text-white px-3 py-1.5 rounded-xl"><i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación</button>
+                  <h3 className="font-babydoll text-xl font-bold flex items-center gap-2"><i className="fa-solid fa-location-dot text-[var(--primary-olive)]"></i> Tu localización</h3>
+                  <button type="button" onClick={obtenerUbicacionActual} className="text-[10px] font-bold font-sans bg-[var(--primary-olive)] text-white px-3 py-1.5 rounded-xl"><i className="fa-solid fa-location-crosshairs"></i> Usar mi ubicación</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
@@ -513,7 +513,7 @@ export default function App() {
                   <div key={idx} className="bg-[#ffffee] p-3.5 rounded-xl border border-[#e6e4dc] flex gap-3 items-center">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
-                      <span className="font-bold font-sans text-xs text-[#3d4220]">{item.nombre || 'lectora'}</span>
+                      <span className="font-bold font-sans text-xs text-[var(--primary-olive)]">{item.nombre || 'lectora'}</span>
                       {item.cita ? (
                         <blockquote className="border-l-2 border-[#8b6040] pl-2 font-babydoll text-sm">“{item.cita}”</blockquote>
                       ) : (
