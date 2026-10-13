@@ -36,7 +36,7 @@ export default function SeccionComunidad({
   const [mensajeFundadora, setMensajeFundadora] = useState('');
   const chatEndRef = useRef(null);
 
-  const cantidadSociasEnLinea = usuariasClub.filter(u => {
+  const cantidadGildasEnLinea = usuariasClub.filter(u => {
     if (!u.ultima_conexion) return false;
     const diff = (new Date() - new Date(u.ultima_conexion)) / 1000 / 60;
     return diff < 3;
@@ -52,7 +52,7 @@ export default function SeccionComunidad({
 
     await supabase.from('cafes').update({ votos: nuevoTotal, votantes: nuevosVotantes.join(',') }).eq('id', cafecito.id);
     await cargarDatosSupabase();
-    mostrarToast(yaVoto ? 'Has retirado tu voto.' : '¡Voto registrado!');
+    mostrarToast(yaVoto ? 'Has retirado tu voto' : '¡Voto guardado!');
   };
 
   const cafecitosConVotos = cafecitos.map(cafecito => {
@@ -69,82 +69,81 @@ export default function SeccionComunidad({
   const sumaVotosCafes = cafecitosConVotos.reduce((s, c) => s + c.votos, 0);
 
   return (
-    <div className="space-y-4 fade-in" onClick={registrarActividadPresencia}>
-      {/* Selector de sub-pestañas */}
-      <div className="flex overflow-x-auto gap-2 bg-[#ffffff]/60 p-1.5 rounded-2xl border border-[#e8e4d9] font-sans no-scrollbar">
+    <div className="space-y-5 fade-in" onClick={registrarActividadPresencia}>
+      {/* Navegación sobria sin iconos pesados */}
+      <div className="flex overflow-x-auto gap-1.5 border-b border-[#e8e4d9] pb-2 font-sans no-scrollbar">
         {[
-          { id: 'chat', label: 'Chat', icon: 'fa-comments' },
-          { id: 'mapa', label: `Mapa (${usuariasClub.length})`, icon: 'fa-map-location-dot' },
-          { id: 'archivo', label: 'Archivo', icon: 'fa-box-archive' },
-          { id: 'cafecitos', label: 'Cafecitos', icon: 'fa-mug-hot' },
-          { id: 'buzon', label: 'Buzón', icon: 'fa-inbox' }
+          { id: 'chat', label: 'Chat' },
+          { id: 'mapa', label: `Mapa (${usuariasClub.length})` },
+          { id: 'archivo', label: 'Propuestas' },
+          { id: 'cafecitos', label: 'Cafecitos' },
+          { id: 'buzon', label: 'Cartas' }
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setSubTabComunidad(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 min-h-[44px] ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 ${
               subTabComunidad === tab.id
-                ? 'bg-[var(--primary-olive)] text-[#ffffee] shadow-sm scale-[1.02]'
-                : 'text-[#625f6e] hover:bg-white/80'
+                ? 'bg-[#23211e] text-[#ffffee]'
+                : 'text-[#75706b] hover:text-[#23211e]'
             }`}
           >
-            <i className={`fa-solid ${tab.icon} text-[11px]`}></i>
-            <span>{tab.label}</span>
+            {tab.label}
           </button>
         ))}
       </div>
 
       {/* Sub-tab 1: CHAT */}
       {subTabComunidad === 'chat' && (
-        <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-[#faf9f5]">
-          <div className="bg-white/90 p-3 border-b border-[#e8e4d9] flex items-center justify-between rounded-t-2xl shadow-xs">
+        <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-white">
+          <div className="p-3.5 border-b border-[#e8e4d9] flex items-center justify-between">
             <div>
-              <h3 className="font-babydoll text-lg font-bold text-[#23211e] leading-none">Chat de Lectoras</h3>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p className="text-[10px] font-sans font-medium text-[#625f6e]">
-                  {cantidadSociasEnLinea} {cantidadSociasEnLinea === 1 ? 'socia en línea' : 'socias en línea'}
+              <h3 className="font-editorial text-base font-medium text-[#23211e]">El club</h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#23211e]"></span>
+                <p className="text-[11px] font-sans text-[#75706b]">
+                  {cantidadGildasEnLinea} {cantidadGildasEnLinea === 1 ? 'gilda en línea' : 'gildas en línea'}
                 </p>
               </div>
             </div>
-            <div className="flex bg-[#ffffff] p-0.5 rounded-lg border border-[#e8e4d9]">
+            <div className="flex gap-1 bg-[#ffffee] p-1 rounded-lg border border-[#e8e4d9]">
               <button
                 onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all min-h-[44px] ${
-                  chatModo === 'global' ? 'bg-white text-[var(--primary-olive)] shadow-xs' : 'text-[#625f6e]'
+                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                  chatModo === 'global' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
               >
-                Global
+                General
               </button>
               <button
                 onClick={() => setChatModo('privado')}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all min-h-[44px] ${
-                  chatModo === 'privado' ? 'bg-white text-[var(--primary-olive)] shadow-xs' : 'text-[#625f6e]'
+                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                  chatModo === 'privado' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
               >
-                Privados
+                Gildas
               </button>
             </div>
           </div>
 
           {chatModo === 'global' && (
             <>
-              <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col bg-[#ffffee]/40">
+              <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col bg-[#ffffee]/30">
                 {chatMsgs.filter(m => !m.tipo || m.tipo !== 'privado').map((m, i) => {
                   const nombreAutorChat = obtenerNombreReal(m.email, m.usuario);
                   const esMia = (m.email || '').toLowerCase() === sesion?.email?.toLowerCase();
                   const horaMensaje = formatearHoraWhatsApp(m.timestamp);
 
                   return (
-                    <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
-                      {!esMia && <span className="text-[10px] font-bold text-[var(--primary-olive)] font-sans mb-0.5 px-1">{nombreAutorChat}</span>}
-                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${
+                    <div key={m.id || i} className={`flex flex-col max-w-[80%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                      {!esMia && <span className="text-[10px] font-medium text-[#75706b] font-sans mb-0.5 px-1">{nombreAutorChat}</span>}
+                      <div className={`px-3.5 py-2 text-xs leading-relaxed font-sans relative ${
                         esMia
-                          ? 'bg-[var(--primary-olive)] text-[#ffffee] rounded-[18px] rounded-br-[4px]'
-                          : 'bg-[#ffffff] border border-[#e8e4d9] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
+                          ? 'bg-[#23211e] text-[#ffffee] rounded-2xl rounded-br-xs'
+                          : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
-                        <span className="block pr-8 pb-1">{m.mensaje}</span>
-                        <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-[#ffffee]/80' : 'text-[#625f6e]'}`}>{horaMensaje}</span>
+                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                        <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
                   );
@@ -165,32 +164,31 @@ export default function SeccionComunidad({
                 await supabase.from('chat_messages').insert([nuevoMsg]);
                 await cargarDatosSupabase();
                 setNuevoChat(''); 
-              }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white/90">
-                <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder="Escribe un mensaje al club..." />
-                <button type="submit" className="editorial-btn px-4 py-2.5 text-xs shadow-sm min-h-[44px]"><i className="fa-solid fa-paper-plane"></i></button>
+              }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
+                <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
+                <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
               </form>
             </>
           )}
 
           {chatModo === 'privado' && !destinatarioPrivado && (
-            <div className="flex-grow p-4 overflow-y-auto space-y-2 bg-[#ffffee]/40">
-              <p className="text-xs text-[#625f6e] font-sans italic pb-2">Selecciona una socia para abrir un chat privado:</p>
+            <div className="flex-grow p-4 overflow-y-auto space-y-2 bg-[#ffffee]/20">
+              <p className="text-xs text-[#75706b] font-sans pb-2">Escribe a una gilda en privado:</p>
               {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== sesion?.email?.toLowerCase()).map((socia, sIdx) => {
                 const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
                 return (
-                  <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white/90 rounded-xl border border-[#e8e4d9] cursor-pointer hover:bg-[#ffffff]/60 transition-all shadow-xs min-h-[44px]">
+                  <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-8 h-8" textClass="text-xs" />
+                      <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-7 h-7" textClass="text-xs" />
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5">
                           <IndicadorPresencia timestamp={socia.ultima_conexion} />
-                          <p className="font-babydoll font-bold text-sm truncate text-[#23211e]">{nombreSociaReal}</p>
+                          <p className="font-editorial text-sm font-medium text-[#23211e]">{nombreSociaReal}</p>
                         </div>
-                        <p className="text-xs text-[#625f6e] truncate font-sans font-medium">{socia.modalidad || 'socia de gilda'}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-[var(--primary-olive)] font-bold bg-[#ffffff] px-3 py-1.5 rounded-xl border border-[#e8e4d9] shadow-xs flex items-center gap-1">
-                      <i className="fa-solid fa-envelope text-xs"></i> Chat
+                    <span className="text-xs text-[#23211e] font-medium bg-[#ffffee] px-2.5 py-1 rounded-lg border border-[#e8e4d9]">
+                      Mensaje
                     </span>
                   </div>
                 );
@@ -200,17 +198,17 @@ export default function SeccionComunidad({
 
           {chatModo === 'privado' && destinatarioPrivado && (
             <>
-              <div className="bg-white/90 p-2.5 border-b border-[#e8e4d9] flex items-center justify-between text-xs shadow-xs">
-                <button onClick={() => setDestinatarioPrivado(null)} className="text-[var(--primary-olive)] font-bold flex items-center gap-1 p-2 min-h-[44px]">
-                  <i className="fa-solid fa-arrow-left"></i> Volver
+              <div className="p-2.5 border-b border-[#e8e4d9] flex items-center justify-between text-xs">
+                <button onClick={() => setDestinatarioPrivado(null)} className="text-[#23211e] font-medium flex items-center gap-1">
+                  ← Volver
                 </button>
                 <div className="flex items-center gap-1.5">
                   <IndicadorPresencia timestamp={destinatarioPrivado.ultima_conexion} />
-                  <span className="font-babydoll font-bold text-sm">{destinatarioPrivado.nombre || destinatarioPrivado.email.split('@')[0]}</span>
+                  <span className="font-editorial text-sm font-medium">{destinatarioPrivado.nombre || destinatarioPrivado.email.split('@')[0]}</span>
                 </div>
               </div>
               
-              <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col bg-[#ffffee]/40">
+              <div className="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col bg-[#ffffee]/30">
                 {chatMsgs.filter(m => {
                   if (m.tipo !== 'privado') return false;
                   const rem = (m.remitente || m.email || '').toLowerCase().trim();
@@ -223,14 +221,14 @@ export default function SeccionComunidad({
                   const horaMensaje = formatearHoraWhatsApp(m.timestamp);
 
                   return (
-                    <div key={m.id || i} className={`flex flex-col max-w-[82%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
-                      <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${
+                    <div key={m.id || i} className={`flex flex-col max-w-[80%] ${esMia ? 'self-end items-end' : 'self-start items-start'}`}>
+                      <div className={`px-3.5 py-2 text-xs leading-relaxed font-sans relative ${
                         esMia
-                          ? 'bg-[var(--primary-olive)] text-[#ffffee] rounded-[18px] rounded-br-[4px]'
-                          : 'bg-[#ffffff] border border-[#e8e4d9] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
+                          ? 'bg-[#23211e] text-[#ffffee] rounded-2xl rounded-br-xs'
+                          : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
-                        <span className="block pr-8 pb-1">{m.mensaje}</span>
-                        <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-[#ffffee]/80' : 'text-[#625f6e]'}`}>{horaMensaje}</span>
+                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                        <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
                   );
@@ -252,9 +250,9 @@ export default function SeccionComunidad({
                 await supabase.from('chat_messages').insert([payload]);
                 await cargarDatosSupabase();
                 setNuevoChatPrivado('');
-              }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white/90">
-                <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3.5 py-2.5 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'socia'}...`} />
-                <button type="submit" className="editorial-btn px-4 py-2.5 text-xs min-h-[44px]"><i className="fa-solid fa-paper-plane"></i></button>
+              }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
+                <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
+                <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
               </form>
             </>
           )}
@@ -265,8 +263,8 @@ export default function SeccionComunidad({
       {subTabComunidad === 'mapa' && (
         <div className="editorial-card p-4 space-y-3">
           <div className="flex justify-between items-center text-xs px-1">
-            <span className="font-babydoll text-xl font-bold">Mapa global de lectoras</span>
-            <span className="text-xs text-[var(--primary-olive)] font-bold font-sans">{usuariasClub.length} socia(s)</span>
+            <span className="font-editorial text-base font-medium">Dónde leemos</span>
+            <span className="text-xs text-[#75706b] font-sans">{usuariasClub.length} gildas</span>
           </div>
           <MapaGilda usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
         </div>
@@ -276,15 +274,13 @@ export default function SeccionComunidad({
       {subTabComunidad === 'cafecitos' && (
         <div className="space-y-3">
           <header className="px-1">
-            <p className="text-[10px] uppercase font-bold text-[#756a58] font-sans">encuentros del club</p>
-            <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Votación de cafecitos</h2>
-            <p className="text-xs text-[#625f6e] font-sans">Elige las fechas que te gustaría compartir con la comunidad.</p>
+            <h2 className="font-editorial text-xl font-medium text-[#23211e]">Próximos cafecitos</h2>
+            <p className="text-xs text-[#75706b] font-sans mt-0.5">Vota los días para encontrarnos.</p>
           </header>
 
           {cafecitosConVotos.length === 0 ? (
             <div className="editorial-card p-6 text-center">
-              <i className="fa-solid fa-mug-hot text-xl text-[var(--primary-olive)]"></i>
-              <p className="mt-2 text-xs text-[#625f6e] font-sans">Todavía no hay propuestas de cafecitos activas.</p>
+              <p className="text-xs text-[#75706b] font-sans">Aún no hay fechas propuestas.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -292,32 +288,26 @@ export default function SeccionComunidad({
                 const pct = sumaVotosCafes ? Math.round((cafecito.votos / sumaVotosCafes) * 100) : 0;
                 return (
                   <article key={cafecito.id || cafecito.titulo} className="editorial-card p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 shrink-0 rounded-full bg-[#ffffff] border border-[#e8e4d9] flex items-center justify-center text-[var(--primary-olive)]">
-                        <i className="fa-solid fa-mug-hot text-sm"></i>
-                      </div>
-                      <div className="min-w-0 flex-grow">
-                        <h3 className="font-babydoll text-lg font-bold leading-snug text-[#23211e]">{cafecito.titulo || 'Cafecito del club'}</h3>
-                        {cafecito.fecha && <p className="text-[10px] uppercase font-bold text-[var(--primary-olive)] font-sans">{cafecito.fecha}</p>}
-                        {cafecito.descripcion && <p className="mt-1 text-xs leading-relaxed text-[#625f6e] font-sans">{cafecito.descripcion}</p>}
-                      </div>
+                    <div className="min-w-0 flex-grow">
+                      <h3 className="font-editorial text-base font-medium text-[#23211e]">{cafecito.titulo || 'Encuentro del club'}</h3>
+                      {cafecito.fecha && <p className="text-[11px] text-[#75706b] font-sans mt-0.5">{cafecito.fecha}</p>}
+                      {cafecito.descripcion && <p className="mt-1 text-xs leading-relaxed text-[#75706b] font-sans">{cafecito.descripcion}</p>}
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center text-[10px] text-[#625f6e] font-sans">
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center text-[10px] text-[#75706b] font-sans">
                         <span>{cafecito.votos} {cafecito.votos === 1 ? 'voto' : 'votos'}</span>
                         <span>{pct}%</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-[#e8e4d9] overflow-hidden">
-                        <div className="h-full rounded-full bg-[var(--primary-olive)] transition-all duration-300" style={{ width: `${pct}%` }}></div>
+                      <div className="h-1 rounded-full bg-[#e8e4d9] overflow-hidden">
+                        <div className="h-full rounded-full bg-[#23211e] transition-all duration-300" style={{ width: `${pct}%` }}></div>
                       </div>
                     </div>
-                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2.5 rounded-xl text-xs font-bold font-sans border transition-colors min-h-[44px] ${
+                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2 rounded-lg text-xs font-medium font-sans border transition-colors ${
                       cafecito.yaVoto
-                        ? 'bg-[#ffffff] text-[var(--primary-olive)] border-[#e8e4d9]'
-                        : 'bg-white text-[var(--primary-olive)] border-[#e8e4d9] hover:bg-[#ffffff]/50'
+                        ? 'bg-[#23211e] text-[#ffffee] border-[#23211e]'
+                        : 'bg-white text-[#23211e] border-[#e8e4d9] hover:bg-[#ffffee]'
                     }`}>
-                      <i className={`fa-solid ${cafecito.yaVoto ? 'fa-check' : 'fa-heart'} mr-1.5`}></i>
-                      {cafecito.yaVoto ? 'Retirar mi voto' : 'Votar este cafecito'}
+                      {cafecito.yaVoto ? 'Guardado' : 'Me encaja'}
                     </button>
                   </article>
                 );
@@ -330,8 +320,8 @@ export default function SeccionComunidad({
       {/* Sub-tab 4: ARCHIVO DE PROPUESTAS */}
       {subTabComunidad === 'archivo' && (
         <div className="space-y-4">
-          <div className="editorial-card p-5 space-y-3">
-            <h3 className="font-babydoll text-xl font-bold">Proponer nueva lectura</h3>
+          <div className="editorial-card p-4 space-y-3">
+            <h3 className="font-editorial text-base font-medium">Proponer una lectura</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
               const tit = nuevaPropuestaTitulo?.trim();
@@ -348,28 +338,24 @@ export default function SeccionComunidad({
               setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
               mostrarToast('Propuesta añadida.');
             }} className="space-y-2">
-              <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+              <BuscadorLibros placeholder="Título o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
               <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-              <button type="submit" className="w-full editorial-btn py-2.5 text-xs min-h-[44px]">Añadir propuesta</button>
+              <button type="submit" className="w-full editorial-btn py-2 text-xs">Añadir propuesta</button>
             </form>
           </div>
 
-          <div className="editorial-card p-5">
+          <div className="editorial-card p-4">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-babydoll text-xl font-bold">Votación del mes</h3>
-              <span className="text-xs text-[#625f6e] font-sans uppercase">Propuestas del club</span>
+              <h3 className="font-editorial text-base font-medium">Sugerencias del mes</h3>
             </div>
             <div className="space-y-3">
               {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
-                <div key={p.id || i} className="flex gap-3 border border-[#e8e4d9] p-3.5 rounded-xl bg-[#ffffff]/60">
+                <div key={p.id || i} className="flex gap-3 border border-[#e8e4d9] p-3 rounded-xl bg-[#ffffee]/40">
                   <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                   <div className="flex flex-col justify-between w-full">
                     <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-[var(--primary-olive)]">#{i + 1}</span>
-                        <h4 className="font-bold text-base leading-tight font-babydoll text-[#23211e]">{p.titulo}</h4>
-                      </div>
-                      <p className="text-xs text-[#625f6e] italic">{p.autora}</p>
+                      <h4 className="font-editorial text-sm font-medium text-[#23211e]">{p.titulo}</h4>
+                      <p className="text-xs text-[#75706b] italic">{p.autora}</p>
                     </div>
                     <button onClick={async () => {
                       const votantesArr = String(p.votantes || '').toLowerCase().split(',').map(v => v.trim()).filter(Boolean);
@@ -381,7 +367,7 @@ export default function SeccionComunidad({
                       await supabase.from('proposals').update({ votos: nuevosVotos, votantes: nuevosVotantes.join(',') }).eq('id', p.id);
                       await cargarDatosSupabase();
                       mostrarToast('Voto actualizado.');
-                    }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-white text-[var(--primary-olive)] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-[#ffffee] transition-all min-h-[44px]">
+                    }} className="self-start mt-2 px-3 py-1 text-xs rounded-lg font-medium bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#23211e] hover:text-[#ffffee] transition-all">
                       Votar ({p.votos || 0})
                     </button>
                   </div>
@@ -392,18 +378,18 @@ export default function SeccionComunidad({
         </div>
       )}
 
-      {/* Sub-tab 5: BUZÓN */}
+      {/* Sub-tab 5: CARTAS / BUZÓN */}
       {subTabComunidad === 'buzon' && (
         <div className="editorial-card p-5 space-y-3">
-          <h2 className="font-babydoll text-2xl font-bold">Buzón privado</h2>
-          <p className="text-xs text-[#625f6e] font-sans">Sugerencias y comunicación directa con la administración del club.</p>
-          <textarea placeholder="Escribe tu mensaje..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
+          <h2 className="font-editorial text-lg font-medium">Carta a la fundadora</h2>
+          <p className="text-xs text-[#75706b] font-sans">Cualquier idea, duda o nota que quieras compartir en privado.</p>
+          <textarea placeholder="Escribe aquí..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
           <button onClick={async () => {
             if (!mensajeFundadora.trim()) return;
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);
             setMensajeFundadora('');
-            mostrarToast('Mensaje enviado al buzón.');
-          }} className="w-full editorial-btn py-2.5 text-xs min-h-[44px]">Enviar mensaje</button>
+            mostrarToast('Mensaje enviado.');
+          }} className="w-full editorial-btn py-2 text-xs">Enviar nota</button>
         </div>
       )}
     </div>
