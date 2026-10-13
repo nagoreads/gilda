@@ -13,9 +13,9 @@ export default function EdificioClub({
 
   return (
     <div className="space-y-5 fade-in">
-      {/* Cabecera del Edificio */}
+      {/* Cabecera */}
       <section className="editorial-card p-5 text-center space-y-1">
-        <h1 className="font-babydoll text-3xl font-bold text-[#23211e]">La Casa de Gilda</h1>
+        <h1 className="font-babydoll text-3xl font-bold text-[#23211e]">Nuestro hogar</h1>
         <p className="text-xs text-[#75706b] font-sans">Un vistazo a las ventanas de nuestras lectoras.</p>
       </section>
 
@@ -58,7 +58,7 @@ export default function EdificioClub({
               <AvatarUsuaria foto={gildaSeleccionada.foto_perfil} nombre={gildaSeleccionada.nombre} sizeClass="w-12 h-12" textClass="text-xl" />
               <div className="min-w-0 flex-grow">
                 <h3 className="font-babydoll text-xl font-bold text-[#23211e] truncate">{gildaSeleccionada.nombre}</h3>
-                <p className="text-xs text-[#75706b] font-sans truncate">{gildaSeleccionada.ciudad || 'Lectora de gilda'}</p>
+                <p className="text-xs text-[#75706b] font-sans truncate">{gildaSeleccionada.ciudad || 'Gilda del club'}</p>
               </div>
             </div>
 
