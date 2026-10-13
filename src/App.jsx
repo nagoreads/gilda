@@ -15,6 +15,7 @@ import { ModalUpgrade, ModalImportarPin, ModalDetalleLibro } from './components/
 import SeccionComunidad from './components/SeccionComunidad';
 import SeccionHabitacion from './components/SeccionHabitacion';
 import SeccionAdmin from './components/SeccionAdmin';
+import SuscribirPush from './components/SuscribirPush';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -406,6 +407,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
+      <SuscribirPush sesion={sesion} supabase={supabase} />
+
       {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans modal-elastic">{toastMsg}</div>}
 
       {modalImportarAbierto && (
