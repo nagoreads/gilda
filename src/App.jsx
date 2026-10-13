@@ -389,7 +389,7 @@ export default function App() {
   if (esModalidadCorreo && !esAdministradora) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-8 bg-[#ffffee]">
-        <div className="editorial-card max-w-sm w-full p-8 text-center space-y-4">
+        <div className="editorial-card-lavender p-5 space-y-4">
           <h1 className="font-babydoll text-4xl font-bold">gilda</h1>
           <p className="text-xs text-[#595750] font-sans leading-relaxed">Tu modalidad ({sesion.modalidad}) está registrada para recibir correspondencia y no incluye acceso web.</p>
           <button onClick={() => supabase.auth.signOut()} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
@@ -510,7 +510,7 @@ export default function App() {
                 <p className="text-xs text-[#595750] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 muroActividad.map((item, idx) => (
-                  <div key={idx} className="bg-[#ffffee] p-3.5 rounded-xl border border-[#e6e4dc] flex gap-3 items-center">
+                  <div key={idx} className="bg-[#eeeeff] p-3.5 rounded-xl border border-[#d0ceeb] flex gap-3 items-center">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
                       <span className="font-bold font-sans text-xs text-[var(--primary-olive)]">{item.nombre || 'lectora'}</span>
