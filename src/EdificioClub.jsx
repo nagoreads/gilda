@@ -15,34 +15,56 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
         <h2 className="text-[52px] font-babydoll text-center mb-0 text-[#1c1c1a] leading-none">gilda</h2>
         <p className="text-[13px] text-[#595750] text-center mb-5 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
         
-        <div className="grid grid-cols-3 gap-x-6 gap-y-8 w-full max-w-[240px] mx-auto mb-10">
-          {listaUsuarias.map((usuaria, indice) => {
-            const estaLeyendo = usuaria.estaLeyendo;
-            const usuariaKey = (usuaria.email || `usuaria-${indice}`).toLowerCase().trim();
-            const seleccionada = usuariaKey === usuariaActivaKey;
-            const nombreMostrar = (usuaria.nombre || (usuaria.email ? usuaria.email.split('@')[0] : 'lectora')).split(' ')[0].toLowerCase();
-            return (
-              <div key={usuaria.email || indice} className="relative flex flex-col items-center">
-                <button
-  type="button"
-  onClick={() => setUsuariaActivaEmail(usuaria.email ? usuariaKey : '')}
-  aria-pressed={seleccionada}
-  aria-label={`Abrir la ventana de ${usuaria.nombre || usuaria.email || 'lectora'}`}
-  className={`w-[34px] h-[46px] rounded-[3px] cursor-pointer transition-all duration-200 hover:scale-105 relative border ${
-    estaLeyendo 
-      ? 'bg-[#fff5cc] border-[#e6d085] shadow-[0_0_14px_rgba(255,215,120,0.9)]' 
-      : 'bg-[#dedbd0] border-[#c9c6b3]'
-  } ${seleccionada ? 'outline-[1.5px] outline-[#3d4220] outline-offset-[3px]' : ''}`}
-></button>
-                <div className="flex items-center justify-center mt-1.5">
-                  <span className="text-[12px] text-[#595750] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
+        {/* Fachada/Marco de Edificio Vintage */}
+        <div className="w-full bg-[#f3eadb] border-2 border-[#d8cdb8] rounded-3xl p-5 shadow-sm relative overflow-hidden mb-6">
+          <div className="flex justify-center items-center mb-4 pb-2 border-b border-[#d8cdb8]/60">
+            <span className="font-babydoll text-xl font-bold text-[#3d4220] tracking-wide flex items-center gap-2">
+              ✦ residencia gilda ✦
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-x-6 gap-y-7 w-full max-w-[260px] mx-auto">
+            {listaUsuarias.map((usuaria, indice) => {
+              const estaLeyendo = usuaria.estaLeyendo;
+              const usuariaKey = (usuaria.email || `usuaria-${indice}`).toLowerCase().trim();
+              const seleccionada = usuariaKey === usuariaActivaKey;
+              const nombreMostrar = (usuaria.nombre || (usuaria.email ? usuaria.email.split('@')[0] : 'lectora')).split(' ')[0].toLowerCase();
+              
+              return (
+                <div key={usuaria.email || indice} className="relative flex flex-col items-center">
+                  {/* Ventana con efecto de resplandor cálido cuando está leyendo */}
+                  <button
+                    type="button"
+                    onClick={() => setUsuariaActivaEmail(usuaria.email ? usuariaKey : '')}
+                    aria-pressed={seleccionada}
+                    aria-label={`Abrir la ventana de ${usuaria.nombre || usuaria.email || 'lectora'}`}
+                    className={`w-[40px] h-[52px] rounded-t-lg rounded-b-xs cursor-pointer transition-all duration-300 hover:scale-105 relative border-2 flex flex-col items-center justify-between p-1 ${
+                      estaLeyendo 
+                        ? 'bg-[#fff8d6] border-[#e5c158] shadow-[0_0_16px_rgba(255,215,80,0.85)] text-[#8b6040]' 
+                        : 'bg-[#d8d5c9] border-[#b8b5a3] text-[#757263]'
+                    } ${seleccionada ? 'ring-2 ring-[#3d4220] ring-offset-2 scale-105' : ''}`}
+                  >
+                    {/* Cuadrícula de ventana vintage */}
+                    <div className="w-full h-1/2 border-b border-current opacity-25 flex">
+                      <div className="w-1/2 h-full border-r border-current"></div>
+                    </div>
+                    {/* Luz encendida parpadeante */}
+                    {estaLeyendo && (
+                      <span className="w-2 h-2 rounded-full bg-[#e5c158] animate-pulse shadow-xs mb-1"></span>
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-center mt-1.5">
+                    <span className="text-[12px] text-[#595750] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        <div className="editorial-card w-full p-5 flex flex-col gap-4 fade-in">
+        {/* Tarjeta Flotante Emergente (Habitación de la socia) */}
+        <div key={usuariaActivaKey} className="editorial-card w-full p-5 flex flex-col gap-4 modal-pop">
           <div className="flex flex-col gap-2 w-full border-b border-[#e6e4dc] pb-2.5">
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-2 min-w-0">
@@ -104,4 +126,4 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
         </div>
       </div>
     );
-  }
+}

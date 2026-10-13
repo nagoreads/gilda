@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useMemo, useCallback, useId } from 'react';
+
 export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarUbicacion, formatearPais }) {
     const mapRef = useRef(null);
     const leafletRef = useRef(null);
@@ -304,7 +305,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         if (!Array.isArray(coor) || coor.length !== 2 || !coor.every(Number.isFinite)) return;
         boundsArray.push(coor);
         const piruletaHtml = `
-          <div style="position: relative; width: 18px; height: 26px; display: flex; items-align: center; justify-content: center; cursor: pointer;" title="${item.nombre}">
+          <div style="position: relative; width: 18px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="${item.nombre}">
             <svg viewBox="0 0 16 24" width="18" height="26" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));">
               <line x1="8" y1="12" x2="8" y2="23" stroke="#1c1c1a" stroke-width="2" stroke-linecap="round"/>
               <circle cx="8" cy="7" r="6" fill="#3d4220" stroke="#1c1c1a" stroke-width="1.5"/>
@@ -342,9 +343,15 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
     return (
       <div className="space-y-4 relative">
         <div className="relative">
-          <div ref={mapContainerRef} style={{ height: '280px', width: '100%', borderRadius: '16px', border: '1px solid var(--border-editorial)', zIndex: 1 }} className="transition-opacity duration-300"></div>
+          {/* Contenedor Leaflet con Bordes Redondeados y Sombra Suave */}
+          <div 
+            ref={mapContainerRef} 
+            style={{ height: '280px', width: '100%', zIndex: 1 }} 
+            className="rounded-2xl border border-[#e6e4dc] shadow-sm overflow-hidden bg-[#faf9f5] transition-opacity duration-300"
+          ></div>
+          
           {regionSeleccionada && (
-            <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-md p-4 flex flex-col rounded-xl fade-in text-[#1c1c1a] shadow-2xl max-h-[280px] overflow-hidden">
+            <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-md p-4 flex flex-col rounded-2xl fade-in text-[#1c1c1a] shadow-2xl max-h-[280px] overflow-hidden">
               <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2 mb-2 shrink-0">
                 <h3 className="font-babydoll text-[#1c1c1a] font-bold text-lg leading-none">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
                 <button onClick={limpiarRegion} className="text-[11px] font-bold text-[#595750] bg-white border border-[#e6e4dc] px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
@@ -362,6 +369,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
             </div>
           )}
         </div>
+
         <div className="editorial-card p-4 space-y-2.5">
           <h4 className="font-babydoll text-base font-bold text-[#1c1c1a]">Usuarias por país</h4>
           <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
@@ -403,4 +411,4 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         </div>
       </div>
     );
-  }
+}
