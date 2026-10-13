@@ -37,7 +37,7 @@ export default function SeccionHabitacion({
       <section className="editorial-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h1 className="font-editorial text-2xl sm:text-3xl font-medium text-[#23211e]">Mi habitación</h1>
+            <h1 className="font-babydoll text-3xl sm:text-4xl font-bold text-[#23211e]">Mi habitación</h1>
             <p className="mt-0.5 text-xs text-[#75706b] font-sans">Tu rincón personal de lectura.</p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -67,12 +67,12 @@ export default function SeccionHabitacion({
 
         <div className="mt-5 grid grid-cols-2 border-t border-[#e8e4d9] pt-3">
           <div>
-            <p className="text-[10px] text-[#75706b] font-sans">Libros en la balda</p>
-            <p className="font-editorial text-lg font-medium text-[#23211e]">{todosMisLibrosEstanteria.length}</p>
+            <p className="text-[10px] text-[#75706b] font-sans uppercase">Libros en la balda</p>
+            <p className="font-babydoll text-2xl font-bold text-[#23211e]">{todosMisLibrosEstanteria.length}</p>
           </div>
           <div className="border-l border-[#e8e4d9] pl-4">
-            <p className="text-[10px] text-[#75706b] font-sans">Página actual</p>
-            <p className="font-editorial text-lg font-medium text-[#23211e]">{miPagina}</p>
+            <p className="text-[10px] text-[#75706b] font-sans uppercase">Página actual</p>
+            <p className="font-babydoll text-2xl font-bold text-[#23211e]">{miPagina}</p>
           </div>
         </div>
       </section>
@@ -83,14 +83,14 @@ export default function SeccionHabitacion({
           <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="story" />
         </div>
         <div className="min-w-0 flex-grow">
-          <p className="text-[10px] font-medium text-[#75706b] font-sans">Lectura del club</p>
-          <h2 className="font-editorial text-base font-medium text-[#23211e] leading-snug line-clamp-1">{libroActual.titulo}</h2>
+          <p className="text-[10px] font-medium text-[#75706b] font-sans uppercase">Lectura del club</p>
+          <h2 className="font-babydoll text-xl font-bold text-[#23211e] leading-snug line-clamp-1">{libroActual.titulo}</h2>
           <p className="text-xs text-[#75706b] italic font-sans truncate">{libroActual.autora}</p>
           <div className="mt-2 flex items-center gap-2">
-            <div className="h-1 flex-grow rounded-full bg-[#e8e4d9] overflow-hidden">
+            <div className="h-1.5 flex-grow rounded-full bg-[#e8e4d9] overflow-hidden">
               <div className="h-full rounded-full bg-[#23211e]" style={{ width: `${porcentajeLibro}%` }}></div>
             </div>
-            <span className="text-[10px] font-medium text-[#75706b] font-sans">{porcentajeLibro}%</span>
+            <span className="text-[10px] font-bold text-[#75706b] font-sans">{porcentajeLibro}%</span>
           </div>
         </div>
       </section>
@@ -99,7 +99,7 @@ export default function SeccionHabitacion({
       <div className="editorial-card p-3.5 flex items-center gap-3">
         <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion?.nombre} sizeClass="w-10 h-10" textClass="text-base" editable={true} onFotoChange={handleFotoPerfilUpdate} />
         <div className="flex flex-col text-xs font-sans">
-          <span className="font-medium text-[#23211e]">Foto de perfil</span>
+          <span className="font-bold text-[#23211e]">Foto de perfil</span>
           <span className="text-[11px] text-[#75706b]">Toca para cambiar tu imagen</span>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function SeccionHabitacion({
       {/* Estantería */}
       <section className="editorial-card p-4 sm:p-5 space-y-4">
         <div className="flex items-baseline justify-between border-b border-[#e8e4d9] pb-2">
-          <h2 className="font-editorial text-lg font-medium text-[#23211e]">Estantería</h2>
+          <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Estantería</h2>
           <span className="text-xs text-[#75706b] font-sans">{todosMisLibrosEstanteria.length} {todosMisLibrosEstanteria.length === 1 ? 'libro' : 'libros'}</span>
         </div>
 
@@ -115,7 +115,7 @@ export default function SeccionHabitacion({
           <div className="flex items-end justify-start gap-3 flex-grow">
             {todosMisLibrosEstanteria.length === 0 ? (
               <div className="w-full flex flex-col items-center justify-center py-8 text-center">
-                <p className="font-editorial text-sm font-medium text-[#23211e]">Tu balda está vacía</p>
+                <p className="font-babydoll text-lg font-bold text-[#23211e]">Tu balda está vacía</p>
                 <p className="text-xs text-[#75706b] font-sans italic mb-3">Añade tu primera lectura para verla aquí</p>
                 <button type="button" onClick={() => setModoCreacionManual(true)} className="editorial-btn px-3 py-1.5 text-xs font-medium min-h-[44px]">Añadir libro</button>
               </div>
@@ -142,7 +142,7 @@ export default function SeccionHabitacion({
               guardarLibroPersonal(manualTitulo, paginaPersonalInput, tabEstanteria, manualAutora, manualPortada);
               setManualTitulo(''); setManualAutora(''); setManualPortada(''); setPaginaPersonalInput(''); setModoCreacionManual(false);
             }} className="space-y-2 bg-[#ffffee]/50 p-3 rounded-xl border border-[#e8e4d9]">
-              <p className="text-xs font-medium font-sans text-[#23211e]">Añadir libro manualmente:</p>
+              <p className="text-xs font-bold font-sans text-[#23211e]">Añadir libro manualmente:</p>
               <input type="text" placeholder="Título..." value={manualTitulo} onChange={(e) => setManualTitulo(e.target.value)} required className="w-full editorial-input p-2 text-xs" />
               <input type="text" placeholder="Autora..." value={manualAutora} onChange={(e) => setManualAutora(e.target.value)} className="w-full editorial-input p-2 text-xs" />
               <input type="text" placeholder="Portada (URL)..." value={manualPortada} onChange={(e) => setManualPortada(e.target.value)} className="w-full editorial-input p-2 text-xs" />
@@ -157,7 +157,7 @@ export default function SeccionHabitacion({
               <BuscadorLibros placeholder="Buscar libro..." valor={libroPersonalInput} setValor={setLibroPersonalInput} onSelectLibro={(l) => { setLibroPersonalInput(l.titulo); guardarLibroPersonal(l.titulo, 0, tabEstanteria, l.autora, l.portada); setLibroPersonalInput(''); }} />
               <div className="flex justify-between items-center pt-1 font-sans">
                 <span className="text-xs text-[#75706b]">¿No lo encuentras?</span>
-                <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#23211e] font-medium hover:underline min-h-[44px] flex items-center">+ Crear manualmente</button>
+                <button type="button" onClick={() => setModoCreacionManual(true)} className="text-xs text-[#23211e] font-bold hover:underline min-h-[44px] flex items-center">+ Crear manualmente</button>
               </div>
             </div>
           )}
@@ -166,12 +166,12 @@ export default function SeccionHabitacion({
         {/* Lista de Biblioteca */}
         <div className="pt-3 border-t border-[#e8e4d9] space-y-2">
           <div className="flex items-baseline justify-between gap-2">
-            <h3 className="font-editorial text-base font-medium text-[#23211e]">Biblioteca</h3>
+            <h3 className="font-babydoll text-xl font-bold text-[#23211e]">Biblioteca</h3>
             <span className="text-xs text-[#75706b] font-sans">{librosBibliotecaVisibles.length} {librosBibliotecaVisibles.length === 1 ? 'libro' : 'libros'}</span>
           </div>
           {librosBibliotecaVisibles.length === 0 ? (
             <div className="p-4 text-center bg-[#ffffee]/30 rounded-xl border border-[#e8e4d9] my-2">
-              <p className="font-editorial text-sm font-medium text-[#23211e]">Sin libros en esta lista</p>
+              <p className="font-babydoll text-base font-bold text-[#23211e]">Sin libros en esta lista</p>
               <p className="text-xs text-[#75706b] italic font-sans mt-0.5">Usa el buscador para añadir tu primer título.</p>
             </div>
           ) : (
@@ -185,7 +185,7 @@ export default function SeccionHabitacion({
                 >
                   <PortadaLibro titulo={item.libro || item.titulo} autora={item.autora} portada={item.portada} size="thumb" />
                   <span className="min-w-0 flex-grow">
-                    <span className="block truncate font-editorial text-sm font-medium text-[#23211e]">{item.libro || item.titulo}</span>
+                    <span className="block truncate font-babydoll text-base font-bold text-[#23211e]">{item.libro || item.titulo}</span>
                     <span className="block truncate text-xs italic text-[#75706b] font-sans">{item.autora || 'Autora no especificada'}</span>
                   </span>
                   <span className="shrink-0 text-right text-[11px] font-sans text-[#75706b]">
