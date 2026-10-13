@@ -12,7 +12,7 @@ export default function EdificioClub({
   const [gildaSeleccionada, setGildaSeleccionada] = useState(null);
 
   return (
-    <div className="space-y-5 fade-in">
+    <div className="space-y-5 page-transition">
       {/* Cabecera */}
       <section className="editorial-card p-5 text-center space-y-1">
         <h1 className="font-babydoll text-3xl font-bold text-[#23211e]">Nuestro hogar</h1>
@@ -54,10 +54,10 @@ export default function EdificioClub({
         </div>
       </section>
 
-      {/* Modal / Ficha de la Gilda Seleccionada */}
+      {/* Modal / Ficha de la Gilda Seleccionada con rebote elástico */}
       {gildaSeleccionada && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 flex items-center justify-center p-4" onClick={() => setGildaSeleccionada(null)}>
-          <div className="editorial-card max-w-sm w-full p-5 space-y-4 bg-white modal-pop" onClick={(e) => e.stopPropagation()}>
+          <div className="editorial-card max-w-sm w-full p-5 space-y-4 bg-white modal-elastic" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 border-b border-[#e8e4d9] pb-3">
               <AvatarUsuaria foto={gildaSeleccionada.foto_perfil} nombre={gildaSeleccionada.nombre} sizeClass="w-12 h-12" textClass="text-xl" />
               <div className="min-w-0 flex-grow">

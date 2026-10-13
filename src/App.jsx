@@ -236,8 +236,8 @@ export default function App() {
     };
 
     const content = (foto && foto.trim() !== '' && !errorImg)
-      ? <img src={foto} alt={nombre || 'Gilda'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#e8e4d9] shrink-0`} />
-      : <div className={`${sizeClass} rounded-full bg-[#ffffee] border border-[#e8e4d9] flex items-center justify-center font-babydoll ${textClass} text-[#23211e] shrink-0 font-bold`}>{(nombre || 'G').charAt(0).toUpperCase()}</div>;
+      ? <img src={foto} alt={nombre || 'Gilda'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#e8e4d9] shrink-0 interactive-lift`} />
+      : <div className={`${sizeClass} rounded-full bg-[#ffffee] border border-[#e8e4d9] flex items-center justify-center font-babydoll ${textClass} text-[#23211e] shrink-0 font-bold interactive-lift`}>{(nombre || 'G').charAt(0).toUpperCase()}</div>;
 
     if (editable) {
       return (
@@ -332,7 +332,7 @@ export default function App() {
   if (esPaginaGracias) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
-        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 border border-[#e8e4d9]">
+        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 border border-[#e8e4d9] modal-elastic">
           <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gracias</h1>
           <p className="text-xs text-[#75706b] font-sans">Tu espacio ya está listo para empezar.</p>
           <a href="/" className="block w-full editorial-btn py-3 text-xs font-medium text-center">Ir al club</a>
@@ -343,8 +343,8 @@ export default function App() {
 
   if (!supabaseSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] fade-in">
-        <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e8e4d9]">
+      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] page-transition">
+        <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e8e4d9] modal-elastic">
           <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gilda</h1>
           <p className="text-xs text-[#75706b] font-sans">club de lectura, cartas y conversación</p>
 
@@ -358,7 +358,7 @@ export default function App() {
           )}
 
           {vistaAcceso === 'modalidades' && (
-            <div className="space-y-4 text-left fade-in">
+            <div className="space-y-4 text-left page-transition">
               <button onClick={() => setVistaAcceso('menu')} className="text-xs font-medium text-[#75706b] flex items-center">← Volver</button>
               <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                 {modalidades.map(m => (
@@ -379,7 +379,7 @@ export default function App() {
   if (esModalidadCorreo && !esAdministradora) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-8 bg-[#ffffee]">
-        <div className="editorial-card p-6 space-y-4 text-center max-w-sm">
+        <div className="editorial-card p-6 space-y-4 text-center max-w-sm modal-elastic">
           <h1 className="font-babydoll text-4xl font-bold">gilda</h1>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">Tu modalidad ({sesion.modalidad}) está configurada para recibir cartas por correo y no incluye acceso a la web.</p>
           <button onClick={() => supabase.auth.signOut()} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
@@ -390,7 +390,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
-      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
+      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans modal-elastic">{toastMsg}</div>}
 
       {modalImportarAbierto && (
         <ModalImportarPin onClose={() => setModalImportarAbierto(false)} onSave={() => setModalImportarAbierto(false)} />
@@ -407,7 +407,7 @@ export default function App() {
       )}
 
       {/* Encabezado */}
-      <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9]">
+      <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9] interactive-lift">
         <div className="flex items-center gap-3 overflow-hidden">
           <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-base" editable={true} onFotoChange={handleFotoPerfilUpdate} />
           <div className="overflow-hidden">
@@ -425,10 +425,10 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenido Principal */}
+      {/* Contenido Principal con Transición Sedosa entre Pestañas */}
       <main className="w-full flex-grow space-y-4">
         {/* INICIO */}
-        <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 fade-in">
+        <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3">
             <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Lecturas</button>
             <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Muro</button>
@@ -449,7 +449,7 @@ export default function App() {
                     <p className="text-xs text-[#75706b] italic font-sans">{libroActual.autora}</p>
                     <div className="pt-1">
                       <div className="flex justify-between text-xs text-[#75706b] mb-1 font-sans"><span>Avance</span><span>{porcentajeLibro}%</span></div>
-                      <div className="w-full bg-[#ffffee] rounded-full h-1.5 border border-[#e8e4d9]"><div className="bg-[#23211e] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
+                      <div className="w-full bg-[#ffffee] rounded-full h-1.5 border border-[#e8e4d9]"><div className="bg-[#23211e] h-full rounded-full transition-all duration-300" style={{width: `${porcentajeLibro}%`}}></div></div>
                     </div>
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export default function App() {
                 <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 muroActividad.map((item, idx) => (
-                  <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center">
+                  <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
                       <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
@@ -515,7 +515,7 @@ export default function App() {
         </div>
 
         {/* EDIFICIO / CASA */}
-        <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }}>
+        <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="page-transition">
           <EdificioClub AvatarUsuaria={AvatarUsuaria} usuarias={miembrosEdificio} libroActual={libroActual} sesionEmail={sesion?.email} chatBloqueado={esRestringida} onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} onAbrirPrivado={(socia) => {
             if (esRestringida) { setMostrarModalUpgrade(true); return; }
             setSeccionApp('comunidad');
@@ -526,7 +526,7 @@ export default function App() {
         </div>
 
         {/* HABITACIÓN */}
-        <div style={{ display: seccionApp === 'habitacion' ? 'block' : 'none' }}>
+        <div style={{ display: seccionApp === 'habitacion' ? 'block' : 'none' }} className="page-transition">
           <SeccionHabitacion
             sesion={sesion}
             miPagina={miPagina}
@@ -551,12 +551,12 @@ export default function App() {
         </div>
 
         {/* CAPÍTULOS / TIMELINE */}
-        <div style={{ display: seccionApp === 'capitulos' ? 'block' : 'none' }}>
+        <div style={{ display: seccionApp === 'capitulos' ? 'block' : 'none' }} className="page-transition">
           <TimelineCapitulos capitulos={capitulos} miPagina={miPagina} comentarios={comentarios} modalidadLimpia={modalidadLimpia} obtenerNombreReal={obtenerNombreReal} sesion={sesion} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} />
         </div>
 
         {/* COMUNIDAD */}
-        <div style={{ display: seccionApp === 'comunidad' ? 'block' : 'none' }}>
+        <div style={{ display: seccionApp === 'comunidad' ? 'block' : 'none' }} className="page-transition">
           <SeccionComunidad
             subTabComunidad={subTabComunidad}
             setSubTabComunidad={setSubTabComunidad}
@@ -585,7 +585,7 @@ export default function App() {
         </div>
 
         {/* ADMIN */}
-        <div style={{ display: seccionApp === 'admin' && esAdministradora ? 'block' : 'none' }}>
+        <div style={{ display: seccionApp === 'admin' && esAdministradora ? 'block' : 'none' }} className="page-transition">
           <SeccionAdmin
             libroActual={libroActual}
             chatMsgs={chatMsgs}
@@ -597,7 +597,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* Navegación Inferior */}
+      {/* Navegación Inferior Flotante */}
       <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl bg-white border-t border-[#e8e4d9]">
         {[
           { id: 'inicio', label: 'inicio' },

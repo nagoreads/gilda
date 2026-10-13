@@ -12,11 +12,11 @@
 :root {
   --bg-editorial: #ffffee;       /* El fondo crema insignia de Gilda */
   --bg-card: #ffffff;            /* Tarjetas en papel blanco limpio */
-  --bg-card-alt: #fcfbf7;        /* Tono lino / papiro muy suave para pequeños contrastes */
-  --text-main: #23211e;          /* Tinta carbón cálida (máxima legibilidad) */
+  --bg-card-alt: #fcfbf7;        /* Tono lino / papiro muy suave */
+  --text-main: #23211e;          /* Tinta carbón cálida */
   --text-muted: #75706b;        /* Texto secundario atenuado */
-  --primary-olive: #23211e;      /* Botones y acentos principales en tinta carbón elegante */
-  --border-editorial: #e8e4d9;   /* Bordes finos tono hilo de lino */
+  --primary-olive: #23211e;      /* Acentos y botones principales */
+  --border-editorial: #e8e4d9;   /* Bordes tono hilo de lino */
 }
 
 body {
@@ -38,21 +38,20 @@ h1, h2, h3, .font-editorial {
   letter-spacing: 0.5px;
 }
 
-/* Tarjeta Minimalista estilo Papel */
+/* Tarjeta Minimalista estilo Papel con respuesta fluida */
 .editorial-card {
   background: #ffffff;
   color: var(--text-main);
   border: 1px solid var(--border-editorial);
   border-radius: 20px;
   box-shadow: 0 4px 20px -5px rgba(35, 33, 30, 0.03);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
 .editorial-card:hover {
   box-shadow: 0 8px 25px -5px rgba(35, 33, 30, 0.05);
 }
 
-/* Sobrescribe clases previas de tarjetas lavanda por un tono lino/crema muy discreto */
 .editorial-card-lavender, .editorial-card-alt {
   background-color: #fcfbf7;
   border: 1px solid var(--border-editorial);
@@ -66,14 +65,14 @@ h1, h2, h3, .font-editorial {
   border: 1px solid var(--border-editorial);
   border-radius: 12px;
   color: var(--text-main);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .editorial-input:focus {
   outline: none;
   background: #ffffff;
   border-color: var(--text-main);
-  box-shadow: 0 0 0 3px rgba(35, 33, 30, 0.08);
+  box-shadow: 0 0 0 3.5px rgba(35, 33, 30, 0.08);
 }
 
 /* Botón Principal Tinta Carbón */
@@ -82,18 +81,18 @@ h1, h2, h3, .font-editorial {
   color: var(--bg-editorial);
   border-radius: 14px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .editorial-btn:hover { 
   background: #383531; 
   color: #ffffff; 
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
   box-shadow: 0 6px 16px -4px rgba(35, 33, 30, 0.15);
 }
 
 .editorial-btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.97);
 }
 
 /* Navegación Flotante Minimal */
@@ -113,11 +112,12 @@ h1, h2, h3, .font-editorial {
 }
 
 .lomo-libro {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  transform-origin: bottom center;
 }
 
 .lomo-libro:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px) rotate(-1.5deg) scale(1.03);
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
@@ -146,24 +146,71 @@ h1, h2, h3, .font-editorial {
 }
 
 .ventana-casa:hover {
-  transform: translateY(-2px) scale(1.04);
+  transform: translateY(-3px) scale(1.04);
 }
 
-/* Animaciones y Efectos */
-.modal-pop {
-  animation: modalElastic 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  will-change: transform, opacity;
+/* --- ANIMACIONES FLUIDAS TIPO IRENE RAIN --- */
+
+/* Transición suave entre páginas/secciones */
+.page-transition {
+  animation: pageSlideFade 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
-@keyframes modalElastic {
+@keyframes pageSlideFade {
   from {
     opacity: 0;
-    transform: scale(0.93) translateY(10px);
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modales elásticos orgánicos */
+.modal-elastic {
+  animation: modalElasticIn 0.38s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes modalElasticIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(16px);
   }
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+.modal-pop {
+  animation: modalElasticIn 0.38s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Elementos táctiles interactivos */
+.interactive-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-2px);
+}
+
+.interactive-lift:active {
+  transform: translateY(0) scale(0.97);
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.anim-pulse {
+  animation: heartPulse 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28);
 }
 
 @keyframes parpadeoVela {
@@ -179,12 +226,7 @@ h1, h2, h3, .font-editorial {
 .humo-taza { animation: subirHumo 2s infinite ease-out; }
 
 .fade-in { 
-  animation: fadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  animation: pageSlideFade 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
 }
 
 @keyframes dropBounce {
