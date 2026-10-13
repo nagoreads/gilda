@@ -70,7 +70,7 @@ export default function SeccionComunidad({
 
   return (
     <div className="space-y-5 fade-in" onClick={registrarActividadPresencia}>
-      {/* Navegación sobria sin iconos pesados */}
+      {/* Navegación sobria */}
       <div className="flex overflow-x-auto gap-1.5 border-b border-[#e8e4d9] pb-2 font-sans no-scrollbar">
         {[
           { id: 'chat', label: 'Chat' },
@@ -98,7 +98,7 @@ export default function SeccionComunidad({
         <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-white">
           <div className="p-3.5 border-b border-[#e8e4d9] flex items-center justify-between">
             <div>
-              <h3 className="font-editorial text-base font-medium text-[#23211e]">El club</h3>
+              <h3 className="font-babydoll text-lg font-bold text-[#23211e]">El club</h3>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#23211e]"></span>
                 <p className="text-[11px] font-sans text-[#75706b]">
@@ -183,7 +183,7 @@ export default function SeccionComunidad({
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5">
                           <IndicadorPresencia timestamp={socia.ultima_conexion} />
-                          <p className="font-editorial text-sm font-medium text-[#23211e]">{nombreSociaReal}</p>
+                          <p className="font-babydoll font-bold text-base text-[#23211e]">{nombreSociaReal}</p>
                         </div>
                       </div>
                     </div>
@@ -204,7 +204,7 @@ export default function SeccionComunidad({
                 </button>
                 <div className="flex items-center gap-1.5">
                   <IndicadorPresencia timestamp={destinatarioPrivado.ultima_conexion} />
-                  <span className="font-editorial text-sm font-medium">{destinatarioPrivado.nombre || destinatarioPrivado.email.split('@')[0]}</span>
+                  <span className="font-babydoll font-bold text-base">{destinatarioPrivado.nombre || destinatarioPrivado.email.split('@')[0]}</span>
                 </div>
               </div>
               
@@ -263,7 +263,7 @@ export default function SeccionComunidad({
       {subTabComunidad === 'mapa' && (
         <div className="editorial-card p-4 space-y-3">
           <div className="flex justify-between items-center text-xs px-1">
-            <span className="font-editorial text-base font-medium">Dónde leemos</span>
+            <span className="font-babydoll text-xl font-bold">Dónde leemos</span>
             <span className="text-xs text-[#75706b] font-sans">{usuariasClub.length} gildas</span>
           </div>
           <MapaGilda usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
@@ -274,7 +274,7 @@ export default function SeccionComunidad({
       {subTabComunidad === 'cafecitos' && (
         <div className="space-y-3">
           <header className="px-1">
-            <h2 className="font-editorial text-xl font-medium text-[#23211e]">Próximos cafecitos</h2>
+            <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Próximos cafecitos</h2>
             <p className="text-xs text-[#75706b] font-sans mt-0.5">Vota los días para encontrarnos.</p>
           </header>
 
@@ -289,7 +289,7 @@ export default function SeccionComunidad({
                 return (
                   <article key={cafecito.id || cafecito.titulo} className="editorial-card p-4 space-y-3">
                     <div className="min-w-0 flex-grow">
-                      <h3 className="font-editorial text-base font-medium text-[#23211e]">{cafecito.titulo || 'Encuentro del club'}</h3>
+                      <h3 className="font-babydoll text-lg font-bold text-[#23211e]">{cafecito.titulo || 'Encuentro del club'}</h3>
                       {cafecito.fecha && <p className="text-[11px] text-[#75706b] font-sans mt-0.5">{cafecito.fecha}</p>}
                       {cafecito.descripcion && <p className="mt-1 text-xs leading-relaxed text-[#75706b] font-sans">{cafecito.descripcion}</p>}
                     </div>
@@ -321,7 +321,7 @@ export default function SeccionComunidad({
       {subTabComunidad === 'archivo' && (
         <div className="space-y-4">
           <div className="editorial-card p-4 space-y-3">
-            <h3 className="font-editorial text-base font-medium">Proponer una lectura</h3>
+            <h3 className="font-babydoll text-xl font-bold">Proponer una lectura</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
               const tit = nuevaPropuestaTitulo?.trim();
@@ -346,7 +346,7 @@ export default function SeccionComunidad({
 
           <div className="editorial-card p-4">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-editorial text-base font-medium">Sugerencias del mes</h3>
+              <h3 className="font-babydoll text-xl font-bold">Sugerencias del mes</h3>
             </div>
             <div className="space-y-3">
               {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
@@ -354,7 +354,7 @@ export default function SeccionComunidad({
                   <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                   <div className="flex flex-col justify-between w-full">
                     <div>
-                      <h4 className="font-editorial text-sm font-medium text-[#23211e]">{p.titulo}</h4>
+                      <h4 className="font-babydoll text-base font-bold text-[#23211e]">{p.titulo}</h4>
                       <p className="text-xs text-[#75706b] italic">{p.autora}</p>
                     </div>
                     <button onClick={async () => {
@@ -381,7 +381,7 @@ export default function SeccionComunidad({
       {/* Sub-tab 5: CARTAS / BUZÓN */}
       {subTabComunidad === 'buzon' && (
         <div className="editorial-card p-5 space-y-3">
-          <h2 className="font-editorial text-lg font-medium">Carta a la fundadora</h2>
+          <h2 className="font-babydoll text-2xl font-bold">Carta a la fundadora</h2>
           <p className="text-xs text-[#75706b] font-sans">Cualquier idea, duda o nota que quieras compartir en privado.</p>
           <textarea placeholder="Escribe aquí..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
           <button onClick={async () => {
