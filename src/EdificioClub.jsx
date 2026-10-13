@@ -16,7 +16,11 @@ export default function EdificioClub({
       {/* Cabecera */}
       <section className="editorial-card p-5 text-center space-y-1">
         <h1 className="font-babydoll text-3xl font-bold text-[#23211e]">Nuestro hogar</h1>
-        <p className="text-xs text-[#75706b] font-sans">Un vistazo a las ventanas de nuestras lectoras.</p>
+        <p className="text-xs text-[#75706b] font-sans leading-relaxed">
+          En esta casita, cada una tenemos nuestra propia habitación, que ya era hora :)
+          <br />
+          También puedes visitar las de las demás para ver qué están leyendo &lt;3
+        </p>
       </section>
 
       {/* Grid de Ventanas */}
