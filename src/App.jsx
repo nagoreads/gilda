@@ -73,7 +73,7 @@ export default function App() {
   const [vistaAcceso, setVistaAcceso] = useState('menu');
 
   const [seccionApp, setSeccionApp] = useState('inicio');
-  const [subTabInicio, setSubTabInicio] = useState('progreso');
+  const [subTabInicio, setSubTabInicio] = useState('progreso'); // 'progreso' | 'aqui_ahora' | 'muro'
   const [subTabComunidad, setSubTabComunidad] = useState('chat');
   const [chatModo, setChatModo] = useState('global');
   const [destinatarioPrivado, setDestinatarioPrivado] = useState(null);
@@ -123,7 +123,7 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
-  // COMPROBAR SI LA USUARIA YA HA PUBLICADO HOY
+  // Comprobar si la usuaria ha publicado hoy
   const haPublicadoMomentoHoy = useMemo(() => {
     if (!sesion?.email) return false;
     const hoyStr = new Date().toISOString().split('T')[0];
@@ -343,6 +343,9 @@ export default function App() {
   const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satelite');
   const esAdministradora = String(sesion?.email || '').trim().toLowerCase() === EMAIL_ADMINISTRADORA;
 
+  const momentosGilda = useMemo(() => muroActividad.filter(item => item.tipo === 'momento_gilda'), [muroActividad]);
+  const publicacionesMuro = useMemo(() => muroActividad.filter(item => item.tipo !== 'momento_gilda'), [muroActividad]);
+
   if (esPaginaGracias) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
@@ -443,42 +446,48 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenido Principal con Transición Sedosa entre Pestañas */}
+      {/* Contenido Principal */}
       <main className="w-full flex-grow space-y-4">
         {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
-          {/* BANNER AVISO PENDIENTE SI NO HA PUBLICADO HOY */}
-          {!haPublicadoMomentoHoy && (
-            <div className="editorial-card p-4 bg-[#23211e] text-[#ffffee] border-0 flex justify-between items-center modal-elastic shadow-md">
-              <div className="space-y-0.5">
-                <span className="font-babydoll text-lg font-bold block">aquí y ahora ✦</span>
-                <p className="text-[11px] opacity-80 font-sans">Publica tu instante de hoy para ver lo que están haciendo las demás.</p>
-              </div>
-              <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 ml-3 hover:bg-white transition-colors">
-                Capturar
-              </button>
-            </div>
-          )}
-
-          <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3">
-            <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Lecturas</button>
-            <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Muro</button>
+          {/* Sub-Pestañas: Lecturas / aquí y ahora ✦ (Abierto a todas) / El muro (Exclusivo) */}
+          <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
+            <button
+              onClick={() => setSubTabInicio('progreso')}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
+            >
+              Lecturas
+            </button>
+            <button
+              onClick={() => setSubTabInicio('aqui_ahora')}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] relative ${subTabInicio === 'aqui_ahora' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
+            >
+              aquí y ahora ✦
+              {!haPublicadoMomentoHoy && (
+                <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                if (esRestringida) setMostrarModalUpgrade(true);
+                else setSubTabInicio('muro');
+              }}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'} ${esRestringida ? 'opacity-60' : ''}`}
+            >
+              Muro {esRestringida && '🔒'}
+            </button>
           </div>
 
+          {/* SUBTAB 1: LECTURAS */}
           {subTabInicio === 'progreso' && (
             <>
               <div className="editorial-card p-5 space-y-4">
                 <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2">
                    <h3 className="font-babydoll text-xl font-bold">Progreso</h3>
-                   <div className="flex gap-1.5">
-                     <button onClick={() => setMostrarModalMomento(true)} className="text-xs font-medium font-sans bg-[#23211e] text-[#ffffee] px-3 py-1 rounded-lg hover:bg-[#383531] transition-colors">
-                       aquí y ahora ✦
-                     </button>
-                     <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">
-                       Compartir
-                     </button>
-                   </div>
+                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">
+                     Compartir
+                   </button>
                 </div>
                 <div className="flex gap-4 items-center">
                   <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
@@ -529,76 +538,105 @@ export default function App() {
             </>
           )}
 
-          {subTabInicio === 'muro' && (
-            <div className="editorial-card p-5 space-y-3">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro</h3>
-                <button onClick={() => setMostrarModalMomento(true)} className="text-xs font-medium font-sans bg-[#23211e] text-[#ffffee] px-3 py-1 rounded-lg hover:bg-[#383531] transition-colors">
-                  aquí y ahora ✦
+          {/* SUBTAB 2: AQUÍ Y AHORA ✦ (TODAS LAS MODALIDADES) */}
+          {subTabInicio === 'aqui_ahora' && (
+            <div className="editorial-card p-5 space-y-4">
+              <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
+                <div>
+                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
+                  <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
+                </div>
+                <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3 py-1.5 text-xs font-medium">
+                  📸 Capturar
                 </button>
               </div>
-              {muroActividad.length === 0 ? (
-                <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
+
+              {!haPublicadoMomentoHoy && (
+                <div className="p-4 bg-[#23211e] text-[#ffffee] rounded-xl flex justify-between items-center modal-elastic">
+                  <div className="space-y-0.5">
+                    <p className="font-babydoll font-bold text-sm">Pendiente por publicar</p>
+                    <p className="text-[10px] opacity-80 font-sans">Comparte tu instante para ver lo que están leyendo las demás.</p>
+                  </div>
+                  <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 ml-2">
+                    Tomar foto
+                  </button>
+                </div>
+              )}
+
+              {momentosGilda.length === 0 ? (
+                <p className="text-xs text-[#75706b] italic font-sans py-8 text-center">Aún no hay instantáneas subidas hoy. ¡Sé la primera!</p>
               ) : (
-                muroActividad.map((item, idx) => {
-                  const esMio = sesion?.email && (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
-                  const estaBloqueado = item.tipo === 'momento_gilda' && !esMio && !haPublicadoMomentoHoy;
+                <div className="space-y-4">
+                  {momentosGilda.map((item, idx) => {
+                    const esMio = sesion?.email && (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
+                    const estaBloqueado = !esMio && !haPublicadoMomentoHoy;
 
-                  return (
-                    <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
-                      {item.tipo === 'momento_gilda' ? (
-                        <div className="w-full space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                            <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
-                          </div>
-
-                          {/* REGLA DE PRIVACIDAD: BLUR + MANDADO DE PUBLICAR */}
-                          <div className="relative rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
-                            <img
-                              src={item.portada}
-                              alt="aquí y ahora"
-                              className={`w-full h-full object-cover transition-all duration-300 ${
-                                estaBloqueado ? 'blur-xl scale-105 select-none' : ''
-                              }`}
-                            />
-
-                            {estaBloqueado && (
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-2">
-                                <span className="text-white text-xl">🔒</span>
-                                <p className="font-babydoll text-sm text-[#ffffee] font-bold">Publica tu foto de hoy</p>
-                                <p className="text-[10px] text-white/80 font-sans max-w-[180px]">
-                                  Comparte tu aquí y ahora ✦ para desbloquear el instante de {item.nombre || 'esta gilda'}.
-                                </p>
-                                <button
-                                  onClick={() => setMostrarModalMomento(true)}
-                                  className="mt-1 bg-white text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md"
-                                >
-                                  Tomar foto
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                    return (
+                      <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
                         </div>
-                      ) : (
-                        <>
-                          <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
-                          <div className="flex flex-col space-y-1 w-full">
-                            <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                            {item.cita ? (
-                              <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
-                            ) : (
-                              <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })
+
+                        <div className="relative rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
+                          <img
+                            src={item.portada}
+                            alt="aquí y ahora"
+                            className={`w-full h-full object-cover transition-all duration-300 ${
+                              estaBloqueado ? 'blur-xl scale-105 select-none' : ''
+                            }`}
+                          />
+
+                          {estaBloqueado && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-2">
+                              <span className="text-white text-xl">🔒</span>
+                              <p className="font-babydoll text-sm text-[#ffffee] font-bold">Publica tu foto de hoy</p>
+                              <p className="text-[10px] text-white/80 font-sans max-w-[180px]">
+                                Comparte tu aquí y ahora ✦ para desbloquear esta foto.
+                              </p>
+                              <button
+                                onClick={() => setMostrarModalMomento(true)}
+                                className="mt-1 bg-white text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md"
+                              >
+                                Tomar foto
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           )}
+
+          {/* SUBTAB 3: EL MURO (EXCLUSIVO MIEMBROS) */}
+          {subTabInicio === 'muro' && (
+            <div className="editorial-card p-5 space-y-3">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro del club</h3>
+              </div>
+              {publicacionesMuro.length === 0 ? (
+                <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
+              ) : (
+                publicacionesMuro.map((item, idx) => (
+                  <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
+                    <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
+                    <div className="flex flex-col space-y-1 w-full">
+                      <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                      {item.cita ? (
+                        <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
+                      ) : (
+                        <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
         </div>
 
         {/* EDIFICIO / CASA */}
