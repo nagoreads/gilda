@@ -123,6 +123,18 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
+  // COMPROBAR SI LA USUARIA YA HA PUBLICADO HOY
+  const haPublicadoMomentoHoy = useMemo(() => {
+    if (!sesion?.email) return false;
+    const hoyStr = new Date().toISOString().split('T')[0];
+    return muroActividad.some(item => {
+      if (item.tipo !== 'momento_gilda') return false;
+      const esMismoEmail = (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
+      const fechaItem = item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : '';
+      return esMismoEmail && fechaItem === hoyStr;
+    });
+  }, [muroActividad, sesion]);
+
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
 
   const cargarDatosSupabase = async () => {
@@ -435,6 +447,20 @@ export default function App() {
       <main className="w-full flex-grow space-y-4">
         {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
+          
+          {/* BANNER AVISO PENDIENTE SI NO HA PUBLICADO HOY */}
+          {!haPublicadoMomentoHoy && (
+            <div className="editorial-card p-4 bg-[#23211e] text-[#ffffee] border-0 flex justify-between items-center modal-elastic shadow-md">
+              <div className="space-y-0.5">
+                <span className="font-babydoll text-lg font-bold block">aquí y ahora ✦</span>
+                <p className="text-[11px] opacity-80 font-sans">Publica tu instante de hoy para ver lo que están haciendo las demás.</p>
+              </div>
+              <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 ml-3 hover:bg-white transition-colors">
+                Capturar
+              </button>
+            </div>
+          )}
+
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3">
             <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Lecturas</button>
             <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Muro</button>
@@ -514,33 +540,62 @@ export default function App() {
               {muroActividad.length === 0 ? (
                 <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
-                muroActividad.map((item, idx) => (
-                  <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
-                    {item.tipo === 'momento_gilda' ? (
-                      <div className="w-full space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
+                muroActividad.map((item, idx) => {
+                  const esMio = sesion?.email && (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
+                  const estaBloqueado = item.tipo === 'momento_gilda' && !esMio && !haPublicadoMomentoHoy;
+
+                  return (
+                    <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
+                      {item.tipo === 'momento_gilda' ? (
+                        <div className="w-full space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                            <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
+                          </div>
+
+                          {/* REGLA DE PRIVACIDAD: BLUR + MANDADO DE PUBLICAR */}
+                          <div className="relative rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
+                            <img
+                              src={item.portada}
+                              alt="aquí y ahora"
+                              className={`w-full h-full object-cover transition-all duration-300 ${
+                                estaBloqueado ? 'blur-xl scale-105 select-none' : ''
+                              }`}
+                            />
+
+                            {estaBloqueado && (
+                              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-2">
+                                <span className="text-white text-xl">🔒</span>
+                                <p className="font-babydoll text-sm text-[#ffffee] font-bold">Publica tu foto de hoy</p>
+                                <p className="text-[10px] text-white/80 font-sans max-w-[180px]">
+                                  Comparte tu aquí y ahora ✦ para desbloquear el instante de {item.nombre || 'esta gilda'}.
+                                </p>
+                                <button
+                                  onClick={() => setMostrarModalMomento(true)}
+                                  className="mt-1 bg-white text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md"
+                                >
+                                  Tomar foto
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
-                          <img src={item.portada} alt="aquí y ahora" className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
-                        <div className="flex flex-col space-y-1 w-full">
-                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                          {item.cita ? (
-                            <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
-                          ) : (
-                            <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))
+                      ) : (
+                        <>
+                          <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
+                          <div className="flex flex-col space-y-1 w-full">
+                            <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                            {item.cita ? (
+                              <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
+                            ) : (
+                              <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           )}
