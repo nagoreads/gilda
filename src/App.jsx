@@ -551,14 +551,14 @@ export default function App() {
               </div>
 
               {!haPublicadoMomentoHoy && (
-                <div className="p-4 bg-[#23211e] text-[#ffffee] rounded-xl flex justify-between items-center modal-elastic">
+                <div 
+                  onClick={() => setMostrarModalMomento(true)}
+                  className="p-4 bg-[#23211e] text-[#ffffee] rounded-xl flex justify-between items-center modal-elastic cursor-pointer hover:bg-[#383531] transition-colors"
+                >
                   <div className="space-y-0.5">
-                    <p className="font-babydoll font-bold text-sm">Tu foto de hoy</p>
-                    <p className="text-[10px] opacity-80 font-sans">Comparte tu lectura de hoy para descubrir las del resto.</p>
+                    <p className="font-babydoll font-bold text-sm">Tu foto de hoy está pendiente ✦</p>
+                    <p className="text-[10px] opacity-80 font-sans">Haz clic aquí para compartir tu lectura y desbloquear las de la comunidad.</p>
                   </div>
-                  <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 ml-2 hover:bg-white transition-colors">
-                    publicar foto
-                  </button>
                 </div>
               )}
 
