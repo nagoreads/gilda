@@ -246,8 +246,8 @@ export default function App() {
     };
 
     const content = (foto && foto.trim() !== '' && !errorImg)
-      ? <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#e6e4dc] shrink-0`} />
-      : <div className={`${sizeClass} rounded-full bg-[#faf9f5] border border-[#e6e4dc] flex items-center justify-center font-babydoll ${textClass} text-[var(--primary-olive)] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
+      ? <img src={foto} alt={nombre || 'Lector(a)'} onError={() => setErrorImg(true)} className={`${sizeClass} rounded-full object-cover border border-[#e8e4d9] shrink-0`} />
+      : <div className={`${sizeClass} rounded-full bg-[#faf9f5] border border-[#e8e4d9] flex items-center justify-center font-babydoll ${textClass} text-[var(--primary-olive)] shrink-0 font-bold`}>{(nombre || 'L').charAt(0).toUpperCase()}</div>;
 
     if (editable) {
       return (
@@ -342,8 +342,8 @@ export default function App() {
   if (esPaginaGracias) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
-        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 shadow-xl border border-[#e6e4dc]">
-          <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold">gracias :)</h1>
+        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 shadow-xl border border-[#e8e4d9]">
+          <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gracias :)</h1>
           <p className="text-xs uppercase font-bold text-[var(--primary-olive)] font-sans">tu espacio ya está listo</p>
           <a href="/" className="block w-full editorial-btn py-3.5 text-xs font-bold text-center">Ir a gilda e iniciar sesión</a>
         </div>
@@ -354,13 +354,13 @@ export default function App() {
   if (!supabaseSession) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] fade-in">
-        <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e6e4dc]">
-          <h1 className="font-babydoll text-6xl text-[#1c1c1a] font-bold">gilda</h1>
+        <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e8e4d9]">
+          <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gilda</h1>
           <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--primary-olive)] font-bold font-sans">comunidad de lectura, cartas y creatividad</p>
 
           {vistaAcceso === 'menu' && (
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
-              <label className="block text-xs font-semibold text-[#1c1c1a]">Correo electrónico</label>
+              <label className="block text-xs font-semibold text-[#23211e]">Correo electrónico</label>
               <input type="email" placeholder="tuemail@ejemplo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required className="w-full editorial-input px-4 py-3 text-xs" />
               <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3.5 text-xs shadow-md font-bold">{loadingAuth ? 'Enviando...' : 'Enviar enlace mágico'}</button>
               <button type="button" onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[var(--primary-olive)] border border-[#d4cfbc] rounded-2xl py-3.5 text-xs font-bold mt-3">Ver modalidades del club</button>
@@ -369,12 +369,12 @@ export default function App() {
 
           {vistaAcceso === 'modalidades' && (
             <div className="space-y-4 text-left fade-in">
-              <button onClick={() => setVistaAcceso('menu')} className="text-xs font-semibold text-[#595750] flex items-center"><i className="fa-solid fa-arrow-left mr-2"></i> Volver</button>
+              <button onClick={() => setVistaAcceso('menu')} className="text-xs font-semibold text-[#75706b] flex items-center"><i className="fa-solid fa-arrow-left mr-2"></i> Volver</button>
               <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                 {modalidades.map(m => (
-                  <div key={m.id} className="editorial-card p-4 space-y-2 bg-[#ffffee] border border-[#e6e4dc]">
+                  <div key={m.id} className="editorial-card p-4 space-y-2 bg-[#ffffee] border border-[#e8e4d9]">
                     <div className="flex justify-between items-center"><h3 className="font-babydoll font-bold text-lg">{m.nombre}</h3><span className="text-xs font-bold bg-[var(--primary-olive)] text-white px-2.5 py-1 rounded-full">{m.precio}</span></div>
-                    <p className="text-xs text-[#595750] font-sans">{m.descripcion}</p>
+                    <p className="text-xs text-[#75706b] font-sans">{m.descripcion}</p>
                     <a href={m.esGratis ? '#' : m.enlaceStripe} onClick={e => { if (m.esGratis) setVistaAcceso('menu'); }} className="block w-full mt-2 py-2 text-center text-xs editorial-btn font-semibold">{m.esGratis ? 'Probar gratis' : 'Elegir esta modalidad'}</a>
                   </div>
                 ))}
@@ -391,7 +391,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-8 bg-[#ffffee]">
         <div className="editorial-card-lavender p-5 space-y-4">
           <h1 className="font-babydoll text-4xl font-bold">gilda</h1>
-          <p className="text-xs text-[#595750] font-sans leading-relaxed">Tu modalidad ({sesion.modalidad}) está registrada para recibir correspondencia y no incluye acceso web.</p>
+          <p className="text-xs text-[#75706b] font-sans leading-relaxed">Tu modalidad ({sesion.modalidad}) está registrada para recibir correspondencia y no incluye acceso web.</p>
           <button onClick={() => supabase.auth.signOut()} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
         </div>
       </div>
@@ -400,7 +400,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
-      {toastMsg && <div className="fixed top-6 z-50 bg-[#1c1c1a] text-[#ffffee] text-xs px-4 py-2.5 rounded-full shadow-lg font-sans">{toastMsg}</div>}
+      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2.5 rounded-full shadow-lg font-sans">{toastMsg}</div>}
 
       {modalImportarAbierto && (
         <ModalImportarPin onClose={() => setModalImportarAbierto(false)} onSave={(url, tit) => {
@@ -420,21 +420,21 @@ export default function App() {
       )}
 
       {/* Encabezado */}
-      <header className="w-full mb-5 flex justify-between items-center bg-white p-4 rounded-2xl border border-[#e6e4dc] shadow-sm">
+      <header className="w-full mb-5 flex justify-between items-center bg-white p-4 rounded-2xl border border-[#e8e4d9] shadow-sm">
         <div className="flex items-center gap-3 overflow-hidden">
           <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-10 h-10" textClass="text-lg" editable={true} onFotoChange={handleFotoPerfilUpdate} />
           <div className="overflow-hidden">
             <h2 className="font-bold text-lg leading-none truncate font-babydoll">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
-            <span className="text-xs text-[#595750] uppercase font-sans tracking-wider">{sesion.modalidad}</span>
+            <span className="text-xs text-[#75706b] uppercase font-sans tracking-wider">{sesion.modalidad}</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
           {esAdministradora && (
-            <button onClick={() => setSeccionApp('admin')} className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[var(--primary-olive)] text-white' : 'bg-[#faf9f5] text-[var(--primary-olive)] border-[#e6e4dc]'}`}>
+            <button onClick={() => setSeccionApp('admin')} className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[var(--primary-olive)] text-white' : 'bg-[#faf9f5] text-[var(--primary-olive)] border-[#e8e4d9]'}`}>
               <i className="fa-solid fa-screwdriver-wrench text-xs"></i>
             </button>
           )}
-          <button onClick={() => supabase.auth.signOut()} className="text-[#595750] hover:text-black p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
+          <button onClick={() => supabase.auth.signOut()} className="text-[#75706b] hover:text-black p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center"><i className="fa-solid fa-arrow-right-from-bracket"></i></button>
         </div>
       </header>
 
@@ -442,33 +442,33 @@ export default function App() {
       <main className="w-full flex-grow space-y-4">
         {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 fade-in">
-          <div className="flex bg-[#faf9f5] p-1 rounded-xl text-xs font-semibold border border-[#e6e4dc] font-sans mb-3">
-            <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-2 rounded-lg ${subTabInicio === 'progreso' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Mi actividad y lecturas</button>
-            <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-2 rounded-lg ${subTabInicio === 'muro' ? 'bg-[#1c1c1a] text-[#ffffee]' : 'text-[#595750]'}`}>Muro del club</button>
+          <div className="flex bg-[#faf9f5] p-1 rounded-xl text-xs font-semibold border border-[#e8e4d9] font-sans mb-3">
+            <button onClick={() => setSubTabInicio('progreso')} className={`flex-1 py-2 rounded-lg ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Mi actividad y lecturas</button>
+            <button onClick={() => setSubTabInicio('muro')} className={`flex-1 py-2 rounded-lg ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}>Muro del club</button>
           </div>
 
           {subTabInicio === 'progreso' && (
             <>
               <div className="editorial-card p-5 space-y-4">
-                <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2">
+                <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2">
                    <h3 className="font-babydoll text-xl font-bold">Progreso actual</h3>
-                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans text-[var(--primary-olive)] bg-white border border-[#e6e4dc] px-3 py-1.5 rounded-full shadow-xs"><i className="fa-brands fa-instagram"></i> Compartir</button>
+                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-bold font-sans text-[var(--primary-olive)] bg-white border border-[#e8e4d9] px-3 py-1.5 rounded-full shadow-xs"><i className="fa-brands fa-instagram"></i> Compartir</button>
                 </div>
                 <div className="flex gap-4 items-center">
                   <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
                   <div className="space-y-2 w-full">
                     <span className="text-xs uppercase tracking-wider text-[var(--primary-olive)] font-bold font-sans">Lectura del club</span>
                     <h2 className="font-babydoll text-2xl font-bold leading-tight">{libroActual.titulo}</h2>
-                    <p className="text-xs text-[#595750] italic font-sans">{libroActual.autora}</p>
+                    <p className="text-xs text-[#75706b] italic font-sans">{libroActual.autora}</p>
                     <div>
-                      <div className="flex justify-between text-xs text-[#595750] mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
-                      <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e6e4dc]"><div className="bg-[var(--primary-olive)] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
+                      <div className="flex justify-between text-xs text-[#75706b] mb-1 font-sans"><span>progreso</span><span>{porcentajeLibro}%</span></div>
+                      <div className="w-full bg-[#faf9f5] rounded-full h-2 border border-[#e8e4d9]"><div className="bg-[var(--primary-olive)] h-full rounded-full" style={{width: `${porcentajeLibro}%`}}></div></div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-between">
-                  <span className="text-xs text-[#595750] font-sans">página actual:</span>
+                <div className="pt-3 border-t border-[#e8e4d9] flex items-center justify-between">
+                  <span className="text-xs text-[#75706b] font-sans">página actual:</span>
                   <input type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
                     await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
                     mostrarToast('Progreso guardado');
@@ -505,12 +505,12 @@ export default function App() {
 
           {subTabInicio === 'muro' && (
             <div className="editorial-card p-5 space-y-3">
-              <h3 className="font-babydoll text-2xl font-bold text-[#1c1c1a]">El muro del club</h3>
+              <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro del club</h3>
               {muroActividad.length === 0 ? (
-                <p className="text-xs text-[#595750] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
+                <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 muroActividad.map((item, idx) => (
-                  <div key={idx} className="bg-[#eeeeff] p-3.5 rounded-xl border border-[#d0ceeb] flex gap-3 items-center">
+                  <div key={idx} className="bg-[#ffffff] p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
                       <span className="font-bold font-sans text-xs text-[var(--primary-olive)]">{item.nombre || 'lectora'}</span>
@@ -618,7 +618,7 @@ export default function App() {
       </main>
 
       {/* Navegación Inferior */}
-      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl shadow-lg bg-white border-t border-[#e6e4dc]">
+      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2.5 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl shadow-lg bg-white border-t border-[#e8e4d9]">
         {[
           { id: 'inicio', icon: 'fa-house', label: 'inicio' },
           { id: 'edificio', icon: 'fa-building', label: 'casa' },
@@ -628,7 +628,7 @@ export default function App() {
         ].map(tab => {
           const bloqueado = esRestringida && tab.id === 'comunidad';
           return (
-            <button key={tab.id} onClick={() => { if (bloqueado) setMostrarModalUpgrade(true); else setSeccionApp(tab.id); }} className={`flex flex-col items-center justify-center gap-1 p-1.5 min-w-[48px] min-h-[48px] ${seccionApp === tab.id && !bloqueado ? 'text-[#1c1c1a] font-bold bg-[#faf9f5] px-3.5 py-1.5 rounded-xl' : 'text-[#595750]'} ${bloqueado ? 'opacity-50' : ''}`}>
+            <button key={tab.id} onClick={() => { if (bloqueado) setMostrarModalUpgrade(true); else setSeccionApp(tab.id); }} className={`flex flex-col items-center justify-center gap-1 p-1.5 min-w-[48px] min-h-[48px] ${seccionApp === tab.id && !bloqueado ? 'text-[#23211e] font-bold bg-[#faf9f5] px-3.5 py-1.5 rounded-xl' : 'text-[#75706b]'} ${bloqueado ? 'opacity-50' : ''}`}>
               <i className={`fa-solid ${bloqueado ? 'fa-lock' : tab.icon} text-sm`}></i>
               <span className="text-[9px] font-bold lowercase font-sans">{tab.label}</span>
             </button>

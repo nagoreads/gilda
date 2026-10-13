@@ -19,9 +19,9 @@ export default function TimelineCapitulos({
 
   return (
     <div className="space-y-6 fade-in">
-      <div className="text-center pb-2 border-b border-[#e6e4dc]">
-        <h2 className="font-babydoll text-3xl font-bold text-[#1c1c1a]">línea de tiempo</h2>
-        <p className="text-xs text-[#595750] font-sans italic">tu viaje de lectura capítulo a capítulo</p>
+      <div className="text-center pb-2 border-b border-[#e8e4d9]">
+        <h2 className="font-babydoll text-3xl font-bold text-[#23211e]">línea de tiempo</h2>
+        <p className="text-xs text-[#75706b] font-sans italic">tu viaje de lectura capítulo a capítulo</p>
       </div>
 
       <div className="relative border-l-2 border-[var(--primary-olive)]/30 ml-4 pl-6 space-y-6 my-4">
@@ -43,25 +43,25 @@ export default function TimelineCapitulos({
               <div className={`absolute -left-[35px] top-1.5 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] font-bold shadow-xs transition-all ${
                 desbloqueado 
                   ? 'bg-[var(--primary-olive)] border-white text-white scale-110' 
-                  : 'bg-[#e6e4dc] border-[#d4cfbc] text-[#595750]'
+                  : 'bg-[#e8e4d9] border-[#d4cfbc] text-[#75706b]'
               }`}>
                 {desbloqueado ? (i + 1) : <i className="fa-solid fa-lock text-[8px]"></i>}
               </div>
 
               <div className={`editorial-card p-5 space-y-4 transition-all ${!desbloqueado ? 'opacity-85 bg-[#faf9f5]' : ''}`} onClick={registrarActividadPresencia}>
                 <div className="flex justify-between items-center">
-                  <h3 className="font-babydoll text-2xl font-bold text-[#1c1c1a]">{cap.titulo}</h3>
-                  <span className="text-xs text-[#595750] font-sans font-semibold">pág. {paginaMinima}</span>
+                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">{cap.titulo}</h3>
+                  <span className="text-xs text-[#75706b] font-sans font-semibold">pág. {paginaMinima}</span>
                 </div>
 
                 {desbloqueado ? (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line font-sans text-left">{cap.descripcion || cap.contenido}</p>
-                    <div className="pt-4 border-t border-[#e6e4dc] space-y-3">
+                    <div className="pt-4 border-t border-[#e8e4d9] space-y-3">
                       <h4 className="font-babydoll text-base font-bold">Comentarios de lectoras</h4>
                       <div className="space-y-3">
                         {comentariosCapitulo.length === 0 ? (
-                          <p className="text-xs text-[#595750] italic font-sans">Aún no hay comentarios. ¡Sé la primera!</p>
+                          <p className="text-xs text-[#75706b] italic font-sans">Aún no hay comentarios. ¡Sé la primera!</p>
                         ) : (
                           comentariosCapitulo.map((com, cIdx) => {
                             const idComentario = String(com.id || '').trim();
@@ -69,10 +69,10 @@ export default function TimelineCapitulos({
                             const nombreAutorComentario = obtenerNombreReal(com.autora, com.autora);
 
                             return (
-                              <div key={cIdx} className="bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc] text-xs space-y-2">
+                              <div key={cIdx} className="bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9] text-xs space-y-2">
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold font-sans text-[var(--primary-olive)]">{nombreAutorComentario}</span>
-                                  <span className="text-[10px] text-[#595750]">{com.fecha || ''}</span>
+                                  <span className="text-[10px] text-[#75706b]">{com.fecha || ''}</span>
                                 </div>
                                 <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{com.texto || ''}</p>
                                 {!modalidadLimpia.includes('cotilla') && (
@@ -85,10 +85,10 @@ export default function TimelineCapitulos({
                                 {respuestasCom.length > 0 && (
                                   <div className="pl-3 mt-2 border-l-2 border-[#d4cfbc] space-y-2">
                                     {respuestasCom.map((resp, rIdx) => (
-                                      <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#e6e4dc] text-xs space-y-1">
+                                      <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#e8e4d9] text-xs space-y-1">
                                         <div className="flex justify-between items-center">
                                           <span className="font-bold text-[var(--primary-olive)]">{obtenerNombreReal(resp.autora, resp.autora)}</span>
-                                          <span className="text-[10px] text-[#595750]">{resp.fecha || ''}</span>
+                                          <span className="text-[10px] text-[#75706b]">{resp.fecha || ''}</span>
                                         </div>
                                         <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{resp.texto || ''}</p>
                                       </div>
@@ -138,9 +138,9 @@ export default function TimelineCapitulos({
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3 bg-[#ffffee] border border-[#e6e4dc] rounded-xl text-center space-y-1">
-                    <i className="fa-solid fa-lock text-[#595750] text-xs"></i>
-                    <p className="text-xs text-[#595750] font-sans">Capítulo bloqueado hasta alcanzar la pág. <b>{paginaMinima}</b> (vas por la {miPagina}).</p>
+                  <div className="p-3 bg-[#ffffee] border border-[#e8e4d9] rounded-xl text-center space-y-1">
+                    <i className="fa-solid fa-lock text-[#75706b] text-xs"></i>
+                    <p className="text-xs text-[#75706b] font-sans">Capítulo bloqueado hasta alcanzar la pág. <b>{paginaMinima}</b> (vas por la {miPagina}).</p>
                   </div>
                 )}
               </div>

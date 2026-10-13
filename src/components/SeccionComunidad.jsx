@@ -71,7 +71,7 @@ export default function SeccionComunidad({
   return (
     <div className="space-y-4 fade-in" onClick={registrarActividadPresencia}>
       {/* Selector de sub-pestañas */}
-      <div className="flex overflow-x-auto gap-2 bg-[#eeeeff]/60 p-1.5 rounded-2xl border border-[#d0ceeb] font-sans no-scrollbar">
+      <div className="flex overflow-x-auto gap-2 bg-[#ffffff]/60 p-1.5 rounded-2xl border border-[#e8e4d9] font-sans no-scrollbar">
         {[
           { id: 'chat', label: 'Chat', icon: 'fa-comments' },
           { id: 'mapa', label: `Mapa (${usuariasClub.length})`, icon: 'fa-map-location-dot' },
@@ -107,7 +107,7 @@ export default function SeccionComunidad({
                 </p>
               </div>
             </div>
-            <div className="flex bg-[#eeeeff] p-0.5 rounded-lg border border-[#d0ceeb]">
+            <div className="flex bg-[#ffffff] p-0.5 rounded-lg border border-[#e8e4d9]">
               <button
                 onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }}
                 className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all min-h-[44px] ${
@@ -141,7 +141,7 @@ export default function SeccionComunidad({
                       <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${
                         esMia
                           ? 'bg-[var(--primary-olive)] text-[#ffffee] rounded-[18px] rounded-br-[4px]'
-                          : 'bg-[#eeeeff] border border-[#d0ceeb] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
+                          : 'bg-[#ffffff] border border-[#e8e4d9] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
                       }`}>
                         <span className="block pr-8 pb-1">{m.mensaje}</span>
                         <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-[#ffffee]/80' : 'text-[#625f6e]'}`}>{horaMensaje}</span>
@@ -178,7 +178,7 @@ export default function SeccionComunidad({
               {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== sesion?.email?.toLowerCase()).map((socia, sIdx) => {
                 const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
                 return (
-                  <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white/90 rounded-xl border border-[#e8e4d9] cursor-pointer hover:bg-[#eeeeff]/60 transition-all shadow-xs min-h-[44px]">
+                  <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white/90 rounded-xl border border-[#e8e4d9] cursor-pointer hover:bg-[#ffffff]/60 transition-all shadow-xs min-h-[44px]">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-8 h-8" textClass="text-xs" />
                       <div className="overflow-hidden">
@@ -189,7 +189,7 @@ export default function SeccionComunidad({
                         <p className="text-xs text-[#625f6e] truncate font-sans font-medium">{socia.modalidad || 'socia de gilda'}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-[var(--primary-olive)] font-bold bg-[#eeeeff] px-3 py-1.5 rounded-xl border border-[#d0ceeb] shadow-xs flex items-center gap-1">
+                    <span className="text-xs text-[var(--primary-olive)] font-bold bg-[#ffffff] px-3 py-1.5 rounded-xl border border-[#e8e4d9] shadow-xs flex items-center gap-1">
                       <i className="fa-solid fa-envelope text-xs"></i> Chat
                     </span>
                   </div>
@@ -227,7 +227,7 @@ export default function SeccionComunidad({
                       <div className={`px-3.5 py-2.5 text-xs leading-relaxed font-sans relative shadow-xs ${
                         esMia
                           ? 'bg-[var(--primary-olive)] text-[#ffffee] rounded-[18px] rounded-br-[4px]'
-                          : 'bg-[#eeeeff] border border-[#d0ceeb] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
+                          : 'bg-[#ffffff] border border-[#e8e4d9] text-[#23211e] rounded-[18px] rounded-bl-[4px]'
                       }`}>
                         <span className="block pr-8 pb-1">{m.mensaje}</span>
                         <span className={`absolute bottom-1 right-2.5 text-[8.5px] font-sans ${esMia ? 'text-[#ffffee]/80' : 'text-[#625f6e]'}`}>{horaMensaje}</span>
@@ -293,7 +293,7 @@ export default function SeccionComunidad({
                 return (
                   <article key={cafecito.id || cafecito.titulo} className="editorial-card p-4 space-y-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 shrink-0 rounded-full bg-[#eeeeff] border border-[#d0ceeb] flex items-center justify-center text-[var(--primary-olive)]">
+                      <div className="w-9 h-9 shrink-0 rounded-full bg-[#ffffff] border border-[#e8e4d9] flex items-center justify-center text-[var(--primary-olive)]">
                         <i className="fa-solid fa-mug-hot text-sm"></i>
                       </div>
                       <div className="min-w-0 flex-grow">
@@ -313,8 +313,8 @@ export default function SeccionComunidad({
                     </div>
                     <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2.5 rounded-xl text-xs font-bold font-sans border transition-colors min-h-[44px] ${
                       cafecito.yaVoto
-                        ? 'bg-[#eeeeff] text-[var(--primary-olive)] border-[#d0ceeb]'
-                        : 'bg-white text-[var(--primary-olive)] border-[#e8e4d9] hover:bg-[#eeeeff]/50'
+                        ? 'bg-[#ffffff] text-[var(--primary-olive)] border-[#e8e4d9]'
+                        : 'bg-white text-[var(--primary-olive)] border-[#e8e4d9] hover:bg-[#ffffff]/50'
                     }`}>
                       <i className={`fa-solid ${cafecito.yaVoto ? 'fa-check' : 'fa-heart'} mr-1.5`}></i>
                       {cafecito.yaVoto ? 'Retirar mi voto' : 'Votar este cafecito'}
@@ -361,7 +361,7 @@ export default function SeccionComunidad({
             </div>
             <div className="space-y-3">
               {[...propuestas].sort((a, b) => (Number(b.votos) || 0) - (Number(a.votos) || 0)).map((p, i) => (
-                <div key={p.id || i} className="flex gap-3 border border-[#d0ceeb] p-3.5 rounded-xl bg-[#eeeeff]/60">
+                <div key={p.id || i} className="flex gap-3 border border-[#e8e4d9] p-3.5 rounded-xl bg-[#ffffff]/60">
                   <PortadaLibro titulo={p.titulo} autora={p.autora} portada={p.portada} size="small" />
                   <div className="flex flex-col justify-between w-full">
                     <div>
@@ -381,7 +381,7 @@ export default function SeccionComunidad({
                       await supabase.from('proposals').update({ votos: nuevosVotos, votantes: nuevosVotantes.join(',') }).eq('id', p.id);
                       await cargarDatosSupabase();
                       mostrarToast('Voto actualizado.');
-                    }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-white text-[var(--primary-olive)] border border-[#d0ceeb] hover:bg-[var(--primary-olive)] hover:text-[#ffffee] transition-all min-h-[44px]">
+                    }} className="self-start mt-2 px-3.5 py-1.5 text-xs rounded-full font-bold bg-white text-[var(--primary-olive)] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-[#ffffee] transition-all min-h-[44px]">
                       Votar ({p.votos || 0})
                     </button>
                   </div>

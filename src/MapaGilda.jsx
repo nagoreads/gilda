@@ -307,8 +307,8 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         const piruletaHtml = `
           <div style="position: relative; width: 18px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="${item.nombre}">
             <svg viewBox="0 0 16 24" width="18" height="26" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));">
-              <line x1="8" y1="12" x2="8" y2="23" stroke="#1c1c1a" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="8" cy="7" r="6" fill="var(--primary-olive)" stroke="#1c1c1a" stroke-width="1.5"/>
+              <line x1="8" y1="12" x2="8" y2="23" stroke="#23211e" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="8" cy="7" r="6" fill="var(--primary-olive)" stroke="#23211e" stroke-width="1.5"/>
             </svg>
             <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">1</span>
           </div>
@@ -347,22 +347,22 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
           <div 
             ref={mapContainerRef} 
             style={{ height: '280px', width: '100%', zIndex: 1 }} 
-            className="rounded-2xl border border-[#e6e4dc] shadow-sm overflow-hidden bg-[#faf9f5] transition-opacity duration-300"
+            className="rounded-2xl border border-[#e8e4d9] shadow-sm overflow-hidden bg-[#faf9f5] transition-opacity duration-300"
           ></div>
           
           {regionSeleccionada && (
-            <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-md p-4 flex flex-col rounded-2xl fade-in text-[#1c1c1a] shadow-2xl max-h-[280px] overflow-hidden">
-              <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-2 mb-2 shrink-0">
-                <h3 className="font-babydoll text-[#1c1c1a] font-bold text-lg leading-none">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-                <button onClick={limpiarRegion} className="text-[11px] font-bold text-[#595750] bg-white border border-[#e6e4dc] px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
+            <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-md p-4 flex flex-col rounded-2xl fade-in text-[#23211e] shadow-2xl max-h-[280px] overflow-hidden">
+              <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2 mb-2 shrink-0">
+                <h3 className="font-babydoll text-[#23211e] font-bold text-lg leading-none">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
+                <button onClick={limpiarRegion} className="text-[11px] font-bold text-[#75706b] bg-white border border-[#e8e4d9] px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
                   cerrar
                 </button>
               </div>
               <div className="overflow-y-auto flex-grow space-y-2 pr-1">
                 {regionSeleccionada.usuarias.map((u, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-white rounded-xl border border-[#e6e4dc] gap-2 shadow-xs">
-                    <span className="font-bold font-babydoll text-sm text-[#1c1c1a]">{u.nombre}</span>
-                    <span className="text-[#595750] font-sans text-[11px] italic">{u.ciudad || u.provincia_region || 'Sin localidad'}</span>
+                  <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-white rounded-xl border border-[#e8e4d9] gap-2 shadow-xs">
+                    <span className="font-bold font-babydoll text-sm text-[#23211e]">{u.nombre}</span>
+                    <span className="text-[#75706b] font-sans text-[11px] italic">{u.ciudad || u.provincia_region || 'Sin localidad'}</span>
                   </div>
                 ))}
               </div>
@@ -371,13 +371,13 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         </div>
 
         <div className="editorial-card p-4 space-y-2.5">
-          <h4 className="font-babydoll text-base font-bold text-[#1c1c1a]">Usuarias por país</h4>
+          <h4 className="font-babydoll text-base font-bold text-[#23211e]">Usuarias por país</h4>
           <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
             {conteoPorPais.map(({ pais, total, regiones }, idx) => {
               const expandido = paisExpandido === pais;
               const regionesId = `${idContadorPais}-regiones-${idx}`;
               return (
-                <div key={pais} className="rounded-lg border border-[#e6e4dc] overflow-hidden">
+                <div key={pais} className="rounded-lg border border-[#e8e4d9] overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setPaisExpandido(expandido ? null : pais)}
@@ -386,20 +386,20 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
                     className="w-full flex items-center justify-between gap-3 bg-[#ffffee] px-3 py-2.5 text-xs text-left hover:bg-[#faf9f5] transition-colors"
                   >
                     <span className="flex items-center gap-2 min-w-0">
-                      <i className={`fa-solid ${expandido ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px] text-[#595750]`}></i>
+                      <i className={`fa-solid ${expandido ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px] text-[#75706b]`}></i>
                       <span className="font-bold font-babydoll truncate">{pais}</span>
                     </span>
                     <span className="bg-[var(--primary-olive)] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">{total}</span>
                   </button>
                   {expandido && (
-                    <div id={regionesId} className="px-3 py-2 space-y-1.5 border-t border-[#e6e4dc] bg-white">
-                      <p className="text-[9px] uppercase font-bold text-[#595750]">
+                    <div id={regionesId} className="px-3 py-2 space-y-1.5 border-t border-[#e8e4d9] bg-white">
+                      <p className="text-[9px] uppercase font-bold text-[#75706b]">
                         {pais === 'España' ? 'Comunidades autónomas' : 'Regiones / provincias'}
                       </p>
                       {regiones.map(([region, cantidad]) => (
                         <div key={region} className="flex justify-between items-center gap-3 text-[11px] pl-2">
-                          <span className="text-[#1c1c1a] truncate">{region}</span>
-                          <span className="text-[#595750] font-bold shrink-0">{cantidad}</span>
+                          <span className="text-[#23211e] truncate">{region}</span>
+                          <span className="text-[#75706b] font-bold shrink-0">{cantidad}</span>
                         </div>
                       ))}
                     </div>

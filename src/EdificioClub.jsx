@@ -12,8 +12,8 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
 
     return (
       <div className="flex flex-col items-center w-full max-w-[480px] mx-auto py-2 relative">
-        <h2 className="text-[52px] font-babydoll text-center mb-0 text-[#1c1c1a] leading-none">gilda</h2>
-        <p className="text-[13px] text-[#595750] text-center mb-5 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
+        <h2 className="text-[52px] font-babydoll text-center mb-0 text-[#23211e] leading-none">gilda</h2>
+        <p className="text-[13px] text-[#75706b] text-center mb-5 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
         
         {/* Fachada/Marco de Edificio Vintage */}
         <div className="w-full bg-[#f3eadb] border-2 border-[#d8cdb8] rounded-3xl p-5 shadow-sm relative overflow-hidden mb-6">
@@ -55,7 +55,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
                   </button>
 
                   <div className="flex items-center justify-center mt-1.5">
-                    <span className="text-[12px] text-[#595750] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
+                    <span className="text-[12px] text-[#75706b] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
                   </div>
                 </div>
               );
@@ -65,11 +65,11 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
 
         {/* Tarjeta Flotante Emergente (Habitación de la socia) */}
         <div key={usuariaActivaKey} className="editorial-card w-full p-5 flex flex-col gap-4 modal-pop">
-          <div className="flex flex-col gap-2 w-full border-b border-[#e6e4dc] pb-2.5">
+          <div className="flex flex-col gap-2 w-full border-b border-[#e8e4d9] pb-2.5">
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-2 min-w-0">
                 {AvatarUsuaria ? <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" /> : null}
-                <span className="font-babydoll text-lg sm:text-xl font-bold text-[#1c1c1a] leading-tight">
+                <span className="font-babydoll text-lg sm:text-xl font-bold text-[#23211e] leading-tight">
                   la habitación de {
                     (
                       (usuariaActiva && usuariaActiva.nombre && usuariaActiva.nombre.trim() !== '') 
@@ -79,7 +79,7 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
                   }
                 </span>
               </div>
-              <span className="text-[10px] text-[#595750] font-bold font-sans shrink-0">@gilda.mailclub</span>
+              <span className="text-[10px] text-[#75706b] font-bold font-sans shrink-0">@gilda.mailclub</span>
             </div>
 
             {esOtraSocia && (
@@ -96,28 +96,28 @@ export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, o
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
+            <div className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
               <div className="flex items-center gap-3 overflow-hidden">
                 <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
-                <div className="text-xs text-[#1c1c1a] overflow-hidden">
+                <div className="text-xs text-[#23211e] overflow-hidden">
                   <p className="font-bold truncate font-babydoll text-sm">{libroActual.titulo}</p>
-                  <p className="text-[11px] text-[#595750] font-sans">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+                  <p className="text-[11px] text-[#75706b] font-sans">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
                 </div>
               </div>
-              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
+              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#23211e] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
                 <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
               </button>
             </div>
             {misLibrosPersonales.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e6e4dc]">
+              <div key={idx} className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
-                  <div className="text-xs text-[#1c1c1a] overflow-hidden">
+                  <div className="text-xs text-[#23211e] overflow-hidden">
                     <p className="font-bold truncate font-babydoll text-sm">{item.libro}</p>
-                    <p className="text-[11px] text-[#595750] font-sans">pág. <b>{item.pagina || item.paginas || 0}</b></p>
+                    <p className="text-[11px] text-[#75706b] font-sans">pág. <b>{item.pagina || item.paginas || 0}</b></p>
                   </div>
                 </div>
-                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#1c1c1a] border border-[#e6e4dc] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
+                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#23211e] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
                   <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
                 </button>
               </div>

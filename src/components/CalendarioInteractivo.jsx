@@ -82,7 +82,7 @@ export default function CalendarioInteractivo({ eventos }) {
           if (tieneEventos) setDiaSeleccionado({ dia, eventos: evs });
           else setDiaSeleccionado(null);
         }}
-        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[var(--primary-olive)] text-white font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#1c1c1a]'} ${tieneEventos && !esHoy ? 'border border-[var(--primary-olive)]/40 font-bold bg-[#ffffee]' : ''}`}
+        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[var(--primary-olive)] text-white font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#23211e]'} ${tieneEventos && !esHoy ? 'border border-[var(--primary-olive)]/40 font-bold bg-[#ffffee]' : ''}`}
       >
         <span>{dia}</span>
         {tieneEventos && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${esHoy ? 'bg-amber-300' : 'bg-[var(--primary-olive)]'}`}></span>}
@@ -92,12 +92,12 @@ export default function CalendarioInteractivo({ eventos }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-between items-center bg-[#ffffee] p-2.5 rounded-xl border border-[#e6e4dc]">
-        <button onClick={mesAnterior} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-left text-xs"></i></button>
-        <h4 className="font-babydoll text-base font-bold text-[#1c1c1a]">{nombresMeses[mes]} {anio}</h4>
-        <button onClick={mesSiguiente} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#1c1c1a] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-right text-xs"></i></button>
+      <div className="flex justify-between items-center bg-[#ffffee] p-2.5 rounded-xl border border-[#e8e4d9]">
+        <button onClick={mesAnterior} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#23211e] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-left text-xs"></i></button>
+        <h4 className="font-babydoll text-base font-bold text-[#23211e]">{nombresMeses[mes]} {anio}</h4>
+        <button onClick={mesSiguiente} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-[#23211e] min-h-[44px] min-w-[44px]"><i className="fa-solid fa-chevron-right text-xs"></i></button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center font-sans text-[10px] uppercase font-semibold text-[#595750] pb-1 border-b border-[#e6e4dc]">
+      <div className="grid grid-cols-7 gap-1 text-center font-sans text-[10px] uppercase font-semibold text-[#75706b] pb-1 border-b border-[#e8e4d9]">
         {diasSemana.map((d, i) => <div key={i}>{d}</div>)}
       </div>
 
@@ -106,20 +106,20 @@ export default function CalendarioInteractivo({ eventos }) {
       </div>
 
       {diaSeleccionado && (
-        <div className="bg-[#ffffee] border border-[#e6e4dc] p-3.5 rounded-xl space-y-2.5 mt-2 fade-in text-left shadow-sm">
-          <div className="flex justify-between items-center border-b border-[#e6e4dc] pb-1.5">
-            <span className="font-babydoll font-bold text-sm text-[#1c1c1a]">
+        <div className="bg-[#ffffee] border border-[#e8e4d9] p-3.5 rounded-xl space-y-2.5 mt-2 fade-in text-left shadow-sm">
+          <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-1.5">
+            <span className="font-babydoll font-bold text-sm text-[#23211e]">
               Eventos del {diaSeleccionado.dia} de {nombresMeses[mes]}
             </span>
-            <button onClick={() => setDiaSeleccionado(null)} className="text-xs text-[#595750] hover:text-black p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <button onClick={() => setDiaSeleccionado(null)} className="text-xs text-[#75706b] hover:text-black p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
               <i className="fa-solid fa-xmark"></i>
             </button>
           </div>
           <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
             {diaSeleccionado.eventos.map((ev, idx) => (
-              <div key={idx} className="bg-white p-2.5 rounded-lg border border-[#e6e4dc] text-xs space-y-1">
-                <p className="font-bold text-[#1c1c1a] font-babydoll text-sm">{ev.evento || ev.titulo || 'Evento del club'}</p>
-                <div className="flex items-center gap-1.5 text-[10px] text-[#595750] font-sans">
+              <div key={idx} className="bg-white p-2.5 rounded-lg border border-[#e8e4d9] text-xs space-y-1">
+                <p className="font-bold text-[#23211e] font-babydoll text-sm">{ev.evento || ev.titulo || 'Evento del club'}</p>
+                <div className="flex items-center gap-1.5 text-[10px] text-[#75706b] font-sans">
                   <i className="fa-regular fa-clock text-[var(--primary-olive)]"></i>
                   <span>{ev.hora && ev.hora.trim() !== '' ? ev.hora : 'Durante todo el día'}</span>
                 </div>
