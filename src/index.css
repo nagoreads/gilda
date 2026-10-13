@@ -214,3 +214,9 @@ button:active {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-olive);
 }
+.editorial-card-lavender {
+  background-color: rgba(238, 238, 255, 0.85);
+  border: 1px solid #d0ceeb;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px -10px rgba(63, 66, 104, 0.08);
+}
