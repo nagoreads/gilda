@@ -73,7 +73,7 @@ export default function App() {
   const [vistaAcceso, setVistaAcceso] = useState('menu');
 
   const [seccionApp, setSeccionApp] = useState('inicio');
-  const [subTabInicio, setSubTabInicio] = useState('progreso'); // 'progreso' | 'aqui_ahora' | 'muro'
+  const [subTabInicio, setSubTabInicio] = useState('progreso');
   const [subTabComunidad, setSubTabComunidad] = useState('chat');
   const [chatModo, setChatModo] = useState('global');
   const [destinatarioPrivado, setDestinatarioPrivado] = useState(null);
@@ -123,7 +123,6 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
-  // Comprobar si la usuaria ha publicado hoy
   const haPublicadoMomentoHoy = useMemo(() => {
     if (!sesion?.email) return false;
     const hoyStr = new Date().toISOString().split('T')[0];
@@ -451,7 +450,7 @@ export default function App() {
         {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
-          {/* Sub-Pestañas: Lecturas / aquí y ahora ✦ (Abierto a todas) / El muro (Exclusivo) */}
+          {/* Sub-Pestañas Niveladas */}
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
             <button
               onClick={() => setSubTabInicio('progreso')}
@@ -465,7 +464,7 @@ export default function App() {
             >
               aquí y ahora ✦
               {!haPublicadoMomentoHoy && (
-                <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full"></span>
               )}
             </button>
             <button
@@ -475,7 +474,7 @@ export default function App() {
               }}
               className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'} ${esRestringida ? 'opacity-60' : ''}`}
             >
-              Muro {esRestringida && '🔒'}
+              Muro {esRestringida && '✦'}
             </button>
           </div>
 
@@ -538,7 +537,7 @@ export default function App() {
             </>
           )}
 
-          {/* SUBTAB 2: AQUÍ Y AHORA ✦ (TODAS LAS MODALIDADES) */}
+          {/* SUBTAB 2: AQUÍ Y AHORA ✦ */}
           {subTabInicio === 'aqui_ahora' && (
             <div className="editorial-card p-5 space-y-4">
               <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
@@ -546,19 +545,19 @@ export default function App() {
                   <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
                   <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
                 </div>
-                <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3 py-1.5 text-xs font-medium">
-                  📸 Capturar
+                <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium">
+                  publicar foto
                 </button>
               </div>
 
               {!haPublicadoMomentoHoy && (
                 <div className="p-4 bg-[#23211e] text-[#ffffee] rounded-xl flex justify-between items-center modal-elastic">
                   <div className="space-y-0.5">
-                    <p className="font-babydoll font-bold text-sm">Pendiente por publicar</p>
-                    <p className="text-[10px] opacity-80 font-sans">Comparte tu instante para ver lo que están leyendo las demás.</p>
+                    <p className="font-babydoll font-bold text-sm">Tu foto de hoy</p>
+                    <p className="text-[10px] opacity-80 font-sans">Comparte tu lectura de hoy para descubrir las del resto.</p>
                   </div>
-                  <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 ml-2">
-                    Tomar foto
+                  <button onClick={() => setMostrarModalMomento(true)} className="bg-[#ffffee] text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 ml-2 hover:bg-white transition-colors">
+                    publicar foto
                   </button>
                 </div>
               )}
@@ -589,16 +588,15 @@ export default function App() {
 
                           {estaBloqueado && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-2">
-                              <span className="text-white text-xl">🔒</span>
-                              <p className="font-babydoll text-sm text-[#ffffee] font-bold">Publica tu foto de hoy</p>
-                              <p className="text-[10px] text-white/80 font-sans max-w-[180px]">
-                                Comparte tu aquí y ahora ✦ para desbloquear esta foto.
+                              <p className="font-babydoll text-base text-[#ffffee] font-bold">Instante reservado ✦</p>
+                              <p className="text-[10px] text-white/80 font-sans max-w-[200px] leading-relaxed">
+                                Comparte tu instantánea de hoy para ver qué está leyendo {item.nombre || 'esta gilda'}.
                               </p>
                               <button
                                 onClick={() => setMostrarModalMomento(true)}
-                                className="mt-1 bg-white text-[#23211e] px-3 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md"
+                                className="mt-1 bg-white text-[#23211e] px-3.5 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md hover:bg-[#ffffee] transition-colors"
                               >
-                                Tomar foto
+                                desbloquear
                               </button>
                             </div>
                           )}
@@ -611,7 +609,7 @@ export default function App() {
             </div>
           )}
 
-          {/* SUBTAB 3: EL MURO (EXCLUSIVO MIEMBROS) */}
+          {/* SUBTAB 3: EL MURO */}
           {subTabInicio === 'muro' && (
             <div className="editorial-card p-5 space-y-3">
               <div className="flex justify-between items-center mb-1">
