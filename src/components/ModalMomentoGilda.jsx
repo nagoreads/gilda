@@ -20,7 +20,6 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
     return () => detenerCamara();
   }, []);
 
-  // Iniciar la visión en directo con la cámara trasera
   const iniciarCamaraTrasera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -37,13 +36,12 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
     }
   };
 
-  // Captura instantánea en un solo clic (disparo doble en ráfaga automática)
   const tomarCapturaInstantanea = async () => {
     if (!videoRef.current) return;
     setPaso('capturando');
 
     try {
-      // 1. Capturar encuadre de la cámara trasera
+      // 1. Capturar cámara trasera (entorno/libro)
       const canvasBack = document.createElement('canvas');
       canvasBack.width = videoRef.current.videoWidth || 1080;
       canvasBack.height = videoRef.current.videoHeight || 1440;
@@ -51,10 +49,9 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
       ctxBack.drawImage(videoRef.current, 0, 0, canvasBack.width, canvasBack.height);
       const dataBack = canvasBack.toDataURL('image/jpeg', 0.85);
 
-      // Detener flujo trasero
       detenerCamara();
 
-      // 2. Cambiar inmediatamente a la cámara frontal (selfie)
+      // 2. Activar inmediatamente la cámara frontal (selfie)
       const streamFront = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } },
         audio: false
@@ -63,7 +60,6 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
 
       if (videoRef.current) {
         videoRef.current.srcObject = streamFront;
-        // Esperar brevemente a que el sensor frontal renderice el primer fotograma
         await new Promise(resolve => setTimeout(resolve, 300));
 
         const canvasFront = document.createElement('canvas');
@@ -75,34 +71,33 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
 
         detenerCamara();
 
-        // 3. Fusionar ambas fotos en el estilo doble BeReal
+        // 3. Fusionar con sello "aquí y ahora ✦" y branding @gilda.mailclub
         componerImagenDoble(dataBack, dataFront);
       }
     } catch (err) {
       console.error(err);
-      mostrarToast('Error al tomar la instantánea doble.');
+      mostrarToast('Error al tomar la foto.');
       detenerCamara();
       iniciarCamaraTrasera();
       setPaso('camara');
     }
   };
 
-  // Componer foto doble (Fondo principal + Selfie en recuadro)
   const componerImagenDoble = (backSrc, frontSrc) => {
     const canvas = canvasRef.current || document.createElement('canvas');
     canvas.width = 1080;
-    canvas.height = 1350; // Formato 4:5
+    canvas.height = 1350; // Formato 4:5 idóneo para Stories / Feed
     const ctx = canvas.getContext('2d');
 
     const imgBack = new Image();
     const imgFront = new Image();
 
     imgBack.onload = () => {
-      // Dibujar foto principal
+      // Foto principal
       ctx.drawImage(imgBack, 0, 0, canvas.width, canvas.height);
 
       imgFront.onload = () => {
-        // Dibujar recuadro de la selfie en la esquina superior izquierda
+        // Marco selfie estilo foto flotante
         const insetWidth = 280;
         const insetHeight = 370;
         const insetX = 40;
@@ -126,17 +121,24 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
         ctx.drawImage(imgFront, insetX, insetY, insetWidth, insetHeight);
         ctx.restore();
 
-        // Borde blanco del recuadro selfie
+        // Borde fino blanco del recuadro
         ctx.lineWidth = 6;
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
 
-        // Sello sobrio abajo a la derecha
-        ctx.font = '32px BabyDoll, cursive';
+        // BRANDING & BRANDING INSTAGRAM
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 10;
+
+        // Título atmosférico
+        ctx.font = 'bold 38px BabyDoll, cursive';
         ctx.fillStyle = '#ffffee';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 8;
-        ctx.fillText('momento gilda ✦', canvas.width - 280, canvas.height - 50);
+        ctx.fillText('aquí y ahora ✦', 40, canvas.height - 82);
+
+        // Mención para compartir en IG
+        ctx.font = '24px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('@gilda.mailclub', 40, canvas.height - 42);
 
         const finalData = canvas.toDataURL('image/jpeg', 0.9);
         setImagenFinalComposite(finalData);
@@ -154,7 +156,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
     try {
       await supabase.from('wall_posts').insert([{
         tipo: 'momento_gilda',
-        cita: 'Momento Gilda instantáneo ✦',
+        cita: 'aquí y ahora ✦',
         email: sesion.email,
         nombre: sesion.nombre,
         portada: imagenFinalComposite,
@@ -162,7 +164,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
       }]);
 
       await cargarDatosSupabase();
-      mostrarToast('¡Momento Gilda publicado en el muro!');
+      mostrarToast('¡Publicado en el muro!');
       onClose();
     } catch (err) {
       console.error(err);
@@ -177,17 +179,20 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
         
         {/* Cabecera */}
         <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
-          <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Momento Gilda ✦</h2>
+          <div>
+            <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h2>
+            <p className="text-[10px] text-[#75706b] font-sans">@gilda.mailclub</p>
+          </div>
           <button onClick={onClose} className="text-xs text-[#75706b] hover:text-[#23211e]">✕</button>
         </div>
 
-        {/* Visor de Cámara y Botón Único */}
+        {/* Cámara en directo */}
         {paso === 'camara' && (
           <div className="space-y-4">
             <div className="relative rounded-2xl overflow-hidden bg-black aspect-[3/4] border border-[#e8e4d9]">
               <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
               <span className="absolute top-3 left-3 text-[10px] bg-[#23211e]/80 text-[#ffffee] px-2.5 py-1 rounded-full font-sans">
-                Cámara lista
+                @gilda.mailclub
               </span>
             </div>
             <button onClick={tomarCapturaInstantanea} className="w-full editorial-btn py-3 text-xs font-medium">
@@ -196,20 +201,20 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
           </div>
         )}
 
-        {/* Estado en proceso de disparo automático */}
+        {/* Procesando foto */}
         {paso === 'capturando' && (
           <div className="py-12 space-y-3">
             <video ref={videoRef} autoPlay playsInline className="hidden" />
-            <p className="font-babydoll text-xl font-bold text-[#23211e] animate-pulse">Capturando tu momento...</p>
-            <p className="text-xs text-[#75706b] font-sans">Procesando cámara principal y selfie</p>
+            <p className="font-babydoll text-xl font-bold text-[#23211e] animate-pulse">Guardando el instante...</p>
+            <p className="text-xs text-[#75706b] font-sans">Añadiendo sello @gilda.mailclub</p>
           </div>
         )}
 
-        {/* Vista previa de la foto final */}
+        {/* Vista previa */}
         {paso === 'vista_previa' && imagenFinalComposite && (
           <div className="space-y-3">
             <div className="rounded-2xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee]">
-              <img src={imagenFinalComposite} alt="Momento Gilda" className="w-full h-full object-cover" />
+              <img src={imagenFinalComposite} alt="aquí y ahora" className="w-full h-full object-cover" />
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setPaso('camara'); iniciarCamaraTrasera(); }} className="flex-1 bg-white border border-[#e8e4d9] py-2.5 text-xs font-medium rounded-xl text-[#75706b]">
@@ -222,10 +227,10 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
           </div>
         )}
 
-        {/* Estado de guardado */}
+        {/* Estado de carga */}
         {paso === 'subiendo' && (
           <div className="py-10 space-y-2">
-            <p className="font-babydoll text-lg font-bold text-[#23211e]">Subiendo al muro...</p>
+            <p className="font-babydoll text-lg font-bold text-[#23211e]">Guardando en el club...</p>
           </div>
         )}
 
