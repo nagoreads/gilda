@@ -10,6 +10,7 @@ import EdificioClub from './EdificioClub';
 import CalendarioInteractivo from './components/CalendarioInteractivo';
 import ModalCompartirStory from './components/ModalCompartirStory';
 import TimelineCapitulos from './components/TimelineCapitulos';
+import ModalMomentoGilda from './components/ModalMomentoGilda';
 import { ModalUpgrade, ModalImportarPin, ModalDetalleLibro } from './components/ModalesAuxiliares';
 import SeccionComunidad from './components/SeccionComunidad';
 import SeccionHabitacion from './components/SeccionHabitacion';
@@ -81,6 +82,7 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState(null);
   const [mostrarModalUpgrade, setMostrarModalUpgrade] = useState(false);
   const [mostrarModalShare, setMostrarModalShare] = useState(false);
+  const [mostrarModalMomento, setMostrarModalMomento] = useState(false);
 
   const [capitulos, setCapitulos] = useState(() => safeGetJSON('gilda_cache_capitulos', []));
   const [comentarios, setComentarios] = useState(() => safeGetJSON('gilda_cache_comentarios', []));
@@ -402,6 +404,10 @@ export default function App() {
         <ModalCompartirStory onClose={() => setMostrarModalShare(false)} usuario={nombreUsuarioPersonalizado || sesion.nombre} libro={libroActual} pagina={miPagina} citas={misCitas} decoracion="ninguna" misLibros={lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase())} onPublicarCita={publicarCitaEnMuro} sesion={sesion} />
       )}
 
+      {mostrarModalMomento && (
+        <ModalMomentoGilda onClose={() => setMostrarModalMomento(false)} sesion={sesion} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} mostrarToast={mostrarToast} />
+      )}
+
       {libroSeleccionadoDetalle && (
         <ModalDetalleLibro libro={libroSeleccionadoDetalle} onClose={() => setLibroSeleccionadoDetalle(null)} sesion={sesion} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} />
       )}
@@ -439,7 +445,14 @@ export default function App() {
               <div className="editorial-card p-5 space-y-4">
                 <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2">
                    <h3 className="font-babydoll text-xl font-bold">Progreso</h3>
-                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">Compartir</button>
+                   <div className="flex gap-1.5">
+                     <button onClick={() => setMostrarModalMomento(true)} className="text-xs font-medium font-sans bg-[#23211e] text-[#ffffee] px-3 py-1 rounded-lg hover:bg-[#383531] transition-colors">
+                       aquí y ahora ✦
+                     </button>
+                     <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">
+                       Compartir
+                     </button>
+                   </div>
                 </div>
                 <div className="flex gap-4 items-center">
                   <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
@@ -492,21 +505,40 @@ export default function App() {
 
           {subTabInicio === 'muro' && (
             <div className="editorial-card p-5 space-y-3">
-              <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro</h3>
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro</h3>
+                <button onClick={() => setMostrarModalMomento(true)} className="text-xs font-medium font-sans bg-[#23211e] text-[#ffffee] px-3 py-1 rounded-lg hover:bg-[#383531] transition-colors">
+                  aquí y ahora ✦
+                </button>
+              </div>
               {muroActividad.length === 0 ? (
                 <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 muroActividad.map((item, idx) => (
                   <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
-                    <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
-                    <div className="flex flex-col space-y-1 w-full">
-                      <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                      {item.cita ? (
-                        <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
-                      ) : (
-                        <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
-                      )}
-                    </div>
+                    {item.tipo === 'momento_gilda' ? (
+                      <div className="w-full space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
+                        </div>
+                        <div className="rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
+                          <img src={item.portada} alt="aquí y ahora" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
+                        <div className="flex flex-col space-y-1 w-full">
+                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                          {item.cita ? (
+                            <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
+                          ) : (
+                            <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))
               )}
