@@ -4,5 +4,11 @@
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/momento-cron",
+      "schedule": "*/15 7-23 * * *"
+    }
   ]
 }
