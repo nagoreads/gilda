@@ -10,11 +10,15 @@
 }
 
 :root {
-  --bg-editorial: #ffffee;
+  --bg-editorial: #ffffee;       /* Fondo crema principal */
+  --bg-card-alt: #eeeeff;        /* Fondo suave complementario para destacados */
   --text-main: #23211e;
-  --text-muted: #756a58;
-  --primary-olive: #3d4220;
-  --border-editorial: #e8e4d9;
+  --text-muted: #625f6e;
+  
+  /* Azul Noche Lavanda (complementario de #ffffee) */
+  --primary-olive: #3f4268;
+  
+  --border-editorial: #e0dedf;
 }
 
 body {
