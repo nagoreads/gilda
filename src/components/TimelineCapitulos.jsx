@@ -13,141 +13,184 @@ export default function TimelineCapitulos({
   registrarActividadPresencia,
   mostrarToast
 }) {
-  const [textoComentario, setTextoComentario] = useState({});
-  const [respondiendoA, setRespondiendoA] = useState(null);
-  const [textoRespuesta, setTextoRespuesta] = useState({});
+  const [capituloSeleccionado, setCapituloSeleccionado] = useState(null);
+  const [nuevoComentario, setNuevoComentario] = useState('');
+  const [respuestaA, setRespuestaA] = useState(null); // ID del comentario al que se responde
+  const [textoRespuesta, setTextoRespuesta] = useState('');
+
+  const esRestringida = modalidadLimpia.includes('cotilla');
+
+  // Filtrar capítulos disponibles
+  const listaCapitulos = [...capitulos].sort((a, b) => (Number(a.numero) || 0) - (Number(b.numero) || 0));
+  const capActivo = capituloSeleccionado || listaCapitulos[0] || { id: 1, numero: 1, titulo: 'Capítulo 1', pagina_inicio: 1, pagina_fin: 30 };
+
+  // Filtrar comentarios del capítulo activo
+  const comentariosCap = comentarios.filter(c => String(c.capitulo_id || c.capitulo) === String(capActivo.id || capActivo.numero));
+  const comentariosPrincipales = comentariosCap.filter(c => !c.parent_id);
+
+  const enviarComentario = async (parentId = null, texto = '') => {
+    const contenido = texto.trim();
+    if (!contenido || !sesion?.email) return;
+
+    const payload = {
+      capitulo_id: capActivo.id || capActivo.numero,
+      capitulo: capActivo.numero || capActivo.id,
+      email: sesion.email,
+      nombre: nombreUsuarioPersonalizado || sesion.nombre,
+      comentario: contenido,
+      parent_id: parentId,
+      timestamp: new Date().toISOString()
+    };
+
+    await supabase.from('comments').insert([payload]);
+    await cargarDatosSupabase();
+    if (parentId) {
+      setRespuestaA(null);
+      setTextoRespuesta('');
+    } else {
+      setNuevoComentario('');
+    }
+    mostrarToast('Anotación guardada.');
+  };
 
   return (
-    <div className="space-y-6 fade-in">
-      <div className="text-center pb-2 border-b border-[#e8e4d9]">
-        <h2 className="font-babydoll text-3xl font-bold text-[#23211e]">línea de tiempo</h2>
-        <p className="text-xs text-[#75706b] font-sans italic">tu viaje de lectura capítulo a capítulo</p>
-      </div>
+    <div className="space-y-5 fade-in" onClick={registrarActividadPresencia}>
+      {/* Selector de capítulos (Timeline horizontal) */}
+      <section className="editorial-card p-4 space-y-3">
+        <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Capítulos</h2>
+        <div className="flex overflow-x-auto gap-2 pb-1 no-scrollbar font-sans">
+          {listaCapitulos.map(cap => {
+            const desbloqueado = miPagina >= (Number(cap.pagina_inicio) || 0);
+            const esSeleccionado = (capActivo.id || capActivo.numero) === (cap.id || cap.numero);
 
-      <div className="relative border-l-2 border-[var(--primary-olive)]/30 ml-4 pl-6 space-y-6 my-4">
-        {capitulos.map((cap, i) => {
-          if (['oculto', 'borrador'].includes(String(cap.estado || '').toLowerCase())) return null;
-          const paginaMinima = Number(cap.pagina_fin || cap.pagina_bloqueo || cap.pagina || cap.paginaminima || 0);
-          const desbloqueado = miPagina >= paginaMinima;
-          const identificadorCap = String(cap.id || cap.titulo || '').trim().toLowerCase();
-          const comentariosCapitulo = comentarios.filter(c => {
-            const cCap = String(c.capitulo || '').trim().toLowerCase();
-            const padreId = String(c.parent_id || '').trim();
-            const esPrincipal = !padreId || padreId === '' || padreId === 'undefined';
-            const coincide = !cCap || cCap === identificadorCap || cCap.includes(String(i + 1));
-            return coincide && esPrincipal;
-          });
+            return (
+              <button
+                key={cap.id || cap.numero}
+                onClick={() => setCapituloSeleccionado(cap)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 transition-all text-left min-h-[44px] ${
+                  esSeleccionado
+                    ? 'bg-[#23211e] text-[#ffffee]'
+                    : desbloqueado
+                    ? 'bg-white border border-[#e8e4d9] text-[#23211e] hover:bg-[#ffffee]'
+                    : 'bg-[#ffffee]/40 border border-[#e8e4d9] text-[#75706b] opacity-60'
+                }`}
+              >
+                <span className="block font-bold">Cap. {cap.numero}</span>
+                <span className="block text-[10px] opacity-80">pág. {cap.pagina_inicio}-{cap.pagina_fin}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-          return (
-            <div key={i} className="relative group">
-              <div className={`absolute -left-[35px] top-1.5 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] font-bold shadow-xs transition-all ${
-                desbloqueado 
-                  ? 'bg-[var(--primary-olive)] border-white text-white scale-110' 
-                  : 'bg-[#e8e4d9] border-[#d4cfbc] text-[#75706b]'
-              }`}>
-                {desbloqueado ? (i + 1) : <i className="fa-solid fa-lock text-[8px]"></i>}
-              </div>
+      {/* Detalle del capítulo activo */}
+      <section className="editorial-card p-5 space-y-4">
+        <div className="border-b border-[#e8e4d9] pb-3">
+          <p className="text-[10px] uppercase font-sans text-[#75706b]">Capítulo {capActivo.numero}</p>
+          <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.titulo || `Capítulo ${capActivo.numero}`}</h1>
+          <p className="text-xs text-[#75706b] font-sans mt-1">Páginas {capActivo.pagina_inicio} a {capActivo.pagina_fin}</p>
+        </div>
 
-              <div className={`editorial-card p-5 space-y-4 transition-all ${!desbloqueado ? 'opacity-85 bg-[#faf9f5]' : ''}`} onClick={registrarActividadPresencia}>
-                <div className="flex justify-between items-center">
-                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">{cap.titulo}</h3>
-                  <span className="text-xs text-[#75706b] font-sans font-semibold">pág. {paginaMinima}</span>
-                </div>
+        {/* Anotaciones al margen (Comentarios e Hilos) */}
+        <div className="space-y-4">
+          <h3 className="font-babydoll text-xl font-bold text-[#23211e]">Anotaciones al margen</h3>
 
-                {desbloqueado ? (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line font-sans text-left">{cap.descripcion || cap.contenido}</p>
-                    <div className="pt-4 border-t border-[#e8e4d9] space-y-3">
-                      <h4 className="font-babydoll text-base font-bold">Comentarios de lectoras</h4>
-                      <div className="space-y-3">
-                        {comentariosCapitulo.length === 0 ? (
-                          <p className="text-xs text-[#75706b] italic font-sans">Aún no hay comentarios. ¡Sé la primera!</p>
-                        ) : (
-                          comentariosCapitulo.map((com, cIdx) => {
-                            const idComentario = String(com.id || '').trim();
-                            const respuestasCom = comentarios.filter(r => String(r.parent_id || '').trim() === idComentario);
-                            const nombreAutorComentario = obtenerNombreReal(com.autora, com.autora);
+          {/* Formulario nuevo comentario principal */}
+          {!esRestringida ? (
+            <form onSubmit={(e) => { e.preventDefault(); enviarComentario(null, nuevoComentario); }} className="space-y-2">
+              <textarea
+                value={nuevoComentario}
+                onChange={(e) => setNuevoComentario(e.target.value)}
+                placeholder="Escribe tu reflexión o nota sobre este capítulo..."
+                className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
+              />
+              <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium">
+                Publicar nota
+              </button>
+            </form>
+          ) : (
+            <p className="text-xs text-[#75706b] font-sans italic bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
+              Tu membresía permite leer las notas del club.
+            </p>
+          )}
 
-                            return (
-                              <div key={cIdx} className="bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9] text-xs space-y-2">
-                                <div className="flex justify-between items-center">
-                                  <span className="font-bold font-sans text-[var(--primary-olive)]">{nombreAutorComentario}</span>
-                                  <span className="text-[10px] text-[#75706b]">{com.fecha || ''}</span>
-                                </div>
-                                <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{com.texto || ''}</p>
-                                {!modalidadLimpia.includes('cotilla') && (
-                                  <div className="flex justify-end">
-                                    <button onClick={() => setRespondiendoA(respondiendoA === idComentario ? null : idComentario)} className="text-xs text-[var(--primary-olive)] font-bold hover:underline min-h-[44px]">
-                                      {respondiendoA === idComentario ? 'Cancelar' : 'Responder'}
-                                    </button>
-                                  </div>
-                                )}
-                                {respuestasCom.length > 0 && (
-                                  <div className="pl-3 mt-2 border-l-2 border-[#d4cfbc] space-y-2">
-                                    {respuestasCom.map((resp, rIdx) => (
-                                      <div key={rIdx} className="bg-white p-2 rounded-lg border border-[#e8e4d9] text-xs space-y-1">
-                                        <div className="flex justify-between items-center">
-                                          <span className="font-bold text-[var(--primary-olive)]">{obtenerNombreReal(resp.autora, resp.autora)}</span>
-                                          <span className="text-[10px] text-[#75706b]">{resp.fecha || ''}</span>
-                                        </div>
-                                        <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-sans text-left">{resp.texto || ''}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                                {respondiendoA === idComentario && !modalidadLimpia.includes('cotilla') && (
-                                  <form onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    const txtResp = textoRespuesta[idComentario];
-                                    if (!txtResp || !txtResp.trim()) return;
-                                    const nuevaRespObj = { capitulo: identificadorCap, parent_id: idComentario, autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txtResp, fecha: 'Justo ahora', email: sesion.email };
-                                    await supabase.from('comments').insert([nuevaRespObj]);
-                                    await cargarDatosSupabase();
-                                    registrarActividadPresencia();
-                                    setTextoRespuesta({ ...textoRespuesta, [idComentario]: '' });
-                                    setRespondiendoA(null);
-                                    mostrarToast('Respuesta enviada');
-                                  }} className="flex gap-2 pt-2">
-                                    <input type="text" placeholder="Responde..." value={textoRespuesta[idComentario] || ''} onChange={(e) => setTextoRespuesta({ ...textoRespuesta, [idComentario]: e.target.value })} className="flex-grow editorial-input px-2.5 py-1.5 text-xs bg-white" />
-                                    <button type="submit" className="editorial-btn px-2.5 py-1 text-xs min-h-[44px]">Enviar</button>
-                                  </form>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
+          {/* Lista de notas principales e hilos */}
+          <div className="space-y-3 pt-2">
+            {comentariosPrincipales.length === 0 ? (
+              <p className="text-xs text-[#75706b] font-sans italic py-4 text-center">
+                Aún no hay notas en este capítulo. Sé la primera gilda en escribir.
+              </p>
+            ) : (
+              comentariosPrincipales.map(comentario => {
+                const nombreAutor = obtenerNombreReal(comentario.email, comentario.nombre);
+                const respuestas = comentariosCap.filter(r => String(r.parent_id) === String(comentario.id));
 
-                      {!modalidadLimpia.includes('cotilla') && (
-                        <form onSubmit={async (e) => {
-                          e.preventDefault();
-                          const clave = cap.id || cap.titulo;
-                          const txt = textoComentario[clave];
-                          if (!txt || !txt.trim()) return;
-                          const nuevoCom = { capitulo: identificadorCap, parent_id: '', autora: nombreUsuarioPersonalizado || sesion.nombre, texto: txt, fecha: 'Justo ahora', email: sesion.email };
-                          await supabase.from('comments').insert([nuevoCom]);
-                          await cargarDatosSupabase();
-                          registrarActividadPresencia();
-                          setTextoComentario({ ...textoComentario, [clave]: '' });
-                          mostrarToast('Comentario enviado');
-                        }} className="flex gap-2 pt-1">
-                          <input type="text" placeholder="Escribe tu reflexión..." value={textoComentario[cap.id || cap.titulo] || ''} onChange={(e) => setTextoComentario({ ...textoComentario, [cap.id || cap.titulo]: e.target.value })} className="flex-grow editorial-input px-3 py-2 text-xs" />
-                          <button type="submit" className="editorial-btn px-3 text-xs min-h-[44px]">Comentar</button>
-                        </form>
-                      )}
+                return (
+                  <article key={comentario.id} className="p-3.5 rounded-xl bg-white border border-[#e8e4d9] space-y-2">
+                    <div className="flex justify-between items-baseline font-sans">
+                      <span className="font-bold text-xs text-[#23211e]">{nombreAutor}</span>
+                      <span className="text-[10px] text-[#75706b]">
+                        {comentario.timestamp ? new Date(comentario.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
+                      </span>
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-[#ffffee] border border-[#e8e4d9] rounded-xl text-center space-y-1">
-                    <i className="fa-solid fa-lock text-[#75706b] text-xs"></i>
-                    <p className="text-xs text-[#75706b] font-sans">Capítulo bloqueado hasta alcanzar la pág. <b>{paginaMinima}</b> (vas por la {miPagina}).</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+
+                    <p className="text-xs text-[#23211e] font-sans leading-relaxed">{comentario.comentario || comentario.texto}</p>
+
+                    {/* Botón para responder */}
+                    {!esRestringida && (
+                      <button
+                        onClick={() => setRespuestaA(respuestaA === comentario.id ? null : comentario.id)}
+                        className="text-[11px] font-sans font-medium text-[#75706b] hover:text-[#23211e] transition-colors pt-1"
+                      >
+                        {respuestaA === comentario.id ? 'Cancelar' : 'Responder'}
+                      </button>
+                    )}
+
+                    {/* Formulario de respuesta en hilo */}
+                    {respuestaA === comentario.id && (
+                      <div className="pt-2 pl-3 border-l-2 border-[#23211e] space-y-2 mt-2">
+                        <textarea
+                          value={textoRespuesta}
+                          onChange={(e) => setTextoRespuesta(e.target.value)}
+                          placeholder={`Responder a ${nombreAutor}...`}
+                          className="w-full editorial-input p-2 text-xs h-16 resize-none font-sans"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => enviarComentario(comentario.id, textoRespuesta)}
+                          className="editorial-btn px-3 py-1.5 text-xs font-medium"
+                        >
+                          Enviar respuesta
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Respuestas anidadas (Hilo) */}
+                    {respuestas.length > 0 && (
+                      <div className="pl-3 mt-3 border-l border-[#e8e4d9] space-y-2.5 pt-1">
+                        {respuestas.map(resp => {
+                          const nombreAutorResp = obtenerNombreReal(resp.email, resp.nombre);
+                          return (
+                            <div key={resp.id} className="bg-[#ffffee]/50 p-2.5 rounded-lg border border-[#e8e4d9] space-y-1">
+                              <div className="flex justify-between items-baseline font-sans">
+                                <span className="font-bold text-[11px] text-[#23211e]">{nombreAutorResp}</span>
+                                <span className="text-[9px] text-[#75706b]">
+                                  {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
+                                </span>
+                              </div>
+                              <p className="text-xs text-[#23211e] font-sans leading-relaxed">{resp.comentario || resp.texto}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

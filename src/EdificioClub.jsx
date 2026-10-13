@@ -1,129 +1,119 @@
 import { useState } from 'react';
-import PortadaLibro from './PortadaLibro';
 
-export default function EdificioClub({ usuarias, libroActual, onAddWantToRead, onAbrirPrivado, sesionEmail, chatBloqueado, AvatarUsuaria }) {
-    const [usuariaActivaEmail, setUsuariaActivaEmail] = useState('');
-    const listaUsuarias = usuarias.length > 0 ? usuarias : [];
-    const usuariaActiva = listaUsuarias.find(u => (u.email || '').toLowerCase().trim() === usuariaActivaEmail) || listaUsuarias[0] || {};
-    const usuariaActivaKey = (usuariaActiva.email || '').toLowerCase().trim();
-    const tieneProgresoClub = Number(usuariaActiva.pagina || 0) > 0;
-    const misLibrosPersonales = usuariaActiva.misLecturasPersonales || [];
-    const esOtraSocia = usuariaActiva.email && sesionEmail && usuariaActiva.email.toLowerCase().trim() !== sesionEmail.toLowerCase().trim();
+export default function EdificioClub({
+  AvatarUsuaria,
+  usuarias,
+  libroActual,
+  sesionEmail,
+  chatBloqueado,
+  onAddWantToRead,
+  onAbrirPrivado
+}) {
+  const [gildaSeleccionada, setGildaSeleccionada] = useState(null);
 
-    return (
-      <div className="flex flex-col items-center w-full max-w-[480px] mx-auto py-2 relative">
-        <h2 className="text-[52px] font-babydoll text-center mb-0 text-[#23211e] leading-none">gilda</h2>
-        <p className="text-[13px] text-[#75706b] text-center mb-5 leading-relaxed font-sans italic">comunidad de lectura, cartas y creatividad</p>
-        
-        {/* Fachada/Marco de Edificio Vintage */}
-        <div className="w-full bg-[#f3eadb] border-2 border-[#d8cdb8] rounded-3xl p-5 shadow-sm relative overflow-hidden mb-6">
-          <div className="flex justify-center items-center mb-4 pb-2 border-b border-[#d8cdb8]/60">
-            <span className="font-babydoll text-xl font-bold text-[var(--primary-olive)] tracking-wide flex items-center gap-2">
-              ✦ residencia gilda ✦
-            </span>
-          </div>
+  return (
+    <div className="space-y-5 fade-in">
+      {/* Cabecera del Edificio */}
+      <section className="editorial-card p-5 text-center space-y-1">
+        <h1 className="font-babydoll text-3xl font-bold text-[#23211e]">La Casa de Gilda</h1>
+        <p className="text-xs text-[#75706b] font-sans">Un vistazo a las ventanas de nuestras lectoras.</p>
+      </section>
 
-          <div className="grid grid-cols-3 gap-x-6 gap-y-7 w-full max-w-[260px] mx-auto">
-            {listaUsuarias.map((usuaria, indice) => {
-              const estaLeyendo = usuaria.estaLeyendo;
-              const usuariaKey = (usuaria.email || `usuaria-${indice}`).toLowerCase().trim();
-              const seleccionada = usuariaKey === usuariaActivaKey;
-              const nombreMostrar = (usuaria.nombre || (usuaria.email ? usuaria.email.split('@')[0] : 'lectora')).split(' ')[0].toLowerCase();
-              
-              return (
-                <div key={usuaria.email || indice} className="relative flex flex-col items-center">
-                  {/* Ventana con efecto de resplandor cálido cuando está leyendo */}
-                  <button
-                    type="button"
-                    onClick={() => setUsuariaActivaEmail(usuaria.email ? usuariaKey : '')}
-                    aria-pressed={seleccionada}
-                    aria-label={`Abrir la ventana de ${usuaria.nombre || usuaria.email || 'lectora'}`}
-                    className={`w-[40px] h-[52px] rounded-t-lg rounded-b-xs cursor-pointer transition-all duration-300 hover:scale-105 relative border-2 flex flex-col items-center justify-between p-1 ${
-                      estaLeyendo 
-                        ? 'bg-[#fff8d6] border-[#e5c158] shadow-[0_0_16px_rgba(255,215,80,0.85)] text-[#8b6040]' 
-                        : 'bg-[#d8d5c9] border-[#b8b5a3] text-[#757263]'
-                    } ${seleccionada ? 'ring-2 ring-[var(--primary-olive)] ring-offset-2 scale-105' : ''}`}
-                  >
-                    {/* Cuadrícula de ventana vintage */}
-                    <div className="w-full h-1/2 border-b border-current opacity-25 flex">
-                      <div className="w-1/2 h-full border-r border-current"></div>
-                    </div>
-                    {/* Luz encendida parpadeante */}
-                    {estaLeyendo && (
-                      <span className="w-2 h-2 rounded-full bg-[#e5c158] animate-pulse shadow-xs mb-1"></span>
-                    )}
-                  </button>
+      {/* Grid de Ventanas */}
+      <section className="editorial-card p-5 space-y-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          {usuarias.map((gilda, idx) => {
+            const esYo = (gilda.email || '').toLowerCase().trim() === (sesionEmail || '').toLowerCase().trim();
+            const estaLeyendo = gilda.estaLeyendo;
 
-                  <div className="flex items-center justify-center mt-1.5">
-                    <span className="text-[12px] text-[#75706b] font-bold tracking-tight truncate max-w-[65px] text-center font-sans">{nombreMostrar}</span>
-                  </div>
+            return (
+              <button
+                key={gilda.email || idx}
+                onClick={() => setGildaSeleccionada(gilda)}
+                className={`ventana-casa p-3 flex flex-col items-center justify-between min-h-[110px] transition-all relative ${
+                  estaLeyendo ? 'leyendo' : ''
+                }`}
+              >
+                <AvatarUsuaria foto={gilda.foto_perfil} nombre={gilda.nombre} sizeClass="w-9 h-9" textClass="text-sm" />
+                <div className="text-center w-full mt-2">
+                  <span className="font-babydoll text-xs font-bold text-[#23211e] block truncate">{gilda.nombre}</span>
+                  <span className="text-[9px] text-[#75706b] font-sans block truncate">
+                    {estaLeyendo ? 'Leyendo' : 'En pausa'}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+                {esYo && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#23211e]"></span>
+                )}
+              </button>
+            );
+          })}
         </div>
+      </section>
 
-        {/* Tarjeta Flotante Emergente (Habitación de la socia) */}
-        <div key={usuariaActivaKey} className="editorial-card w-full p-5 flex flex-col gap-4 modal-pop">
-          <div className="flex flex-col gap-2 w-full border-b border-[#e8e4d9] pb-2.5">
-            <div className="flex justify-between items-center w-full">
-              <div className="flex items-center gap-2 min-w-0">
-                {AvatarUsuaria ? <AvatarUsuaria foto={usuariaActiva.foto_perfil} nombre={usuariaActiva.nombre} sizeClass="w-7 h-7" textClass="text-xs" /> : null}
-                <span className="font-babydoll text-lg sm:text-xl font-bold text-[#23211e] leading-tight">
-                  la habitación de {
-                    (
-                      (usuariaActiva && usuariaActiva.nombre && usuariaActiva.nombre.trim() !== '') 
-                        ? usuariaActiva.nombre 
-                        : (usuariaActiva && usuariaActiva.email ? usuariaActiva.email.split('@')[0] : 'lectora')
-                    ).toLowerCase()
-                  }
-                </span>
+      {/* Modal / Ficha de la Gilda Seleccionada */}
+      {gildaSeleccionada && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 flex items-center justify-center p-4" onClick={() => setGildaSeleccionada(null)}>
+          <div className="editorial-card max-w-sm w-full p-5 space-y-4 bg-white modal-pop" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 border-b border-[#e8e4d9] pb-3">
+              <AvatarUsuaria foto={gildaSeleccionada.foto_perfil} nombre={gildaSeleccionada.nombre} sizeClass="w-12 h-12" textClass="text-xl" />
+              <div className="min-w-0 flex-grow">
+                <h3 className="font-babydoll text-xl font-bold text-[#23211e] truncate">{gildaSeleccionada.nombre}</h3>
+                <p className="text-xs text-[#75706b] font-sans truncate">{gildaSeleccionada.ciudad || 'Lectora de gilda'}</p>
               </div>
-              <span className="text-[10px] text-[#75706b] font-bold font-sans shrink-0">@gilda.mailclub</span>
             </div>
 
-            {esOtraSocia && (
-              <div className="flex justify-end pt-0.5">
-                <button 
-                  onClick={() => onAbrirPrivado(usuariaActiva)} 
-                  className="bg-[var(--primary-olive)] text-white px-3 py-1 rounded-xl text-[10px] font-bold font-sans flex items-center gap-1.5 hover:bg-black transition-colors shadow-xs"
-                  title={chatBloqueado ? 'Mejora tu modalidad para usar el chat' : 'Enviar privado'}
-                >
-                  <i className={`fa-solid ${chatBloqueado ? 'fa-lock' : 'fa-envelope'} text-[9px]`}></i> {chatBloqueado ? 'Mejorar modalidad' : 'Enviar privado'}
-                </button>
+            <div className="space-y-2 text-xs font-sans text-[#23211e]">
+              <div className="flex justify-between py-1 border-b border-[#e8e4d9]">
+                <span className="text-[#75706b]">Avance del club:</span>
+                <span className="font-bold">pág. {gildaSeleccionada.pagina || 0}</span>
               </div>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="thumb" />
-                <div className="text-xs text-[#23211e] overflow-hidden">
-                  <p className="font-bold truncate font-babydoll text-sm">{libroActual.titulo}</p>
-                  <p className="text-[11px] text-[#75706b] font-sans">pág. <b>{tieneProgresoClub ? usuariaActiva.pagina : 0}</b></p>
+              {gildaSeleccionada.misLecturasPersonales && gildaSeleccionada.misLecturasPersonales.length > 0 && (
+                <div className="pt-1">
+                  <span className="text-[#75706b] block mb-1">También está leyendo:</span>
+                  <ul className="space-y-1">
+                    {gildaSeleccionada.misLecturasPersonales.map((l, i) => (
+                      <li key={i} className="font-medium flex justify-between items-center bg-[#ffffee] p-2 rounded-lg border border-[#e8e4d9]">
+                        <span className="truncate pr-2">{l.libro}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onAddWantToRead(l.libro, l.autora, l.portada);
+                            setGildaSeleccionada(null);
+                          }}
+                          className="text-[10px] underline text-[#23211e] shrink-0 font-bold"
+                        >
+                          Quiero leer
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-              <button onClick={() => onAddWantToRead(libroActual.titulo, libroActual.autora, libroActual.portada)} className="shrink-0 bg-[#FFFFFF] text-[#23211e] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
-                <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const g = gildaSeleccionada;
+                  setGildaSeleccionada(null);
+                  onAbrirPrivado(g);
+                }}
+                className="editorial-btn flex-1 py-2 text-xs font-medium"
+              >
+                Escribir privado
+              </button>
+              <button
+                type="button"
+                onClick={() => setGildaSeleccionada(null)}
+                className="bg-white border border-[#e8e4d9] px-4 py-2 rounded-xl text-xs font-medium text-[#75706b]"
+              >
+                Cerrar
               </button>
             </div>
-            {misLibrosPersonales.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-3 bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <PortadaLibro titulo={item.libro} autora={item.autora || ''} portada={item.portada || ''} size="thumb" />
-                  <div className="text-xs text-[#23211e] overflow-hidden">
-                    <p className="font-bold truncate font-babydoll text-sm">{item.libro}</p>
-                    <p className="text-[11px] text-[#75706b] font-sans">pág. <b>{item.pagina || item.paginas || 0}</b></p>
-                  </div>
-                </div>
-                <button onClick={() => onAddWantToRead(item.libro, item.autora || '', item.portada || '')} className="shrink-0 bg-[#FFFFFF] text-[#23211e] border border-[#e8e4d9] hover:bg-[var(--primary-olive)] hover:text-white px-3 py-1.5 rounded-full text-[10px] font-semibold transition-colors flex items-center gap-1 font-sans">
-                  <i className="fa-solid fa-bookmark text-[9px]"></i> + Guardar
-                </button>
-              </div>
-            ))}
           </div>
         </div>
-      </div>
-    );
+      )}
+    </div>
+  );
 }
