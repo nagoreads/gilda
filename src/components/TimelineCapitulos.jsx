@@ -76,7 +76,7 @@ export default function TimelineCapitulos({
                 }`}
               >
                 <span className="block font-bold">Cap. {cap.numero}</span>
-                <span className="block text-[10px] opacity-80">pág. {cap.pagina_inicio}-{cap.pagina_fin}</span>
+                <span className="block text-[10px] opacity-80">hasta pág. {cap.pagina_fin}</span>
               </button>
             );
           })}
@@ -88,7 +88,7 @@ export default function TimelineCapitulos({
         <div className="border-b border-[#e8e4d9] pb-3">
           <p className="text-[10px] uppercase font-sans text-[#75706b]">Capítulo {capActivo.numero}</p>
           <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.titulo || `Capítulo ${capActivo.numero}`}</h1>
-          <p className="text-xs text-[#75706b] font-sans mt-1">Páginas {capActivo.pagina_inicio} a {capActivo.pagina_fin}</p>
+          <p className="text-xs text-[#75706b] font-sans mt-1">Hasta la página {capActivo.pagina_fin}</p>
         </div>
 
         {/* Anotaciones al margen (Comentarios e Hilos) */}

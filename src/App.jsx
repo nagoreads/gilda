@@ -128,38 +128,34 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
-  const estadoBeReal = useMemo(() => {
-    if (!sesion?.email || !alertaMomento) {
-      return { disponible: false, publicado: false, mensaje: "Esperando notificación de hoy" };
-    }
-
-    const fechaAlerta = new Date(alertaMomento);
-    const ahora = new Date();
-
-    const hoyStr = ahora.toISOString().split('T')[0];
-    const alertaFechaStr = fechaAlerta.toISOString().split('T')[0];
-
-    const haSaltadoHoy = hoyStr === alertaFechaStr;
-
-    if (!haSaltadoHoy) {
-      return { disponible: false, publicado: false, mensaje: "Aún no ha saltado la foto de hoy" };
-    }
-
-    const fotoPublicada = muroActividad.find(item => {
+  // Comprobación directa de publicación de hoy (Mecánica BeReal)
+  const haPublicadoMomentoHoy = useMemo(() => {
+    if (!sesion?.email) return false;
+    const hoyStr = new Date().toISOString().split('T')[0];
+    return muroActividad.some(item => {
       if (item.tipo !== 'momento_gilda') return false;
       const esMismoEmail = (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
-      const fechaFoto = new Date(item.timestamp);
-      return esMismoEmail && fechaFoto >= fechaAlerta;
+      if (!item.timestamp) return false;
+      const fechaFotoStr = new Date(item.timestamp).toISOString().split('T')[0];
+      return esMismoEmail && fechaFotoStr === hoyStr;
     });
+  }, [muroActividad, sesion]);
 
-    if (fotoPublicada) {
+  const estadoBeReal = useMemo(() => {
+    if (!sesion?.email) {
+      return { disponible: false, publicado: false, mensaje: "Inicia sesión para participar" };
+    }
+
+    if (haPublicadoMomentoHoy) {
       return { disponible: false, publicado: true, mensaje: "Foto de hoy publicada" };
     }
 
-    return { disponible: true, publicado: false, mensaje: "¡A jugar! Publica tu foto" };
-  }, [muroActividad, sesion, alertaMomento]);
-
-  const haPublicadoMomentoHoy = estadoBeReal.publicado;
+    return { 
+      disponible: true, 
+      publicado: false, 
+      mensaje: "Publica tu foto de hoy para ver las de las demás" 
+    };
+  }, [sesion, haPublicadoMomentoHoy]);
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
 
@@ -532,7 +528,7 @@ export default function App() {
               className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] relative ${subTabInicio === 'aqui_ahora' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
             >
               aquí y ahora ✦
-              {!haPublicadoMomentoHoy && estadoBeReal.disponible && (
+              {!haPublicadoMomentoHoy && (
                 <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full animate-pulse"></span>
               )}
             </button>
@@ -615,32 +611,28 @@ export default function App() {
                   <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
                 </div>
                 {estadoBeReal.publicado ? (
-                  <span className="text-[11px] font-sans font-medium text-[#75706b] bg-[#e8e4d9]/50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                    <i className="fa-solid fa-circle-check text-[11px] text-[#23211e]"></i> Foto de hoy publicada
+                  <span className="text-[11px] font-sans font-medium text-[#23211e] bg-[#e8e4d9]/60 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold">
+                    ✦ Foto de hoy publicada
                   </span>
-                ) : estadoBeReal.disponible ? (
+                ) : (
                   <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium animate-pulse flex items-center gap-1.5 active:scale-95 transition-transform duration-100">
                     <i className="fa-solid fa-camera"></i> publicar foto
                   </button>
-                ) : (
-                  <span className="text-[10px] font-sans text-[#75706b] bg-[#ffffee] border border-[#e8e4d9] px-2.5 py-1.5 rounded-lg italic">
-                    {estadoBeReal.mensaje}
-                  </span>
                 )}
               </div>
 
-              {!estadoBeReal.publicado && estadoBeReal.disponible && (
+              {!haPublicadoMomentoHoy && (
                 <div 
                   onClick={() => setMostrarModalMomento(true)}
                   className="p-4 bg-[#23211e] text-[#ffffee] rounded-2xl flex justify-between items-center modal-elastic cursor-pointer hover:bg-[#383531] transition-all active:scale-[0.98] duration-100 shadow-md border border-[#23211e]"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#ffffee] text-[#23211e] flex items-center justify-center shrink-0 shadow-sm">
-                      <i className="fa-solid fa-camera text-base animate-pulse"></i>
+                    <div className="w-10 h-10 rounded-full bg-[#ffffee] text-[#23211e] flex items-center justify-center shrink-0 shadow-sm font-bold text-lg">
+                      ✦
                     </div>
                     <div className="space-y-0.5">
-                      <p className="font-babydoll font-bold text-base leading-tight">¡Ha saltado el aviso de hoy! ✦</p>
-                      <p className="text-[11px] opacity-85 font-sans leading-tight">Sube tu foto para desbloquear las de las demás</p>
+                      <p className="font-babydoll font-bold text-base leading-tight">¡Sube tu instantánea de hoy!</p>
+                      <p className="text-[11px] opacity-85 font-sans leading-tight">Comparte tu lectura para desbloquear la comunidad</p>
                     </div>
                   </div>
                   <i className="fa-solid fa-chevron-right text-xs opacity-70"></i>
@@ -673,8 +665,8 @@ export default function App() {
 
                           {estaBloqueado && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-3">
-                              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg animate-pulse">
-                                <i className="fa-solid fa-lock"></i>
+                              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg animate-pulse font-bold">
+                                ✦
                               </div>
                               <div className="space-y-1">
                                 <p className="font-babydoll text-lg text-[#ffffee] font-bold">Instante reservado ✦</p>
@@ -682,15 +674,12 @@ export default function App() {
                                   Comparte tu instantánea de hoy para ver qué está leyendo {item.nombre || 'esta gilda'}.
                                 </p>
                               </div>
-                              {estadoBeReal.disponible && (
-                                <button
-                                  onClick={() => setMostrarModalMomento(true)}
-                                  className="mt-1 bg-white text-[#23211e] px-4 py-2 rounded-xl text-xs font-bold font-sans shadow-lg hover:bg-[#ffffee] active:scale-95 transition-all duration-100 flex items-center gap-2"
-                                >
-                                  <i className="fa-solid fa-camera text-xs"></i>
-                                  <span>Desbloquear instante</span>
-                                </button>
-                              )}
+                              <button
+                                onClick={() => setMostrarModalMomento(true)}
+                                className="mt-1 bg-white text-[#23211e] px-4 py-2 rounded-xl text-xs font-bold font-sans shadow-lg hover:bg-[#ffffee] active:scale-95 transition-all duration-100 flex items-center gap-1.5"
+                              >
+                                <span>Desbloquear instante</span>
+                              </button>
                             </div>
                           )}
                         </div>
