@@ -205,7 +205,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
         
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
           <span className="font-babydoll text-xl font-bold drop-shadow-md">aquí y ahora ✦</span>
-          <button onClick={onClose} className="bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+          <button onClick={onClose} className="bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center transition-colors active:scale-95 duration-100">
             ✕
           </button>
         </div>
@@ -237,15 +237,20 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
 
         <div className="p-6 bg-[#23211e] flex flex-col gap-3">
           {paso === 'trasera' && (
-            <button onClick={capturarTrasera} className="w-16 h-16 rounded-full bg-white border-4 border-zinc-400 mx-auto hover:scale-95 transition-transform" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[11px] font-sans text-white/70">Paso 1: Foto a lo que estás leyendo o haciendo</span>
+              <button onClick={capturarTrasera} className="w-16 h-16 rounded-full bg-white border-4 border-zinc-400 mx-auto hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-[#23211e] shadow-lg">
+                <i className="fa-solid fa-camera text-xl"></i>
+              </button>
+            </div>
           )}
           
           {paso === 'preview' && (
             <>
-              <button onClick={compartirEnStories} className="w-full bg-[#ffffee] text-[#23211e] py-3 rounded-xl font-sans font-medium text-xs flex items-center justify-center gap-2">
+              <button onClick={compartirEnStories} className="w-full bg-[#ffffee] text-[#23211e] py-3 rounded-xl font-sans font-medium text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100">
                 <i className="fa-brands fa-instagram"></i> Compartir en Stories
               </button>
-              <button onClick={publicarMomento} className="w-full bg-zinc-800 text-[#ffffee] py-3 rounded-xl font-sans font-medium text-xs hover:bg-zinc-700 transition-colors">
+              <button onClick={publicarMomento} className="w-full bg-zinc-800 text-[#ffffee] py-3 rounded-xl font-sans font-medium text-xs hover:bg-zinc-700 transition-colors active:scale-95 transition-transform duration-100">
                 Publicar en el club
               </button>
             </>
