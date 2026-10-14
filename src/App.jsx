@@ -97,6 +97,7 @@ export default function App() {
   const [eventosCalendario, setEventosCalendario] = useState(() => safeGetJSON('gilda_cache_calendario', []));
   const [muroActividad, setMuroActividad] = useState(() => safeGetJSON('gilda_cache_muro', []));
   const [cafecitos, setCafecitos] = useState(() => safeGetJSON('gilda_cache_cafecitos', []));
+  const [alertaMomento, setAlertaMomento] = useState(null);
 
   const [miPagina, setMiPagina] = useState(0);
   const [miCiudadInput, setMiCiudadInput] = useState(() => safeGet('gilda_ciudad', ''));
@@ -127,16 +128,38 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
-  const haPublicadoMomentoHoy = useMemo(() => {
-    if (!sesion?.email) return false;
-    const hoyStr = new Date().toISOString().split('T')[0];
-    return muroActividad.some(item => {
+  const estadoBeReal = useMemo(() => {
+    if (!sesion?.email || !alertaMomento) {
+      return { disponible: false, publicado: false, mensaje: "Esperando notificación de hoy ✦" };
+    }
+
+    const fechaAlerta = new Date(alertaMomento);
+    const ahora = new Date();
+
+    const hoyStr = ahora.toISOString().split('T')[0];
+    const alertaFechaStr = fechaAlerta.toISOString().split('T')[0];
+
+    const haSaltadoHoy = hoyStr === alertaFechaStr;
+
+    if (!haSaltadoHoy) {
+      return { disponible: false, publicado: false, mensaje: "Aún no ha saltado la foto de hoy ✦" };
+    }
+
+    const fotoPublicada = muroActividad.find(item => {
       if (item.tipo !== 'momento_gilda') return false;
       const esMismoEmail = (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
-      const fechaItem = item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : '';
-      return esMismoEmail && fechaItem === hoyStr;
+      const fechaFoto = new Date(item.timestamp);
+      return esMismoEmail && fechaFoto >= fechaAlerta;
     });
-  }, [muroActividad, sesion]);
+
+    if (fotoPublicada) {
+      return { disponible: false, publicado: true, mensaje: "Foto de hoy publicada" };
+    }
+
+    return { disponible: true, publicado: false, mensaje: "¡A jugar! Publica tu foto" };
+  }, [muroActividad, sesion, alertaMomento]);
+
+  const haPublicadoMomentoHoy = estadoBeReal.publicado;
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
 
@@ -145,7 +168,8 @@ export default function App() {
       const [
         { data: profiles }, { data: chapters }, { data: comments },
         { data: clubReadings }, { data: chatMessages }, { data: proposals },
-        { data: personalReadings }, { data: calendarEvents }, { data: wallPosts }, { data: cafes }
+        { data: personalReadings }, { data: calendarEvents }, { data: wallPosts }, { data: cafes },
+        { data: configMomento }
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase.from('chapters').select('*'),
@@ -156,8 +180,14 @@ export default function App() {
         supabase.from('personal_readings').select('*'),
         supabase.from('calendar_events').select('*'),
         supabase.from('wall_posts').select('*').order('timestamp', { ascending: false }),
-        supabase.from('cafes').select('*')
+        supabase.from('cafes').select('*'),
+        supabase.from('momento_gilda_config').select('*').limit(1)
       ]);
+
+      if (configMomento && configMomento.length > 0) {
+        const conf = configMomento[0];
+        setAlertaMomento(conf.ultima_alerta || conf.created_at || conf.fecha || null);
+      }
 
       if (profiles) {
         setUsuariasClub(profiles); safeSet('gilda_cache_usuarias', profiles);
@@ -502,8 +532,8 @@ export default function App() {
               className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] relative ${subTabInicio === 'aqui_ahora' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
             >
               aquí y ahora ✦
-              {!haPublicadoMomentoHoy && (
-                <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full"></span>
+              {!haPublicadoMomentoHoy && estadoBeReal.disponible && (
+                <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full animate-pulse"></span>
               )}
             </button>
             <button
@@ -584,25 +614,29 @@ export default function App() {
                   <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
                   <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
                 </div>
-                {haPublicadoMomentoHoy ? (
+                {estadoBeReal.publicado ? (
                   <span className="text-[11px] font-sans font-medium text-[#75706b] bg-[#e8e4d9]/50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                     <i className="fa-solid fa-circle-check text-[11px] text-[#23211e]"></i> Foto de hoy publicada
                   </span>
-                ) : (
-                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium">
+                ) : estadoBeReal.disponible ? (
+                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium animate-pulse">
                     publicar foto
                   </button>
+                ) : (
+                  <span className="text-[10px] font-sans text-[#75706b] bg-[#ffffee] border border-[#e8e4d9] px-2.5 py-1.5 rounded-lg italic">
+                    {estadoBeReal.mensaje}
+                  </span>
                 )}
               </div>
 
-              {!haPublicadoMomentoHoy && (
+              {!estadoBeReal.publicado && estadoBeReal.disponible && (
                 <div 
                   onClick={() => setMostrarModalMomento(true)}
                   className="p-4 bg-[#23211e] text-[#ffffee] rounded-xl flex justify-between items-center modal-elastic cursor-pointer hover:bg-[#383531] transition-colors"
                 >
                   <div className="space-y-0.5">
-                    <p className="font-babydoll font-bold text-sm">Tu foto de hoy está pendiente ✦</p>
-                    <p className="text-[10px] opacity-80 font-sans">Haz clic aquí para compartir tu lectura y desbloquear las de la comunidad.</p>
+                    <p className="font-babydoll font-bold text-sm">¡Ha saltado el aviso de hoy! ✦</p>
+                    <p className="text-[10px] opacity-80 font-sans">Haz clic aquí para compartir tu foto y desbloquear las de las demás.</p>
                   </div>
                 </div>
               )}
@@ -637,12 +671,14 @@ export default function App() {
                               <p className="text-[10px] text-white/80 font-sans max-w-[200px] leading-relaxed">
                                 Comparte tu instantánea de hoy para ver qué está leyendo {item.nombre || 'esta gilda'}.
                               </p>
-                              <button
-                                onClick={() => setMostrarModalMomento(true)}
-                                className="mt-1 bg-white text-[#23211e] px-3.5 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md hover:bg-[#ffffee] transition-colors"
-                              >
-                                desbloquear
-                              </button>
+                              {estadoBeReal.disponible && (
+                                <button
+                                  onClick={() => setMostrarModalMomento(true)}
+                                  className="mt-1 bg-white text-[#23211e] px-3.5 py-1.5 rounded-lg text-xs font-bold font-sans shadow-md hover:bg-[#ffffee] transition-colors"
+                                >
+                                  desbloquear
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
