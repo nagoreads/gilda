@@ -218,7 +218,6 @@ export default function App() {
     });
   };
 
-  
   const handleMagicLinkLogin = async (e) => {
     e.preventDefault();
     if (!esperandoToken) {
@@ -398,7 +397,6 @@ export default function App() {
             <p className="text-xs text-[#75706b] font-sans">club de lectura, mailclub y comunidad</p>
 
             {vistaAcceso === 'menu' && (
-              
               <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
                 <label className="block text-xs font-medium text-[#23211e]">Correo electrónico</label>
                 <input type="email" placeholder="tuemail@ejemplo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} disabled={esperandoToken} required className="w-full editorial-input px-3.5 py-2.5 text-xs disabled:opacity-50" />
@@ -421,7 +419,6 @@ export default function App() {
                   </div>
                 )}
               </form>
-
             )}
 
             {vistaAcceso === 'modalidades' && (
@@ -443,8 +440,6 @@ export default function App() {
       </div>
     );
   }
-
-  
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
@@ -589,9 +584,15 @@ export default function App() {
                   <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
                   <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
                 </div>
-                <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium">
-                  publicar foto
-                </button>
+                {haPublicadoMomentoHoy ? (
+                  <span className="text-[11px] font-sans font-medium text-[#75706b] bg-[#e8e4d9]/50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <i className="fa-solid fa-circle-check text-[11px] text-[#23211e]"></i> Foto de hoy publicada
+                  </span>
+                ) : (
+                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium">
+                    publicar foto
+                  </button>
+                )}
               </div>
 
               {!haPublicadoMomentoHoy && (
