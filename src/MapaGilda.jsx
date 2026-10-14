@@ -320,7 +320,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         marker.on('click', () => {
           const usuariasActuales = usuariasGeocodificadasRef.current;
           setRegionSeleccionada({
-            region: [item.regionAgrupada, item.paisAgrupado].filter(Boolean).join(', '),
+            region: item.regionAgrupada,
             usuarias: usuariasActuales.filter(u => u.regionAgrupada === item.regionAgrupada && u.paisAgrupado === item.paisAgrupado)
           });
         });
