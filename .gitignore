@@ -28,3 +28,6 @@ dist-ssr
 *.txt
 .env
 .env
+
+.vercel
+.env*

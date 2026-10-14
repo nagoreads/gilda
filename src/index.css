@@ -262,3 +262,30 @@ button:active {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-main);
 }
+/* Tipografía fluida adaptativa y UI (CSS nativo) */
+@layer utilities {
+  .gilda-title-lg { font-family: "babydoll", cursive, sans-serif; font-size: clamp(1.875rem, 6vw, 3rem); line-height: 1.15; font-weight: 700; color: #23211e; }
+  .gilda-title-md { font-family: "babydoll", cursive, sans-serif; font-size: clamp(1.25rem, 4vw, 1.875rem); line-height: 1.25; font-weight: 700; color: #23211e; }
+  .gilda-title-sm { font-family: "babydoll", cursive, sans-serif; font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.3; font-weight: 700; color: #23211e; }
+  .gilda-body { font-size: clamp(0.8125rem, 2.2vw, 0.9375rem); line-height: 1.6; font-family: ui-sans-serif, system-ui, sans-serif; color: #3d3834; }
+  .gilda-caption { font-size: clamp(0.6875rem, 1.8vw, 0.8125rem); line-height: 1.5; font-family: ui-sans-serif, system-ui, sans-serif; color: #75706b; }
+  .gilda-label { font-size: clamp(0.625rem, 1.5vw, 0.75rem); letter-spacing: 0.08em; font-family: ui-sans-serif, system-ui, sans-serif; text-transform: uppercase; color: #75706b; font-weight: 500; }
+  .gilda-quote { font-family: "babydoll", cursive, sans-serif; font-size: clamp(0.9375rem, 2.5vw, 1.25rem); line-height: 1.4; color: #23211e; border-left: 2px solid #23211e; padding-left: 0.75rem; padding-top: 0.25rem; padding-bottom: 0.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; font-style: italic; }
+  
+  .page-transition { animation: fade-in 0.4s ease-out forwards; }
+  .interactive-lift { transition: transform 150ms ease; }
+  .interactive-lift:hover { transform: translateY(-0.25rem); }
+  .editorial-input { background-color: #ffffee; border: 1px solid #e8e4d9; border-radius: 0.75rem; color: #3d3834; transition: all 150ms ease; }
+  .editorial-input:focus { outline: none; border-color: #23211e; box-shadow: 0 0 0 1px #23211e; }
+  .editorial-btn { background-color: #23211e; color: #ffffee; border-radius: 0.75rem; transition: background-color 150ms ease; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+  .editorial-btn:hover { background-color: #3d3834; }
+  .editorial-card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #e8e4d9; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}

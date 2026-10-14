@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import MapaGilda from '../MapaGilda';
 import BuscadorLibros from '../BuscadorLibros';
 import PortadaLibro from '../PortadaLibro';
@@ -29,18 +29,84 @@ export default function SeccionComunidad({
   AvatarUsuaria
 }) {
   const [nuevoChat, setNuevoChat] = useState('');
+  const [mensajeRespuesta, setMensajeRespuesta] = useState(null);
   const [nuevoChatPrivado, setNuevoChatPrivado] = useState('');
   const [nuevaPropuestaTitulo, setNuevaPropuestaTitulo] = useState('');
   const [nuevaPropuestaAutora, setNuevaPropuestaAutora] = useState('');
   const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
   const [mensajeFundadora, setMensajeFundadora] = useState('');
   const chatEndRef = useRef(null);
+  useEffect(() => {
+    if (chatModo === 'privado' && destinatarioPrivado) {
+      const emailSocia = (destinatarioPrivado.email || '').toLowerCase().trim();
+      const miEmail = (sesion?.email || '').toLowerCase().trim();
 
-  const cantidadGildasEnLinea = usuariasClub.filter(u => {
+      // Apagado optimista local para eliminar el punto rojo al instante
+      chatMsgs.forEach(m => {
+        if (
+          m.tipo === 'privado' &&
+          (m.destinatario || '').toLowerCase().trim() === miEmail &&
+          (m.remitente || m.email || '').toLowerCase().trim() === emailSocia
+        ) {
+          m.leido = true;
+        }
+      });
+
+      const unreadMsgs = chatMsgs.filter(m =>
+        m.tipo === 'privado' &&
+        (m.destinatario || '').toLowerCase().trim() === miEmail &&
+        (m.remitente || m.email || '').toLowerCase().trim() === emailSocia &&
+        !m.leido
+      );
+
+      if (unreadMsgs.length > 0) {
+        const ids = unreadMsgs.map(m => m.id).filter(Boolean);
+        if (ids.length > 0) {
+          supabase.from('chat_messages').update({ leido: true }).in('id', ids).then(() => {
+            if (typeof cargarDatosSupabase === 'function') cargarDatosSupabase();
+          });
+        }
+      }
+    }
+  }, [chatModo, destinatarioPrivado, chatMsgs]);
+  useEffect(() => {
+    if (chatModo === 'privado' && destinatarioPrivado) {
+      const unreadMsgs = chatMsgs.filter(m => 
+        m.tipo === 'privado' &&
+        (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() &&
+        (m.remitente || m.email || '').toLowerCase().trim() === (destinatarioPrivado.email || '').toLowerCase().trim() &&
+        !m.leido
+      );
+      if (unreadMsgs.length > 0) {
+        const ids = unreadMsgs.map(m => m.id).filter(Boolean);
+        if (ids.length > 0) {
+          supabase.from('chat_messages').update({ leido: true }).in('id', ids).then(() => {
+            if (typeof cargarDatosSupabase === 'function') cargarDatosSupabase();
+          });
+        }
+      }
+    }
+  }, [chatModo, destinatarioPrivado, chatMsgs]);
+
+  useEffect(() => {
+    if (subTabComunidad === 'chat') {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMsgs, chatModo, subTabComunidad, destinatarioPrivado]);
+
+    const cantidadGildasEnLinea = usuariasClub.filter(u => {
     if (!u.ultima_conexion) return false;
     const diff = (new Date() - new Date(u.ultima_conexion)) / 1000 / 60;
     return diff < 3;
   }).length;
+
+  // Conteo de mensajes privados no leídos dirigidos a la usuaria actual
+  const mensajesPrivadosNoLeidos = chatMsgs.filter(m => 
+    m.tipo === 'privado' && 
+    (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && 
+    !m.leido
+  );
+  const totalPrivadosNoLeidos = mensajesPrivadosNoLeidos.length;
 
   const votarCafecito = async (cafecito) => {
     const email = String(sesion?.email || '').toLowerCase();
@@ -100,7 +166,7 @@ export default function SeccionComunidad({
             <div>
               <h3 className="font-babydoll text-lg font-bold text-[#23211e]">El club</h3>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#23211e]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#849673]"></span>
                 <p className="text-[11px] font-sans text-[#75706b]">
                   {cantidadGildasEnLinea} {cantidadGildasEnLinea === 1 ? 'gilda en línea' : 'gildas en línea'}
                 </p>
@@ -116,12 +182,23 @@ export default function SeccionComunidad({
                 General
               </button>
               <button
-                onClick={() => setChatModo('privado')}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                onClick={() => {
+                setChatModo('privado');
+                if (mensajesPrivadosNoLeidos.length > 0) {
+                  const primerNoLeido = mensajesPrivadosNoLeidos[0];
+                  const emailRemitente = (primerNoLeido.remitente || primerNoLeido.email || '').toLowerCase().trim();
+                  const sociaDirecta = usuariasClub.find(u => (u.email || '').toLowerCase().trim() === emailRemitente);
+                  if (sociaDirecta) setDestinatarioPrivado(sociaDirecta);
+                }
+              }}
+                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all relative flex items-center gap-1.5 ${
                   chatModo === 'privado' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
               >
-                Gildas
+                <span>Gildas</span>
+                {totalPrivadosNoLeidos > 0 && chatModo !== 'privado' && (
+                  <span className="w-2 h-2 rounded-full bg-[#d9534f] animate-pulse"></span>
+                )}
               </button>
             </div>
           </div>
@@ -142,7 +219,19 @@ export default function SeccionComunidad({
                           ? 'bg-[#23211e] text-[#ffffee] rounded-2xl rounded-br-xs'
                           : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
-                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                        {m.respuesta_a_texto && (
+                <div className="mb-1.5 p-1.5 bg-[#f2efe6] border-l-2 border-[#23211e] text-[11px] text-[#33312e] rounded-lg">
+                  <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
+                  <p className="truncate">{m.respuesta_a_texto}</p>
+                </div>
+              )}
+              <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+              <button 
+                onClick={() => setMensajeRespuesta(m)} 
+                className="text-[10px] text-gray-400 hover:text-[#23211e] mt-1 block transition-colors"
+              >
+                responder
+              </button>
                         <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
@@ -151,33 +240,79 @@ export default function SeccionComunidad({
                 <div ref={chatEndRef} />
               </div>
 
-              <form onSubmit={async (e) => { 
-                e.preventDefault(); 
-                if (!nuevoChat.trim()) return; 
-                const nuevoMsg = {
-                  email: sesion.email,
-                  usuario: nombreUsuarioPersonalizado || sesion.nombre,
-                  mensaje: nuevoChat.trim(),
-                  tipo: 'global',
-                  timestamp: new Date().toISOString()
-                };
-                await supabase.from('chat_messages').insert([nuevoMsg]);
-                await cargarDatosSupabase();
-                setNuevoChat(''); 
-              }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
-                <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
-                <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
-              </form>
+              <div className="border-t border-[#e8e4d9] bg-white">
+                {mensajeRespuesta && (
+                  <div className="mx-3 mt-2.5 p-2 bg-[#23211e]/5 border-l-2 border-[#23211e] text-[11px] text-[#23211e] flex justify-between items-center rounded-lg">
+                    <div>
+                      <span className="font-bold">Respondiendo a {typeof obtenerNombreReal === 'function' && mensajeRespuesta.email ? obtenerNombreReal(mensajeRespuesta.email, mensajeRespuesta.usuario) : (mensajeRespuesta.usuario || 'gilda')}:</span>
+                      <p className="truncate max-w-xs">{mensajeRespuesta.mensaje}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setMensajeRespuesta(null)}
+                      className="text-gray-500 hover:text-black font-bold px-1.5 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!nuevoChat.trim()) return;
+                  const nombreAutor = mensajeRespuesta ? (typeof obtenerNombreReal === 'function' && mensajeRespuesta.email ? obtenerNombreReal(mensajeRespuesta.email, mensajeRespuesta.usuario) : mensajeRespuesta.usuario) : null;
+                  const nuevoMsg = {
+                    email: sesion.email,
+                    usuario: nombreUsuarioPersonalizado || sesion.nombre,
+                    mensaje: nuevoChat.trim(),
+                    tipo: 'global',
+                    timestamp: new Date().toISOString(),
+                    respuesta_a_id: mensajeRespuesta?.id || null,
+                    respuesta_a_texto: mensajeRespuesta?.mensaje || null,
+                    respuesta_a_nombre: nombreAutor || 'gilda'
+                  };
+                  const { error } = await supabase.from('chat_messages').insert([nuevoMsg]);
+                  if (error) {
+                    console.error('Error enviando mensaje:', error);
+                    alert('Error al enviar mensaje: ' + error.message);
+                  } else {
+                    if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+                    setNuevoChat('');
+                    setMensajeRespuesta(null);
+                  }
+                }} className="p-3 flex gap-2">
+                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
+                  <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
+                </form>
+              </div>
             </>
           )}
 
           {chatModo === 'privado' && !destinatarioPrivado && (
             <div className="flex-grow p-4 overflow-y-auto space-y-2 bg-[#ffffee]/20">
               <p className="text-xs text-[#75706b] font-sans pb-2">Escribe a una gilda en privado:</p>
-              {usuariasClub.filter(u => (u.email || '').toLowerCase().trim() !== sesion?.email?.toLowerCase()).map((socia, sIdx) => {
+              {usuariasClub
+                .filter(u => (u.email || '').toLowerCase().trim() !== sesion?.email?.toLowerCase())
+                .sort((a, b) => {
+                  const unreadA = chatMsgs.filter(m => m.tipo === 'privado' && (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && (m.remitente || m.email || '').toLowerCase().trim() === (a.email || '').toLowerCase().trim() && !m.leido).length;
+                  const unreadB = chatMsgs.filter(m => m.tipo === 'privado' && (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && (m.remitente || m.email || '').toLowerCase().trim() === (b.email || '').toLowerCase().trim() && !m.leido).length;
+                  return unreadB - unreadA; // Muestra las socias con mensajes no leídos arriba
+                })
+                .map((socia, sIdx) => {
                 const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
                 return (
-                  <div key={sIdx} onClick={() => setDestinatarioPrivado(socia)} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all">
+                  <div key={sIdx} onClick={async () => {
+                    setDestinatarioPrivado(socia);
+                    const noLeidosDeSocia = mensajesPrivadosNoLeidos.filter(
+                      m => (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim()
+                    );
+                    if (noLeidosDeSocia.length > 0) {
+                      const idsToUpdate = noLeidosDeSocia.map(m => m.id).filter(Boolean);
+                      if (idsToUpdate.length > 0) {
+                        await supabase.from('chat_messages').update({ leido: true }).in('id', idsToUpdate);
+                        if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+                      }
+                    }
+                  }} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-7 h-7" textClass="text-xs" />
                       <div className="overflow-hidden">
@@ -187,9 +322,27 @@ export default function SeccionComunidad({
                         </div>
                       </div>
                     </div>
-                    <span className="text-xs text-[#23211e] font-medium bg-[#ffffee] px-2.5 py-1 rounded-lg border border-[#e8e4d9]">
-                      Mensaje
-                    </span>
+                    {(() => {
+                      const unreadFromSocia = chatMsgs.filter(m =>
+                        m.tipo === 'privado' &&
+                        (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() &&
+                        (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim() &&
+                        !m.leido
+                      ).length;
+
+                      return (
+                        <div className="flex items-center gap-2">
+                          {unreadFromSocia > 0 && (
+                            <span className="px-2 py-0.5 text-[10px] bg-[#d9534f] text-white font-bold rounded-full animate-pulse">
+                              {unreadFromSocia} nuevo{unreadFromSocia > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          <span className="text-xs text-[#23211e] font-medium bg-[#ffffee] px-2.5 py-1 rounded-lg border border-[#e8e4d9]">
+                            Mensaje
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })}
@@ -227,7 +380,13 @@ export default function SeccionComunidad({
                           ? 'bg-[#23211e] text-[#ffffee] rounded-2xl rounded-br-xs'
                           : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
-                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                        {m.respuesta_a_texto && (
+                <div className="mb-1.5 p-1.5 bg-[#23211e]/5 border-l-2 border-[#23211e] text-[10px] text-gray-600 rounded-r">
+                  <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
+                  <p className="truncate">{m.respuesta_a_texto}</p>
+                </div>
+              )}
+              <span className="block pr-6 pb-0.5">{m.mensaje}</span>
                         <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
@@ -245,11 +404,16 @@ export default function SeccionComunidad({
                   remitente: sesion.email,
                   destinatario: destinatarioPrivado.email,
                   mensaje: nuevoChatPrivado.trim(),
-                  timestamp: new Date().toISOString()
+                  timestamp: new Date().toISOString(),
+                  respuesta_a_id: mensajeRespuesta?.id || null,
+                  respuesta_a_texto: mensajeRespuesta?.mensaje || null,
+                  respuesta_a_nombre: mensajeRespuesta?.usuario || mensajeRespuesta?.usuario_nombre || mensajeRespuesta?.nombre || 'gilda'
                 };
                 await supabase.from('chat_messages').insert([payload]);
                 await cargarDatosSupabase();
                 setNuevoChatPrivado('');
+    setMensajeRespuesta(null);
+                setMensajeRespuesta(null);
               }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
                 <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
                 <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>

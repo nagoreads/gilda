@@ -16,6 +16,7 @@ import SeccionComunidad from './components/SeccionComunidad';
 import SeccionHabitacion from './components/SeccionHabitacion';
 import SeccionAdmin from './components/SeccionAdmin';
 import SuscribirPush from './components/SuscribirPush';
+import CreaTuGilda from './components/CreaTuGilda';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -68,10 +69,12 @@ export default function App() {
   const [supabaseSession, setSupabaseSession] = useState(null);
   const [emailLogin, setEmailLogin] = useState('');
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [tokenLogin, setTokenLogin] = useState("");
+  const [esperandoToken, setEsperandoToken] = useState(false);
   const [esPaginaGracias] = useState(() => window.location.pathname === '/gracias');
 
   const [usuariasClub, setUsuariasClub] = useState(() => safeGetJSON('gilda_cache_usuarias', []));
-  const [vistaAcceso, setVistaAcceso] = useState('menu');
+  const [vistaAcceso, setVistaAcceso] = useState('crea-tu-gilda');
 
   const [seccionApp, setSeccionApp] = useState('inicio');
   const [subTabInicio, setSubTabInicio] = useState('progreso');
@@ -107,13 +110,13 @@ export default function App() {
   const [misCitas] = useState(() => safeGetJSON('gilda_mis_citas', []));
 
   const modalidades = [
-    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'Para curiosear debates y comentarios desde dentro.' },
-    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'Seguimiento de lecturas y comentarios por capítulo.' },
-    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'Acceso total a la app, chat de la comunidad y cafecitos.' },
-    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'Carta mensual digital en tu correo con actividades.' },
-    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'Carta física en papel en tu buzón con marcapáginas.' },
-    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'Carta digital + acceso a la app, chat y cafecitos.' },
-    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'Todo incluido: carta física + app, chat y cafecitos.' }
+    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
+    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
+    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
+    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
+    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
+    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
+    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
   ];
 
   const sesion = useMemo(() => {
@@ -215,13 +218,28 @@ export default function App() {
     });
   };
 
+  
   const handleMagicLinkLogin = async (e) => {
     e.preventDefault();
-    setLoadingAuth(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: emailLogin.trim().toLowerCase(), options: { emailRedirectTo: window.location.origin } });
-    if (error) alert('Error: ' + error.message);
-    else alert('¡Correo enviado! Revisa tu bandeja de entrada.');
-    setLoadingAuth(false);
+    if (!esperandoToken) {
+      setLoadingAuth(true);
+      const { error } = await supabase.auth.signInWithOtp({ email: emailLogin.trim().toLowerCase() });
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        setEsperandoToken(true);
+      }
+      setLoadingAuth(false);
+    } else {
+      setLoadingAuth(true);
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: emailLogin.trim().toLowerCase(),
+        token: tokenLogin.trim(),
+        type: "email"
+      });
+      if (error) alert("Código incorrecto o caducado.");
+      setLoadingAuth(false);
+    }
   };
 
   const obtenerNombreReal = (emailComentario, usuarioOriginal) => {
@@ -361,49 +379,72 @@ export default function App() {
   if (!supabaseSession) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] page-transition">
-        <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e8e4d9] modal-elastic">
-          <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gilda</h1>
-          <p className="text-xs text-[#75706b] font-sans">club de lectura, cartas y conversación</p>
-
-          {vistaAcceso === 'menu' && (
-            <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
-              <label className="block text-xs font-medium text-[#23211e]">Correo electrónico</label>
-              <input type="email" placeholder="tuemail@ejemplo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-xs" />
-              <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3 text-xs font-medium">{loadingAuth ? 'Enviando...' : 'Entrar con enlace mágico'}</button>
-              <button type="button" onClick={() => setVistaAcceso('modalidades')} className="w-full bg-white text-[#23211e] border border-[#e8e4d9] rounded-xl py-3 text-xs font-medium mt-2 hover:bg-[#ffffee] transition-colors">Ver membresías</button>
-            </form>
-          )}
-
-          {vistaAcceso === 'modalidades' && (
-            <div className="space-y-4 text-left page-transition">
-              <button onClick={() => setVistaAcceso('menu')} className="text-xs font-medium text-[#75706b] flex items-center">← Volver</button>
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                {modalidades.map(m => (
-                  <div key={m.id} className="editorial-card p-4 space-y-2 bg-white border border-[#e8e4d9]">
-                    <div className="flex justify-between items-center"><h3 className="font-babydoll font-bold text-lg">{m.nombre}</h3><span className="text-xs font-medium bg-[#23211e] text-[#ffffee] px-2.5 py-1 rounded-full">{m.precio}</span></div>
-                    <p className="text-xs text-[#75706b] font-sans">{m.descripcion}</p>
-                    <a href={m.esGratis ? '#' : m.enlaceStripe} onClick={e => { if (m.esGratis) setVistaAcceso('menu'); }} className="block w-full mt-2 py-2 text-center text-xs editorial-btn font-medium">{m.esGratis ? 'Probar gratis' : 'Elegir esta modalidad'}</a>
-                  </div>
-                ))}
-              </div>
+        {vistaAcceso === 'crea-tu-gilda' ? (
+          <div className="w-full max-w-md">
+            <div className="text-center mb-4">
+              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gilda</h1>
+              <p className="text-xs text-[#75706b] font-sans">club de lectura, mailclub y comunidad</p>
             </div>
-          )}
-        </div>
+            <div className="editorial-card p-4 border border-[#e8e4d9] modal-elastic">
+              <CreaTuGilda
+                enEntrarGratis={() => setVistaAcceso('menu')}
+                enIrALogin={() => setVistaAcceso('menu')}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="editorial-card max-w-md w-full p-8 space-y-6 text-center border border-[#e8e4d9] modal-elastic">
+            <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gilda</h1>
+            <p className="text-xs text-[#75706b] font-sans">club de lectura, mailclub y comunidad</p>
+
+            {vistaAcceso === 'menu' && (
+              
+              <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
+                <label className="block text-xs font-medium text-[#23211e]">Correo electrónico</label>
+                <input type="email" placeholder="tuemail@ejemplo.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} disabled={esperandoToken} required className="w-full editorial-input px-3.5 py-2.5 text-xs disabled:opacity-50" />
+                
+                {esperandoToken && (
+                  <div className="animate-fade-in">
+                    <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
+                    <input type="text" placeholder="123456" value={tokenLogin} onChange={e => setTokenLogin(e.target.value)} required className="w-full editorial-input px-3.5 py-2.5 text-xs text-center tracking-[0.5em] font-bold" maxLength={6} />
+                  </div>
+                )}
+
+                <button type="submit" disabled={loadingAuth} className="w-full editorial-btn py-3 text-xs font-medium">
+                  {loadingAuth ? "procesando..." : (esperandoToken ? "entrar al club" : "enviadme la llave por correo")}
+                </button>
+                
+                {!esperandoToken && (
+                  <div className="space-y-2 pt-2">
+                    <button type="button" onClick={() => setVistaAcceso("crea-tu-gilda")} className="w-full bg-[#23211e] text-white rounded-xl py-3 text-xs font-medium hover:bg-[#383531] transition-colors">crear una gilda propia</button>
+                    <button type="button" onClick={() => setVistaAcceso("modalidades")} className="w-full bg-white text-[#23211e] border border-[#e8e4d9] rounded-xl py-3 text-xs font-medium hover:bg-[#ffffee] transition-colors">Ver todas las membresías</button>
+                  </div>
+                )}
+              </form>
+
+            )}
+
+            {vistaAcceso === 'modalidades' && (
+              <div className="space-y-4 text-left page-transition">
+                <button onClick={() => setVistaAcceso('crea-tu-gilda')} className="text-xs font-medium text-[#75706b] flex items-center">← Volver al test</button>
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                  {modalidades.map(m => (
+                    <div key={m.id} className="editorial-card p-4 space-y-2 bg-white border border-[#e8e4d9]">
+                      <div className="flex justify-between items-center"><h3 className="font-babydoll font-bold text-lg">{m.nombre}</h3><span className="text-xs font-medium bg-[#23211e] text-[#ffffee] px-2.5 py-1 rounded-full">{m.precio}</span></div>
+                      <p className="text-xs text-[#75706b] font-sans">{m.descripcion}</p>
+                      <a href={m.esGratis ? '#' : m.enlaceStripe} onClick={e => { if (m.esGratis) setVistaAcceso('menu'); }} className="block w-full mt-2 py-2 text-center text-xs editorial-btn font-medium">{m.esGratis ? 'Probar gratis' : 'Elegir esta modalidad'}</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }
 
-  if (esModalidadCorreo && !esAdministradora) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 w-full py-8 bg-[#ffffee]">
-        <div className="editorial-card p-6 space-y-4 text-center max-w-sm modal-elastic">
-          <h1 className="font-babydoll text-4xl font-bold">gilda</h1>
-          <p className="text-xs text-[#75706b] font-sans leading-relaxed">Tu modalidad ({sesion.modalidad}) está configurada para recibir cartas por correo y no incluye acceso a la web.</p>
-          <button onClick={() => supabase.auth.signOut()} className="editorial-btn px-4 py-2 text-xs">Cerrar sesión</button>
-        </div>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
