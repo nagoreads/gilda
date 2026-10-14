@@ -216,10 +216,24 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Carga inicial + Suscripción en tiempo real (Realtime) para actualizar chat e interacción en directo
   useEffect(() => {
     cargarDatosSupabase();
-    const interval = setInterval(cargarDatosSupabase, 8000);
-    return () => clearInterval(interval);
+
+    const canalRealtime = supabase
+      .channel('realtime-gilda')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public' },
+        () => {
+          cargarDatosSupabase();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canalRealtime);
+    };
   }, [sesion?.email]);
 
   const registrarActividadPresencia = async () => {
