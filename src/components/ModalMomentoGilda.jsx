@@ -148,7 +148,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
       ctx.font = 'bold 45px sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 10;
-      ctx.fillText('aquí y ahora ✦ @gilda.mailclub', 60, canvas.height - 80);
+      ctx.fillText('aquí y ahora ✦ @gilda.app', 60, canvas.height - 80);
 
       // Calidad de exportación máxima
       setFotoFinal(canvas.toDataURL('image/jpeg', 0.95));

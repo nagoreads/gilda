@@ -106,7 +106,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
               <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[var(--primary-olive)] bg-white border border-[#e8e4d9] rounded-full px-3 py-1.5 min-h-[44px]">Otra cita</button>
               {libroStory?.titulo && <span className="font-sans text-[10px] text-[#75706b]">{libroStory.titulo}{libroStory.autora ? ` · ${libroStory.autora}` : ''}</span>}
               <span className="font-sans text-xs font-semibold text-[var(--primary-olive)] tracking-wide block lowercase">
-                @gilda.mailclub
+                @gilda.app
               </span>
             </div>
           )}
@@ -114,7 +114,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
           {modo === 'progreso' && (
             <div className="w-full flex flex-col items-center text-center space-y-3">
               <span className="font-sans text-xs font-semibold text-[var(--primary-olive)] tracking-wide block lowercase">
-                @gilda.mailclub
+                @gilda.app
               </span>
               
               <div className="shadow-xl w-20 h-28 rounded overflow-hidden shrink-0 flex items-center justify-center bg-gray-100">
@@ -155,7 +155,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
                 )}
                 
                 <span className="absolute bottom-1 right-2 font-sans text-[10px] font-bold text-[var(--primary-olive)] tracking-wide block lowercase z-10">
-                  @gilda.mailclub
+                  @gilda.app
                 </span>
               </div>
             </div>
