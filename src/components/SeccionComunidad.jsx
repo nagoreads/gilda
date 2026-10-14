@@ -148,7 +148,7 @@ export default function SeccionComunidad({
           <button
             key={tab.id}
             onClick={() => setSubTabComunidad(tab.id)}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all shrink-0 active:scale-95 transition-transform duration-100 ${
               subTabComunidad === tab.id
                 ? 'bg-[#23211e] text-[#ffffee]'
                 : 'text-[#75706b] hover:text-[#23211e]'
@@ -175,7 +175,7 @@ export default function SeccionComunidad({
             <div className="flex gap-1 bg-[#ffffee] p-1 rounded-lg border border-[#e8e4d9]">
               <button
                 onClick={() => { setChatModo('global'); setDestinatarioPrivado(null); }}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all active:scale-95 transition-transform duration-100 ${
                   chatModo === 'global' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
               >
@@ -191,7 +191,7 @@ export default function SeccionComunidad({
                   if (sociaDirecta) setDestinatarioPrivado(sociaDirecta);
                 }
               }}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all relative flex items-center gap-1.5 ${
+                className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all relative flex items-center gap-1.5 active:scale-95 transition-transform duration-100 ${
                   chatModo === 'privado' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
               >
@@ -228,7 +228,7 @@ export default function SeccionComunidad({
               <span className="block pr-6 pb-0.5">{m.mensaje}</span>
               <button 
                 onClick={() => setMensajeRespuesta(m)} 
-                className="text-[10px] text-gray-400 hover:text-[#23211e] mt-1 block transition-colors"
+                className="text-[10px] text-gray-400 hover:text-[#23211e] mt-1 block transition-colors active:scale-95 transition-transform duration-100"
               >
                 responder
               </button>
@@ -250,7 +250,7 @@ export default function SeccionComunidad({
                     <button
                       type="button"
                       onClick={() => setMensajeRespuesta(null)}
-                      className="text-gray-500 hover:text-black font-bold px-1.5 text-xs"
+                      className="text-gray-500 hover:text-black font-bold px-1.5 text-xs active:scale-95 transition-transform duration-100"
                     >
                       ✕
                     </button>
@@ -281,7 +281,7 @@ export default function SeccionComunidad({
                   }
                 }} className="p-3 flex gap-2">
                   <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
-                  <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
+                  <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
                 </form>
               </div>
             </>
@@ -312,7 +312,7 @@ export default function SeccionComunidad({
                         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
                       }
                     }
-                  }} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all">
+                  }} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all active:scale-[0.98] transition-transform duration-100">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-7 h-7" textClass="text-xs" />
                       <div className="overflow-hidden">
@@ -352,7 +352,7 @@ export default function SeccionComunidad({
           {chatModo === 'privado' && destinatarioPrivado && (
             <>
               <div className="p-2.5 border-b border-[#e8e4d9] flex items-center justify-between text-xs">
-                <button onClick={() => setDestinatarioPrivado(null)} className="text-[#23211e] font-medium flex items-center gap-1">
+                <button onClick={() => setDestinatarioPrivado(null)} className="text-[#23211e] font-medium flex items-center gap-1 active:scale-95 transition-transform duration-100">
                   ← Volver
                 </button>
                 <div className="flex items-center gap-1.5">
@@ -416,7 +416,7 @@ export default function SeccionComunidad({
                 setMensajeRespuesta(null);
               }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
                 <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
-                <button type="submit" className="editorial-btn px-4 py-2 text-xs">Enviar</button>
+                <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
               </form>
             </>
           )}
@@ -466,7 +466,7 @@ export default function SeccionComunidad({
                         <div className="h-full rounded-full bg-[#23211e] transition-all duration-300" style={{ width: `${pct}%` }}></div>
                       </div>
                     </div>
-                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2 rounded-lg text-xs font-medium font-sans border transition-colors ${
+                    <button type="button" onClick={() => votarCafecito(cafecito)} className={`w-full py-2 rounded-lg text-xs font-medium font-sans border transition-colors active:scale-95 transition-transform duration-100 ${
                       cafecito.yaVoto
                         ? 'bg-[#23211e] text-[#ffffee] border-[#23211e]'
                         : 'bg-white text-[#23211e] border-[#e8e4d9] hover:bg-[#ffffee]'
@@ -504,7 +504,7 @@ export default function SeccionComunidad({
             }} className="space-y-2">
               <BuscadorLibros placeholder="Título o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
               <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
-              <button type="submit" className="w-full editorial-btn py-2 text-xs">Añadir propuesta</button>
+              <button type="submit" className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Añadir propuesta</button>
             </form>
           </div>
 
@@ -531,7 +531,7 @@ export default function SeccionComunidad({
                       await supabase.from('proposals').update({ votos: nuevosVotos, votantes: nuevosVotantes.join(',') }).eq('id', p.id);
                       await cargarDatosSupabase();
                       mostrarToast('Voto actualizado.');
-                    }} className="self-start mt-2 px-3 py-1 text-xs rounded-lg font-medium bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#23211e] hover:text-[#ffffee] transition-all">
+                    }} className="self-start mt-2 px-3 py-1 text-xs rounded-lg font-medium bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#23211e] hover:text-[#ffffee] transition-all active:scale-95 transition-transform duration-100">
                       Votar ({p.votos || 0})
                     </button>
                   </div>
@@ -553,7 +553,7 @@ export default function SeccionComunidad({
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);
             setMensajeFundadora('');
             mostrarToast('Mensaje enviado.');
-          }} className="w-full editorial-btn py-2 text-xs">Enviar nota</button>
+          }} className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Enviar nota</button>
         </div>
       )}
     </div>

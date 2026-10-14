@@ -67,7 +67,7 @@ export default function TimelineCapitulos({
               <button
                 key={cap.id || cap.numero}
                 onClick={() => setCapituloSeleccionado(cap)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 transition-all text-left min-h-[44px] ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 transition-all text-left min-h-[44px] active:scale-95 transition-transform duration-100 ${
                   esSeleccionado
                     ? 'bg-[#23211e] text-[#ffffee]'
                     : desbloqueado
@@ -104,7 +104,7 @@ export default function TimelineCapitulos({
                 placeholder="Escribe tu reflexión o nota sobre este capítulo..."
                 className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
               />
-              <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium">
+              <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium active:scale-95 transition-transform duration-100">
                 Publicar nota
               </button>
             </form>
@@ -140,7 +140,7 @@ export default function TimelineCapitulos({
                     {!esRestringida && (
                       <button
                         onClick={() => setRespuestaA(respuestaA === comentario.id ? null : comentario.id)}
-                        className="text-[11px] font-sans font-medium text-[#75706b] hover:text-[#23211e] transition-colors pt-1"
+                        className="text-[11px] font-sans font-medium text-[#75706b] hover:text-[#23211e] transition-colors pt-1 active:scale-95 transition-transform duration-100"
                       >
                         {respuestaA === comentario.id ? 'Cancelar' : 'Responder'}
                       </button>
@@ -158,7 +158,7 @@ export default function TimelineCapitulos({
                         <button
                           type="button"
                           onClick={() => enviarComentario(comentario.id, textoRespuesta)}
-                          className="editorial-btn px-3 py-1.5 text-xs font-medium"
+                          className="editorial-btn px-3 py-1.5 text-xs font-medium active:scale-95 transition-transform duration-100"
                         >
                           Enviar respuesta
                         </button>
