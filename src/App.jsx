@@ -802,7 +802,7 @@ export default function App() {
       </main>
 
       {/* Navegación Inferior Flotante */}
-      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-2 px-4 flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-2xl bg-white border-t border-[#e8e4d9]">
+      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 pb-safe flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-3xl bg-[#ffffee]/90 backdrop-blur-md border-t border-[#e8e4d9] shadow-lg">
         {[
           { id: 'inicio', label: 'inicio' },
           { id: 'edificio', label: 'casa' },
