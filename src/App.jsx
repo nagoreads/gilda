@@ -130,7 +130,7 @@ export default function App() {
 
   const estadoBeReal = useMemo(() => {
     if (!sesion?.email || !alertaMomento) {
-      return { disponible: false, publicado: false, mensaje: "Esperando notificación de hoy ✦" };
+      return { disponible: false, publicado: false, mensaje: "Esperando notificación de hoy" };
     }
 
     const fechaAlerta = new Date(alertaMomento);
@@ -142,7 +142,7 @@ export default function App() {
     const haSaltadoHoy = hoyStr === alertaFechaStr;
 
     if (!haSaltadoHoy) {
-      return { disponible: false, publicado: false, mensaje: "Aún no ha saltado la foto de hoy ✦" };
+      return { disponible: false, publicado: false, mensaje: "Aún no ha saltado la foto de hoy" };
     }
 
     const fotoPublicada = muroActividad.find(item => {
