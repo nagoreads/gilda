@@ -4,8 +4,8 @@ import PortadaLibro from '../PortadaLibro';
 export function ModalUpgrade({ onClose }) {
   return (
     <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-      <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative modal-pop">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+      <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-[#ffffee] relative modal-pop">
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#75706b] hover:text-[#23211e] p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
           <i className="fa-solid fa-xmark text-sm"></i>
         </button>
         <div className="w-12 h-12 bg-[#ffffee] rounded-full flex items-center justify-center mx-auto text-[var(--primary-olive)] border border-[#e8e4d9]">
@@ -31,8 +31,8 @@ export function ModalImportarPin({ onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-[99999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-      <div className="editorial-card max-w-sm w-full p-6 space-y-4 bg-white relative modal-pop">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+      <div className="editorial-card max-w-sm w-full p-6 space-y-4 bg-[#ffffee] relative modal-pop">
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#75706b] hover:text-[#23211e] p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
           <i className="fa-solid fa-xmark text-sm"></i>
         </button>
         <h3 className="font-babydoll text-xl font-bold">Añadir pin o imagen externa</h3>
@@ -83,8 +83,8 @@ export function ModalDetalleLibro({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-      <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-white relative modal-pop">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+      <div className="editorial-card max-w-sm w-full p-6 space-y-4 text-center bg-[#ffffee] relative modal-pop">
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#75706b] hover:text-[#23211e] p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
           <i className="fa-solid fa-xmark text-sm"></i>
         </button>
         <div className="flex justify-center">
