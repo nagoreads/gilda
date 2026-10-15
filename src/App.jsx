@@ -588,7 +588,7 @@ export default function App() {
           {/* SUBTAB 1: LECTURAS */}
           {subTabInicio === 'progreso' && (
             <>
-              <div className="editorial-card p-5 space-y-4">
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
                 <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2">
                    <h3 className="font-babydoll text-xl font-bold">Progreso</h3>
                    <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">
@@ -617,7 +617,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="editorial-card p-5 space-y-3">
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="font-babydoll text-xl font-bold">Ubicación</h3>
                   <button type="button" onClick={obtenerUbicacionActual} className="text-xs font-medium font-sans bg-white border border-[#e8e4d9] text-[#23211e] px-2.5 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">Detectar</button>
@@ -633,7 +633,7 @@ export default function App() {
                 }} className="w-full editorial-btn py-2 text-xs font-medium">Guardar ubicación</button>
               </div>
 
-              <div className="editorial-card p-5 space-y-4">
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
                 <h3 className="font-babydoll text-xl font-bold">Calendario</h3>
                 <CalendarioInteractivo eventos={eventosCalendario} />
               </div>
@@ -646,7 +646,7 @@ export default function App() {
 
           {/* SUBTAB 2: AQUÍ Y AHORA ✦ */}
           {subTabInicio === 'aqui_ahora' && (
-            <div className="editorial-card p-5 space-y-4">
+            <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
               <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
                 <div>
                   <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
@@ -690,7 +690,7 @@ export default function App() {
                     const estaBloqueado = !esMio && !haPublicadoMomentoHoy;
 
                     return (
-                      <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] space-y-2">
+                      <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
                           <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
@@ -735,7 +735,7 @@ export default function App() {
 
           {/* SUBTAB 3: EL MURO */}
           {subTabInicio === 'muro' && (
-            <div className="editorial-card p-5 space-y-3">
+            <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-3">
               <div className="flex justify-between items-center mb-1">
                 <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro del club</h3>
               </div>
@@ -743,7 +743,7 @@ export default function App() {
                 <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 publicacionesMuro.map((item, idx) => (
-                  <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#e8e4d9] flex gap-3 items-center interactive-lift">
+                  <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 flex gap-3 items-center interactive-lift">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
                       <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
