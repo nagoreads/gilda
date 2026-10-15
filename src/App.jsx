@@ -177,7 +177,7 @@ export default function App() {
         supabase.from('calendar_events').select('*'),
         supabase.from('wall_posts').select('*').order('timestamp', { ascending: false }),
         supabase.from('cafes').select('*'),
-        supabase.from('momento_gilda_config').select('*').limit(1)
+        Promise.resolve({ data: [] })
       ]);
 
       if (configMomento && configMomento.length > 0) {
