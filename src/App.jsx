@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
-import { createClient } from '@supabase/supabase-js';
+
 
 import BuscadorLibros from './BuscadorLibros';
 import PortadaLibro from './PortadaLibro';
@@ -18,9 +18,7 @@ import SeccionAdmin from './components/SeccionAdmin';
 import SuscribirPush from './components/SuscribirPush';
 import CreaTuGilda from './components/CreaTuGilda';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from './context/ClubContext.jsx';
 
 const EMAIL_ADMINISTRADORA = 'ndnagore@gmail.com';
 
