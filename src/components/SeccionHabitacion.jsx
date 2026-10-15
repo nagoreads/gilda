@@ -1,9 +1,10 @@
+import SuscribirPush from './SuscribirPush';
 import { useState } from 'react';
 import PortadaLibro from '../PortadaLibro';
 import BuscadorLibros from '../BuscadorLibros';
 import { LomoLibroEstanteria } from './DecoracionesHabitacion';
 
-export default function SeccionHabitacion({
+export default function SeccionHabitacion({ supabase, 
   sesion,
   miPagina,
   libroActual,
@@ -197,6 +198,12 @@ export default function SeccionHabitacion({
           )}
         </div>
       </section>
+    
+      
+      {/* Centro de Notificaciones Push */}
+      <div className="mt-8 pt-6 border-t border-[#e8e4d9]">
+        <SuscribirPush sesion={sesion} supabase={supabase} />
+      </div>
     </div>
   );
 }
