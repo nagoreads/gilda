@@ -13,7 +13,6 @@ export default function ModalImportarGoodreads({ onClose, sesion, supabase, carg
     const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
     const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
     const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
-    const idxCalificacion = cabeceras.findIndex(h => h.includes('rating') || h.includes('calificacion') || h.includes('my rating'));
 
     const libros = [];
 
@@ -69,7 +68,6 @@ export default function ModalImportarGoodreads({ onClose, sesion, supabase, carg
 
     try {
       for (const lib of librosProcesados) {
-        // Insertamos directamente en Supabase (tabla personal_readings)
         await supabase.from('personal_readings').insert([{
           email: sesion.email.toLowerCase().trim(),
           nombre: sesion.nombre || 'Socia',
