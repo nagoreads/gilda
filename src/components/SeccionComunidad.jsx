@@ -258,26 +258,28 @@ export default function SeccionComunidad({
                 )}
                 <form onSubmit={async (e) => {
                   e.preventDefault();
-                  if (!nuevoChat.trim()) return;
-                  const nombreAutor = mensajeRespuesta ? (typeof obtenerNombreReal === 'function' && mensajeRespuesta.email ? obtenerNombreReal(mensajeRespuesta.email, mensajeRespuesta.usuario) : mensajeRespuesta.usuario) : null;
+                  const textoAEnviar = nuevoChat.trim();
+                  if (!textoAEnviar) return;
+                  const nombreAutor = mensajeRespuesta ? (typeof obtenerNombreReal === "function" && mensajeRespuesta.email ? obtenerNombreReal(mensajeRespuesta.email, mensajeRespuesta.usuario) : mensajeRespuesta.usuario) : null;
                   const nuevoMsg = {
                     email: sesion.email,
                     usuario: nombreUsuarioPersonalizado || sesion.nombre,
-                    mensaje: nuevoChat.trim(),
-                    tipo: 'global',
+                    mensaje: textoAEnviar,
+                    tipo: "global",
                     timestamp: new Date().toISOString(),
                     respuesta_a_id: mensajeRespuesta?.id || null,
                     respuesta_a_texto: mensajeRespuesta?.mensaje || null,
-                    respuesta_a_nombre: nombreAutor || 'gilda'
+                    respuesta_a_nombre: nombreAutor || "gilda"
                   };
-                  const { error } = await supabase.from('chat_messages').insert([nuevoMsg]);
+                  // Limpieza instantánea para respuesta inmediata
+                  setNuevoChat("");
+                  setMensajeRespuesta(null);
+                  
+                  const { error } = await supabase.from("chat_messages").insert([nuevoMsg]);
                   if (error) {
-                    console.error('Error enviando mensaje:', error);
-                    alert('Error al enviar mensaje: ' + error.message);
-                  } else {
-                    if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-                    setNuevoChat('');
-                    setMensajeRespuesta(null);
+                    console.error("Error enviando mensaje:", error);
+                    alert("Error al enviar mensaje: " + error.message);
+                    setNuevoChat(textoAEnviar);
                   }
                 }} className="p-3 flex gap-2">
                   <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />

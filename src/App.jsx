@@ -201,7 +201,11 @@ export default function App() {
       if (chapters) { setCapitulos(chapters); safeSet('gilda_cache_capitulos', chapters); }
       if (comments) { setComentarios(comments); safeSet('gilda_cache_comentarios', comments); }
       if (clubReadings) { setLecturas(clubReadings); safeSet('gilda_cache_lecturas', clubReadings); }
-      if (chatMessages) { setChatMsgs(chatMessages); safeSet('gilda_cache_chat', chatMessages); }
+      if (chatMessages) {
+        const msgsUnicos = Array.from(new Map(chatMessages.map(m => [m.id || (m.timestamp + m.usuario + m.mensaje), m])).values());
+        setChatMsgs(msgsUnicos);
+        safeSet(gilda_cache_chat, msgsUnicos);
+      }
       if (proposals) { setPropuestas(proposals); safeSet('gilda_cache_propuestas', proposals); }
       if (personalReadings) { setLecturasPersonales(personalReadings); safeSet('gilda_cache_personales', personalReadings); }
       if (calendarEvents) { setEventosCalendario(calendarEvents); safeSet('gilda_cache_calendario', calendarEvents); }
@@ -221,12 +225,19 @@ export default function App() {
     cargarDatosSupabase();
 
     const canalRealtime = supabase
-      .channel('realtime-gilda')
+      .channel("realtime-gilda")
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public' },
-        () => {
-          cargarDatosSupabase();
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
+          if (payload.new) {
+            setChatMsgs((prev) => {
+              if (prev.some((m) => m.id === payload.new.id)) return prev;
+              const actualizados = [...prev, payload.new];
+              safeSet("gilda_cache_chat", actualizados);
+              return actualizados;
+            });
+          }
         }
       )
       .subscribe();
