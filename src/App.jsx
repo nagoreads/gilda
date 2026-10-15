@@ -73,7 +73,7 @@ export default function App() {
   const [esperandoToken, setEsperandoToken] = useState(false);
   const [esPaginaGracias] = useState(() => window.location.pathname === '/gracias');
 
-  const [usuariasClub, setUsuariasClub] = useState(() => safeGetJSON('gilda_cache_usuarias', []));
+  const [usuariasClub, setUsuariasClub] = useState(() => safeGetJSON('gilda_cache_usuarias_v2', []));
   const [vistaAcceso, setVistaAcceso] = useState('crea-tu-gilda');
 
   const [seccionApp, setSeccionApp] = useState('inicio');
@@ -186,7 +186,7 @@ export default function App() {
       }
 
       if (profiles) {
-        setUsuariasClub(profiles); safeSet('gilda_cache_usuarias', profiles);
+        setUsuariasClub(profiles); safeSet('gilda_cache_usuarias_v2', profiles);
         if (sesion?.email) {
           const sociaActual = profiles.find(u => (u.email || '').trim().toLowerCase() === sesion.email.toLowerCase());
           if (sociaActual) {

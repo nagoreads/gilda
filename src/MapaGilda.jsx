@@ -308,9 +308,9 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
           <div style="position: relative; width: 18px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="${item.nombre}">
             <svg viewBox="0 0 16 24" width="18" height="26" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3));">
               <line x1="8" y1="12" x2="8" y2="23" stroke="#23211e" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="8" cy="7" r="6" fill="var(--primary-olive)" stroke="#23211e" stroke-width="1.5"/>
+              <circle cx="8" cy="7" r="6" fill="#849673" stroke="#23211e" stroke-width="1.5"/>
             </svg>
-            <span style="position: absolute; top: 1.5px; width: 100%; text-align: center; color: #FFFFFF; font-weight: bold; font-size: 8px; font-family: sans-serif;">1</span>
+            
           </div>
         `;
         if (!mapRef.current || !mapRef.current._loaded || !markersGroupRef.current) return;
@@ -389,7 +389,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
                       <i className={`fa-solid ${expandido ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px] text-[#75706b]`}></i>
                       <span className="font-bold font-babydoll truncate">{pais}</span>
                     </span>
-                    <span className="bg-[var(--primary-olive)] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">{total}</span>
+                    <span className="bg-[#849673] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">{total}</span>
                   </button>
                   {expandido && (
                     <div id={regionesId} className="px-3 py-2 space-y-1.5 border-t border-[#e8e4d9] bg-white">

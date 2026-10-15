@@ -17,7 +17,7 @@
   --bg-card-alt: #fcfbf7;        /* Tono lino / papiro muy suave */
   --text-main: #23211e;          /* Tinta carbón cálida */
   --text-muted: #75706b;        /* Texto secundario atenuado */
-  --primary-olive: #23211e;      /* Acentos y botones principales */
+  --primary-olive: #849673;      /* Acentos y botones principales */
   --border-editorial: #e8e4d9;   /* Bordes tono hilo de lino */
 }
 
@@ -334,3 +334,38 @@ button:active {
 img {
   transition: transform 0.3s ease-out, filter 0.3s ease-out;
 }
+
+
+/* --- Transformación Estética Artesanal (Sin alterar JS) --- */
+
+/* Quitar el aspecto de tarjetas corporativas cuadradas */
+.editorial-card {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border: 1px dashed #e8e4d9 !important;
+  box-shadow: none !important;
+  border-radius: 1rem !important;
+}
+
+.editorial-card:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #23211e !important;
+}
+
+/* Suavizar barras de navegación e insignias */
+.bg-white {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Transformar botones rígidos en etiquetas tipo fanzine */
+button {
+  letter-spacing: -0.01em;
+}
+
+/* Líneas separadoras con tacto de lápiz/papel */
+.border-[#e8e4d9] {
+  border-color: #e8e4d9 !important;
+}
+
+
+
+
