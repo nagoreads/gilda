@@ -366,21 +366,39 @@ export default function App() {
     mostrarToast('Cita publicada en el Muro');
   };
 
-  const guardarLibroPersonal = async (tituloOpt, pagOpt, estadoOpt = 'leyendo', autoraOpt = '', portadaOpt = '') => {
-    const tituloLibro = String(tituloOpt || '').trim();
+  const guardarLibroPersonal = (tituloOpt, pagOpt, estadoOpt = "leyendo", autoraOpt = "", portadaOpt = "") => {
+    const tituloLibro = String(tituloOpt || "").trim();
     if (!tituloLibro || !sesion?.email) return;
     const pagFinal = Number(pagOpt) || 0;
 
-    const existente = lecturasPersonales.find(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase() && (l.libro || '').toLowerCase() === tituloLibro.toLowerCase());
+    const existente = lecturasPersonales.find(l => (l.email || "").toLowerCase() === sesion.email.toLowerCase() && (l.libro || "").toLowerCase() === tituloLibro.toLowerCase());
 
     if (existente) {
-      await supabase.from('personal_readings').update({ pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada }).eq('id', existente.id);
-    } else {
-      await supabase.from('personal_readings').insert([{ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt }]);
-    }
+      const itemActualizado = { ...existente, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada };
+      const nuevas = lecturasPersonales.map(l => l.id === existente.id ? itemActualizado : l);
+      setLecturasPersonales(nuevas);
+      if (typeof safeSet === "function") safeSet("gilda_cache_personales", nuevas);
+      mostrarToast(`Guardado: ${tituloLibro}`);
 
-    await cargarDatosSupabase();
-    mostrarToast(`Guardado: ${tituloLibro}`);
+      supabase.from("personal_readings").update({ pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada }).eq("id", existente.id).then(({ error }) => {
+        if (error) console.error("Error actualizando libro en Supabase:", error);
+      });
+    } else {
+      const tempId = "temp_" + Date.now();
+      const nuevoItem = { id: tempId, email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt };
+      const nuevas = [...lecturasPersonales, nuevoItem];
+      setLecturasPersonales(nuevas);
+      if (typeof safeSet === "function") safeSet("gilda_cache_personales", nuevas);
+      mostrarToast(`Guardado: ${tituloLibro}`);
+
+      supabase.from("personal_readings").insert([{ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt }]).select().then(({ data, error }) => {
+        if (error) {
+          console.error("Error creando libro en Supabase:", error);
+        } else if (data && data[0]) {
+          setLecturasPersonales(prev => prev.map(item => item.id === tempId ? data[0] : item));
+        }
+      });
+    }
   };
 
   const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
