@@ -204,7 +204,7 @@ export default function App() {
       if (chatMessages) {
         const msgsUnicos = Array.from(new Map(chatMessages.map(m => [m.id || (m.timestamp + m.usuario + m.mensaje), m])).values());
         setChatMsgs(msgsUnicos);
-        safeSet(gilda_cache_chat, msgsUnicos);
+        safeSet("gilda_cache_chat", msgsUnicos);
       }
       if (proposals) { setPropuestas(proposals); safeSet('gilda_cache_propuestas', proposals); }
       if (personalReadings) { setLecturasPersonales(personalReadings); safeSet('gilda_cache_personales', personalReadings); }
