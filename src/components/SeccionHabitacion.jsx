@@ -1,3 +1,4 @@
+import ModalImportarGoodreads from './ModalImportarGoodreads';
 import SuscribirPush from './SuscribirPush';
 import { useState } from 'react';
 import PortadaLibro from '../PortadaLibro';
@@ -26,6 +27,7 @@ export default function SeccionHabitacion({ supabase,
   AvatarUsuaria
 }) {
   const [modoCreacionManual, setModoCreacionManual] = useState(false);
+  const [mostrarModalGoodreads, setMostrarModalGoodreads] = useState(false);
   const [libroPersonalInput, setLibroPersonalInput] = useState('');
   const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
   const [manualTitulo, setManualTitulo] = useState('');
@@ -204,6 +206,19 @@ export default function SeccionHabitacion({ supabase,
       <div className="mt-8 pt-6 border-t border-[#e8e4d9]">
         <SuscribirPush sesion={sesion} supabase={supabase} />
       </div>
+    
+      {mostrarModalGoodreads && (
+        <ModalImportarGoodreads 
+          onClose={() => setMostrarModalGoodreads(false)} 
+          onImportSuccess={(libros) => {
+            // Integramos los libros importados en la estantería o guardamos localmente/supabase
+            if (typeof guardarLibroPersonal === "function" && libros.length > 0) {
+              libros.forEach(lib => guardarLibroPersonal({ titulo: lib.titulo, autor: lib.autor }));
+            }
+          }}
+          mostrarToast={(msg) => console.log(msg)}
+        />
+      )}
     </div>
   );
 }
