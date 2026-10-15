@@ -82,7 +82,7 @@ export default function CalendarioInteractivo({ eventos }) {
           if (tieneEventos) setDiaSeleccionado({ dia, eventos: evs });
           else setDiaSeleccionado(null);
         }}
-        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[var(--primary-olive)] text-white font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#23211e]'} ${tieneEventos && !esHoy ? 'border border-[var(--primary-olive)]/40 font-bold bg-[#ffffee]' : ''}`}
+        className={`h-9 flex flex-col items-center justify-center rounded-xl relative transition-all text-xs font-sans cursor-pointer ${esHoy ? 'bg-[#23211e] text-[#ffffee] font-bold shadow-sm' : 'hover:bg-[#faf9f5] text-[#23211e]'} ${tieneEventos && !esHoy ? 'border border-[var(--primary-olive)]/40 font-bold bg-[#ffffee]' : ''}`}
       >
         <span>{dia}</span>
         {tieneEventos && <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${esHoy ? 'bg-[#ffffee]' : 'bg-[#23211e]'}`}></span>}
