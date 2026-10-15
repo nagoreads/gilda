@@ -291,3 +291,46 @@ button:active {
 .animate-fade-in {
   animation: fade-in 0.4s ease-out forwards;
 }
+/* --- Animaciones Artesanales Gilda --- */
+@keyframes fadeInSuave {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition, .animate-fade-in {
+  animation: fadeInSuave 0.25s ease-out forwards;
+}
+
+/* Elevación táctil para botones */
+.editorial-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+}
+.editorial-btn:hover {
+  transform: translateY(-1.5px);
+}
+.editorial-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* Tarjetas vivas con tacto de papel */
+.editorial-card, .interactive-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+.editorial-card:hover, .interactive-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -4px rgba(35, 33, 30, 0.06);
+}
+.editorial-card:active, .interactive-lift:active {
+  transform: scale(0.99);
+}
+
+/* Efecto para portadas e imágenes */
+img {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out;
+}

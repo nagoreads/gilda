@@ -34,20 +34,20 @@ export const MODALIDADES_GILDA = [
     enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03'
   },
   {
-    id: 'papel',
-    nombre: 'gilda de papel',
-    precio: '10 €/mes',
-    esGratis: false,
-    descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.',
-    enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04'
-  },
-  {
     id: 'virtual',
     nombre: 'gilda virtual',
     precio: '8 €/mes',
     esGratis: false,
     descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.',
     enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05'
+  },
+  {
+    id: 'papel',
+    nombre: 'gilda de papel',
+    precio: '10 €/mes',
+    esGratis: false,
+    descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, y muchas sorpresas más.',
+    enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04'
   },
   {
     id: 'absoluta',
@@ -59,187 +59,120 @@ export const MODALIDADES_GILDA = [
   }
 ];
 
-const preguntas = [
-  {
-    id: 'interaccion',
-    titulo: "¿Cómo te apetece estar por aquí?",
-    subtitulo: "Elige la forma de acompañarnos que mejor encaje contigo.",
-    opciones: [
-      { texto: "Asomarme de vez en cuando, leer comentarios y seguir mi propio ritmo.", valor: 'sombra' },
-      { texto: "Comentar capítulo a capítulo y compartir impresiones como en una lectura conjunta.", valor: 'lectura' },
-      { texto: "Estar en todo: la rutina de lectura, el chat de la comunidad y los cafecitos virtuales.", valor: 'completo' }
-    ]
-  },
-  {
-    id: 'correo',
-    titulo: "¿Te apetece recibir correspondencia?",
-    subtitulo: "Cartas, actividades y detalles pensados para cada mes.",
-    opciones: [
-      { texto: "Prefiero enfocarme en la app y no recibir nada por correo.", valor: 'ninguno' },
-      { texto: "Me hace ilusión recibir la carta mensual por correo electrónico (con guías y descargables).", valor: 'email' },
-      { texto: "Quiero recibir la carta física escrita a mano en el buzón de mi casa.", valor: 'papel' }
-    ]
-  },
-  {
-    id: 'presupuesto',
-    titulo: "¿Qué opción se adapta a tu momento?",
-    subtitulo: "Puedes cambiar o cancelar cuando quieras.",
-    opciones: [
-      { texto: "Entrar de forma gratuita para probar.", valor: 'gratis' },
-      { texto: "Una contribución tranquila (entre 1 € y 5 € al mes).", valor: 'suave' },
-      { texto: "La experiencia completa con cartas o acceso total (entre 8 € y 12 € al mes).", valor: 'completo' }
-    ]
-  }
+const detallesModalidades = [
+  { id: 'cotilla', resumen: 'para curiosear y leer comentarios sin compromiso' },
+  { id: 'satelite', resumen: 'comunidad en la app y lectura conjunta' },
+  { id: 'cafe', resumen: 'comunidad completa, chat y cafecitos virtuales' },
+  { id: 'nube', resumen: 'carta sorpresa digital mensual en tu correo' },
+  { id: 'virtual', resumen: 'carta digital + acceso total a la app' },
+  { id: 'papel', resumen: 'carta física escrita a mano en tu buzón' },
+  { id: 'absoluta', resumen: 'experiencia completa (papel + app + cafecitos)' }
 ];
 
 export default function CreaTuGilda({ enEntrarGratis, enIrALogin }) {
-  const [paso, setPaso] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
-  const [modalidadRecomendada, setModalidadRecomendada] = useState(null);
+  const [modalidadSeleccionada, setModalidadSeleccionada] = useState(null);
 
-  const seleccionarRespuesta = (clave, valor) => {
-    const nuevasRespuestas = { ...respuestas, [clave]: valor };
-    setRespuestas(nuevasRespuestas);
-
-    if (paso < preguntas.length - 1) {
-      setPaso(paso + 1);
-    } else {
-      calcularMatch(nuevasRespuestas);
-    }
-  };
-
-  const calcularMatch = (res) => {
-    if (res.presupuesto === 'gratis') {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'cotilla'));
-      return;
-    }
-
-    if (res.correo === 'papel' && (res.interaccion === 'completo' || res.presupuesto === 'completo')) {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'absoluta'));
-      return;
-    }
-
-    if (res.correo === 'papel') {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'papel'));
-      return;
-    }
-
-    if (res.correo === 'email' && (res.interaccion === 'completo' || res.presupuesto === 'completo')) {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'virtual'));
-      return;
-    }
-
-    if (res.correo === 'email') {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'nube'));
-      return;
-    }
-
-    if (res.interaccion === 'completo') {
-      setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'cafe'));
-      return;
-    }
-
-    setModalidadRecomendada(MODALIDADES_GILDA.find(m => m.id === 'satelite'));
+  const seleccionarOpcion = (modalidadId) => {
+    const encontrada = MODALIDADES_GILDA.find(m => m.id === modalidadId) || MODALIDADES_GILDA[0];
+    setModalidadSeleccionada(encontrada);
   };
 
   const confirmarModalidad = () => {
-    if (!modalidadRecomendada) return;
+    if (!modalidadSeleccionada) return;
 
-    if (modalidadRecomendada.esGratis) {
+    if (modalidadSeleccionada.esGratis) {
       enEntrarGratis();
-    } else if (modalidadRecomendada.enlaceStripe) {
-      window.location.href = modalidadRecomendada.enlaceStripe;
+    } else if (modalidadSeleccionada.enlaceStripe) {
+      window.location.href = modalidadSeleccionada.enlaceStripe;
     }
   };
 
   return (
-    <div className="space-y-6 text-left font-sans">
-      {!modalidadRecomendada ? (
-        <>
-          <div className="space-y-1">
-            <span className="text-[11px] text-[#75706b] font-sans tracking-wide">
-              pregunta {paso + 1} de {preguntas.length}
-            </span>
+    <div className="space-y-5 text-left font-sans">
+      {!modalidadSeleccionada ? (
+        <div className="animate-fade-in space-y-4">
+          <div className="text-center space-y-1">
             <h2 className="font-babydoll text-3xl font-bold text-[#23211e] leading-tight">
-              {preguntas[paso].titulo}
+              formas de estar en gilda
             </h2>
-            <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-              {preguntas[paso].subtitulo}
+            <p className="text-[11px] text-[#75706b] font-sans">
+              puedes cambiar o cancelar tu suscripción cuando quieras
             </p>
           </div>
 
-          <div className="space-y-2.5 pt-2">
-            {preguntas[paso].opciones.map((op, idx) => (
-              <button
-                key={idx}
-                onClick={() => seleccionarRespuesta(preguntas[paso].id, op.valor)}
-                className="w-full text-left p-3.5 rounded-xl bg-[#ffffee] border border-[#e8e4d9] hover:border-[#23211e] transition-all text-xs font-sans text-[#23211e] leading-relaxed interactive-lift"
-              >
-                {op.texto}
-              </button>
-            ))}
+          <div className="py-1 space-y-2">
+            {MODALIDADES_GILDA.map((item) => {
+              const info = detallesModalidades.find(d => d.id === item.id);
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => seleccionarOpcion(item.id)}
+                  className="group cursor-pointer p-3.5 rounded-xl bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] transition-all duration-200"
+                >
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-babydoll font-bold text-base text-[#23211e]">
+                      {item.nombre}
+                    </span>
+                    <span className="text-xs font-medium text-[#75706b] group-hover:text-[#23211e] font-sans">
+                      {item.precio}
+                    </span>
+                  </div>
+                  {info && (
+                    <p className="text-[11px] text-[#75706b] font-sans pt-0.5 leading-snug">
+                      {info.resumen}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          <div className="pt-3 border-t border-[#e8e4d9] flex justify-between items-center text-xs text-[#75706b]">
-            {paso > 0 ? (
-              <button
-                onClick={() => setPaso(paso - 1)}
-                className="hover:text-[#23211e] transition-colors"
-              >
-                ← Anterior
-              </button>
-            ) : (
-              <span>crea tu propia gilda</span>
-            )}
+          <div className="pt-2 text-center border-t border-[#e8e4d9]/60">
             <button
               onClick={enIrALogin}
-              className="hover:text-[#23211e] transition-colors"
+              className="text-xs text-[#75706b] hover:text-[#23211e] transition-colors"
             >
-              ya soy gilda
+              ya tengo cuenta (entrar al club)
             </button>
           </div>
-        </>
+        </div>
       ) : (
-        <div className="space-y-5 page-transition">
+        <div className="space-y-5 animate-fade-in">
           <div className="space-y-1">
-            <span className="text-[11px] text-[#75706b] uppercase tracking-wider font-sans font-medium">
-              tu modalidad sugerida
+            <span className="text-[10px] text-[#75706b] uppercase tracking-widest font-sans font-medium">
+              modalidad seleccionada
             </span>
             <div className="flex justify-between items-baseline pt-1">
               <h2 className="font-babydoll text-3xl font-bold text-[#23211e]">
-                {modalidadRecomendada.nombre}
+                {modalidadSeleccionada.nombre}
               </h2>
-              <span className="text-xs font-medium bg-[#23211e] text-[#ffffee] px-2.5 py-1 rounded-full font-sans">
-                {modalidadRecomendada.precio}
+              <span className="text-xs font-medium bg-[#23211e] text-[#ffffee] px-3 py-1 rounded-full font-sans">
+                {modalidadSeleccionada.precio}
               </span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#ffffee] border border-[#e8e4d9]">
+          <div className="p-4 rounded-2xl bg-white/80 border border-[#e8e4d9]">
             <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-              {modalidadRecomendada.descripcion}
+              {modalidadSeleccionada.descripcion}
             </p>
           </div>
 
           <div className="space-y-2 pt-2">
             <button
               onClick={confirmarModalidad}
-              className="w-full editorial-btn py-3 text-xs font-medium text-center block"
+              className="w-full editorial-btn py-3 text-xs font-medium text-center block hover:-translate-y-0.5 active:scale-[0.98] transition-all"
             >
-              {modalidadRecomendada.esGratis
+              {modalidadSeleccionada.esGratis
                 ? 'Entrar gratis al club'
-                : `Elegir ${modalidadRecomendada.nombre} en Stripe`}
+                : `Elegir ${modalidadSeleccionada.nombre} en Stripe`}
             </button>
 
             <button
-              onClick={() => {
-                setModalidadRecomendada(null);
-                setPaso(0);
-                setRespuestas({});
-              }}
+              onClick={() => setModalidadSeleccionada(null)}
               className="block w-full text-center text-xs text-[#75706b] hover:text-[#23211e] font-sans transition-colors pt-1"
             >
-              Volver a responder el test
+              volver a las modalidades
             </button>
           </div>
         </div>
