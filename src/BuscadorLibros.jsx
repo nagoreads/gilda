@@ -67,7 +67,7 @@ export default function BuscadorLibros({ placeholder, valor, setValor, onSelectL
           {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[var(--primary-olive)]"></i>}
         </div>
         {mostrarDropdown && sugerencias.length > 0 && (
-          <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#e8e4d9] rounded-b-xl shadow-xl max-h-56 overflow-y-auto mt-1">
+          <div className="absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] border border-[#e8e4d9] rounded-b-xl shadow-sm border-t-0 rounded-b-xl max-h-56 overflow-y-auto mt-1">
             {sugerencias.map((item, idx) => (
               <div key={idx} onClick={() => { onSelectLibro(item); setMostrarDropdown(false); }} className="flex items-center gap-2.5 p-2 hover:bg-[#ffffee] cursor-pointer border-b border-[#e8e4d9] last:border-0 text-left">
                 {item.portada ? <img src={`https://images.weserv.nl/?url=${encodeURIComponent(item.portada)}&w=100&output=jpg`} alt="" className="w-7 h-10 object-cover rounded shrink-0 shadow-sm" /> : <div className="w-7 h-10 bg-[#faf9f5] rounded shrink-0 flex items-center justify-center text-[7px] text-[#75706b] border border-[#e8e4d9]">Sin foto</div>}
