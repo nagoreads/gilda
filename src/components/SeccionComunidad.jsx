@@ -161,7 +161,7 @@ export default function SeccionComunidad({
 
       {/* Sub-tab 1: CHAT */}
       {subTabComunidad === 'chat' && (
-        <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-white">
+        <div className="editorial-card h-[520px] flex flex-col justify-between relative overflow-hidden bg-[#ffffee]">
           <div className="p-3.5 border-b border-[#e8e4d9] flex items-center justify-between">
             <div>
               <h3 className="font-babydoll text-lg font-bold text-[#23211e]">El club</h3>
