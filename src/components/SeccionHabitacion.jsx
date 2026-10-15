@@ -51,6 +51,12 @@ export default function SeccionHabitacion({ supabase,
               Compartir
             </button>
             <button
+              onClick={() => setMostrarModalGoodreads(true)}
+              className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px] flex items-center gap-1.5"
+            >
+              <i className="fa-solid fa-book-bookmark text-[10px]"></i> Goodreads
+            </button>
+            <button
               onClick={() => {
                 const nuevo = !isReadingNow;
                 setIsReadingNow(nuevo);
