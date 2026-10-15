@@ -1,4 +1,4 @@
-import ModalImportarGoodreads from './ModalImportarGoodreads';
+import ModalImportarBiblioteca from './ModalImportarBiblioteca';
 import SuscribirPush from './SuscribirPush';
 import { useState } from 'react';
 import PortadaLibro from '../PortadaLibro';
@@ -27,7 +27,7 @@ export default function SeccionHabitacion({ supabase,
   AvatarUsuaria
 }) {
   const [modoCreacionManual, setModoCreacionManual] = useState(false);
-  const [mostrarModalGoodreads, setMostrarModalGoodreads] = useState(false);
+  const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
   const [libroPersonalInput, setLibroPersonalInput] = useState('');
   const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
   const [manualTitulo, setManualTitulo] = useState('');
@@ -51,10 +51,10 @@ export default function SeccionHabitacion({ supabase,
               Compartir
             </button>
             <button
-              onClick={() => setMostrarModalGoodreads(true)}
+              onClick={() => setMostrarModalBiblioteca(true)}
               className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px] flex items-center gap-1.5"
             >
-              <i className="fa-solid fa-book-bookmark text-[10px]"></i> Goodreads
+              <i className="fa-solid fa-book-bookmark text-[10px]"></i> Importar biblioteca
             </button>
             <button
               onClick={() => {
@@ -213,9 +213,9 @@ export default function SeccionHabitacion({ supabase,
         <SuscribirPush sesion={sesion} supabase={supabase} />
       </div>
     
-      {mostrarModalGoodreads && (
-        <ModalImportarGoodreads 
-          onClose={() => setMostrarModalGoodreads(false)} 
+      {mostrarModalBiblioteca && (
+        <ModalImportarBiblioteca 
+          onClose={() => setMostrarModalBiblioteca(false)} 
           supabase={supabase}
           sesion={sesion}
           cargarDatosSupabase={cargarDatosSupabase}
