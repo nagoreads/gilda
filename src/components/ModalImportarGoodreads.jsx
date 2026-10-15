@@ -35,7 +35,7 @@ export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostr
 
       if (titulo) {
         libros.push({
-          id: 'gr_' + Math.random().toString(36.substring(2, 9)),
+          id: 'gr_' + Math.random().toString(36).substring(2, 9),
           titulo,
           autor: autor || 'Desconocido',
           estante: estante.toLowerCase(),
