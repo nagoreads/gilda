@@ -1,21 +1,19 @@
 import { useState } from 'react';
 
-export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostrarToast }) {
+export default function ModalImportarGoodreads({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [librosProcesados, setLibrosProcesados] = useState([]);
 
-  // Función sencilla para parsear CSV básico de Goodreads
   const procesarCSV = (texto) => {
     const lineas = texto.split('\n');
     if (lineas.length < 2) return [];
 
-    // Detectar cabeceras
-    const cabeceras = lineas[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-    const idxTitulo = cabeceras.findIndex(h => h.toLowerCase().includes('title'));
-    const idxAutor = cabeceras.findIndex(h => h.toLowerCase().includes('author'));
-    const idxEstante = cabeceras.findIndex(h => h.toLowerCase().includes('exclusive shelf') || h.toLowerCase().includes('shelf'));
-    const idxCalificacion = cabeceras.findIndex(h => h.toLowerCase().includes('my rating'));
+    const cabeceras = lineas[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+    const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
+    const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
+    const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
+    const idxCalificacion = cabeceras.findIndex(h => h.includes('rating') || h.includes('calificacion') || h.includes('my rating'));
 
     const libros = [];
 
@@ -23,23 +21,19 @@ export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostr
       const linea = lineas[i].trim();
       if (!linea) continue;
 
-      // Parseo básico respetando comillas simples/dobles de CSV
       const columnas = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || linea.split(',');
-      
       const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
 
       const titulo = idxTitulo !== -1 ? limpiar(columnas[idxTitulo] || '') : '';
       const autor = idxAutor !== -1 ? limpiar(columnas[idxAutor] || '') : '';
       const estante = idxEstante !== -1 ? limpiar(columnas[idxEstante] || '') : 'read';
-      const calificacion = idxCalificacion !== -1 ? Number(limpiar(columnas[idxCalificacion] || '0')) : 0;
 
       if (titulo) {
         libros.push({
-          id: 'gr_' + Math.random().toString(36).substring(2, 9),
           titulo,
-          autor: autor || 'Desconocido',
-          estante: estante.toLowerCase(),
-          calificacion
+          autora: autor || 'Desconocido',
+          estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
+          portada: 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
         });
       }
     }
@@ -58,24 +52,44 @@ export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostr
           const parsed = procesarCSV(contenido);
           setLibrosProcesados(parsed);
           setCargando(false);
-          if (mostrarToast) mostrarToast(`Se encontraron ${parsed.length} libros en el archivo.`);
+          if (mostrarToast) mostrarToast(`Se detectaron ${parsed.length} libros listos para guardar.`);
         } catch (err) {
           console.error(err);
           setCargando(false);
-          if (mostrarToast) mostrarToast('Error al leer el archivo CSV de Goodreads.');
+          if (mostrarToast) mostrarToast('Error al procesar el archivo CSV.');
         }
       };
       lector.readAsText(file);
     }
   };
 
-  const confirmarImportacion = () => {
-    if (librosProcesados.length === 0) return;
-    if (onImportSuccess) {
-      onImportSuccess(librosProcesados);
+  const confirmarImportacion = async () => {
+    if (librosProcesados.length === 0 || !supabase || !sesion?.email) return;
+    setCargando(true);
+
+    try {
+      for (const lib of librosProcesados) {
+        // Insertamos directamente en Supabase (tabla personal_readings)
+        await supabase.from('personal_readings').insert([{
+          email: sesion.email.toLowerCase().trim(),
+          nombre: sesion.nombre || 'Socia',
+          libro: lib.titulo,
+          autora: lib.autora,
+          estado: lib.estado,
+          pagina: lib.estado === 'leido' ? 100 : 0,
+          paginas: 100,
+          portada: lib.portada
+        }]);
+      }
+
+      if (cargarDatosSupabase) await cargarDatosSupabase();
+      if (mostrarToast) mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
+      onClose();
+    } catch (err) {
+      console.error(err);
+      if (mostrarToast) mostrarToast('Hubo un error al guardar en la base de datos.');
+      setCargando(false);
     }
-    if (mostrarToast) mostrarToast('¡Lecturas de Goodreads importadas con éxito!');
-    onClose();
   };
 
   return (
@@ -92,33 +106,36 @@ export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostr
           <div className="w-10 h-10 bg-[#23211e] text-[#ffffee] rounded-full flex items-center justify-center mb-2">
             <i className="fa-solid fa-book-bookmark text-sm"></i>
           </div>
-          <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar desde Goodreads</h3>
+          <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube el archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> exportado desde tu cuenta de Goodreads (*My Books &gt; Import and Export*) para integrar tus lecturas en Gilda.
+            Sube un archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> para registrar tus lecturas directamente en la base de datos de Gilda.
           </p>
         </div>
 
         <div className="space-y-3 pt-2">
           <label className="border-2 border-dashed border-[#e8e4d9] hover:border-[#23211e] bg-white/50 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all">
-            <i className="fa-solid fa-cloud-arrow-up text-xl text-[#75706b] mb-1">span</i>
+            <i className="fa-solid fa-cloud-arrow-up text-xl text-[#75706b] mb-1"></i>
             <span className="text-xs font-semibold text-[#23211e]">
               {archivo ? archivo.name : 'Seleccionar archivo CSV'}
             </span>
-            <span className="text-[10px] text-[#75706b] mt-0.5">Haz clic aquí para buscar el archivo</span>
+            <span className="text-[10px] text-[#75706b] mt-0.5">Haz clic aquí para buscar tu archivo</span>
             <input type="file" accept=".csv" onChange={manejarArchivo} className="hidden" />
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Procesando estantería...</p>
+            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en la base de datos...</p>
           )}
 
-          {librosProcesados.length > 0 && (
+          {librosProcesados.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">Libros detectados ({librosProcesados.length}):</p>
+              <p className="text-xs font-bold text-[#23211e]">Libros encontrados ({librosProcesados.length}):</p>
               {librosProcesados.slice(0, 5).map((lib, idx) => (
-                <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between">
-                  <span className="truncate max-w-[200px] font-medium text-[#23211e]">{lib.titulo}</span>
-                  <span className="italic">{lib.autor}</span>
+                <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
+                  <div className="truncate max-w-[220px]">
+                    <span className="font-medium text-[#23211e]">{lib.titulo}</span>
+                    <span className="block text-[10px] italic text-[#75706b]">{lib.autora}</span>
+                  </div>
+                  <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
                 </div>
               ))}
               {librosProcesados.length > 5 && (
@@ -137,14 +154,14 @@ export default function ModalImportarGoodreads({ onClose, onImportSuccess, mostr
           </button>
           <button 
             onClick={confirmarImportacion}
-            disabled={librosProcesados.length === 0}
+            disabled={librosProcesados.length === 0 || cargando}
             className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-              librosProcesados.length > 0 
+              librosProcesados.length > 0 && !cargando
                 ? 'bg-[#23211e] text-[#ffffee] hover:opacity-95' 
                 : 'bg-[#e8e4d9] text-[#75706b] cursor-not-allowed'
             }`}
           >
-            Importar estantería
+            Guardar en la base de datos
           </button>
         </div>
       </div>

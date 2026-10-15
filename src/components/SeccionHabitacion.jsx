@@ -216,6 +216,12 @@ export default function SeccionHabitacion({ supabase,
       {mostrarModalGoodreads && (
         <ModalImportarGoodreads 
           onClose={() => setMostrarModalGoodreads(false)} 
+          supabase={supabase}
+          sesion={sesion}
+          cargarDatosSupabase={cargarDatosSupabase}
+          mostrarToast={(msg) => console.log(msg)}
+        />
+      )} 
           onImportSuccess={(libros) => {
             // Integramos los libros importados en la estantería o guardamos localmente/supabase
             if (typeof guardarLibroPersonal === "function" && libros.length > 0) {
