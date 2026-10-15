@@ -13,7 +13,7 @@ const ASSETS_TO_CACHE = [
 // Instalar Service Worker y precargar shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    if (e.request.url.startsWith('http')) { caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
         console.warn('Precarga parcial de assets:', err);
       });
