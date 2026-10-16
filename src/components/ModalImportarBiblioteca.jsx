@@ -6,56 +6,66 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   const [librosProcesados, setLibrosProcesados] = useState([]);
 
   const procesarCSV = (texto) => {
-    const lineas = texto.split('\n');
-    if (lineas.length < 2) return [];
+    try {
+      if (!texto) return [];
+      const lineas = texto.split('\n');
+      if (lineas.length < 2) return [];
 
-    const cabeceras = lineas[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-    const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
-    const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
-    const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
+      const cabeceras = lineas[0].split(',').map(h => h ? h.trim().replace(/^"|"$/g, '').toLowerCase() : '');
+      const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
+      const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
+      const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
 
-    const libros = [];
+      const libros = [];
 
-    for (let i = 1; i < lineas.length; i++) {
-      const linea = lineas[i].trim();
-      if (!linea) continue;
+      for (let i = 1; i < lineas.length; i++) {
+        const linea = lineas[i] ? lineas[i].trim() : '';
+        if (!linea) continue;
 
-      const columnas = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || linea.split(',');
-      const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
+        const columnas = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || linea.split(',');
+        const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
 
-      const titulo = idxTitulo !== -1 ? limpiar(columnas[idxTitulo] || '') : '';
-      const autor = idxAutor !== -1 ? limpiar(columnas[idxAutor] || '') : '';
-      const estante = idxEstante !== -1 ? limpiar(columnas[idxEstante] || '') : 'read';
+        const titulo = idxTitulo !== -1 && columnas[idxTitulo] ? limpiar(columnas[idxTitulo]) : '';
+        const autor = idxAutor !== -1 && columnas[idxAutor] ? limpiar(columnas[idxAutor]) : '';
+        const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
-      if (titulo) {
-        libros.push({
-          titulo,
-          autora: autor || 'Desconocido',
-          estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
-          portada: 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
-        });
+        if (titulo) {
+          libros.push({
+            titulo,
+            autora: autor || 'Desconocido',
+            estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
+            portada: 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
+          });
+        }
       }
+      return libros;
+    } catch (e) {
+      console.error("Error parseando CSV:", e);
+      return [];
     }
-    return libros;
   };
 
   const manejarArchivo = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       setArchivo(file);
       setCargando(true);
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
-          const contenido = evento.target.result;
+          const contenido = evento.target?.result || '';
           const parsed = procesarCSV(contenido);
           setLibrosProcesados(parsed);
           setCargando(false);
-          if (mostrarToast) mostrarToast(`Se detectaron ${parsed.length} libros listos para guardar.`);
+          if (typeof mostrarToast === 'function') {
+            mostrarToast(`Se detectaron ${parsed.length} libros listos para guardar.`);
+          }
         } catch (err) {
           console.error(err);
           setCargando(false);
-          if (mostrarToast) mostrarToast('Error al procesar el archivo CSV.');
+          if (typeof mostrarToast === 'function') {
+            mostrarToast('Error al procesar el archivo CSV.');
+          }
         }
       };
       lector.readAsText(file);
@@ -63,7 +73,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    if (librosProcesados.length === 0 || !supabase || !sesion?.email) return;
+    if (librosProcesados.length === 0 || !supabase || !sesion?.email) {
+      if (typeof mostrarToast === 'function') mostrarToast('Faltan datos de sesión o libros para guardar.');
+      return;
+    }
     setCargando(true);
 
     try {
@@ -80,12 +93,12 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         }]);
       }
 
-      if (cargarDatosSupabase) await cargarDatosSupabase();
-      if (mostrarToast) mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
-      onClose();
+      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+      if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
+      if (typeof onClose === 'function') onClose();
     } catch (err) {
-      console.error(err);
-      if (mostrarToast) mostrarToast('Hubo un error al guardar en la base de datos.');
+      console.error("Error al guardar en Supabase:", err);
+      if (typeof mostrarToast === 'function') mostrarToast('Hubo un error al guardar en la base de datos.');
       setCargando(false);
     }
   };
