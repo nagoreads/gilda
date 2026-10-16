@@ -112,6 +112,7 @@ export default function App() {
   const [eventosCalendario, setEventosCalendario] = useState(() => safeGetJSON('gilda_cache_calendario', []));
   const [muroActividad, setMuroActividad] = useState(() => safeGetJSON('gilda_cache_muro', []));
   const [cafecitos, setCafecitos] = useState(() => safeGetJSON('gilda_cache_cafecitos', []));
+  const [alertaMomento, setAlertaMomento] = useState(null);
 
   const [miPagina, setMiPagina] = useState(0);
   const [miCiudadInput, setMiCiudadInput] = useState(() => safeGet('gilda_ciudad', ''));
@@ -326,6 +327,15 @@ export default function App() {
     return <span className={`w-2 h-2 rounded-full ${diff < 3 ? 'bg-[#23211e] animate-pulse' : 'bg-[#75706b]'} inline-block shrink-0`}></span>;
   };
 
+  const formatearHoraWhatsApp = (timestampOrStr) => {
+    if (timestampOrStr) {
+      const d = new Date(timestampOrStr);
+      if (!isNaN(d.getTime())) return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+    const ahora = new Date();
+    return `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+  };
+
   const handleFotoPerfilUpdate = async (base64Img) => {
     setFotoPerfilPersonalizada(base64Img);
     safeSet('gilda_foto_perfil', base64Img);
@@ -508,7 +518,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
       
-      {/* ✦ AQUÍ ESTÁ EL BANNER DE NOTIFICACIONES FIJO ARRIBA ✦ */}
+      {/* ✦ BANNER DE NOTIFICACIONES FIJO ARRIBA ✦ */}
       <BannerNotificaciones />
 
       {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
