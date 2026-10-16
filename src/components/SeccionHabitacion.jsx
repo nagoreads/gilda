@@ -213,15 +213,7 @@ export default function SeccionHabitacion({ supabase,
         <SuscribirPush sesion={sesion} supabase={supabase} />
       </div>
     
-      {mostrarModalBiblioteca && (
-        <ModalImportarBiblioteca 
-          onClose={() => setMostrarModalBiblioteca(false)} 
-          supabase={supabase}
-          sesion={sesion}
-          cargarDatosSupabase={cargarDatosSupabase}
-          mostrarToast={(msg) => console.log(msg)}
-        />
-      )} 
+       
           onImportSuccess={(libros) => {
             // Integramos los libros importados en la estantería o guardamos localmente/supabase
             if (typeof guardarLibroPersonal === "function" && libros.length > 0) {
@@ -231,6 +223,17 @@ export default function SeccionHabitacion({ supabase,
           mostrarToast={(msg) => console.log(msg)}
         />
       )}
+    
+      {mostrarModalBiblioteca && (
+        <ModalImportarBiblioteca 
+          onClose={() => setMostrarModalBiblioteca(false)} 
+          supabase={supabase}
+          sesion={sesion}
+          cargarDatosSupabase={cargarDatosSupabase}
+          mostrarToast={typeof mostrarToast === "function" ? mostrarToast : (msg) => console.log(msg)}
+        />
+      )}
+    
     </div>
   );
 }
