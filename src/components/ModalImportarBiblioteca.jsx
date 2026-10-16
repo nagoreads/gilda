@@ -1,12 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [progresoTexto, setProgresoTexto] = useState('');
-  const librosRef = useRef([]); // Referencia segura blindada contra reseteos de estado
+  const librosRef = useRef([]);
   const [cuentaLibros, setCuentaLibros] = useState(0);
   const [muestraLibros, setMuestraLibros] = useState([]);
+
+  // Al abrir el modal, destruimos cualquier caché previa que sature la memoria
+  useEffect(() => {
+    try {
+      localStorage.removeItem('gilda_cache_muro');
+      localStorage.removeItem('gilda_cache_usuarias');
+      localStorage.removeItem('gilda_cache_usuarias_v2');
+    } catch (e) {}
+  }, []);
 
   const procesarCSV = (texto) => {
     try {
@@ -71,7 +80,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           const contenido = evento.target?.result || '';
           const parsed = procesarCSV(contenido);
           
-          librosRef.current = parsed; // Guardamos en referencia blindada
+          librosRef.current = parsed;
           setCuentaLibros(parsed.length);
           setMuestraLibros(parsed.slice(0, 5));
           
@@ -102,19 +111,19 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      // Bloqueamos temporalmente localStorage para que ninguna otra función de la app sature la cuota
+      // Interceptamos y bloqueamos completamente el localStorage para evitar el QuotaExceededError
       const originalSetItem = Storage.prototype.setItem;
       Storage.prototype.setItem = function(key, value) {
-        if (key && (key.includes('muro') || key.includes('usuarias'))) {
-          return; // Ignoramos estas cachés pesadas durante la importación
+        if (key && (key.includes('muro') || key.includes('usuarias') || key.includes('cache'))) {
+          return; 
         }
         return originalSetItem.apply(this, arguments);
       };
 
-      const tamanoLote = 25; // Lotes pequeños muy estables para miles de registros
+      const tamanoLote = 30; // Lotes estables de 30 en 30
       for (let i = 0; i < totalLibros; i += tamanoLote) {
         const lote = librosRef.current.slice(i, i + tamanoLote);
-        setProgresoTexto(`Guardando: ${Math.min(i + tamanoLote, totalLibros)} de ${totalLibros} libros...`);
+        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, totalLibros)} de ${totalLibros} libros...`);
         
         const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
@@ -123,7 +132,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         }
       }
 
-      // Restauramos localStorage original
       Storage.prototype.setItem = originalSetItem;
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
