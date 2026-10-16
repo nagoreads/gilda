@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [progresoTexto, setProgresoTexto] = useState('');
-  const [librosProcesados, setLibrosProcesados] = useState([]);
-
-  useEffect(() => {
-    try {
-      localStorage.clear();
-    } catch (e) {}
-  }, []);
+  const librosRef = useRef([]); // Referencia segura blindada contra reseteos de estado
+  const [cuentaLibros, setCuentaLibros] = useState(0);
+  const [muestraLibros, setMuestraLibros] = useState([]);
 
   const procesarCSV = (texto) => {
     try {
@@ -25,7 +21,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
       const libros = [];
 
-      // Procesamos todas las líneas del archivo sin límite artificial
       for (let i = 1; i < lineas.length; i++) {
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
@@ -69,13 +64,17 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     if (file) {
       setArchivo(file);
       setCargando(true);
-      setProgresoTexto('Leyendo archivo CSV...');
+      setProgresoTexto('Leyendo archivo CSV de Goodreads...');
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
           const contenido = evento.target?.result || '';
           const parsed = procesarCSV(contenido);
-          setLibrosProcesados(parsed);
+          
+          librosRef.current = parsed; // Guardamos en referencia blindada
+          setCuentaLibros(parsed.length);
+          setMuestraLibros(parsed.slice(0, 5));
+          
           setCargando(false);
           setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
@@ -95,21 +94,27 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    if (librosProcesados.length === 0 || !supabase) {
+    const totalLibros = librosRef.current.length;
+    if (totalLibros === 0 || !supabase) {
       if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar.');
       return;
     }
     setCargando(true);
 
     try {
-      try { localStorage.clear(); } catch (e) {}
+      // Bloqueamos temporalmente localStorage para que ninguna otra función de la app sature la cuota
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function(key, value) {
+        if (key && (key.includes('muro') || key.includes('usuarias'))) {
+          return; // Ignoramos estas cachés pesadas durante la importación
+        }
+        return originalSetItem.apply(this, arguments);
+      };
 
-      const total = librosProcesados.length;
-      const tamanoLote = 40; // Lotes seguros para bases de datos masivas
-
-      for (let i = 0; i < total; i += tamanoLote) {
-        const lote = librosProcesados.slice(i, i + tamanoLote);
-        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
+      const tamanoLote = 25; // Lotes pequeños muy estables para miles de registros
+      for (let i = 0; i < totalLibros; i += tamanoLote) {
+        const lote = librosRef.current.slice(i, i + tamanoLote);
+        setProgresoTexto(`Guardando: ${Math.min(i + tamanoLote, totalLibros)} de ${totalLibros} libros...`);
         
         const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
@@ -117,6 +122,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           throw error;
         }
       }
+
+      // Restauramos localStorage original
+      Storage.prototype.setItem = originalSetItem;
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
       if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
@@ -168,10 +176,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             </div>
           )}
 
-          {librosProcesados.length > 0 && !cargando && (
+          {cuentaLibros > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({librosProcesados.length})!</p>
-              {librosProcesados.slice(0, 5).map((lib, idx) => (
+              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({cuentaLibros})!</p>
+              {muestraLibros.map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
                     <span className="font-medium text-[#23211e]">{lib.libro}</span>
@@ -180,8 +188,8 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                   <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
                 </div>
               ))}
-              {librosProcesados.length > 5 && (
-                <p className="text-[10px] text-center text-[#75706b] italic">y {librosProcesados.length - 5} libros más listos para importar...</p>
+              {cuentaLibros > 5 && (
+                <p className="text-[10px] text-center text-[#75706b] italic">y {cuentaLibros - 5} libros más listos para importar...</p>
               )}
             </div>
           )}
@@ -196,9 +204,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </button>
           <button 
             onClick={confirmarImportacion}
-            disabled={librosProcesados.length === 0 || cargando}
+            disabled={cuentaLibros === 0 || cargando}
             className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-              librosProcesados.length > 0 && !cargando
+              cuentaLibros > 0 && !cargando
                 ? 'bg-[#23211e] text-[#ffffee] hover:opacity-95' 
                 : 'bg-[#e8e4d9] text-[#75706b] cursor-not-allowed'
             }`}
