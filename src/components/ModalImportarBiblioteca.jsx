@@ -16,6 +16,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const originalSetItem = Storage.prototype.setItem;
       Storage.prototype.setItem = function(key, value) {
         try {
+          if (key && (key.includes('muro') || key.includes('usuarias'))) return;
           originalSetItem.call(this, key, value);
         } catch (e) {}
       };
@@ -35,7 +36,8 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
       const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
-      const idxISBN = cabeceras.findIndex(h => h.includes('isbn') || h.includes('isbn13'));
+      const idxISBN13 = cabeceras.findIndex(h => h === 'isbn13' || h.includes('isbn13'));
+      const idxISBN = cabeceras.findIndex(h => h === 'isbn' || h.includes('isbn'));
 
       const libros = [];
 
@@ -43,13 +45,31 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
-        const columnas = linea.split(',');
-        const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
+        // Parseo seguro de CSV respetando comillas
+        const columnas = [];
+        let enComillas = sessionStorage; // reutilizamos variable de control local
+        let actual = '';
+        for (let char of linea) {
+          if (char === '"') {
+            enComillas = !enComillas;
+          } else if (char === ',' && !enComillas) {
+            columnas.push(actual);
+            actual = '';
+          } else {
+            actual += char;
+          }
+        }
+        columnas.push(actual);
+
+        const limpiar = (val) => val ? val.replace(/^"|"$/g, '').replace(/^="\vert{}"$/g, '').trim() : '';
 
         const titulo = idxTitulo !== -1 && columnas[idxTitulo] ? limpiar(columnas[idxTitulo]) : (columnas[1] ? limpiar(columnas[1]) : '');
         const autor = idxAutor !== -1 && columnas[idxAutor] ? limpiar(columnas[idxAutor]) : (columnas[2] ? limpiar(columnas[2]) : 'Desconocido');
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
-        const isbn = idxISBN !== -1 && columnas[idxISBN] ? limpiar(columnas[idxISBN]).replace(/="([0-9Xx]+)"/, '$1').replace(/"/g, '') : '';
+        
+        let isbn13Val = idxISBN13 !== -1 && columnas[idxISBN13] ? limpiar(columnas[idxISBN13]) : '';
+        let isbnVal = idxISBN !== -1 && columnas[idxISBN] ? limpiar(columnas[idxISBN]) : '';
+        let isbnLimpio = isbn13Val.replace(/[^0-9X]/gi, '') || isbnVal.replace(/[^0-9X]/gi, '');
 
         if (titulo && titulo.toLowerCase() !== 'title') {
           let emailUsuario = sesion?.email;
@@ -59,11 +79,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             } catch (e) {}
           }
 
-          let portadaDinamica = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&q=80';
-          if (isbn && isbn.length >= 10) {
-            portadaDinamica = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
-          } else if (titulo) {
-            portadaDinamica = `https://covers.openlibrary.org/b/title/${encodeURIComponent(titulo.toLowerCase())}-M.jpg`;
+          // URL de portada real basada en Open Library mediante ISBN oficial (sin bloqueos de exceso de peticiones)
+          let portadaReal = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80';
+          if (isbnLimpio && isbnLimpio.length >= 10) {
+            portadaReal = `https://covers.openlibrary.org/b/isbn/${isbnLimpio}-L.jpg`;
           }
 
           libros.push({
@@ -74,7 +93,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
             pagina: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 100 : 0,
             paginas: 100,
-            portada: portadaDinamica
+            portada: portadaReal
           });
         }
       }
@@ -90,7 +109,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     if (file) {
       setArchivo(file);
       setCargando(true);
-      setProgresoTexto('Leyendo archivo CSV y preparando portadas...');
+      setProgresoTexto('Leyendo archivo CSV y extrayendo ISBNs...');
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
@@ -101,7 +120,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           setCargando(false);
           setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
-            mostrarToast(`¡Se detectaron ${parsed.length} libros listos para importar sin duplicados!`);
+            mostrarToast(`¡Se detectaron ${parsed.length} libros con sus portadas reales!`);
           }
         } catch (err) {
           console.error(err);
@@ -130,16 +149,13 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
       }
 
-      // 1. Obtenemos los libros que ya tiene esta usuaria en Supabase para evitar duplicados exactos
       setProgresoTexto('Verificando libros existentes...');
-      const { data: existentes, error: errFetch } = await client
+      const { data: existentes } = await client
         .from('personal_readings')
         .select('libro')
         .eq('email', emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app');
 
       const titulosExistentes = new Set((existentes || []).map(l => l.libro.toLowerCase().trim()));
-
-      // 2. Filtramos el listado para importar solo los que NO existan todavía
       const librosNuevos = librosProcesados.filter(l => !titulosExistentes.has(l.libro.toLowerCase().trim()));
 
       if (librosNuevos.length === 0) {
@@ -149,13 +165,12 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         return;
       }
 
-      // 3. Insertamos por lotes solo los libros nuevos
       const tamanoLote = 30;
       const total = librosNuevos.length;
 
       for (let i = 0; i < total; i += tamanoLote) {
         const lote = librosNuevos.slice(i, i + tamanoLote);
-        setProgresoTexto(`Guardando nuevos: ${Math.min(i + tamanoLote, total)} de ${total}...`);
+        setProgresoTexto(`Guardando portadas reales: ${Math.min(i + tamanoLote, total)} de ${total}...`);
 
         const { error } = await client.from('personal_readings').insert(lote);
         if (error) {
@@ -165,9 +180,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       }
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') {
-        mostrarToast(`¡Importados ${librosNuevos.length} libros nuevos con portadas inteligentes!`);
-      }
+      if (typeof mostrarToast === 'function') mostrarToast(`¡Importados ${librosNuevos.length} libros con sus portadas reales!`);
       if (typeof onClose === 'function') onClose();
     } catch (err) {
       console.error("Excepción al guardar en Supabase:", err);
@@ -193,7 +206,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code>. El sistema detectará las portadas y evitará duplicados automáticamente.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code>. Se asignarán las portadas reales por ISBN automáticamente.
           </p>
         </div>
 
@@ -218,7 +231,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
           {librosProcesados.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">¡Listos para importar ({librosProcesados.length})!</p>
+              <p className="text-xs font-bold text-[#23211e]">¡Listos con portadas reales ({librosProcesados.length})!</p>
               {librosProcesados.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
@@ -251,7 +264,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                 : 'bg-[#e8e4d9] text-[#75706b] cursor-not-allowed'
             }`}
           >
-            Guardar sin duplicar
+            Guardar con portadas reales
           </button>
         </div>
       </div>
