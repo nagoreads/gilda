@@ -3,6 +3,7 @@ import ModalImportarBiblioteca from './ModalImportarBiblioteca';
 import SuscribirPush from './SuscribirPush';
 import PortadaLibro from '../PortadaLibro';
 import BuscadorLibros from '../BuscadorLibros';
+import BuscadorOpenLibrary from './BuscadorOpenLibrary';
 import { LomoLibroEstanteria } from './DecoracionesHabitacion';
 
 export default function SeccionHabitacion({ 
@@ -28,6 +29,7 @@ export default function SeccionHabitacion({
   mostrarToast
 }) {
   const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
+  const [mostrarBuscadorOL, setMostrarBuscadorOL] = useState(false);
 
   // Filtros flexibles para capturar cualquier variante de estado en Supabase
   const librosLeyendo = todosMisLibrosEstanteria?.filter(l => {
@@ -50,6 +52,71 @@ export default function SeccionHabitacion({
   if (librosRestantes.length > 0) {
     librosLeidos.push(...librosRestantes);
   }
+
+  // Función para cambiar de estado (estilo Goodreads) directamente desde la tarjeta del libro
+  const cambiarEstadoLibro = async (libroId, nuevoEstado) => {
+    try {
+      const { error } = await supabase
+        .from('personal_readings')
+        .update({ estado: nuevoEstado })
+        .eq('id', libroId);
+
+      if (error) throw error;
+      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+      if (typeof mostrarToast === 'function') mostrarToast('¡Libro movido de estante con éxito!');
+    } catch (err) {
+      console.error("Error al cambiar de estante:", err);
+      if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
+    }
+  };
+
+  // Función para guardar el libro seleccionado del buscador de Open Library
+  const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
+    let emailUsuario = sesion?.email;
+    if (!emailUsuario) {
+      try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
+    }
+
+    // Mapear la pestaña activa al estado correspondiente de la base de datos
+    let estadoBD = 'pendiente';
+    if (tabEstanteria === 'leyendo') estadoBD = 'leyendo';
+    else if (tabEstanteria === 'leidos') estadoBD = 'leido';
+
+    const nuevoLibro = {
+      email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
+      nombre: sesion?.nombre || 'Socia',
+      libro: libroSeleccionado.titulo,
+      autora: libroSeleccionado.autora,
+      estado: estadoBD,
+      pagina: tabEstanteria === 'leidos' ? 100 : 0,
+      paginas: libroSeleccionado.paginas || 200,
+      portada: libroSeleccionado.portada
+    };
+
+    try {
+      // Evitar duplicados exactos para esta usuaria
+      const { data: existentes } = await supabase
+        .from('personal_readings')
+        .select('libro')
+        .eq('email', nuevoLibro.email);
+
+      const yaExiste = (existentes || []).some(l => l.libro.toLowerCase().trim() === nuevoLibro.libro.toLowerCase().trim());
+      if (yaExiste) {
+        if (typeof mostrarToast === 'function') mostrarToast('¡Este libro ya está en tu estantería!');
+        return;
+      }
+
+      const { error } = await supabase.from('personal_readings').insert([nuevoLibro]);
+      if (error) throw error;
+      
+      setMostrarBuscadorOL(false);
+      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+      if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido con su portada real!');
+    } catch (err) {
+      console.error("Error al añadir libro desde Open Library:", err);
+      if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
+    }
+  };
 
   return (
     <div className="space-y-5 fade-in pb-12">
@@ -94,15 +161,34 @@ export default function SeccionHabitacion({
 
       {/* Sección de Estantería */}
       <section className="editorial-card p-5 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Estantería</h2>
-          <span className="text-xs text-[#75706b] font-sans">{todosMisLibrosEstanteria?.length || 0} libros</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-[#75706b] font-sans">{todosMisLibrosEstanteria?.length || 0} libros</span>
+            <button
+              onClick={() => setMostrarBuscadorOL(!mostrarBuscadorOL)}
+              className="px-3.5 py-1.5 bg-[#23211e] text-[#ffffee] text-xs font-semibold rounded-xl hover:opacity-95 transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              <i className={`fa-solid ${mostrarBuscadorOL ? 'fa-xmark' : 'fa-plus'}`}></i>
+              {mostrarBuscadorOL ? 'Cerrar buscador' : 'Añadir libro'}
+            </button>
+          </div>
         </div>
+
+        {/* Buscador desplegable de Open Library */}
+        {mostrarBuscadorOL && (
+          <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2">
+            <div className="text-xs font-semibold text-[#75706b]">
+              Añadiendo al estante actual: <span className="text-[#23211e] uppercase font-bold">{tabEstanteria}</span>
+            </div>
+            <BuscadorOpenLibrary onSeleccionarLibro={manejarLibroSeleccionadoOL} />
+          </div>
+        )}
 
         {/* Pestanas de estantería */}
         <div className="flex gap-2 border-b border-[#e8e4d9] pb-3">
           <button
-            onClick={() => setTabEstanteria('leyendo')}
+            onClick={() => { setTabEstanteria('leyendo'); setMostrarBuscadorOL(false); }}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
               tabEstanteria === 'leyendo'
                 ? 'bg-[#23211e] text-[#ffffee]'
@@ -112,7 +198,7 @@ export default function SeccionHabitacion({
             Leyendo ({librosLeyendo.length})
           </button>
           <button
-            onClick={() => setTabEstanteria('quiero')}
+            onClick={() => { setTabEstanteria('quiero'); setMostrarBuscadorOL(false); }}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
               tabEstanteria === 'quiero'
                 ? 'bg-[#23211e] text-[#ffffee]'
@@ -122,7 +208,7 @@ export default function SeccionHabitacion({
             Quiero leer ({librosQuiero.length})
           </button>
           <button
-            onClick={() => setTabEstanteria('leidos')}
+            onClick={() => { setTabEstanteria('leidos'); setMostrarBuscadorOL(false); }}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
               tabEstanteria === 'leidos'
                 ? 'bg-[#23211e] text-[#ffffee]'
@@ -133,34 +219,73 @@ export default function SeccionHabitacion({
           </button>
         </div>
 
-        {/* Visualizador de libros en estantes */}
+        {/* Visualizador de libros en estantes con selector para cambiar de estado */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => (
-            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
-              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
-              <div className="truncate w-full">
-                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+              <div className="flex flex-col items-center text-center">
+                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
+                <div className="truncate w-full">
+                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-[#e8e4d9]/50">
+                <select
+                  value={lib.estado || 'leyendo'}
+                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
+                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
+                >
+                  <option value="leyendo">Leyendo</option>
+                  <option value="pendiente">Quiero leer</option>
+                  <option value="leido">Leído</option>
+                </select>
               </div>
             </div>
           ))}
 
           {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => (
-            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
-              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
-              <div className="truncate w-full">
-                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+              <div className="flex flex-col items-center text-center">
+                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
+                <div className="truncate w-full">
+                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-[#e8e4d9]/50">
+                <select
+                  value={lib.estado || 'pendiente'}
+                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
+                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
+                >
+                  <option value="leyendo">Leyendo</option>
+                  <option value="pendiente">Quiero leer</option>
+                  <option value="leido">Leído</option>
+                </select>
               </div>
             </div>
           ))}
 
           {tabEstanteria === 'leidos' && librosLeidos.map((lib, idx) => (
-            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
-              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
-              <div className="truncate w-full">
-                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+              <div className="flex flex-col items-center text-center">
+                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
+                <div className="truncate w-full">
+                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-[#e8e4d9]/50">
+                <select
+                  value={lib.estado || 'leido'}
+                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
+                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
+                >
+                  <option value="leyendo">Leyendo</option>
+                  <option value="pendiente">Quiero leer</option>
+                  <option value="leido">Leído</option>
+                </select>
               </div>
             </div>
           ))}
@@ -173,6 +298,7 @@ export default function SeccionHabitacion({
       {/* Renderizado del Modal de Importación */}
       {mostrarModalBiblioteca && (
         <ModalImportarBiblioteca 
+          onChildClose={() => setMostrarModalBiblioteca(false)}
           onClose={() => setMostrarModalBiblioteca(false)} 
           supabase={supabase}
           sesion={sesion}
