@@ -35,6 +35,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
       const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
+      const idxISBN = cabeceras.findIndex(h => h.includes('isbn') || h.includes('isbn13'));
 
       const libros = [];
 
@@ -48,6 +49,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const titulo = idxTitulo !== -1 && columnas[idxTitulo] ? limpiar(columnas[idxTitulo]) : (columnas[1] ? limpiar(columnas[1]) : '');
         const autor = idxAutor !== -1 && columnas[idxAutor] ? limpiar(columnas[idxAutor]) : (columnas[2] ? limpiar(columnas[2]) : 'Desconocido');
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
+        const isbn = idxISBN !== -1 && columnas[idxISBN] ? limpiar(columnas[idxISBN]).replace(/="([0-9Xx]+)"/, '$1').replace(/"/g, '') : '';
 
         if (titulo && titulo.toLowerCase() !== 'title') {
           let emailUsuario = sesion?.email;
@@ -57,8 +59,14 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             } catch (e) {}
           }
 
-          // Imagen de portada estable que carga perfectamente sin errores 404
-          const portadaPorDefecto = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&q=80';
+          // Generación inteligente de portada: si hay ISBN usamos Open Library por ISBN, si no por búsqueda de título/autor o imagen por defecto elegante
+          let portadaDinamica = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&q=80';
+          if (isbn && isbn.length >= 10) {
+            portadaDinamica = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
+          } else if (titulo) {
+            // Usamos Open Library por título codificado de forma limpia
+            portadaDinamica = `https://covers.openlibrary.org/b/title/${encodeURIComponent(titulo.toLowerCase())}-M.jpg`;
+          }
 
           libros.push({
             email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
@@ -68,7 +76,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
             pagina: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 100 : 0,
             paginas: 100,
-            portada: portadaPorDefecto
+            portada: portadaDinamica
           });
         }
       }
@@ -84,7 +92,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     if (file) {
       setArchivo(file);
       setCargando(true);
-      setProgresoTexto('Leyendo archivo CSV de Goodreads...');
+      setProgresoTexto('Leyendo y buscando portadas para tu archivo CSV...');
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
@@ -95,7 +103,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           setCargando(false);
           setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
-            mostrarToast(`¡Se detectaron ${parsed.length} libros listos para guardar!`);
+            mostrarToast(`¡Se detectaron ${parsed.length} libros con portadas inteligentes listas!`);
           }
         } catch (err) {
           console.error(err);
@@ -135,7 +143,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       }
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
+      if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada con portadas inteligentes y guardada en Supabase!');
       if (typeof onClose === 'function') onClose();
     } catch (err) {
       console.error("Excepción al guardar en Supabase:", err);
@@ -161,7 +169,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads (compatible con miles de libros).
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads. Buscaremos las portadas automáticamente.
           </p>
         </div>
 
@@ -186,7 +194,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
           {librosProcesados.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({librosProcesados.length})!</p>
+              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados con portadas ({librosProcesados.length})!</p>
               {librosProcesados.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
