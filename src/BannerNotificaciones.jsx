@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from './context/ClubContext.jsx'; // Usamos la misma ruta de importación que App.jsx
+import React, { useState, useEffect } from 'react';
+import { supabase } from './context/ClubContext.jsx';
 
 export function BannerNotificaciones() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -7,14 +7,18 @@ export function BannerNotificaciones() {
 
   useEffect(() => {
     const cargarNotificaciones = async () => {
-      const { data, error } = await supabase
-        .from('notificaciones_club')
-        .select('*')
-        .eq('activa', true)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('notificaciones_club')
+          .select('*')
+          .eq('activa', true)
+          .order('created_at', { ascending: false });
 
-      if (data && data.length > 0) {
-        setNotificaciones(data);
+        if (data && data.length > 0) {
+          setNotificaciones(data);
+        }
+      } catch (err) {
+        console.error('Error cargando notificaciones:', err);
       }
     };
 
