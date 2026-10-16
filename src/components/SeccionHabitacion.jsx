@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import ModalImportarBiblioteca from './ModalImportarBiblioteca';
 import SuscribirPush from './SuscribirPush';
 import PortadaLibro from '../PortadaLibro';
 import BuscadorLibros from '../BuscadorLibros';
 import BuscadorOpenLibrary from './BuscadorOpenLibrary';
 import { LomoLibroEstanteria } from './DecoracionesHabitacion';
-
-const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjA2MzUsImV4cCI6MjEwNjU5NjYzNX0.n9KPVdYVDQ_l3WtFCO0RVOMdAI_OLKYNLhHdg34EKK0";
-const fallbackClient = createClient(supabaseUrl, supabaseKey);
 
 export default function SeccionHabitacion({ 
   supabase, 
@@ -37,7 +32,7 @@ export default function SeccionHabitacion({
   const [mostrarBuscadorOL, setMostrarBuscadorOL] = useState(false);
   const [cargandoGuardar, setCargandoGuardar] = useState(false);
 
-  const activeClient = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
+  const activeClient = supabase;
 
   const librosLeyendo = todosMisLibrosEstanteria?.filter(l => {
     const est = (l.estado || "").toLowerCase();
@@ -126,7 +121,6 @@ export default function SeccionHabitacion({
 
     const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
 
-    // Se envían únicamente los campos de la tabla real de Supabase
     const nuevoLibroBD = {
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',
@@ -196,7 +190,6 @@ export default function SeccionHabitacion({
 
   return (
     <div className="space-y-5 fade-in pb-12">
-      {/* Banner Principal */}
       <section className="editorial-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -235,7 +228,6 @@ export default function SeccionHabitacion({
         </div>
       </section>
 
-      {/* Sección de Estantería */}
       <section className="editorial-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Estantería</h2>
@@ -251,7 +243,6 @@ export default function SeccionHabitacion({
           </div>
         </div>
 
-        {/* Buscador desplegable */}
         {mostrarBuscadorOL && (
           <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2">
             <div className="text-xs font-semibold text-[#75706b] flex justify-between items-center">
@@ -262,7 +253,6 @@ export default function SeccionHabitacion({
           </div>
         )}
 
-        {/* Pestañas de estantería */}
         <div className="flex gap-2 border-b border-[#e8e4d9] pb-3">
           <button
             onClick={() => { setTabEstanteria('leyendo'); setMostrarBuscadorOL(false); }}
@@ -296,7 +286,6 @@ export default function SeccionHabitacion({
           </button>
         </div>
 
-        {/* Visualizador de libros */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
           {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
@@ -304,10 +293,8 @@ export default function SeccionHabitacion({
         </div>
       </section>
 
-      {/* Suscripción Push */}
       <SuscribirPush sesion={sesion} supabase={supabase} />
 
-      {/* Renderizado del Modal de Importación */}
       {mostrarModalBiblioteca && (
         <ModalImportarBiblioteca 
           onClose={() => setMostrarModalBiblioteca(false)} 

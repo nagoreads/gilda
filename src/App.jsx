@@ -68,13 +68,16 @@ export default function App() {
       localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.code === 22) {
-        localStorage.removeItem('gilda_cache_muro');
-        localStorage.removeItem('gilda_cache_usuarias_v2');
-        localStorage.removeItem('gilda_cache_chat');
+        // Purgar todas las claves de caché pesadas
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('gilda_cache_')) {
+            localStorage.removeItem(k);
+          }
+        });
         try {
           localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
-        } catch (retryErr) {
-          console.warn('Almacenamiento local lleno:', retryErr);
+        } catch {
+          // Si continúa lleno, se ignora el guardado en localStorage sin detener la app
         }
       }
     }
