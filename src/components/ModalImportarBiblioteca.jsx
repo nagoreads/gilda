@@ -8,12 +8,21 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   const [cuentaLibros, setCuentaLibros] = useState(0);
   const [muestraLibros, setMuestraLibros] = useState([]);
 
-  // Al abrir el modal, destruimos cualquier caché previa que sature la memoria
+  // Neutralizamos globalmente el QuotaExceededError para que ningun script colapse la app
   useEffect(() => {
     try {
-      localStorage.removeItem('gilda_cache_muro');
-      localStorage.removeItem('gilda_cache_usuarias');
-      localStorage.removeItem('gilda_cache_usuarias_v2');
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        try {
+          originalSetItem.call(this, key, value);
+        } catch (e) {
+          // Si la cuota se llena, ignoramos silenciosamente para evitar que la app crashee
+          console.warn("Espacio de almacenamiento local lleno, omitiendo caché:", key);
+        }
+      };
+      return () => {
+        Storage.prototype.setItem = originalSetItem;
+      };
     } catch (e) {}
   }, []);
 
@@ -111,16 +120,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      // Interceptamos y bloqueamos completamente el localStorage para evitar el QuotaExceededError
-      const originalSetItem = Storage.prototype.setItem;
-      Storage.prototype.setItem = function(key, value) {
-        if (key && (key.includes('muro') || key.includes('usuarias') || key.includes('cache'))) {
-          return; 
-        }
-        return originalSetItem.apply(this, arguments);
-      };
-
-      const tamanoLote = 30; // Lotes estables de 30 en 30
+      const tamanoLote = 25; // Lotes ultra seguros de 25 en 25
       for (let i = 0; i < totalLibros; i += tamanoLote) {
         const lote = librosRef.current.slice(i, i + tamanoLote);
         setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, totalLibros)} de ${totalLibros} libros...`);
@@ -131,8 +131,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           throw error;
         }
       }
-
-      Storage.prototype.setItem = originalSetItem;
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
       if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
