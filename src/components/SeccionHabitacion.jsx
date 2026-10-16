@@ -1,38 +1,33 @@
-import ModalImportarBiblioteca from './ModalImportarBiblioteca';
-import SuscribirPush from './SuscribirPush';
-import { useState } from 'react';
-import PortadaLibro from '../PortadaLibro';
-import BuscadorLibros from '../BuscadorLibros';
-import { LomoLibroEstanteria } from './DecoracionesHabitacion';
+import ModalImportarBiblioteca from "./ModalImportarBiblioteca";
+import SuscribirPush from "./SuscribirPush";
+import { useState } from "react";
+import PortadaLibro from "../PortadaLibro";
+import BuscadorLibros from "../BuscadorLibros";
+import { LomoLibroEstanteria } from "./DecoracionesHabitacion";
 
-export default function SeccionHabitacion({ supabase, 
-  sesion,
-  miPagina,
-  libroActual,
-  porcentajeLibro,
-  todosMisLibrosEstanteria,
-  librosBibliotecaVisibles,
+export default function SeccionHabitacion({ 
+  supabase, 
+  sesion, 
+  miPagina, 
+  libroActual, 
+  porcentajeLibro, 
+  todosMisLibrosEstanteria, 
+  librosBibliotecaVisibles, 
   tabEstanteria,
   setTabEstanteria,
+  busquedaLibro,
+  setBusquedaLibro,
+  guardarLibroPersonal,
+  eliminarLibroPersonal,
   isReadingNow,
   setIsReadingNow,
-  fotoPerfilPersonalizada,
-  nombreUsuarioPersonalizado,
-  handleFotoPerfilUpdate,
-  guardarLibroPersonal,
-  setLibroSeleccionadoDetalle,
-  setMostrarModalShare,
-  registrarActividadPresencia,
   safeSet,
-  AvatarUsuaria
+  registrarActividadPresencia,
+  setMostrarModalShare,
+  cargarDatosSupabase,
+  mostrarToast
 }) {
-  const [modoCreacionManual, setModoCreacionManual] = useState(false);
   const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
-  const [libroPersonalInput, setLibroPersonalInput] = useState('');
-  const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
-  const [manualTitulo, setManualTitulo] = useState('');
-  const [manualAutora, setManualAutora] = useState('');
-  const [manualPortada, setManualPortada] = useState('');
 
   return (
     <div className="space-y-5 fade-in">
@@ -60,16 +55,16 @@ export default function SeccionHabitacion({ supabase,
               onClick={() => {
                 const nuevo = !isReadingNow;
                 setIsReadingNow(nuevo);
-                safeSet('gilda_is_reading', nuevo);
+                safeSet("gilda_is_reading", nuevo);
                 registrarActividadPresencia();
               }}
               className={`px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans border transition-colors min-h-[44px] ${
                 isReadingNow
-                  ? 'bg-[#23211e] border-[#23211e] text-[#ffffee]'
-                  : 'bg-white border-[#e8e4d9] text-[#75706b] hover:text-[#23211e]'
+                  ? "bg-[#23211e] border-[#23211e] text-[#ffffee]"
+                  : "bg-white border-[#e8e4d9] text-[#75706b] hover:text-[#23211e]"
               }`}
             >
-              {isReadingNow ? 'Leyendo ahora' : 'En pausa'}
+              {isReadingNow ? "Leyendo ahora" : "En pausa"}
             </button>
           </div>
         </div>
@@ -87,5 +82,4 @@ export default function SeccionHabitacion({ supabase,
       )}
     </div>
   );
-}
 }
