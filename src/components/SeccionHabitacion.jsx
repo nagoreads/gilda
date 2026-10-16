@@ -29,8 +29,7 @@ export default function SeccionHabitacion({
 }) {
   const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
 
-  // Filtros y libros de la estantería
-    // Filtros flexibles para capturar cualquier variante de estado en Supabase
+  // Filtros flexibles para capturar cualquier variante de estado en Supabase
   const librosLeyendo = todosMisLibrosEstanteria?.filter(l => {
     const est = (l.estado || "").toLowerCase();
     return est.includes("leyend") || est.includes("actual") || est === "leyendo";
@@ -46,13 +45,11 @@ export default function SeccionHabitacion({
     return est.includes("leid") || est.includes("term") || est.includes("read") || est === "leido";
   }) || [];
 
-  // Si por defecto no encajaran en ninguna, los ponemos en leídos o pendientes para que nunca desaparezcan
+  // Si hay libros que no encajan exactamente, los incluimos en leídos por defecto
   const librosRestantes = todosMisLibrosEstanteria?.filter(l => !librosLeyendo.includes(l) && !librosQuiero.includes(l) && !librosLeidos.includes(l)) || [];
   if (librosRestantes.length > 0) {
     librosLeidos.push(...librosRestantes);
   }
-  const librosQuiero = todosMisLibrosEstanteria?.filter(l => l.estado === 'pendiente' || l.estado === 'quiero_leer') || [];
-  const librosLeidos = todosMisLibrosEstanteria?.filter(l => l.estado === 'leido' || l.estado === 'terminado') || [];
 
   return (
     <div className="space-y-5 fade-in pb-12">
