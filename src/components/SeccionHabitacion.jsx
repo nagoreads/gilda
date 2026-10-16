@@ -60,11 +60,10 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Obtención del título real del libro independientemente del formato del objeto
   const obtenerTituloLibro = (lib) => lib.libro || lib.titulo || lib.title || "";
   const obtenerIdLibro = (lib) => lib.id || lib.id_libro;
 
-  // Función unificada para cambiar de estante o eliminar
+  // Cambiar de estante o borrar de manera instantánea y persistente
   const manejarAccionLibro = async (lib, nuevaAccion) => {
     const idLibro = obtenerIdLibro(lib);
     const tituloLibro = obtenerTituloLibro(lib);
@@ -78,36 +77,32 @@ export default function SeccionHabitacion({
     if (nuevaAccion === 'eliminar') {
       if (!window.confirm(`¿Seguro que quieres eliminar "${tituloLibro}" de tu estantería?`)) return;
 
-      // Si existe la función prop eliminarLibroPersonal la usamos primero
-      if (typeof eliminarLibroPersonal === 'function') {
-        try {
-          await eliminarLibroPersonal(idLibro || tituloLibro);
-          if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-          if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
-          return;
-        } catch (e) {
-          console.warn("Fallo en eliminarLibroPersonal, reintentando con consulta directa...", e);
-        }
+      // Actualización optimista local
+      if (Array.isArray(todosMisLibrosEstanteria)) {
+        const idx = todosMisLibrosEstanteria.findIndex(item => obtenerTituloLibro(item) === tituloLibro);
+        if (idx !== -1) todosMisLibrosEstanteria.splice(idx, 1);
       }
+
+      if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado de la estantería.');
 
       try {
         let res;
         if (idLibro) {
           res = await activeClient.from('personal_readings').delete().eq('id', idLibro);
         } else {
-          // Intenta borrado coincidiendo por título (soporta columna 'libro' y 'titulo')
           res = await activeClient.from('personal_readings').delete().eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
         }
-        if (res.error) throw res.error;
-
+        if (res.error) console.error("Error al borrar en Supabase:", res.error);
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
       } catch (err) {
-        console.error("Error al eliminar libro:", err);
-        if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
+        console.error("Excepción al eliminar libro:", err);
       }
     } else {
-      // Cambio de estante (leyendo, pendiente, leido)
+      // Cambio de estado (leyendo, pendiente, leido)
+      lib.estado = nuevaAccion; // Actualización visual inmediata
+
+      if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado.');
+
       try {
         let res;
         if (idLibro) {
@@ -115,18 +110,15 @@ export default function SeccionHabitacion({
         } else {
           res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
         }
-        if (res.error) throw res.error;
-
+        if (res.error) console.error("Error al actualizar estado en Supabase:", res.error);
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado con éxito.');
       } catch (err) {
-        console.error("Error al cambiar de estante:", err);
-        if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
+        console.error("Excepción al cambiar de estante:", err);
       }
     }
   };
 
-  // Inserción instantánea (optimista) en pantalla + guardado en Supabase
+  // Añadir libro de forma optimista
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -143,7 +135,7 @@ export default function SeccionHabitacion({
     const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
 
     const nuevoLibro = {
-      id: Date.now(), // ID temporal para renderizado inmediato
+      id: Date.now(),
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',
       libro: tituloClean,
@@ -155,7 +147,6 @@ export default function SeccionHabitacion({
       portada: libroSeleccionado.portada
     };
 
-    // 1. Cerramos el buscador y mostramos el libro INSTANTÁNEAMENTE en pantalla
     setMostrarBuscadorOL(false);
     if (Array.isArray(todosMisLibrosEstanteria)) {
       todosMisLibrosEstanteria.push(nuevoLibro);
@@ -163,8 +154,7 @@ export default function SeccionHabitacion({
     if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido a tu estantería!');
 
     try {
-      // 2. Insertamos en Supabase en segundo plano
-      const { data, error } = await activeClient.from('personal_readings').insert([{
+      const { error } = await activeClient.from('personal_readings').insert([{
         email: nuevoLibro.email,
         nombre: nuevoLibro.nombre,
         libro: nuevoLibro.libro,
@@ -174,11 +164,9 @@ export default function SeccionHabitacion({
         pagina: nuevoLibro.pagina,
         paginas: nuevoLibro.paginas,
         portada: nuevoLibro.portada
-      }]).select();
+      }]);
 
-      if (error) console.error("Error al persistir en Supabase:", error);
-
-      // 3. Recargamos la base de datos para sincronizar los IDs reales
+      if (error) console.error("Error persistiendo en Supabase:", error);
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
     } catch (err) {
       console.error("Excepción al guardar libro:", err);
@@ -192,7 +180,15 @@ export default function SeccionHabitacion({
     return (
       <div key={obtenerIdLibro(lib) || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
         <div className="flex flex-col items-center text-center">
-          <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={tituloDisplay} className="w-20 h-28 object-cover rounded shadow mb-2" />
+          <img 
+            src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} 
+            alt={tituloDisplay} 
+            className="w-20 h-28 object-cover rounded shadow mb-2 bg-[#f8f6f0]"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api';
+            }}
+          />
           <div className="truncate w-full">
             <p className="text-xs font-bold text-[#23211e] truncate">{tituloDisplay}</p>
             <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
@@ -271,7 +267,7 @@ export default function SeccionHabitacion({
           </div>
         </div>
 
-        {/* Buscador desplegable de Open Library */}
+        {/* Buscador desplegable */}
         {mostrarBuscadorOL && (
           <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2">
             <div className="text-xs font-semibold text-[#75706b] flex justify-between items-center">
@@ -316,7 +312,7 @@ export default function SeccionHabitacion({
           </button>
         </div>
 
-        {/* Visualizador de libros en estantes */}
+        {/* Visualizador de libros */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
           {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
