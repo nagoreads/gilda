@@ -7,7 +7,6 @@ import BuscadorLibros from '../BuscadorLibros';
 import BuscadorOpenLibrary from './BuscadorOpenLibrary';
 import { LomoLibroEstanteria } from './DecoracionesHabitacion';
 
-// Cliente de respaldo seguro para garantizar que Supabase siempre responda
 const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjA2MzUsImV4cCI6MjEwNjU5NjYzNX0.n9KPVdYVDQ_l3WtFCO0RVOMdAI_OLKYNLhHdg34EKK0";
 const fallbackClient = createClient(supabaseUrl, supabaseKey);
@@ -36,8 +35,8 @@ export default function SeccionHabitacion({
 }) {
   const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
   const [mostrarBuscadorOL, setMostrarBuscadorOL] = useState(false);
+  const [cargandoGuardar, setCargandoGuardar] = useState(false);
 
-  // Cliente activo robusto (usa la prop si está disponible, o el cliente de respaldo si no)
   const activeClient = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
 
   // Filtros flexibles para capturar cualquier variante de estado en Supabase
@@ -56,13 +55,12 @@ export default function SeccionHabitacion({
     return est.includes("leid") || est.includes("term") || est.includes("read") || est === "leido";
   }) || [];
 
-  // Si hay libros que no encajan exactamente, los incluimos en leídos por defecto
   const librosRestantes = todosMisLibrosEstanteria?.filter(l => !librosLeyendo.includes(l) && !librosQuiero.includes(l) && !librosLeidos.includes(l)) || [];
   if (librosRestantes.length > 0) {
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función para cambiar de estado al estilo Goodreads desde la tarjeta
+  // Función para cambiar de estado al estilo Goodreads
   const cambiarEstadoLibro = async (libroId, nuevoEstado) => {
     try {
       const { error } = await activeClient
@@ -79,8 +77,29 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Función para guardar el libro seleccionado desde Open Library en Supabase
+  // Función para eliminar un libro por error
+  const eliminarLibro = async (libroId) => {
+    if (!window.confirm("¿Seguro que quieres eliminar este libro de tu estantería?")) return;
+    try {
+      const { error } = await activeClient
+        .from('personal_readings')
+        .delete()
+        .eq('id', libroId);
+
+      if (error) throw error;
+      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+      if (typeof mostrarToast === 'function') mostrarToast('¡Libro eliminado correctamente!');
+    } catch (err) {
+      console.error("Error al eliminar libro:", err);
+      if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
+    }
+  };
+
+  // Función para guardar con bloqueo antirrepetición
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
+    if (cargandoGuardar) return; // Evita múltiples envíos si se hace clic varias veces
+    setCargandoGuardar(true);
+
     let emailUsuario = sesion?.email;
     if (!emailUsuario) {
       try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
@@ -111,6 +130,8 @@ export default function SeccionHabitacion({
     } catch (err) {
       console.error("Error al añadir libro desde Open Library:", err);
       if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
+    } finally {
+      setCargandoGuardar(false);
     }
   };
 
@@ -174,8 +195,9 @@ export default function SeccionHabitacion({
         {/* Buscador desplegable de Open Library */}
         {mostrarBuscadorOL && (
           <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2">
-            <div className="text-xs font-semibold text-[#75706b]">
-              Añadiendo al estante actual: <span className="text-[#23211e] uppercase font-bold">{tabEstanteria}</span>
+            <div className="text-xs font-semibold text-[#75706b] flex justify-between items-center">
+              <span>Añadiendo al estante actual: <strong className="text-[#23211e] uppercase">{tabEstanteria}</strong></span>
+              {cargandoGuardar && <span className="text-xs italic text-[#23211e] animate-pulse">Guardando libro...</span>}
             </div>
             <BuscadorOpenLibrary onSeleccionarLibro={manejarLibroSeleccionadoOL} />
           </div>
@@ -215,10 +237,17 @@ export default function SeccionHabitacion({
           </button>
         </div>
 
-        {/* Visualizador de libros en estantes con selector para cambiar de estado */}
+        {/* Visualizador de libros en estantes con selector de estado y botón de eliminar */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
+              <button 
+                onClick={() => eliminarLibro(lib.id)}
+                title="Eliminar libro"
+                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
+              >
+                <i className="fa-solid fa-trash"></i>
+              </button>
               <div className="flex flex-col items-center text-center">
                 <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
                 <div className="truncate w-full">
@@ -241,7 +270,14 @@ export default function SeccionHabitacion({
           ))}
 
           {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
+              <button 
+                onClick={() => eliminarLibro(lib.id)}
+                title="Eliminar libro"
+                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
+              >
+                <i className="fa-solid fa-trash"></i>
+              </button>
               <div className="flex flex-col items-center text-center">
                 <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
                 <div className="truncate w-full">
@@ -264,7 +300,14 @@ export default function SeccionHabitacion({
           ))}
 
           {tabEstanteria === 'leidos' && librosLeidos.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
+              <button 
+                onClick={() => eliminarLibro(lib.id)}
+                title="Eliminar libro"
+                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
+              >
+                <i className="fa-solid fa-trash"></i>
+              </button>
               <div className="flex flex-col items-center text-center">
                 <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
                 <div className="truncate w-full">
