@@ -60,8 +60,14 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función unificada en el menú desplegable para cambiar de estante o eliminar
+  // Función robusta para actualizar o eliminar utilizando id, libro y email
   const manejarAccionLibro = async (lib, nuevaAccion) => {
+    let emailUsuario = sesion?.email;
+    if (!emailUsuario) {
+      try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
+    }
+    const emailFiltro = emailUsuario ? emailUsuario.toLowerCase().trim() : lib.email;
+
     if (nuevaAccion === 'eliminar') {
       if (!window.confirm(`¿Seguro que quieres eliminar "${lib.libro}" de tu estantería?`)) return;
       try {
@@ -69,29 +75,28 @@ export default function SeccionHabitacion({
         if (lib.id) {
           query = query.eq('id', lib.id);
         } else {
-          query = query.eq('libro', lib.libro).eq('email', lib.email);
+          query = query.eq('libro', lib.libro).eq('email', emailFiltro);
         }
         const { error } = await query;
         if (error) throw error;
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('¡Libro eliminado correctamente!');
+        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
       } catch (err) {
         console.error("Error al eliminar libro:", err);
         if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
       }
     } else {
-      // Es un cambio de estado (leyendo, pendiente, leido)
       try {
         let query = activeClient.from('personal_readings').update({ estado: nuevaAccion });
         if (lib.id) {
           query = query.eq('id', lib.id);
         } else {
-          query = query.eq('libro', lib.libro).eq('email', lib.email);
+          query = query.eq('libro', lib.libro).eq('email', emailFiltro);
         }
         const { error } = await query;
         if (error) throw error;
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('¡Estante actualizado con éxito!');
+        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado con éxito.');
       } catch (err) {
         console.error("Error al cambiar de estante:", err);
         if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
@@ -99,7 +104,6 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Función para guardar con bloqueo antirrepetición
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -130,9 +134,9 @@ export default function SeccionHabitacion({
       
       setMostrarBuscadorOL(false);
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido con su portada real!');
+      if (typeof mostrarToast === 'function') mostrarToast('Libro añadido con su portada real.');
     } catch (err) {
-      console.error("Error al añadir libro desde Open Library:", err);
+      console.error("Error al añadir libro:", err);
       if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
     } finally {
       setCargandoGuardar(false);
@@ -154,10 +158,10 @@ export default function SeccionHabitacion({
           onChange={(e) => manejarAccionLibro(lib, e.target.value)}
           className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
         >
-          <option value="leyendo">📖 Leyendo</option>
-          <option value="pendiente">⏳ Quiero leer</option>
-          <option value="leido">✅ Leído</option>
-          <option value="eliminar" className="text-red-600 font-bold">🗑️ Eliminar libro</option>
+          <option value="leyendo">Leyendo</option>
+          <option value="pendiente">Quiero leer</option>
+          <option value="leido">Leído</option>
+          <option value="eliminar" className="text-red-600 font-semibold">Eliminar libro</option>
         </select>
       </div>
     </div>
