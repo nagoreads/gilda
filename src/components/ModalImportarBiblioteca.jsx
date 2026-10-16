@@ -1,9 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [librosProcesados, setLibrosProcesados] = useState([]);
+
+  // Limpiar localStorage preventivamente al abrir el modal para evitar QuotaExceededError
+  useEffect(() => {
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('gilda_cache_') || key.includes('muro') || key.includes('usuarias'))) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.error("Error limpiando caché previa:", e);
+    }
+  }, []);
 
   const procesarCSV = (texto) => {
     try {
@@ -17,7 +31,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
 
       const libros = [];
-      const limite = Math.min(lineas.length, 150); // Lote seguro de hasta 150 libros
+      const limite = Math.min(lineas.length, 150); // Procesamos los primeros 150 libros
 
       for (let i = 1; i < limite; i++) {
         const linea = lineas[i] ? lineas[i].trim() : '';
@@ -31,7 +45,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
         if (titulo && titulo.toLowerCase() !== 'title') {
-          // Obtenemos el email de forma segura (props o localStorage)
           let emailUsuario = sesion?.email;
           if (!emailUsuario) {
             try {
@@ -94,16 +107,16 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      // Limpiamos caché antigua del localStorage para evitar el error de cuota superada (QuotaExceededError)
-      for (let i = 0; i < localStorage.length; i++) {
+      // Liberar espacio en localStorage de nuevo antes de insertar
+      for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('gilda_cache_')) {
+        if (key && (key.startsWith('gilda_cache_') || key.includes('muro') || key.includes('usuarias'))) {
           localStorage.removeItem(key);
         }
       }
 
-      // Insertamos por lotes seguros de 40 en 40
-      const tamanoLote = 40;
+      // Inserción por lotes de 30 en 30 para evitar saturar Supabase
+      const tamanoLote = 30;
       for (let i = 0; i < librosProcesados.length; i += tamanoLote) {
         const lote = librosProcesados.slice(i, i + tamanoLote);
         const { error } = await supabase.from('personal_readings').insert(lote);
@@ -139,7 +152,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads para registrar tus lecturas al instante.
           </p>
         </div>
 
