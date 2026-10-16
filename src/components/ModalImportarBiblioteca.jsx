@@ -11,6 +11,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const lineas = texto.split('\n');
       if (lineas.length < 2) return [];
 
+      // Detectar cabeceras limpias
       const cabeceras = lineas[0].split(',').map(h => h ? h.trim().replace(/^"|"$/g, '').toLowerCase() : '');
       const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
       const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
@@ -22,19 +23,23 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
-        const columnas = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || linea.split(',');
+        // Limpieza rápida de columnas separadas por comas
+        const columnas = linea.split(',');
         const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
 
-        const titulo = idxTitulo !== -1 && columnas[idxTitulo] ? limpiar(columnas[idxTitulo]) : '';
-        const autor = idxAutor !== -1 && columnas[idxAutor] ? limpiar(columnas[idxAutor]) : '';
+        const titulo = idxTitulo !== -1 && columnas[idxTitulo] ? limpiar(columnas[idxTitulo]) : (columnas[1] ? limpiar(columnas[1]) : '');
+        const autor = idxAutor !== -1 && columnas[idxAutor] ? limpiar(columnas[idxAutor]) : (columnas[2] ? limpiar(columnas[2]) : 'Desconocido');
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
-        if (titulo) {
+        if (titulo && titulo.toLowerCase() !== 'title') {
+          // Generar URL directa de Google Books para la portada al vuelo (sin bloquear)
+          const portadaDinamica = `https://books.google.com/books/content?printsec=frontcover&img=1&zoom=1&q=${encodeURIComponent(titulo)}&source=gbs_api`;
+
           libros.push({
             titulo,
             autora: autor || 'Desconocido',
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
-            portada: 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
+            portada: portadaDinamica
           });
         }
       }
@@ -58,7 +63,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           setLibrosProcesados(parsed);
           setCargando(false);
           if (typeof mostrarToast === 'function') {
-            mostrarToast(`Se detectaron ${parsed.length} libros listos para guardar.`);
+            mostrarToast(`¡Se detectaron ${parsed.length} libros listos para guardar!`);
           }
         } catch (err) {
           console.error(err);
@@ -119,7 +124,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube un archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> para registrar tus lecturas directamente en la base de datos de Gilda.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads para registrar tus lecturas al instante.
           </p>
         </div>
 
@@ -134,7 +139,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en la base de datos...</p>
+            <p className="text-center text-xs text-[#75706b] italic">Procesando archivo...</p>
           )}
 
           {librosProcesados.length > 0 && !cargando && (
