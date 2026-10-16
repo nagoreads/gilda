@@ -36,21 +36,12 @@ export default function SeccionComunidad({
   const [nuevaPropuestaPortada, setNuevaPropuestaPortada] = useState('');
   const [mensajeFundadora, setMensajeFundadora] = useState('');
   const chatEndRef = useRef(null);
+
+  // Efecto unificado y optimizado para marcar mensajes privados como leídos sin duplicidades
   useEffect(() => {
     if (chatModo === 'privado' && destinatarioPrivado) {
       const emailSocia = (destinatarioPrivado.email || '').toLowerCase().trim();
       const miEmail = (sesion?.email || '').toLowerCase().trim();
-
-      // Apagado optimista local para eliminar el punto rojo al instante
-      chatMsgs.forEach(m => {
-        if (
-          m.tipo === 'privado' &&
-          (m.destinatario || '').toLowerCase().trim() === miEmail &&
-          (m.remitente || m.email || '').toLowerCase().trim() === emailSocia
-        ) {
-          m.leido = true;
-        }
-      });
 
       const unreadMsgs = chatMsgs.filter(m =>
         m.tipo === 'privado' &&
@@ -68,25 +59,7 @@ export default function SeccionComunidad({
         }
       }
     }
-  }, [chatModo, destinatarioPrivado, chatMsgs]);
-  useEffect(() => {
-    if (chatModo === 'privado' && destinatarioPrivado) {
-      const unreadMsgs = chatMsgs.filter(m => 
-        m.tipo === 'privado' &&
-        (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() &&
-        (m.remitente || m.email || '').toLowerCase().trim() === (destinatarioPrivado.email || '').toLowerCase().trim() &&
-        !m.leido
-      );
-      if (unreadMsgs.length > 0) {
-        const ids = unreadMsgs.map(m => m.id).filter(Boolean);
-        if (ids.length > 0) {
-          supabase.from('chat_messages').update({ leido: true }).in('id', ids).then(() => {
-            if (typeof cargarDatosSupabase === 'function') cargarDatosSupabase();
-          });
-        }
-      }
-    }
-  }, [chatModo, destinatarioPrivado, chatMsgs]);
+  }, [chatModo, destinatarioPrivado, chatMsgs, sesion, supabase, cargarDatosSupabase]);
 
   useEffect(() => {
     if (subTabComunidad === 'chat') {
@@ -94,13 +67,12 @@ export default function SeccionComunidad({
     }
   }, [chatMsgs, chatModo, subTabComunidad, destinatarioPrivado]);
 
-    const cantidadGildasEnLinea = usuariasClub.filter(u => {
+  const cantidadGildasEnLinea = usuariasClub.filter(u => {
     if (!u.ultima_conexion) return false;
     const diff = (new Date() - new Date(u.ultima_conexion)) / 1000 / 60;
     return diff < 3;
   }).length;
 
-  // Conteo de mensajes privados no leídos dirigidos a la usuaria actual
   const mensajesPrivadosNoLeidos = chatMsgs.filter(m => 
     m.tipo === 'privado' && 
     (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && 
@@ -183,14 +155,14 @@ export default function SeccionComunidad({
               </button>
               <button
                 onClick={() => {
-                setChatModo('privado');
-                if (mensajesPrivadosNoLeidos.length > 0) {
-                  const primerNoLeido = mensajesPrivadosNoLeidos[0];
-                  const emailRemitente = (primerNoLeido.remitente || primerNoLeido.email || '').toLowerCase().trim();
-                  const sociaDirecta = usuariasClub.find(u => (u.email || '').toLowerCase().trim() === emailRemitente);
-                  if (sociaDirecta) setDestinatarioPrivado(sociaDirecta);
-                }
-              }}
+                  setChatModo('privado');
+                  if (mensajesPrivadosNoLeidos.length > 0) {
+                    const primerNoLeido = mensajesPrivadosNoLeidos[0];
+                    const emailRemitente = (primerNoLeido.remitente || primerNoLeido.email || '').toLowerCase().trim();
+                    const sociaDirecta = usuariasClub.find(u => (u.email || '').toLowerCase().trim() === emailRemitente);
+                    if (sociaDirecta) setDestinatarioPrivado(sociaDirecta);
+                  }
+                }}
                 className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all relative flex items-center gap-1.5 active:scale-95 transition-transform duration-100 ${
                   chatModo === 'privado' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'
                 }`}
@@ -220,18 +192,18 @@ export default function SeccionComunidad({
                           : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
                         {m.respuesta_a_texto && (
-                <div className="mb-1.5 p-1.5 bg-[#f2efe6] border-l-2 border-[#23211e] text-[11px] text-[#33312e] rounded-lg">
-                  <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
-                  <p className="truncate">{m.respuesta_a_texto}</p>
-                </div>
-              )}
-              <span className="block pr-6 pb-0.5">{m.mensaje}</span>
-              <button 
-                onClick={() => setMensajeRespuesta(m)} 
-                className="text-[10px] text-gray-400 hover:text-[#23211e] mt-1 block transition-colors active:scale-95 transition-transform duration-100"
-              >
-                responder
-              </button>
+                          <div className="mb-1.5 p-1.5 bg-[#f2efe6] border-l-2 border-[#23211e] text-[11px] text-[#33312e] rounded-lg">
+                            <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
+                            <p className="truncate">{m.respuesta_a_texto}</p>
+                          </div>
+                        )}
+                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                        <button 
+                          onClick={() => setMensajeRespuesta(m)} 
+                          className="text-[10px] text-gray-400 hover:text-[#23211e] mt-1 block transition-colors active:scale-95 transition-transform duration-100"
+                        >
+                          responder
+                        </button>
                         <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
@@ -271,7 +243,6 @@ export default function SeccionComunidad({
                     respuesta_a_texto: mensajeRespuesta?.mensaje || null,
                     respuesta_a_nombre: nombreAutor || "gilda"
                   };
-                  // Limpieza instantánea para respuesta inmediata
                   setNuevoChat("");
                   setMensajeRespuesta(null);
                   
@@ -297,57 +268,57 @@ export default function SeccionComunidad({
                 .sort((a, b) => {
                   const unreadA = chatMsgs.filter(m => m.tipo === 'privado' && (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && (m.remitente || m.email || '').toLowerCase().trim() === (a.email || '').toLowerCase().trim() && !m.leido).length;
                   const unreadB = chatMsgs.filter(m => m.tipo === 'privado' && (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() && (m.remitente || m.email || '').toLowerCase().trim() === (b.email || '').toLowerCase().trim() && !m.leido).length;
-                  return unreadB - unreadA; // Muestra las socias con mensajes no leídos arriba
+                  return unreadB - unreadA;
                 })
                 .map((socia, sIdx) => {
-                const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
-                return (
-                  <div key={sIdx} onClick={async () => {
-                    setDestinatarioPrivado(socia);
-                    const noLeidosDeSocia = mensajesPrivadosNoLeidos.filter(
-                      m => (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim()
-                    );
-                    if (noLeidosDeSocia.length > 0) {
-                      const idsToUpdate = noLeidosDeSocia.map(m => m.id).filter(Boolean);
-                      if (idsToUpdate.length > 0) {
-                        await supabase.from('chat_messages').update({ leido: true }).in('id', idsToUpdate);
-                        if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+                  const nombreSociaReal = socia.nombre || socia.email.split('@')[0];
+                  return (
+                    <div key={sIdx} onClick={async () => {
+                      setDestinatarioPrivado(socia);
+                      const noLeidosDeSocia = mensajesPrivadosNoLeidos.filter(
+                        m => (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim()
+                      );
+                      if (noLeidosDeSocia.length > 0) {
+                        const idsToUpdate = noLeidosDeSocia.map(m => m.id).filter(Boolean);
+                        if (idsToUpdate.length > 0) {
+                          await supabase.from('chat_messages').update({ leido: true }).in('id', idsToUpdate);
+                          if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+                        }
                       }
-                    }
-                  }} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all active:scale-[0.98] transition-transform duration-100">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-7 h-7" textClass="text-xs" />
-                      <div className="overflow-hidden">
-                        <div className="flex items-center gap-1.5">
-                          <IndicadorPresencia timestamp={socia.ultima_conexion} />
-                          <p className="font-babydoll font-bold text-base text-[#23211e]">{nombreSociaReal}</p>
+                    }} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#e8e4d9] cursor-pointer hover:border-[#23211e] transition-all active:scale-[0.98] transition-transform duration-100">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <AvatarUsuaria foto={socia.foto_perfil} nombre={nombreSociaReal} sizeClass="w-7 h-7" textClass="text-xs" />
+                        <div className="overflow-hidden">
+                          <div className="flex items-center gap-1.5">
+                            <IndicadorPresencia timestamp={socia.ultima_conexion} />
+                            <p className="font-babydoll font-bold text-base text-[#23211e]">{nombreSociaReal}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {(() => {
-                      const unreadFromSocia = chatMsgs.filter(m =>
-                        m.tipo === 'privado' &&
-                        (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() &&
-                        (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim() &&
-                        !m.leido
-                      ).length;
+                      {(() => {
+                        const unreadFromSocia = chatMsgs.filter(m =>
+                          m.tipo === 'privado' &&
+                          (m.destinatario || '').toLowerCase().trim() === (sesion?.email || '').toLowerCase().trim() &&
+                          (m.remitente || m.email || '').toLowerCase().trim() === (socia.email || '').toLowerCase().trim() &&
+                          !m.leido
+                        ).length;
 
-                      return (
-                        <div className="flex items-center gap-2">
-                          {unreadFromSocia > 0 && (
-                            <span className="px-2 py-0.5 text-[10px] bg-[#d9534f] text-white font-bold rounded-full animate-pulse">
-                              {unreadFromSocia} nuevo{unreadFromSocia > 1 ? 's' : ''}
+                        return (
+                          <div className="flex items-center gap-2">
+                            {unreadFromSocia > 0 && (
+                              <span className="px-2 py-0.5 text-[10px] bg-[#d9534f] text-white font-bold rounded-full animate-pulse">
+                                {unreadFromSocia} nuevo{unreadFromSocia > 1 ? 's' : ''}
+                              </span>
+                            )}
+                            <span className="text-xs text-[#23211e] font-medium bg-[#ffffee] px-2.5 py-1 rounded-lg border border-[#e8e4d9]">
+                              Mensaje
                             </span>
-                          )}
-                          <span className="text-xs text-[#23211e] font-medium bg-[#ffffee] px-2.5 py-1 rounded-lg border border-[#e8e4d9]">
-                            Mensaje
-                          </span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                );
-              })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  );
+                })}
             </div>
           )}
 
@@ -383,12 +354,12 @@ export default function SeccionComunidad({
                           : 'bg-white border border-[#e8e4d9] text-[#23211e] rounded-2xl rounded-bl-xs'
                       }`}>
                         {m.respuesta_a_texto && (
-                <div className="mb-1.5 p-1.5 bg-[#23211e]/5 border-l-2 border-[#23211e] text-[10px] text-gray-600 rounded-r">
-                  <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
-                  <p className="truncate">{m.respuesta_a_texto}</p>
-                </div>
-              )}
-              <span className="block pr-6 pb-0.5">{m.mensaje}</span>
+                          <div className="mb-1.5 p-1.5 bg-[#23211e]/5 border-l-2 border-[#23211e] text-[10px] text-gray-600 rounded-r">
+                            <span className="font-bold text-[#23211e]">{m.respuesta_a_nombre || 'gilda'}:</span>
+                            <p className="truncate">{m.respuesta_a_texto}</p>
+                          </div>
+                        )}
+                        <span className="block pr-6 pb-0.5">{m.mensaje}</span>
                         <span className={`block text-[8px] text-right font-sans ${esMia ? 'text-[#ffffee]/60' : 'text-[#75706b]'}`}>{horaMensaje}</span>
                       </div>
                     </div>
@@ -414,7 +385,6 @@ export default function SeccionComunidad({
                 await supabase.from('chat_messages').insert([payload]);
                 await cargarDatosSupabase();
                 setNuevoChatPrivado('');
-    setMensajeRespuesta(null);
                 setMensajeRespuesta(null);
               }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
                 <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
