@@ -6,15 +6,17 @@ export function BannerNotificaciones() {
   const [abierto, setAbierto] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const cargarNotificaciones = async () => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('notificaciones_club')
           .select('*')
           .eq('activa', true)
           .order('created_at', { ascending: false });
 
-        if (data && data.length > 0) {
+        if (!error && data && data.length > 0 && isMounted) {
           setNotificaciones(data);
         }
       } catch (err) {
@@ -23,6 +25,10 @@ export function BannerNotificaciones() {
     };
 
     cargarNotificaciones();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (!notificaciones || notificaciones.length === 0) return null;
@@ -86,3 +92,5 @@ export function BannerNotificaciones() {
     </div>
   );
 }
+
+export default BannerNotificaciones;
