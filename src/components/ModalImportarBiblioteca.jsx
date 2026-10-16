@@ -1,19 +1,4 @@
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-// Instancia de respaldo por si el prop supabase no llega desde el componente padre
-const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjM3NDYyMVF5N2VzIiw.fakekey_fallback"; 
-// Usamos el cliente general o el recibido por props
-const getSupabaseClient = (propSupabase) => {
-  if (propSupabase && typeof propSupabase.from === 'function') return propSupabase;
-  // Si no viene, intentamos recuperarlo de window o crearlo de forma segura
-  try {
-    return window.supabase || createClient("https://lsbdcmshswcqzitqwfiq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyMTY5N2VzIn0.FakeFallbackSignatureToPreventCrash");
-  } catch (e) {
-    return propSupabase;
-  }
-};
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
@@ -104,26 +89,22 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    if (librosProcesados.length === 0) {
-      if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar.');
+    if (librosProcesados.length === 0 || !supabase) {
+      if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar o falta conexión.');
       return;
     }
     setCargando(true);
 
     try {
-      const client = getSupabaseClient(supabase);
-      if (!client || typeof client.from !== 'function') {
-        throw new Error("No hay cliente de Supabase disponible.");
-      }
-
-      const tamanoLote = 30; // Lotes seguros de 30 en 30
+      const tamanoLote = 30; // Lotes de 30 en 30 para respetar los límites de Supabase
       const total = librosProcesados.length;
 
       for (let i = 0; i < total; i += tamanoLote) {
         const lote = librosProcesados.slice(i, i + tamanoLote);
         setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
 
-        const { error } = await client.from('personal_readings').insert(lote);
+        // Usamos el cliente supabase autenticado que viene de la app principal
+        const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
           console.error("Error en lote de Supabase:", error);
           throw error;
@@ -135,7 +116,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       if (typeof onClose === 'function') onClose();
     } catch (err) {
       console.error("Excepción al guardar en Supabase:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Hubo un error al guardar en la base de datos.');
+      if (typeof mostrarToast === 'function') mostrarToast('Hubo un error de permisos o de base de datos al guardar.');
       setCargando(false);
       setProgresoTexto('');
     }
