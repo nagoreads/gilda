@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function ModalImportarGoodreads({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
+export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [librosProcesados, setLibrosProcesados] = useState([]);
