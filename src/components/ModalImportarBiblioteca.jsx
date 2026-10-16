@@ -59,12 +59,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             } catch (e) {}
           }
 
-          // Generación inteligente de portada: si hay ISBN usamos Open Library por ISBN, si no por búsqueda de título/autor o imagen por defecto elegante
           let portadaDinamica = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&q=80';
           if (isbn && isbn.length >= 10) {
             portadaDinamica = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
           } else if (titulo) {
-            // Usamos Open Library por título codificado de forma limpia
             portadaDinamica = `https://covers.openlibrary.org/b/title/${encodeURIComponent(titulo.toLowerCase())}-M.jpg`;
           }
 
@@ -92,7 +90,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     if (file) {
       setArchivo(file);
       setCargando(true);
-      setProgresoTexto('Leyendo y buscando portadas para tu archivo CSV...');
+      setProgresoTexto('Leyendo archivo CSV y preparando portadas...');
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
@@ -103,7 +101,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           setCargando(false);
           setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
-            mostrarToast(`¡Se detectaron ${parsed.length} libros con portadas inteligentes listas!`);
+            mostrarToast(`¡Se detectaron ${parsed.length} libros listos para importar sin duplicados!`);
           }
         } catch (err) {
           console.error(err);
@@ -127,13 +125,37 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
     try {
       const client = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
+      let emailUsuario = sesion?.email;
+      if (!emailUsuario) {
+        try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
+      }
 
+      // 1. Obtenemos los libros que ya tiene esta usuaria en Supabase para evitar duplicados exactos
+      setProgresoTexto('Verificando libros existentes...');
+      const { data: existentes, error: errFetch } = await client
+        .from('personal_readings')
+        .select('libro')
+        .eq('email', emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app');
+
+      const titulosExistentes = new Set((existentes || []).map(l => l.libro.toLowerCase().trim()));
+
+      // 2. Filtramos el listado para importar solo los que NO existan todavía
+      const librosNuevos = librosProcesados.filter(l => !titulosExistentes.has(l.libro.toLowerCase().trim()));
+
+      if (librosNuevos.length === 0) {
+        if (typeof mostrarToast === 'function') mostrarToast('¡Todos los libros de este archivo ya estaban en tu biblioteca!');
+        setCargando(false);
+        setProgresoTexto('');
+        return;
+      }
+
+      // 3. Insertamos por lotes solo los libros nuevos
       const tamanoLote = 30;
-      const total = librosProcesados.length;
+      const total = librosNuevos.length;
 
       for (let i = 0; i < total; i += tamanoLote) {
-        const lote = librosProcesados.slice(i, i + tamanoLote);
-        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
+        const lote = librosNuevos.slice(i, i + tamanoLote);
+        setProgresoTexto(`Guardando nuevos: ${Math.min(i + tamanoLote, total)} de ${total}...`);
 
         const { error } = await client.from('personal_readings').insert(lote);
         if (error) {
@@ -143,7 +165,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       }
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada con portadas inteligentes y guardada en Supabase!');
+      if (typeof mostrarToast === 'function') {
+        mostrarToast(`¡Importados ${librosNuevos.length} libros nuevos con portadas inteligentes!`);
+      }
       if (typeof onClose === 'function') onClose();
     } catch (err) {
       console.error("Excepción al guardar en Supabase:", err);
@@ -169,7 +193,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads. Buscaremos las portadas automáticamente.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code>. El sistema detectará las portadas y evitará duplicados automáticamente.
           </p>
         </div>
 
@@ -194,7 +218,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
           {librosProcesados.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados con portadas ({librosProcesados.length})!</p>
+              <p className="text-xs font-bold text-[#23211e]">¡Listos para importar ({librosProcesados.length})!</p>
               {librosProcesados.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
@@ -205,7 +229,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                 </div>
               ))}
               {librosProcesados.length > 5 && (
-                <p className="text-[10px] text-center text-[#75706b] italic">y {librosProcesados.length - 5} libros más listos para importar...</p>
+                <p className="text-[10px] text-center text-[#75706b] italic">y {librosProcesados.length - 5} libros más...</p>
               )}
             </div>
           )}
@@ -227,7 +251,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                 : 'bg-[#e8e4d9] text-[#75706b] cursor-not-allowed'
             }`}
           >
-            Guardar en la base de datos
+            Guardar sin duplicar
           </button>
         </div>
       </div>
