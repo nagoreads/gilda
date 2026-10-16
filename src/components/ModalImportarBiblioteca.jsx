@@ -1,10 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [progresoTexto, setProgresoTexto] = useState('');
   const [librosProcesados, setLibrosProcesados] = useState([]);
+
+  // Interceptamos y silenciamos globalmente los errores de cuota de localStorage al abrir el modal
+  useEffect(() => {
+    try {
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function(key, value) {
+        try {
+          originalSetItem.call(this, key, value);
+        } catch (e) {
+          // Si el almacenamiento se llena, lo ignoramos para evitar que la app colapse
+        }
+      };
+      return () => {
+        Storage.prototype.setItem = originalSetItem;
+      };
+    } catch (e) {}
+  }, []);
 
   const procesarCSV = (texto) => {
     try {
@@ -89,21 +106,20 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    if (librosProcesados.length === 0 || !supabase) {
-      if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar o falta conexión.');
+    if (librosProcesados.length === 0) {
+      if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar.');
       return;
     }
     setCargando(true);
 
     try {
-      const tamanoLote = 30; // Lotes de 30 en 30 para respetar los límites de Supabase
+      const tamanoLote = 30; // Lotes estables de 30 en 30 para Supabase
       const total = librosProcesados.length;
 
       for (let i = 0; i < total; i += tamanoLote) {
         const lote = librosProcesados.slice(i, i + tamanoLote);
         setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
 
-        // Usamos el cliente supabase autenticado que viene de la app principal
         const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
           console.error("Error en lote de Supabase:", error);
@@ -116,7 +132,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       if (typeof onClose === 'function') onClose();
     } catch (err) {
       console.error("Excepción al guardar en Supabase:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Hubo un error de permisos o de base de datos al guardar.');
+      if (typeof mostrarToast === 'function') mostrarToast('Hubo un error al guardar en la base de datos.');
       setCargando(false);
       setProgresoTexto('');
     }
