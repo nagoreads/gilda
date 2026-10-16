@@ -8,7 +8,7 @@ export function BannerNotificaciones() {
   useEffect(() => {
     const cargarNotificaciones = async () => {
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('notificaciones_club')
           .select('*')
           .eq('activa', true)
@@ -25,7 +25,7 @@ export function BannerNotificaciones() {
     cargarNotificaciones();
   }, []);
 
-  if (notificaciones.length === 0) return null;
+  if (!notificaciones || notificaciones.length === 0) return null;
 
   const ultimaNotif = notificaciones[0];
 
