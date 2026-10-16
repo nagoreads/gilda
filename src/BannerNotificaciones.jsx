@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './context/ClubContext.jsx';
 
 export function BannerNotificaciones() {
-  const [notificaciones, setNotificaciones] = useState([]);
-  const [abierto, setAbierto] = useState(true);
+  const [notificaciones, setNotificaciones] = React.useState([]);
+  const [abierto, setAbierto] = React.useState(true);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let isMounted = true;
 
     const cargarNotificaciones = async () => {
