@@ -3,20 +3,13 @@ import { useState, useEffect } from 'react';
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const [progresoTexto, setProgresoTexto] = useState('');
   const [librosProcesados, setLibrosProcesados] = useState([]);
 
-  // Limpiar localStorage preventivamente al abrir el modal para evitar QuotaExceededError
   useEffect(() => {
     try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('gilda_cache_') || key.includes('muro') || key.includes('usuarias'))) {
-          localStorage.removeItem(key);
-        }
-      }
-    } catch (e) {
-      console.error("Error limpiando caché previa:", e);
-    }
+      localStorage.clear();
+    } catch (e) {}
   }, []);
 
   const procesarCSV = (texto) => {
@@ -31,9 +24,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
 
       const libros = [];
-      const limite = Math.min(lineas.length, 150); // Procesamos los primeros 150 libros
 
-      for (let i = 1; i < limite; i++) {
+      // Procesamos todas las líneas del archivo sin límite artificial
+      for (let i = 1; i < lineas.length; i++) {
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
@@ -48,8 +41,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           let emailUsuario = sesion?.email;
           if (!emailUsuario) {
             try {
-              const localSesion = JSON.parse(localStorage.getItem('gilda_sesion') || '{}');
-              emailUsuario = localSesion.email;
+              emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email;
             } catch (e) {}
           }
 
@@ -77,6 +69,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     if (file) {
       setArchivo(file);
       setCargando(true);
+      setProgresoTexto('Leyendo archivo CSV...');
       const lector = new FileReader();
       lector.onload = (evento) => {
         try {
@@ -84,12 +77,14 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           const parsed = procesarCSV(contenido);
           setLibrosProcesados(parsed);
           setCargando(false);
+          setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
             mostrarToast(`¡Se detectaron ${parsed.length} libros listos para guardar!`);
           }
         } catch (err) {
           console.error(err);
           setCargando(false);
+          setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
             mostrarToast('Error al procesar el archivo CSV.');
           }
@@ -107,18 +102,15 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      // Liberar espacio en localStorage de nuevo antes de insertar
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('gilda_cache_') || key.includes('muro') || key.includes('usuarias'))) {
-          localStorage.removeItem(key);
-        }
-      }
+      try { localStorage.clear(); } catch (e) {}
 
-      // Inserción por lotes de 30 en 30 para evitar saturar Supabase
-      const tamanoLote = 30;
-      for (let i = 0; i < librosProcesados.length; i += tamanoLote) {
+      const total = librosProcesados.length;
+      const tamanoLote = 40; // Lotes seguros para bases de datos masivas
+
+      for (let i = 0; i < total; i += tamanoLote) {
         const lote = librosProcesados.slice(i, i + tamanoLote);
+        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
+        
         const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
           console.error("Error en lote de Supabase:", error);
@@ -133,6 +125,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       console.error("Excepción al guardar en Supabase:", err);
       if (typeof mostrarToast === 'function') mostrarToast('Hubo un error al guardar en la base de datos.');
       setCargando(false);
+      setProgresoTexto('');
     }
   };
 
@@ -152,7 +145,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads para registrar tus lecturas al instante.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads (compatible con miles de libros).
           </p>
         </div>
 
@@ -167,12 +160,17 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en Supabase...</p>
+            <div className="space-y-1 text-center">
+              <p className="text-xs text-[#75706b] italic font-semibold">{progresoTexto || 'Procesando...'}</p>
+              <div className="w-full bg-[#e8e4d9] rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#23211e] h-full animate-pulse w-full"></div>
+              </div>
+            </div>
           )}
 
           {librosProcesados.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">Libros encontrados ({librosProcesados.length}):</p>
+              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({librosProcesados.length})!</p>
               {librosProcesados.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
@@ -182,6 +180,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                   <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
                 </div>
               ))}
+              {librosProcesados.length > 5 && (
+                <p className="text-[10px] text-center text-[#75706b] italic">y {librosProcesados.length - 5} libros más listos para importar...</p>
+              )}
             </div>
           )}
         </div>
