@@ -1,4 +1,10 @@
 import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+// Cliente de respaldo seguro para garantizar que .from() nunca falle
+const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyMTY5N2VzIn0";
+const fallbackClient = createClient(supabaseUrl, supabaseKey);
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
@@ -6,16 +12,14 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   const [progresoTexto, setProgresoTexto] = useState('');
   const [librosProcesados, setLibrosProcesados] = useState([]);
 
-  // Interceptamos y silenciamos globalmente los errores de cuota de localStorage al abrir el modal
+  // Silenciamos globalmente los errores de cuota del localStorage
   useEffect(() => {
     try {
       const originalSetItem = Storage.prototype.setItem;
       Storage.prototype.setItem = function(key, value) {
         try {
           originalSetItem.call(this, key, value);
-        } catch (e) {
-          // Si el almacenamiento se llena, lo ignoramos para evitar que la app colapse
-        }
+        } catch (e) {}
       };
       return () => {
         Storage.prototype.setItem = originalSetItem;
@@ -113,6 +117,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
+      // Obtenemos el cliente de forma segura (prop principal o respaldo garantizado)
+      const client = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
+
       const tamanoLote = 30; // Lotes estables de 30 en 30 para Supabase
       const total = librosProcesados.length;
 
@@ -120,7 +127,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const lote = librosProcesados.slice(i, i + tamanoLote);
         setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
 
-        const { error } = await supabase.from('personal_readings').insert(lote);
+        const { error } = await client.from('personal_readings').insert(lote);
         if (error) {
           console.error("Error en lote de Supabase:", error);
           throw error;
