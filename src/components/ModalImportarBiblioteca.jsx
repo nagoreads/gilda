@@ -17,8 +17,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
 
       const libros = [];
-      // Limitamos a los primeros 100 libros para evitar saturar la primera prueba
-      const limite = Math.min(lineas.length, 100);
+      const limite = Math.min(lineas.length, 150); // Lote seguro de hasta 150 libros
 
       for (let i = 1; i < limite; i++) {
         const linea = lineas[i] ? lineas[i].trim() : '';
@@ -32,8 +31,17 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
         if (titulo && titulo.toLowerCase() !== 'title') {
+          // Obtenemos el email de forma segura (props o localStorage)
+          let emailUsuario = sesion?.email;
+          if (!emailUsuario) {
+            try {
+              const localSesion = JSON.parse(localStorage.getItem('gilda_sesion') || '{}');
+              emailUsuario = localSesion.email;
+            } catch (e) {}
+          }
+
           libros.push({
-            email: sesion?.email ? sesion.email.toLowerCase().trim() : '',
+            email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
             nombre: sesion?.nombre || 'Socia',
             libro: titulo,
             autora: autor || 'Desconocido',
@@ -79,23 +87,32 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    if (librosProcesados.length === 0 || !supabase || !sesion?.email) {
-      if (typeof mostrarToast === 'function') mostrarToast('Faltan datos de sesión o libros para guardar.');
+    if (librosProcesados.length === 0 || !supabase) {
+      if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar.');
       return;
     }
     setCargando(true);
-    console.log("Iniciando guardado de libros en Supabase...");
 
     try {
-      // Intentamos insertar todos los libros procesados de golpe
-      const { error } = await supabase.from('personal_readings').insert(librosProcesados);
-      
-      if (error) {
-        console.error("Error devuelto por Supabase:", error);
-        throw error;
+      // Limpiamos caché antigua del localStorage para evitar el error de cuota superada (QuotaExceededError)
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('gilda_cache_')) {
+          localStorage.removeItem(key);
+        }
       }
 
-      console.log("¡Libros guardados con éxito!");
+      // Insertamos por lotes seguros de 40 en 40
+      const tamanoLote = 40;
+      for (let i = 0; i < librosProcesados.length; i += tamanoLote) {
+        const lote = librosProcesados.slice(i, i + tamanoLote);
+        const { error } = await supabase.from('personal_readings').insert(lote);
+        if (error) {
+          console.error("Error en lote de Supabase:", error);
+          throw error;
+        }
+      }
+
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
       if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
       if (typeof onClose === 'function') onClose();
@@ -137,7 +154,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Guardando en Supabase... (mira la consola F12 si tarda)</p>
+            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en Supabase...</p>
           )}
 
           {librosProcesados.length > 0 && !cargando && (
