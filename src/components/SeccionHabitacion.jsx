@@ -60,7 +60,7 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función robusta para actualizar o eliminar utilizando id, libro y email
+  // Función unificada en el menú desplegable para cambiar de estante o eliminar de forma robusta
   const manejarAccionLibro = async (lib, nuevaAccion) => {
     let emailUsuario = sesion?.email;
     if (!emailUsuario) {
@@ -104,6 +104,7 @@ export default function SeccionHabitacion({
     }
   };
 
+  // Función para guardar el libro seleccionado desde Open Library
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
