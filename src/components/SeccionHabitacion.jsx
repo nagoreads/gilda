@@ -60,44 +60,48 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función para cambiar de estado al estilo Goodreads
-  const cambiarEstadoLibro = async (libroId, nuevoEstado) => {
-    try {
-      const { error } = await activeClient
-        .from('personal_readings')
-        .update({ estado: nuevoEstado })
-        .eq('id', libroId);
-
-      if (error) throw error;
-      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('¡Libro movido de estante con éxito!');
-    } catch (err) {
-      console.error("Error al cambiar de estante:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
-    }
-  };
-
-  // Función para eliminar un libro por error
-  const eliminarLibro = async (libroId) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este libro de tu estantería?")) return;
-    try {
-      const { error } = await activeClient
-        .from('personal_readings')
-        .delete()
-        .eq('id', libroId);
-
-      if (error) throw error;
-      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('¡Libro eliminado correctamente!');
-    } catch (err) {
-      console.error("Error al eliminar libro:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
+  // Función unificada en el menú desplegable para cambiar de estante o eliminar
+  const manejarAccionLibro = async (lib, nuevaAccion) => {
+    if (nuevaAccion === 'eliminar') {
+      if (!window.confirm(`¿Seguro que quieres eliminar "${lib.libro}" de tu estantería?`)) return;
+      try {
+        let query = activeClient.from('personal_readings').delete();
+        if (lib.id) {
+          query = query.eq('id', lib.id);
+        } else {
+          query = query.eq('libro', lib.libro).eq('email', lib.email);
+        }
+        const { error } = await query;
+        if (error) throw error;
+        if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+        if (typeof mostrarToast === 'function') mostrarToast('¡Libro eliminado correctamente!');
+      } catch (err) {
+        console.error("Error al eliminar libro:", err);
+        if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
+      }
+    } else {
+      // Es un cambio de estado (leyendo, pendiente, leido)
+      try {
+        let query = activeClient.from('personal_readings').update({ estado: nuevaAccion });
+        if (lib.id) {
+          query = query.eq('id', lib.id);
+        } else {
+          query = query.eq('libro', lib.libro).eq('email', lib.email);
+        }
+        const { error } = await query;
+        if (error) throw error;
+        if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+        if (typeof mostrarToast === 'function') mostrarToast('¡Estante actualizado con éxito!');
+      } catch (err) {
+        console.error("Error al cambiar de estante:", err);
+        if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
+      }
     }
   };
 
   // Función para guardar con bloqueo antirrepetición
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
-    if (cargandoGuardar) return; // Evita múltiples envíos si se hace clic varias veces
+    if (cargandoGuardar) return;
     setCargandoGuardar(true);
 
     let emailUsuario = sesion?.email;
@@ -134,6 +138,30 @@ export default function SeccionHabitacion({
       setCargandoGuardar(false);
     }
   };
+
+  const renderizarTarjetaLibro = (lib, idx) => (
+    <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+      <div className="flex flex-col items-center text-center">
+        <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
+        <div className="truncate w-full">
+          <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+          <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+        </div>
+      </div>
+      <div className="pt-2 border-t border-[#e8e4d9]/50">
+        <select
+          value={lib.estado || 'pendiente'}
+          onChange={(e) => manejarAccionLibro(lib, e.target.value)}
+          className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
+        >
+          <option value="leyendo">📖 Leyendo</option>
+          <option value="pendiente">⏳ Quiero leer</option>
+          <option value="leido">✅ Leído</option>
+          <option value="eliminar" className="text-red-600 font-bold">🗑️ Eliminar libro</option>
+        </select>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-5 fade-in pb-12">
@@ -237,97 +265,11 @@ export default function SeccionHabitacion({
           </button>
         </div>
 
-        {/* Visualizador de libros en estantes con selector de estado y botón de eliminar */}
+        {/* Visualizador de libros en estantes */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
-          {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
-              <button 
-                onClick={() => eliminarLibro(lib.id)}
-                title="Eliminar libro"
-                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
-              <div className="flex flex-col items-center text-center">
-                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
-                <div className="truncate w-full">
-                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
-                </div>
-              </div>
-              <div className="pt-2 border-t border-[#e8e4d9]/50">
-                <select
-                  value={lib.estado || 'leyendo'}
-                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
-                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
-                >
-                  <option value="leyendo">Leyendo</option>
-                  <option value="pendiente">Quiero leer</option>
-                  <option value="leido">Leído</option>
-                </select>
-              </div>
-            </div>
-          ))}
-
-          {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
-              <button 
-                onClick={() => eliminarLibro(lib.id)}
-                title="Eliminar libro"
-                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
-              <div className="flex flex-col items-center text-center">
-                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
-                <div className="truncate w-full">
-                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
-                </div>
-              </div>
-              <div className="pt-2 border-t border-[#e8e4d9]/50">
-                <select
-                  value={lib.estado || 'pendiente'}
-                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
-                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
-                >
-                  <option value="leyendo">Leyendo</option>
-                  <option value="pendiente">Quiero leer</option>
-                  <option value="leido">Leído</option>
-                </select>
-              </div>
-            </div>
-          ))}
-
-          {tabEstanteria === 'leidos' && librosLeidos.map((lib, idx) => (
-            <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm relative group">
-              <button 
-                onClick={() => eliminarLibro(lib.id)}
-                title="Eliminar libro"
-                className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-600 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow transition-all"
-              >
-                <i className="fa-solid fa-trash"></i>
-              </button>
-              <div className="flex flex-col items-center text-center">
-                <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
-                <div className="truncate w-full">
-                  <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-                  <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
-                </div>
-              </div>
-              <div className="pt-2 border-t border-[#e8e4d9]/50">
-                <select
-                  value={lib.estado || 'leido'}
-                  onChange={(e) => cambiarEstadoLibro(lib.id, e.target.value)}
-                  className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none"
-                >
-                  <option value="leyendo">Leyendo</option>
-                  <option value="pendiente">Quiero leer</option>
-                  <option value="leido">Leído</option>
-                </select>
-              </div>
-            </div>
-          ))}
+          {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
+          {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
+          {tabEstanteria === 'leidos' && librosLeidos.map((lib, idx) => renderizarTarjetaLibro(lib, idx))}
         </div>
       </section>
 
