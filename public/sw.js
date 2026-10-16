@@ -1,48 +1,24 @@
-const CACHE_NAME = 'gilda-cache-v2';
+import { precacheAndRoute } from 'workbox-precaching';
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
-});
+// 1. Vite inyectará aquí todos los archivos de tu app automáticamente para que funcione Offline
+precacheAndRoute(self.__WB_MANIFEST);
 
-self.addEventListener('activate', (event) => {
+// 2. Escuchar las notificaciones Push (Vital para tu mailclub)
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : { title: 'Gilda', body: 'Tienes nuevas actualizaciones en el club.' };
+  
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      )
-    ).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
-
-  // Ignorar peticiones de extensiones de Chrome o esquemas no HTTP/HTTPS
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
-
-  // No guardar en cache las peticiones a la API de Supabase para evitar guardar errores 500
-  if (url.includes('supabase.co')) return;
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache).catch(() => {});
-          });
-          return networkResponse;
-        })
-        .catch(() => {
-          return new Response('Offline', { status: 503, statusText: 'Offline' });
-        });
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icon-192.png',
+      badge: '/favicon.svg', // Icono monocromo para la barra superior de Android
+      data: { url: data.url || '/' }
     })
   );
+});
+
+// 3. Al hacer clic en la notificación, llevar a la chica a la app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.openWindow(event.notification.data.url));
 });
