@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjA2MzUsImV4cCI6MjEwNjU5NjYzNX0.n9KPVdYVDQ_l3WtFCO0RVOMdAI_OLKYNLhHdg34EKK0";
-const fallbackClient = createClient(supabaseUrl, supabaseKey);
+import { supabase as supabaseContext } from '../context/ClubContext.jsx';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [progresoTexto, setProgresoTexto] = useState('');
   const [librosProcesados, setLibrosProcesados] = useState([]);
+
+  // Usamos el cliente supabase pasado por props o el importado del contexto central
+  const client = supabase || supabaseContext;
 
   useEffect(() => {
     try {
@@ -45,9 +44,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
-        // Parseo seguro de CSV respetando comillas
+        // Parseo seguro de CSV respetando comillas (CORREGIDO)
         const columnas = [];
-        let enComillas = sessionStorage; // reutilizamos variable de control local
+        let enComillas = false; 
         let actual = '';
         for (let char of linea) {
           if (char === '"') {
@@ -79,7 +78,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             } catch (e) {}
           }
 
-          // URL de portada real basada en Open Library mediante ISBN oficial (sin bloqueos de exceso de peticiones)
           let portadaReal = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80';
           if (isbnLimpio && isbnLimpio.length >= 10) {
             portadaReal = `https://covers.openlibrary.org/b/isbn/${isbnLimpio}-L.jpg`;
@@ -143,7 +141,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      const client = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
       let emailUsuario = sesion?.email;
       if (!emailUsuario) {
         try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
