@@ -1,14 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ModalImportarBiblioteca({ onClose, sesion, supabase, cargarDatosSupabase, mostrarToast }) {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [progresoTexto, setProgresoTexto] = useState('');
-  const librosRef = useRef([]);
-  const [cuentaLibros, setCuentaLibros] = useState(0);
-  const [muestraLibros, setMuestraLibros] = useState([]);
+  const [listaLibros, setListaLibros] = useState([]); // Estado directo de React
 
-  // Neutralizamos globalmente el QuotaExceededError para que ningun script colapse la app
+  // Neutralizamos globalmente el QuotaExceededError
   useEffect(() => {
     try {
       const originalSetItem = Storage.prototype.setItem;
@@ -16,7 +14,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         try {
           originalSetItem.call(this, key, value);
         } catch (e) {
-          // Si la cuota se llena, ignoramos silenciosamente para evitar que la app crashee
           console.warn("Espacio de almacenamiento local lleno, omitiendo caché:", key);
         }
       };
@@ -89,10 +86,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           const contenido = evento.target?.result || '';
           const parsed = procesarCSV(contenido);
           
-          librosRef.current = parsed;
-          setCuentaLibros(parsed.length);
-          setMuestraLibros(parsed.slice(0, 5));
-          
+          setListaLibros(parsed); // Guardamos directamente en el estado de React
           setCargando(false);
           setProgresoTexto('');
           if (typeof mostrarToast === 'function') {
@@ -112,8 +106,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   };
 
   const confirmarImportacion = async () => {
-    const totalLibros = librosRef.current.length;
-    if (totalLibros === 0 || !supabase) {
+    if (listaLibros.length === 0) {
       if (typeof mostrarToast === 'function') mostrarToast('No hay libros para guardar.');
       return;
     }
@@ -121,9 +114,11 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
 
     try {
       const tamanoLote = 25; // Lotes ultra seguros de 25 en 25
-      for (let i = 0; i < totalLibros; i += tamanoLote) {
-        const lote = librosRef.current.slice(i, i + tamanoLote);
-        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, totalLibros)} de ${totalLibros} libros...`);
+      const total = listaLibros.length;
+
+      for (let i = 0; i < total; i += tamanoLote) {
+        const lote = listaLibros.slice(i, i + tamanoLote);
+        setProgresoTexto(`Guardando en Supabase: ${Math.min(i + tamanoLote, total)} de ${total} libros...`);
         
         const { error } = await supabase.from('personal_readings').insert(lote);
         if (error) {
@@ -182,10 +177,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             </div>
           )}
 
-          {cuentaLibros > 0 && !cargando && (
+          {listaLibros.length > 0 && !cargando && (
             <div className="bg-white p-3 rounded-xl border border-[#e8e4d9] max-h-40 overflow-y-auto space-y-2">
-              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({cuentaLibros})!</p>
-              {muestraLibros.map((lib, idx) => (
+              <p className="text-xs font-bold text-[#23211e]">¡Libros detectados ({listaLibros.length})!</p>
+              {listaLibros.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
                     <span className="font-medium text-[#23211e]">{lib.libro}</span>
@@ -194,8 +189,8 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                   <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
                 </div>
               ))}
-              {cuentaLibros > 5 && (
-                <p className="text-[10px] text-center text-[#75706b] italic">y {cuentaLibros - 5} libros más listos para importar...</p>
+              {listaLibros.length > 5 && (
+                <p className="text-[10px] text-center text-[#75706b] italic">y {listaLibros.length - 5} libros más listos para importar...</p>
               )}
             </div>
           )}
@@ -210,9 +205,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </button>
           <button 
             onClick={confirmarImportacion}
-            disabled={cuentaLibros === 0 || cargando}
+            disabled={listaLibros.length === 0 || cargando}
             className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-              cuentaLibros > 0 && !cargando
+              listaLibros.length > 0 && !cargando
                 ? 'bg-[#23211e] text-[#ffffee] hover:opacity-95' 
                 : 'bg-[#e8e4d9] text-[#75706b] cursor-not-allowed'
             }`}
