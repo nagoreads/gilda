@@ -11,7 +11,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const lineas = texto.split('\n');
       if (lineas.length < 2) return [];
 
-      // Detectar cabeceras limpias
       const cabeceras = lineas[0].split(',').map(h => h ? h.trim().replace(/^"|"$/g, '').toLowerCase() : '');
       const idxTitulo = cabeceras.findIndex(h => h.includes('title') || h.includes('titulo') || h.includes('book title'));
       const idxAutor = cabeceras.findIndex(h => h.includes('author') || h.includes('autora') || h.includes('book author'));
@@ -23,7 +22,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
-        // Limpieza rápida de columnas separadas por comas
         const columnas = linea.split(',');
         const limpiar = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
 
@@ -32,13 +30,16 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
         if (titulo && titulo.toLowerCase() !== 'title') {
-          // Generar URL directa de Google Books para la portada al vuelo (sin bloquear)
           const portadaDinamica = `https://books.google.com/books/content?printsec=frontcover&img=1&zoom=1&q=${encodeURIComponent(titulo)}&source=gbs_api`;
 
           libros.push({
-            titulo,
+            email: sesion?.email ? sesion.email.toLowerCase().trim() : '',
+            nombre: sesion?.nombre || 'Socia',
+            libro: titulo,
             autora: autor || 'Desconocido',
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
+            pagina: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 100 : 0,
+            paginas: 100,
             portada: portadaDinamica
           });
         }
@@ -85,17 +86,12 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     setCargando(true);
 
     try {
-      for (const lib of librosProcesados) {
-        await supabase.from('personal_readings').insert([{
-          email: sesion.email.toLowerCase().trim(),
-          nombre: sesion.nombre || 'Socia',
-          libro: lib.titulo,
-          autora: lib.autora,
-          estado: lib.estado,
-          pagina: lib.estado === 'leido' ? 100 : 0,
-          paginas: 100,
-          portada: lib.portada
-        }]);
+      // Inserción por lotes (chunks de 50 libros) para no saturar Supabase ni bloquear la app
+      const tamanoLote = 50;
+      for (let i = 0; i < librosProcesados.length; i += tamanoLote) {
+        const lote = librosProcesados.slice(i, i + tamanoLote);
+        const { error } = await supabase.from('personal_readings').insert(lote);
+        if (error) throw error;
       }
 
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
@@ -139,7 +135,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Procesando archivo...</p>
+            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en la base de datos...</p>
           )}
 
           {librosProcesados.length > 0 && !cargando && (
@@ -148,7 +144,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
               {librosProcesados.slice(0, 5).map((lib, idx) => (
                 <div key={idx} className="text-[11px] text-[#75706b] border-b border-[#e8e4d9]/50 pb-1 flex justify-between items-center">
                   <div className="truncate max-w-[220px]">
-                    <span className="font-medium text-[#23211e]">{lib.titulo}</span>
+                    <span className="font-medium text-[#23211e]">{lib.libro}</span>
                     <span className="block text-[10px] italic text-[#75706b]">{lib.autora}</span>
                   </div>
                   <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
