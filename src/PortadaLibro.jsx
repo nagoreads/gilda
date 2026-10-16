@@ -104,7 +104,8 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
       let p = pFinal.trim();
       if (p.startsWith('data:image')) return p;
       if (p.startsWith('http://')) p = p.replace('http://', 'https://');
-      if (p.startsWith('https://')) return `https://images.weserv.nl/?url=${encodeURIComponent(p)}&w=300&output=jpg`;
+      // Eliminamos weserv.nl y devolvemos la URL directamente de forma segura
+      if (p.startsWith('https://')) return p;
       return '';
     }, [portadaOriginal, portadaDinamica]);
 
