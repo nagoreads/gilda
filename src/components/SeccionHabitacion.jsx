@@ -126,7 +126,7 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Guardar libro desde Open Library
+  // Guardar libro de forma instantánea sin bloquear la interfaz
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -154,16 +154,19 @@ export default function SeccionHabitacion({
       portada: libroSeleccionado.portada
     };
 
+    // 1. Cerramos el buscador al instante para no congelar la pantalla
+    setMostrarBuscadorOL(false);
+    if (typeof mostrarToast === 'function') mostrarToast('Guardando libro...');
+
     try {
+      // 2. Enviamos a Supabase en segundo plano
       const { error } = await activeClient.from('personal_readings').insert([nuevoLibro]);
-      if (error) throw error;
+      if (error) console.error("Error al guardar en Supabase:", error);
       
-      setMostrarBuscadorOL(false);
-      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-      if (typeof mostrarToast === 'function') mostrarToast('Libro añadido con su portada real.');
+      // 3. Recargamos la estantería en segundo plano
+      if (typeof cargarDatosSupabase === 'function') cargarDatosSupabase();
     } catch (err) {
       console.error("Error al añadir libro:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
     } finally {
       setCargandoGuardar(false);
     }
