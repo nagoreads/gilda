@@ -17,8 +17,10 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       const idxEstante = cabeceras.findIndex(h => h.includes('shelf') || h.includes('estante') || h.includes('exclusive shelf'));
 
       const libros = [];
+      // Limitamos a los primeros 100 libros para evitar saturar la primera prueba
+      const limite = Math.min(lineas.length, 100);
 
-      for (let i = 1; i < lineas.length; i++) {
+      for (let i = 1; i < limite; i++) {
         const linea = lineas[i] ? lineas[i].trim() : '';
         if (!linea) continue;
 
@@ -30,8 +32,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
         const estante = idxEstante !== -1 && columnas[idxEstante] ? limpiar(columnas[idxEstante]) : 'read';
 
         if (titulo && titulo.toLowerCase() !== 'title') {
-          const portadaDinamica = `https://books.google.com/books/content?printsec=frontcover&img=1&zoom=1&q=${encodeURIComponent(titulo)}&source=gbs_api`;
-
           libros.push({
             email: sesion?.email ? sesion.email.toLowerCase().trim() : '',
             nombre: sesion?.nombre || 'Socia',
@@ -40,7 +40,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
             pagina: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 100 : 0,
             paginas: 100,
-            portada: portadaDinamica
+            portada: 'https://images.weserv.nl/?url=https://i.imgur.com/Q9yK5aI.png&w=300&h=450&fit=contain'
           });
         }
       }
@@ -84,21 +84,23 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
       return;
     }
     setCargando(true);
+    console.log("Iniciando guardado de libros en Supabase...");
 
     try {
-      // Inserción por lotes (chunks de 50 libros) para no saturar Supabase ni bloquear la app
-      const tamanoLote = 50;
-      for (let i = 0; i < librosProcesados.length; i += tamanoLote) {
-        const lote = librosProcesados.slice(i, i + tamanoLote);
-        const { error } = await supabase.from('personal_readings').insert(lote);
-        if (error) throw error;
+      // Intentamos insertar todos los libros procesados de golpe
+      const { error } = await supabase.from('personal_readings').insert(librosProcesados);
+      
+      if (error) {
+        console.error("Error devuelto por Supabase:", error);
+        throw error;
       }
 
+      console.log("¡Libros guardados con éxito!");
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
       if (typeof mostrarToast === 'function') mostrarToast('¡Biblioteca importada y guardada en Supabase con éxito!');
       if (typeof onClose === 'function') onClose();
     } catch (err) {
-      console.error("Error al guardar en Supabase:", err);
+      console.error("Excepción al guardar en Supabase:", err);
       if (typeof mostrarToast === 'function') mostrarToast('Hubo un error al guardar en la base de datos.');
       setCargando(false);
     }
@@ -120,7 +122,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </div>
           <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">Importar mi biblioteca</h3>
           <p className="text-xs text-[#75706b] font-sans leading-relaxed">
-            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads para registrar tus lecturas al instante.
+            Sube tu archivo <code className="bg-[#e8e4d9] px-1 py-0.5 rounded text-[11px]">.csv</code> de Goodreads.
           </p>
         </div>
 
@@ -135,7 +137,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
           </label>
 
           {cargando && (
-            <p className="text-center text-xs text-[#75706b] italic">Guardando libros en la base de datos...</p>
+            <p className="text-center text-xs text-[#75706b] italic">Guardando en Supabase... (mira la consola F12 si tarda)</p>
           )}
 
           {librosProcesados.length > 0 && !cargando && (
@@ -150,9 +152,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
                   <span className="text-[9px] bg-[#ffffee] border border-[#e8e4d9] px-1.5 py-0.5 rounded text-[#23211e]">{lib.estado}</span>
                 </div>
               ))}
-              {librosProcesados.length > 5 && (
-                <p className="text-[10px] text-center text-[#75706b] italic">y {librosProcesados.length - 5} libros más...</p>
-              )}
             </div>
           )}
         </div>
