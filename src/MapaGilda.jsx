@@ -7,32 +7,35 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
     const markersGroupRef = useRef(null);
     const marcadoresKeyRef = useRef(null);
     const usuariasGeocodificadasRef = useRef([]);
+    const peticionesEnCursoRef = useRef(new Set());
     const [regionSeleccionada, setRegionSeleccionada] = useState(null);
     const [paisExpandido, setPaisExpandido] = useState(null);
     const idContadorPais = useId();
     const [mapReady, setMapReady] = useState(false);
     const [coordenadasInternacionales, setCoordenadasInternacionales] = useState({});
 
-    const GEO_INTERNA = useMemo(() => ({    'madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
-    'barcelona': { coords: [41.3851, 2.1734], ca: 'Cataluña' },
-    'eibar': { coords: [43.1827, -2.4729], ca: 'País Vasco' },
-    'salamanca': { coords: [40.9701, -5.6635], ca: 'Castilla y León' },
-    'as pontes': { coords: [43.4475, -7.8631], ca: 'Galicia' },
-    'as pontes de garcia rodriguez': { coords: [43.4475, -7.8631], ca: 'Galicia' },
-    'gasteiz': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
-    'vitoria': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
-    'santander': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
-    'tolosa': { coords: [43.1385, -2.0744], ca: 'País Vasco' },
-    'bilbao': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
-    'sevilla': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
-    'valencia': { coords: [39.4699, -0.3763], ca: 'Comunidad Valenciana' },
-    'zaragoza': { coords: [41.6488, -0.8891], ca: 'Aragón' },
-    'málaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
-    'malaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
-    'murcia': { coords: [37.9922, -1.1307], ca: 'Región de Murcia' },
-    'palma': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
-    'a coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
-    'granada': { coords: [37.1773, -3.5986], ca: 'Andalucía' }}), []);
+    const GEO_INTERNA = useMemo(() => ({
+      'madrid': { coords: [40.4168, -3.7038], ca: 'Comunidad de Madrid' },
+      'barcelona': { coords: [41.3851, 2.1734], ca: 'Cataluña' },
+      'eibar': { coords: [43.1827, -2.4729], ca: 'País Vasco' },
+      'salamanca': { coords: [40.9701, -5.6635], ca: 'Castilla y León' },
+      'as pontes': { coords: [43.4475, -7.8631], ca: 'Galicia' },
+      'as pontes de garcia rodriguez': { coords: [43.4475, -7.8631], ca: 'Galicia' },
+      'gasteiz': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+      'vitoria': { coords: [42.8467, -2.6716], ca: 'País Vasco' },
+      'santander': { coords: [43.4623, -3.8099], ca: 'Cantabria' },
+      'tolosa': { coords: [43.1385, -2.0744], ca: 'País Vasco' },
+      'bilbao': { coords: [43.2630, -2.9350], ca: 'País Vasco' },
+      'sevilla': { coords: [37.3891, -5.9845], ca: 'Andalucía' },
+      'valencia': { coords: [39.4699, -0.3763], ca: 'Comunidad Valenciana' },
+      'zaragoza': { coords: [41.6488, -0.8891], ca: 'Aragón' },
+      'málaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+      'malaga': { coords: [36.7213, -4.4214], ca: 'Andalucía' },
+      'murcia': { coords: [37.9922, -1.1307], ca: 'Región de Murcia' },
+      'palma': { coords: [39.5696, 2.6502], ca: 'Islas Baleares' },
+      'a coruña': { coords: [43.3623, -8.4115], ca: 'Galicia' },
+      'granada': { coords: [37.1773, -3.5986], ca: 'Andalucía' }
+    }), []);
 
     const buscarUbicacion = useCallback((texto, pais = '') => {
       if (!texto) return null;
@@ -49,7 +52,7 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         if (limpio.includes(clave) || clave.includes(limpio)) return val;
       }
       return null;
-    }, [GEO_INTERNA]);
+    }, [GEO_INTERNA, normalizarUbicacion]);
 
     const comunidadesEspanolas = useMemo(() => new Map([
       ['andalucia', 'Andalucía'],
@@ -137,22 +140,23 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
         }
         return { ...u, coords: coordsFinales, paisAgrupado, regionAgrupada, consultaGeo };
       });
-    }, [usuarias, coordenadasInternacionales, buscarUbicacion, comunidadesEspanolas]);
+    }, [usuarias, coordenadasInternacionales, buscarUbicacion, comunidadesEspanolas, normalizarUbicacion, formatearPais]);
 
-    const consultasGeoKey = useMemo(() => (
-      JSON.stringify([...new Set(usuariasGeocodificadas.filter(u => !u.coords && u.consultaGeo).map(u => u.consultaGeo))].sort())
-    ), [usuariasGeocodificadas]);
-
+    // Control riguroso de geocodificación previa para evitar peticiones repetidas
     useEffect(() => {
-      const consultas = JSON.parse(consultasGeoKey);
-      consultas.forEach(consulta => {
-        geocodificarUbicacion(consulta).then(coordenadas => {
+      const sinCoords = usuariasGeocodificadas.filter(u => !u.coords && u.consultaGeo);
+      sinCoords.forEach(u => {
+        const key = normalizarUbicacion(u.consultaGeo);
+        if (!key || coordenadasInternacionales[key] || peticionesEnCursoRef.current.has(key)) return;
+
+        peticionesEnCursoRef.current.add(key);
+        geocodificarUbicacion(u.consultaGeo).then(coordenadas => {
+          peticionesEnCursoRef.current.delete(key);
           if (!coordenadas) return;
-          const key = normalizarUbicacion(consulta);
           setCoordenadasInternacionales(prev => prev[key] ? prev : { ...prev, [key]: coordenadas });
-        });
+        }).catch(() => peticionesEnCursoRef.current.delete(key));
       });
-    }, [consultasGeoKey]);
+    }, [usuariasGeocodificadas, coordenadasInternacionales, geocodificarUbicacion, normalizarUbicacion]);
 
     const conteoPorPais = useMemo(() => {
       const conteo = new Map();
@@ -217,26 +221,26 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
           const Leaflet = moduloLeaflet.default || moduloLeaflet;
           leafletRef.current = Leaflet;
 
-        if (!mapRef.current) {
-          const map = Leaflet.map(container, {
-            zoomControl: false,
-            attributionControl: false,
-            zoomAnimation: false,
-            fadeAnimation: false,
-            markerZoomAnimation: false
-          }).setView([40.4167, -3.7037], 5);
-          Leaflet.control.zoom({ position: 'topright' }).addTo(map);
-          Leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
-          markersGroupRef.current = Leaflet.layerGroup().addTo(map);
-          mapRef.current = map;
-          setMapReady(true);
-        }
-
-        resizeTimer = setTimeout(() => {
-          if (activo && mapRef.current && container.offsetWidth > 0 && container.offsetHeight > 0) {
-            mapRef.current.invalidateSize();
+          if (!mapRef.current) {
+            const map = Leaflet.map(container, {
+              zoomControl: false,
+              attributionControl: false,
+              zoomAnimation: false,
+              fadeAnimation: false,
+              markerZoomAnimation: false
+            }).setView([40.4167, -3.7037], 5);
+            Leaflet.control.zoom({ position: 'topright' }).addTo(map);
+            Leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
+            markersGroupRef.current = Leaflet.layerGroup().addTo(map);
+            mapRef.current = map;
+            setMapReady(true);
           }
-        }, 100);
+
+          resizeTimer = setTimeout(() => {
+            if (activo && mapRef.current && container.offsetWidth > 0 && container.offsetHeight > 0) {
+              mapRef.current.invalidateSize();
+            }
+          }, 100);
         } catch (error) {
           console.error('No se pudo cargar Leaflet:', error);
         } finally {
@@ -291,7 +295,6 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
               <line x1="8" y1="12" x2="8" y2="23" stroke="#23211e" stroke-width="2" stroke-linecap="round"/>
               <circle cx="8" cy="7" r="6" fill="#849673" stroke="#23211e" stroke-width="1.5"/>
             </svg>
-            
           </div>
         `;
         if (!mapRef.current || !mapRef.current._loaded || !markersGroupRef.current) return;
@@ -324,7 +327,6 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
     return (
       <div className="space-y-4 relative">
         <div className="relative">
-          {/* Contenedor Leaflet con Bordes Redondeados y Sombra Suave */}
           <div 
             ref={mapContainerRef} 
             style={{ height: '280px', width: '100%', zIndex: 1 }} 
@@ -335,61 +337,4 @@ export default function MapaGilda({ usuarias, normalizarUbicacion, geocodificarU
             <div className="absolute inset-0 z-[1000] bg-[#FFFFFF]/95 backdrop-blur-md p-4 flex flex-col rounded-2xl fade-in text-[#23211e] shadow-2xl max-h-[280px] overflow-hidden">
               <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2 mb-2 shrink-0">
                 <h3 className="font-babydoll text-[#23211e] font-bold text-lg leading-none">{regionSeleccionada.region} ({regionSeleccionada.usuarias.length})</h3>
-                <button onClick={limpiarRegion} className="text-[11px] font-bold text-[#75706b] bg-white border border-[#e8e4d9] px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                  cerrar
-                </button>
-              </div>
-              <div className="overflow-y-auto flex-grow space-y-2 pr-1">
-                {regionSeleccionada.usuarias.map((u, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs p-2.5 bg-white rounded-xl border border-[#e8e4d9] gap-2 shadow-xs">
-                    <span className="font-bold font-babydoll text-sm text-[#23211e]">{u.nombre}</span>
-                    <span className="text-[#75706b] font-sans text-[11px] italic">{u.ciudad || u.provincia_region || 'Sin localidad'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="editorial-card p-4 space-y-2.5">
-          <h4 className="font-babydoll text-base font-bold text-[#23211e]">Usuarias por país</h4>
-          <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
-            {conteoPorPais.map(({ pais, total, regiones }, idx) => {
-              const expandido = paisExpandido === pais;
-              const regionesId = `${idContadorPais}-regiones-${idx}`;
-              return (
-                <div key={pais} className="rounded-lg border border-[#e8e4d9] overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setPaisExpandido(expandido ? null : pais)}
-                    aria-expanded={expandido}
-                    aria-controls={regionesId}
-                    className="w-full flex items-center justify-between gap-3 bg-[#ffffee] px-3 py-2.5 text-xs text-left hover:bg-[#faf9f5] transition-colors"
-                  >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <i className={`fa-solid ${expandido ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px] text-[#75706b]`}></i>
-                      <span className="font-bold font-babydoll truncate">{pais}</span>
-                    </span>
-                    <span className="bg-[#849673] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0">{total}</span>
-                  </button>
-                  {expandido && (
-                    <div id={regionesId} className="px-3 py-2 space-y-1.5 border-t border-[#e8e4d9] bg-white">
-                      <p className="text-[9px] uppercase font-bold text-[#75706b]">
-                        {pais === 'España' ? 'Comunidades autónomas' : 'Regiones / provincias'}
-                      </p>
-                      {regiones.map(([region, cantidad]) => (
-                        <div key={region} className="flex justify-between items-center gap-3 text-[11px] pl-2">
-                          <span className="text-[#23211e] truncate">{region}</span>
-                          <span className="text-[#75706b] font-bold shrink-0">{cantidad}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-}
+                <button onClick={limpiarRegion} className="text-[11px] font-bold text-[#75706b] bg-white border border-[#e8e4d9] px-2.

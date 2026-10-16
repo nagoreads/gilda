@@ -39,7 +39,6 @@ export default function SeccionHabitacion({
 
   const activeClient = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
 
-  // Filtros flexibles para capturar cualquier variante de estado en Supabase
   const librosLeyendo = todosMisLibrosEstanteria?.filter(l => {
     const est = (l.estado || "").toLowerCase();
     return est.includes("leyend") || est.includes("actual") || est === "leyendo";
@@ -63,7 +62,6 @@ export default function SeccionHabitacion({
   const obtenerTituloLibro = (lib) => lib.libro || lib.titulo || lib.title || "";
   const obtenerIdLibro = (lib) => lib.id || lib.id_libro;
 
-  // Acción unificada para cambiar de estante o eliminar
   const manejarAccionLibro = async (lib, nuevaAccion) => {
     const idLibro = obtenerIdLibro(lib);
     const tituloLibro = obtenerTituloLibro(lib);
@@ -94,7 +92,6 @@ export default function SeccionHabitacion({
         if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
       }
     } else {
-      // Cambio de estado (leyendo, pendiente, leido)
       try {
         let res;
         if (idLibro) {
@@ -114,7 +111,6 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Inserción en Supabase limpia (sin columnas no existentes)
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -130,7 +126,7 @@ export default function SeccionHabitacion({
 
     const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
 
-    // Payload ajustado exclusivamente a las columnas existentes en la tabla Supabase
+    // Se envían únicamente los campos de la tabla real de Supabase
     const nuevoLibroBD = {
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',

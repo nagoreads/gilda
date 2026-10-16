@@ -11,14 +11,13 @@ export default function BuscadorOpenLibrary({ onSeleccionarLibro }) {
     setBuscando(true);
 
     try {
-      // Consulta directa a Open Library
       const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=25`);
       if (!res.ok) throw new Error("Error en la red");
       const data = await res.json();
 
       let docs = data.docs || [];
 
-      // Priorizar ediciones publicadas en idioma español ('spa' o 'spanish')
+      // Priorizar ediciones publicadas en castellano
       docs.sort((a, b) => {
         const aEsSpa = a.language?.some(l => l.toLowerCase().includes('spa')) ? 1 : 0;
         const bEsSpa = b.language?.some(l => l.toLowerCase().includes('spa')) ? 1 : 0;

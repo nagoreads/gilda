@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-
 import BuscadorLibros from './BuscadorLibros';
 import PortadaLibro from './PortadaLibro';
 import MapaGilda from './MapaGilda';
@@ -62,7 +61,24 @@ export default function App() {
       return typeof parsed === typeof fallback || Array.isArray(fallback) ? parsed : fallback;
     } catch { return fallback; }
   };
-  const safeSet = (key, val) => { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch (e) { console.error(e); } };
+
+  // Guardado seguro con liberación automática de caché si se supera el límite
+  const safeSet = (key, val) => {
+    try {
+      localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        localStorage.removeItem('gilda_cache_muro');
+        localStorage.removeItem('gilda_cache_usuarias_v2');
+        localStorage.removeItem('gilda_cache_chat');
+        try {
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+        } catch (retryErr) {
+          console.warn('Almacenamiento local lleno:', retryErr);
+        }
+      }
+    }
+  };
 
   const [supabaseSession, setSupabaseSession] = useState(null);
   const [emailLogin, setEmailLogin] = useState('');
@@ -108,16 +124,6 @@ export default function App() {
   const [libroSeleccionadoDetalle, setLibroSeleccionadoDetalle] = useState(null);
   const [misCitas] = useState(() => safeGetJSON('gilda_mis_citas', []));
 
-  const modalidades = [
-    { id: 'cotilla', nombre: 'gilda cotilla', precio: 'Gratis', esGratis: true, enlaceStripe: '', descripcion: 'asómate, lee los comentarios de las demás y forma parte de la comunidad de forma libre y gratuita.' },
-    { id: 'satelite', nombre: 'gilda satélite', precio: '1 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi4gtfqV8cxeju0WV6Ri01', descripcion: 'forma parte de la comunidad y lee a tu ritmo mientras vas comentando y leyendo a las demás. para que te hagas una idea, es como una lectura conjunta, pero a través de una app diseñada específicamente para eso.' },
-    { id: 'cafe', nombre: 'gilda de café', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/3cI5kx0w1gJ3fny4976Ri02', descripcion: 'forma parte de la comunidad al completo, chat y cafecitos virtuales.' },
-    { id: 'nube', nombre: 'gilda de nube', precio: '5 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/cNi5kx92xcsNb7i3536Ri03', descripcion: 'recibe por correo electrónico la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora, marcapáginas, plantillas para stories... y muchas sorpresas más.' },
-    { id: 'papel', nombre: 'gilda de papel', precio: '10 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe8wJ7Yt50l1wIbBz6Ri04', descripcion: 'recibe por correo postal (sí, llega hasta el buzón de tu casa porque solo soy una chica que adora escribir cartas a mano) la carta sorpresa de gilda, con distintas actividades creativas, pasatiempos, pegatinas, anti - guía de lectura de autora (esto lo recibirás a través de un qr monísimo porque algunas guías son demasiado largas como para meterlas en un sobre), marcapáginas, y muchas sorpresas más.' },
-    { id: 'virtual', nombre: 'gilda virtual', precio: '8 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/bJe9ANguZ9gB6R27lj6Ri05', descripcion: 'recibe todo el contenido digital en tu correo electrónico más acceso total a la app.' },
-    { id: 'absoluta', nombre: 'gilda absoluta', precio: '12 €/mes', esGratis: false, enlaceStripe: 'https://buy.stripe.com/14A5kxemReAV2AMcFD6Ri08', descripcion: 'la experiencia completa: recibe todo el contenido en papel en tu buzón de casa y acceso total a la app, al chat y a los cafecitos del club.' }
-  ];
-
   const sesion = useMemo(() => {
     if (!supabaseSession) return null;
     const emailUser = supabaseSession.user.email.toLowerCase().trim();
@@ -126,7 +132,6 @@ export default function App() {
     return { nombre: nombreSocia, email: emailUser, modalidad: socia?.modalidad || 'gilda' };
   }, [supabaseSession, usuariasClub]);
 
-  // Comprobación directa de publicación de hoy (Mecánica BeReal)
   const haPublicadoMomentoHoy = useMemo(() => {
     if (!sesion?.email) return false;
     const hoyStr = new Date().toISOString().split('T')[0];
@@ -140,48 +145,32 @@ export default function App() {
   }, [muroActividad, sesion]);
 
   const estadoBeReal = useMemo(() => {
-    if (!sesion?.email) {
-      return { disponible: false, publicado: false, mensaje: "Inicia sesión para participar" };
-    }
-
-    if (haPublicadoMomentoHoy) {
-      return { disponible: false, publicado: true, mensaje: "Foto de hoy publicada" };
-    }
-
-    return { 
-      disponible: true, 
-      publicado: false, 
-      mensaje: "Publica tu foto de hoy para ver las de las demás" 
-    };
+    if (!sesion?.email) return { disponible: false, publicado: false, mensaje: "Inicia sesión para participar" };
+    if (haPublicadoMomentoHoy) return { disponible: false, publicado: true, mensaje: "Foto de hoy publicada" };
+    return { disponible: true, publicado: false, mensaje: "Publica tu foto de hoy para ver las de las demás" };
   }, [sesion, haPublicadoMomentoHoy]);
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
 
+  // Consulta optimizada a Supabase con límite de registros para controlar el Egress
   const cargarDatosSupabase = async () => {
     try {
       const [
         { data: profiles }, { data: chapters }, { data: comments },
         { data: clubReadings }, { data: chatMessages }, { data: proposals },
-        { data: personalReadings }, { data: calendarEvents }, { data: wallPosts }, { data: cafes },
-        { data: configMomento }
+        { data: personalReadings }, { data: calendarEvents }, { data: wallPosts }, { data: cafes }
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase.from('chapters').select('*'),
         supabase.from('comments').select('*'),
         supabase.from('club_readings').select('*'),
-        supabase.from('chat_messages').select('*').order('timestamp', { ascending: true }),
+        supabase.from('chat_messages').select('*').order('timestamp', { ascending: true }).limit(50),
         supabase.from('proposals').select('*'),
         supabase.from('personal_readings').select('*'),
         supabase.from('calendar_events').select('*'),
-        supabase.from('wall_posts').select('*').order('timestamp', { ascending: false }),
-        supabase.from('cafes').select('*'),
-        Promise.resolve({ data: [] })
+        supabase.from('wall_posts').select('*').order('timestamp', { ascending: false }).limit(40),
+        supabase.from('cafes').select('*')
       ]);
-
-      if (configMomento && configMomento.length > 0) {
-        const conf = configMomento[0];
-        setAlertaMomento(conf.ultima_alerta || conf.created_at || conf.fecha || null);
-      }
 
       if (profiles) {
         setUsuariasClub(profiles); safeSet('gilda_cache_usuarias_v2', profiles);
@@ -201,15 +190,14 @@ export default function App() {
       if (clubReadings) { setLecturas(clubReadings); safeSet('gilda_cache_lecturas', clubReadings); }
       if (chatMessages) {
         const msgsUnicos = Array.from(new Map(chatMessages.map(m => [m.id || (m.timestamp + m.usuario + m.mensaje), m])).values());
-        setChatMsgs(msgsUnicos);
-        safeSet("gilda_cache_chat", msgsUnicos);
+        setChatMsgs(msgsUnicos); safeSet("gilda_cache_chat", msgsUnicos);
       }
       if (proposals) { setPropuestas(proposals); safeSet('gilda_cache_propuestas', proposals); }
       if (personalReadings) { setLecturasPersonales(personalReadings); safeSet('gilda_cache_personales', personalReadings); }
       if (calendarEvents) { setEventosCalendario(calendarEvents); safeSet('gilda_cache_calendario', calendarEvents); }
       if (wallPosts) { setMuroActividad(wallPosts); safeSet('gilda_cache_muro', wallPosts); }
       if (cafes) { setCafecitos(cafes); safeSet('gilda_cache_cafecitos', cafes); }
-    } catch (err) { console.error('Error sincronizando:', err); }
+    } catch (err) { console.error('Error sincronizando Supabase:', err); }
   };
 
   useEffect(() => {
@@ -218,7 +206,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Carga inicial + Suscripción en tiempo real (Realtime) para actualizar chat e interacción en directo
   useEffect(() => {
     cargarDatosSupabase();
 
@@ -374,8 +361,7 @@ export default function App() {
     if (existente) {
       const itemActualizado = { ...existente, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada };
       const nuevas = lecturasPersonales.map(l => l.id === existente.id ? itemActualizado : l);
-      setLecturasPersonales(nuevas);
-      if (typeof safeSet === "function") safeSet("gilda_cache_personales", nuevas);
+      setLecturasPersonales(nuevas); safeSet("gilda_cache_personales", nuevas);
       mostrarToast(`Guardado: ${tituloLibro}`);
 
       supabase.from("personal_readings").update({ pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt || existente.autora, portada: portadaOpt || existente.portada }).eq("id", existente.id).then(({ error }) => {
@@ -385,8 +371,7 @@ export default function App() {
       const tempId = "temp_" + Date.now();
       const nuevoItem = { id: tempId, email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt };
       const nuevas = [...lecturasPersonales, nuevoItem];
-      setLecturasPersonales(nuevas);
-      if (typeof safeSet === "function") safeSet("gilda_cache_personales", nuevas);
+      setLecturasPersonales(nuevas); safeSet("gilda_cache_personales", nuevas);
       mostrarToast(`Guardado: ${tituloLibro}`);
 
       supabase.from("personal_readings").insert([{ email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, libro: tituloLibro, pagina: pagFinal, paginas: pagFinal, estado: estadoOpt, autora: autoraOpt, portada: portadaOpt }]).select().then(({ data, error }) => {
@@ -423,7 +408,6 @@ export default function App() {
   }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
 
   const modalidadLimpia = (sesion?.modalidad || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const esModalidadCorreo = modalidadLimpia.includes('nube') || modalidadLimpia.includes('papel');
   const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satelite');
   const esAdministradora = String(sesion?.email || '').trim().toLowerCase() === EMAIL_ADMINISTRADORA;
 
@@ -433,7 +417,7 @@ export default function App() {
   if (esPaginaGracias) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
-        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 border border-[#e8e4d9] modal-elastic">
+        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 border border-[#e8e4d9]">
           <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gracias</h1>
           <p className="text-xs text-[#75706b] font-sans">Tu espacio ya está listo para empezar.</p>
           <a href="/" className="block w-full editorial-btn py-3 text-xs font-medium text-center">Ir al club</a>
@@ -453,11 +437,11 @@ export default function App() {
                 <img 
                   src="/icon-192.png" 
                   alt="Gilda" 
-                  className="w-56 h-56 object-contain hover:scale-105 hover:rotate-3 transition-all duration-300 ease-out cursor-pointer active:scale-95" 
+                  className="w-56 h-56 object-contain hover:scale-105 transition-all duration-300 ease-out cursor-pointer" 
                   title="¡Hola!"
                 />
               </div>
-              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4 hover:scale-105 transition-transform duration-200 cursor-default">gilda</h1>
+              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4">gilda</h1>
             </div>
 
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
@@ -470,7 +454,7 @@ export default function App() {
                   onChange={e => setEmailLogin(e.target.value)} 
                   disabled={esperandoToken} 
                   required 
-                  className="w-full editorial-input px-3.5 py-2.5 text-xs disabled:opacity-50 focus:scale-[1.01] transition-transform duration-200" 
+                  className="w-full editorial-input px-3.5 py-2.5 text-xs" 
                 />
               </div>
               
@@ -483,7 +467,7 @@ export default function App() {
                     value={tokenLogin} 
                     onChange={e => setTokenLogin(e.target.value)} 
                     required 
-                    className="w-full editorial-input px-3.5 py-2.5 text-xs text-center tracking-[0.5em] font-bold focus:scale-[1.01] transition-transform duration-200" 
+                    className="w-full editorial-input px-3.5 py-2.5 text-xs text-center tracking-[0.5em] font-bold" 
                     maxLength={6} 
                   />
                 </div>
@@ -492,7 +476,7 @@ export default function App() {
               <button 
                 type="submit" 
                 disabled={loadingAuth} 
-                className="w-full editorial-btn py-3 text-xs font-medium hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
+                className="w-full editorial-btn py-3 text-xs font-medium"
               >
                 {loadingAuth ? "procesando..." : (esperandoToken ? "entrar al club" : "enviadme la llave por correo")}
               </button>
@@ -513,16 +497,11 @@ export default function App() {
         ) : (
           <div className="w-full max-w-md animate-fade-in">
             <div className="text-center mb-2 flex flex-col items-center">
-              <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium hover:text-[#23211e] transition-colors cursor-default">club de lectura, mailclub y comunidad</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium">club de lectura, mailclub y comunidad</p>
               <div className="flex justify-center my-0">
-                <img 
-                  src="/icon-192.png" 
-                  alt="Gilda" 
-                  className="w-56 h-56 object-contain hover:scale-105 hover:rotate-3 transition-all duration-300 ease-out cursor-pointer active:scale-95" 
-                  title="¡Hola!"
-                />
+                <img src="/icon-192.png" alt="Gilda" className="w-56 h-56 object-contain" />
               </div>
-              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4 hover:scale-105 transition-transform duration-200 cursor-default">gilda</h1>
+              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4">gilda</h1>
             </div>
             <div className="pt-2">
               <CreaTuGilda
@@ -538,9 +517,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
-      
-
-      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans modal-elastic">{toastMsg}</div>}
+      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
 
       {modalImportarAbierto && (
         <ModalImportarPin onClose={() => setModalImportarAbierto(false)} onSave={() => setModalImportarAbierto(false)} />
@@ -561,7 +538,7 @@ export default function App() {
       )}
 
       {/* Encabezado */}
-      <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9] interactive-lift">
+      <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9]">
         <div className="flex items-center gap-3 overflow-hidden">
           <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-base" editable={true} onFotoChange={handleFotoPerfilUpdate} />
           <div className="overflow-hidden">
@@ -584,7 +561,6 @@ export default function App() {
         {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
-          {/* Sub-Pestañas Niveladas */}
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
             <button
               onClick={() => setSubTabInicio('progreso')}
@@ -684,7 +660,7 @@ export default function App() {
                     ✦ Foto de hoy publicada
                   </span>
                 ) : (
-                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium animate-pulse flex items-center gap-1.5 active:scale-95 transition-transform duration-100">
+                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium flex items-center gap-1.5">
                     <i className="fa-solid fa-camera"></i> publicar foto
                   </button>
                 )}
@@ -693,7 +669,7 @@ export default function App() {
               {!haPublicadoMomentoHoy && (
                 <div 
                   onClick={() => setMostrarModalMomento(true)}
-                  className="p-4 bg-[#23211e] text-[#ffffee] rounded-2xl flex justify-between items-center modal-elastic cursor-pointer hover:bg-[#383531] transition-all active:scale-[0.98] duration-100 shadow-md border border-[#23211e]"
+                  className="p-4 bg-[#23211e] text-[#ffffee] rounded-2xl flex justify-between items-center cursor-pointer hover:bg-[#383531] transition-all shadow-md border border-[#23211e]"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#ffffee] text-[#23211e] flex items-center justify-center shrink-0 shadow-sm font-bold text-lg">
@@ -734,7 +710,7 @@ export default function App() {
 
                           {estaBloqueado && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-3">
-                              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg animate-pulse font-bold">
+                              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg font-bold">
                                 ✦
                               </div>
                               <div className="space-y-1">
@@ -745,7 +721,7 @@ export default function App() {
                               </div>
                               <button
                                 onClick={() => setMostrarModalMomento(true)}
-                                className="mt-1 bg-white text-[#23211e] px-4 py-2 rounded-xl text-xs font-bold font-sans shadow-lg hover:bg-[#ffffee] active:scale-95 transition-all duration-100 flex items-center gap-1.5"
+                                className="mt-1 bg-white text-[#23211e] px-4 py-2 rounded-xl text-xs font-bold font-sans shadow-lg hover:bg-[#ffffee] flex items-center gap-1.5"
                               >
                                 <span>Desbloquear instante</span>
                               </button>
@@ -770,7 +746,7 @@ export default function App() {
                 <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
               ) : (
                 publicacionesMuro.map((item, idx) => (
-                  <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 flex gap-3 items-center interactive-lift">
+                  <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 flex gap-3 items-center">
                     <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
                     <div className="flex flex-col space-y-1 w-full">
                       <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
@@ -799,9 +775,10 @@ export default function App() {
           }} />
         </div>
 
-        {/* HABITACIÓN */}
+        {/* HABITACIÓN - Pasa correctamente las props de Supabase, refresco y mensajes */}
         <div style={{ display: seccionApp === 'habitacion' ? 'block' : 'none' }} className="page-transition">
           <SeccionHabitacion
+            supabase={supabase}
             sesion={sesion}
             miPagina={miPagina}
             libroActual={libroActual}
@@ -819,6 +796,8 @@ export default function App() {
             setLibroSeleccionadoDetalle={setLibroSeleccionadoDetalle}
             setMostrarModalShare={setMostrarModalShare}
             registrarActividadPresencia={registrarActividadPresencia}
+            cargarDatosSupabase={cargarDatosSupabase}
+            mostrarToast={mostrarToast}
             safeSet={safeSet}
             AvatarUsuaria={AvatarUsuaria}
           />
@@ -885,7 +864,7 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => { if (bloqueado) setMostrarModalUpgrade(true); else setSeccionApp(tab.id); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-all duration-200 hover:-translate-y-0.5 active:scale-95 capitalize min-h-[40px] ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-all duration-200 capitalize min-h-[40px] ${
                 seccionApp === tab.id && !bloqueado
                   ? 'bg-[#23211e] text-[#ffffee]'
                   : 'text-[#75706b] hover:text-[#23211e]'
