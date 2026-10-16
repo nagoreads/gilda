@@ -61,9 +61,14 @@ export default function SeccionComunidad({
     }
   }, [chatModo, destinatarioPrivado, chatMsgs, sesion, supabase, cargarDatosSupabase]);
 
+  // Scroll instantáneo y directo al último mensaje al cargar o cambiar de modo
   useEffect(() => {
     if (subTabComunidad === 'chat') {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // Usamos un pequeño micro-timeout para asegurar que el DOM ha pintado las burbujas
+      const timer = setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'instant', block: 'end' });
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [chatMsgs, chatModo, subTabComunidad, destinatarioPrivado]);
 
