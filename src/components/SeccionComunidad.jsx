@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import MapaGilda from '../MapaGilda';
 import BuscadorLibros from '../BuscadorLibros';
 import PortadaLibro from '../PortadaLibro';
@@ -61,14 +61,11 @@ export default function SeccionComunidad({
     }
   }, [chatModo, destinatarioPrivado, chatMsgs, sesion, supabase, cargarDatosSupabase]);
 
-  // Scroll instantáneo y directo al último mensaje al cargar o cambiar de modo
-  useEffect(() => {
+  // useLayoutEffect se ejecuta de forma síncrona ANTES de que el navegador pinte la pantalla,
+  // evitando por completo el parpadeo y colocando el chat abajo del todo de forma instantánea.
+  useLayoutEffect(() => {
     if (subTabComunidad === 'chat') {
-      // Usamos un pequeño micro-timeout para asegurar que el DOM ha pintado las burbujas
-      const timer = setTimeout(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'instant', block: 'end' });
-      }, 50);
-      return () => clearTimeout(timer);
+      chatEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
     }
   }, [chatMsgs, chatModo, subTabComunidad, destinatarioPrivado]);
 
