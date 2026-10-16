@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Cliente de respaldo seguro con tu clave real y oficial de Supabase
 const supabaseUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjA2MzUsImV4cCI6MjEwNjU5NjYzNX0.n9KPVdYVDQ_l3WtFCO0RVOMdAI_OLKYNLhHdg34EKK0";
 const fallbackClient = createClient(supabaseUrl, supabaseKey);
@@ -12,7 +11,6 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
   const [progresoTexto, setProgresoTexto] = useState('');
   const [librosProcesados, setLibrosProcesados] = useState([]);
 
-  // Silenciamos globalmente los errores de cuota del localStorage para que no interfieran
   useEffect(() => {
     try {
       const originalSetItem = Storage.prototype.setItem;
@@ -59,6 +57,9 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             } catch (e) {}
           }
 
+          // Imagen de portada estable que carga perfectamente sin errores 404
+          const portadaPorDefecto = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&q=80';
+
           libros.push({
             email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
             nombre: sesion?.nombre || 'Socia',
@@ -67,7 +68,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
             estado: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 'leido' : 'pendiente',
             pagina: estante.toLowerCase().includes('read') && !estante.toLowerCase().includes('to-read') ? 100 : 0,
             paginas: 100,
-            portada: 'https://images.weserv.nl/?url=https://i.imgur.com/Q9yK5aI.png&w=300&h=450&fit=contain'
+            portada: portadaPorDefecto
           });
         }
       }
@@ -119,7 +120,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
     try {
       const client = (supabase && typeof supabase.from === 'function') ? supabase : fallbackClient;
 
-      const tamanoLote = 30; // Lotes estables de 30 en 30 para Supabase
+      const tamanoLote = 30;
       const total = librosProcesados.length;
 
       for (let i = 0; i < total; i += tamanoLote) {
