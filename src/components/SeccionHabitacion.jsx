@@ -126,7 +126,7 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Guardar libro de forma instantánea sin bloquear la interfaz
+  // Inserción instantánea (optimista) en pantalla + guardado en Supabase
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -143,6 +143,7 @@ export default function SeccionHabitacion({
     const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
 
     const nuevoLibro = {
+      id: Date.now(), // ID temporal para renderizado inmediato
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',
       libro: tituloClean,
@@ -154,19 +155,33 @@ export default function SeccionHabitacion({
       portada: libroSeleccionado.portada
     };
 
-    // 1. Cerramos el buscador al instante para no congelar la pantalla
+    // 1. Cerramos el buscador y mostramos el libro INSTANTÁNEAMENTE en pantalla
     setMostrarBuscadorOL(false);
-    if (typeof mostrarToast === 'function') mostrarToast('Guardando libro...');
+    if (Array.isArray(todosMisLibrosEstanteria)) {
+      todosMisLibrosEstanteria.push(nuevoLibro);
+    }
+    if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido a tu estantería!');
 
     try {
-      // 2. Enviamos a Supabase en segundo plano
-      const { error } = await activeClient.from('personal_readings').insert([nuevoLibro]);
-      if (error) console.error("Error al guardar en Supabase:", error);
-      
-      // 3. Recargamos la estantería en segundo plano
-      if (typeof cargarDatosSupabase === 'function') cargarDatosSupabase();
+      // 2. Insertamos en Supabase en segundo plano
+      const { data, error } = await activeClient.from('personal_readings').insert([{
+        email: nuevoLibro.email,
+        nombre: nuevoLibro.nombre,
+        libro: nuevoLibro.libro,
+        titulo: nuevoLibro.titulo,
+        autora: nuevoLibro.autora,
+        estado: nuevoLibro.estado,
+        pagina: nuevoLibro.pagina,
+        paginas: nuevoLibro.paginas,
+        portada: nuevoLibro.portada
+      }]).select();
+
+      if (error) console.error("Error al persistir en Supabase:", error);
+
+      // 3. Recargamos la base de datos para sincronizar los IDs reales
+      if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
     } catch (err) {
-      console.error("Error al añadir libro:", err);
+      console.error("Excepción al guardar libro:", err);
     } finally {
       setCargandoGuardar(false);
     }
