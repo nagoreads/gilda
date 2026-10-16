@@ -53,7 +53,7 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función para cambiar de estado (estilo Goodreads) directamente desde la tarjeta del libro
+  // Función para cambiar de estado al estilo Goodreads desde la tarjeta
   const cambiarEstadoLibro = async (libroId, nuevoEstado) => {
     try {
       const { error } = await supabase
@@ -70,14 +70,13 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Función para guardar el libro seleccionado del buscador de Open Library
+  // Función para guardar el libro seleccionado desde Open Library en Supabase
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     let emailUsuario = sesion?.email;
     if (!emailUsuario) {
       try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
     }
 
-    // Mapear la pestaña activa al estado correspondiente de la base de datos
     let estadoBD = 'pendiente';
     if (tabEstanteria === 'leyendo') estadoBD = 'leyendo';
     else if (tabEstanteria === 'leidos') estadoBD = 'leido';
@@ -94,7 +93,6 @@ export default function SeccionHabitacion({
     };
 
     try {
-      // Evitar duplicados exactos para esta usuaria
       const { data: existentes } = await supabase
         .from('personal_readings')
         .select('libro')
@@ -298,7 +296,6 @@ export default function SeccionHabitacion({
       {/* Renderizado del Modal de Importación */}
       {mostrarModalBiblioteca && (
         <ModalImportarBiblioteca 
-          onChildClose={() => setMostrarModalBiblioteca(false)}
           onClose={() => setMostrarModalBiblioteca(false)} 
           supabase={supabase}
           sesion={sesion}
