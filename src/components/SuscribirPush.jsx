@@ -88,8 +88,7 @@ export default function SuscribirPush({ sesion, supabase }) {
     await supabase.from('push_subscriptions').upsert([{
       email: (sesion.email || '').toLowerCase().trim(),
       endpoint: endpoint,
-      p256dh: subData.keys?.p256dh || '',
-      auth: subData.keys?.auth || '',
+      subscription: subData, // Guardamos el objeto completo JSONB que espera tu tabla
       preferencias: nuevasPrefs
     }], { onConflict: 'endpoint' });
   };
