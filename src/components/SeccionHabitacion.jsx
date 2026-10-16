@@ -214,15 +214,11 @@ export default function SeccionHabitacion({ supabase,
       </div>
     
        
-          onImportSuccess={(libros) => {
-            // Integramos los libros importados en la estantería o guardamos localmente/supabase
-            if (typeof guardarLibroPersonal === "function" && libros.length > 0) {
-              libros.forEach(lib => guardarLibroPersonal({ titulo: lib.titulo, autor: lib.autor }));
-            }
-          }}
-          mostrarToast={(msg) => console.log(msg)}
-        />
+          
       )}
+    
+      
+    
     
       {mostrarModalBiblioteca && (
         <ModalImportarBiblioteca 
