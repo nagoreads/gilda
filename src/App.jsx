@@ -382,10 +382,489 @@ export default function App() {
     }
   };
 
-  const libroActual = useMemo(() => lecturas[0] || { tituloEl log de Vercel marca el error exacto:
+  const libroActual = useMemo(() => lecturas[0] || { titulo: 'La campana de cristal', autora: 'Sylvia Plath', paginas_totales: 280, portada: '' }, [lecturas]);
+  const porcentajeLibro = useMemo(() => Math.min(Math.round((miPagina / Number(libroActual.paginas_totales || 280)) * 100), 100), [miPagina, libroActual]);
 
-> `Could not resolve "./components/SuscribirPush" from "src/App.jsx"`
+  const todosMisLibrosEstanteria = useMemo(() => sesion ? lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()) : [], [lecturasPersonales, sesion]);
+  const librosBibliotecaVisibles = useMemo(() => todosMisLibrosEstanteria.filter(item => (item.estado || 'leyendo') === tabEstanteria), [todosMisLibrosEstanteria, tabEstanteria]);
 
-En la parte superior de tu archivo `src/App.jsx` había una línea importando `SuscribirPush`:
-```javascript
-import SuscribirPush from './components/SuscribirPush';
+  const miembrosEdificio = useMemo(() => {
+    return usuariasClub.map(u => {
+      const emailU = (u.email || '').toLowerCase().trim();
+      const esYo = emailU === (sesion?.email || '').toLowerCase().trim();
+      const nombreRealU = u.nombre ? u.nombre.trim() : (u.email ? u.email.split('@')[0] : 'gilda');
+      const misPersonales = lecturasPersonales.filter(l => (l.email || '').toLowerCase().trim() === emailU && (l.estado || 'leyendo') === 'leyendo');
+      return {
+        ...u,
+        nombre: esYo ? (nombreUsuarioPersonalizado || nombreRealU) : nombreRealU,
+        foto_perfil: esYo ? (fotoPerfilPersonalizada || u.foto_perfil) : u.foto_perfil,
+        pagina: esYo ? miPagina : Number(u.pagina || 0),
+        estaLeyendo: esYo ? isReadingNow : (Number(u.pagina || 0) > 0 || misPersonales.length > 0),
+        misLecturasPersonales: misPersonales
+      };
+    });
+  }, [usuariasClub, sesion, nombreUsuarioPersonalizado, fotoPerfilPersonalizada, miPagina, isReadingNow, lecturasPersonales]);
+
+  const modalidadLimpia = (sesion?.modalidad || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const esRestringida = modalidadLimpia.includes('cotilla') || modalidadLimpia.includes('satelite');
+  const esAdministradora = String(sesion?.email || '').trim().toLowerCase() === EMAIL_ADMINISTRADORA;
+
+  const momentosGilda = useMemo(() => muroActividad.filter(item => item.tipo === 'momento_gilda'), [muroActividad]);
+  const publicacionesMuro = useMemo(() => muroActividad.filter(item => item.tipo !== 'momento_gilda'), [muroActividad]);
+
+  if (esPaginaGracias) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee]">
+        <div className="editorial-card max-w-md w-full p-8 text-center space-y-6 border border-[#e8e4d9]">
+          <h1 className="font-babydoll text-6xl text-[#23211e] font-bold">gracias</h1>
+          <p className="text-xs text-[#75706b] font-sans">Tu espacio ya está listo para empezar.</p>
+          <a href="/" className="block w-full editorial-btn py-3 text-xs font-medium text-center">Ir al club</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (!supabaseSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 w-full py-12 bg-[#ffffee] page-transition">
+        {vistaAcceso === 'menu' ? (
+          <div className="w-full max-w-md text-center animate-fade-in">
+            <div className="text-center mb-2 flex flex-col items-center">
+              <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium hover:text-[#23211e] transition-colors cursor-default">club de lectura, mailclub y comunidad</p>
+              <div className="flex justify-center my-0">
+                <img 
+                  src="/icon-192.png" 
+                  alt="Gilda" 
+                  className="w-56 h-56 object-contain hover:scale-105 transition-all duration-300 ease-out cursor-pointer" 
+                  title="¡Hola!"
+                />
+              </div>
+              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4">gilda</h1>
+            </div>
+
+            <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
+              <div>
+                <label className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
+                <input 
+                  type="email" 
+                  placeholder="tuemail@ejemplo.com" 
+                  value={emailLogin} 
+                  onChange={e => setEmailLogin(e.target.value)} 
+                  disabled={esperandoToken} 
+                  required 
+                  className="w-full editorial-input px-3.5 py-2.5 text-xs" 
+                />
+              </div>
+              
+              {esperandoToken && (
+                <div className="animate-fade-in">
+                  <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
+                  <input 
+                    type="text" 
+                    placeholder="123456" 
+                    value={tokenLogin} 
+                    onChange={e => setTokenLogin(e.target.value)} 
+                    required 
+                    className="w-full editorial-input px-3.5 py-2.5 text-xs text-center tracking-[0.5em] font-bold" 
+                    maxLength={6} 
+                  />
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                disabled={loadingAuth} 
+                className="w-full editorial-btn py-3 text-xs font-medium"
+              >
+                {loadingAuth ? "procesando..." : (esperandoToken ? "entrar al club" : "enviadme la llave por correo")}
+              </button>
+              
+              {!esperandoToken && (
+                <div className="pt-3 flex justify-center items-center text-xs text-[#75706b] border-t border-[#e8e4d9]/60">
+                  <button 
+                    type="button" 
+                    onClick={() => setVistaAcceso("crea-tu-gilda")} 
+                    className="hover:text-[#23211e] transition-colors border-b border-transparent hover:border-[#23211e]"
+                  >
+                    ← ver las formas de estar en gilda
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+        ) : (
+          <div className="w-full max-w-md animate-fade-in">
+            <div className="text-center mb-2 flex flex-col items-center">
+              <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium">club de lectura, mailclub y comunidad</p>
+              <div className="flex justify-center my-0">
+                <img src="/icon-192.png" alt="Gilda" className="w-56 h-56 object-contain" />
+              </div>
+              <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4">gilda</h1>
+            </div>
+            <div className="pt-2">
+              <CreaTuGilda
+                enEntrarGratis={() => setVistaAcceso('menu')}
+                enIrALogin={() => setVistaAcceso('menu')}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
+      
+      {/* ✦ BANNER DE NOTIFICACIONES FIJO ARRIBA ✦ */}
+      <BannerNotificaciones />
+
+      {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
+
+      {modalImportarAbierto && (
+        <ModalImportarPin onClose={() => setModalImportarAbierto(false)} onSave={() => setModalImportarAbierto(false)} />
+      )}
+
+      {mostrarModalUpgrade && <ModalUpgrade onClose={() => setMostrarModalUpgrade(false)} />}
+
+      {mostrarModalShare && (
+        <ModalCompartirStory onClose={() => setMostrarModalShare(false)} usuario={nombreUsuarioPersonalizado || sesion.nombre} libro={libroActual} pagina={miPagina} citas={misCitas} decoracion="ninguna" misLibros={lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase())} onPublicarCita={publicarCitaEnMuro} sesion={sesion} />
+      )}
+
+      {mostrarModalMomento && (
+        <ModalMomentoGilda onClose={() => setMostrarModalMomento(false)} sesion={sesion} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} mostrarToast={mostrarToast} />
+      )}
+
+      {libroSeleccionadoDetalle && (
+        <ModalDetalleLibro libro={libroSeleccionadoDetalle} onClose={() => setLibroSeleccionadoDetalle(null)} sesion={sesion} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} />
+      )}
+
+      <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9]">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-base" editable={true} onFotoChange={handleFotoPerfilUpdate} />
+          <div className="overflow-hidden">
+            <h2 className="font-babydoll font-bold text-lg leading-none truncate text-[#23211e]">{nombreUsuarioPersonalizado || sesion.nombre}</h2>
+            <span className="text-[11px] text-[#75706b] font-sans">{sesion.modalidad}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {esAdministradora && (
+            <button onClick={() => setSeccionApp('admin')} className={`p-2 rounded-xl border transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center ${seccionApp === 'admin' ? 'bg-[#23211e] text-[#ffffee]' : 'bg-white text-[#23211e] border-[#e8e4d9]'}`}>
+              <i className="fa-solid fa-screwdriver-wrench text-xs"></i>
+            </button>
+          )}
+          <button onClick={() => supabase.auth.signOut()} className="text-[#75706b] hover:text-[#23211e] p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"><i className="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+        </div>
+      </header>
+
+      <main className="w-full flex-grow space-y-4">
+        <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
+          
+          <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
+            <button
+              onClick={() => setSubTabInicio('progreso')}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'progreso' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
+            >
+              Lecturas
+            </button>
+            <button
+              onClick={() => setSubTabInicio('aqui_ahora')}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] relative ${subTabInicio === 'aqui_ahora' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
+            >
+              aquí y ahora ✦
+              {!haPublicadoMomentoHoy && (
+                <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full animate-pulse"></span>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                if (esRestringida) setMostrarModalUpgrade(true);
+                else setSubTabInicio('muro');
+              }}
+              className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'} ${esRestringida ? 'opacity-60' : ''}`}
+            >
+              Muro {esRestringida && '✦'}
+            </button>
+          </div>
+
+          {subTabInicio === 'progreso' && (
+            <>
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
+                <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-2">
+                   <h3 className="font-babydoll text-xl font-bold">Progreso</h3>
+                   <button onClick={() => setMostrarModalShare(true)} className="text-xs font-medium font-sans text-[#23211e] bg-white border border-[#e8e4d9] px-3 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">
+                     Compartir
+                   </button>
+                </div>
+                <div className="flex gap-4 items-center">
+                  <PortadaLibro titulo={libroActual.titulo} autora={libroActual.autora} portada={libroActual.portada} size="large" />
+                  <div className="space-y-1.5 w-full">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-[#75706b] font-sans">Leyendo juntas</span>
+                    <h2 className="font-babydoll text-2xl font-bold leading-tight text-[#23211e]">{libroActual.titulo}</h2>
+                    <p className="text-xs text-[#75706b] italic font-sans">{libroActual.autora}</p>
+                    <div className="pt-1">
+                      <div className="flex justify-between text-xs text-[#75706b] mb-1 font-sans"><span>Avance</span><span>{porcentajeLibro}%</span></div>
+                      <div className="w-full bg-[#ffffee] rounded-full h-1.5 border border-[#e8e4d9]"><div className="bg-[#23211e] h-full rounded-full transition-all duration-300" style={{width: `${porcentajeLibro}%`}}></div></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[#e8e4d9] flex items-center justify-between">
+                  <span className="text-xs text-[#75706b] font-sans">Página actual:</span>
+                  <input type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
+                    await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
+                    mostrarToast('Progreso guardado');
+                  }} className="editorial-input w-20 text-center py-1 text-xs font-medium" />
+                </div>
+              </div>
+
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-babydoll text-xl font-bold">Ubicación</h3>
+                  <button type="button" onClick={obtenerUbicacionActual} className="text-xs font-medium font-sans bg-white border border-[#e8e4d9] text-[#23211e] px-2.5 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">Detectar</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={e => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                </div>
+                <button onClick={async () => {
+                  safeSet('gilda_ciudad', miCiudadInput); safeSet('gilda_codigo_postal', miCodigoPostalInput);
+                  await supabase.from('profiles').update({ ciudad: miCiudadInput, codigo_postal: miCodigoPostalInput }).eq('email', sesion.email);
+                  mostrarToast('Ubicación guardada');
+                }} className="w-full editorial-btn py-2 text-xs font-medium">Guardar ubicación</button>
+              </div>
+
+              <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
+                <h3 className="font-babydoll text-xl font-bold">Calendario</h3>
+                <CalendarioInteractivo eventos={eventosCalendario} />
+              </div>
+
+              <div className="editorial-card p-4 space-y-3">
+                <MapaGilda usuarias={usuariasClub} normalizarUbicacion={normalizarUbicacion} geocodificarUbicacion={geocodificarUbicacion} formatearPais={formatearPais} />
+              </div>
+            </>
+          )}
+
+          {subTabInicio === 'aqui_ahora' && (
+            <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
+              <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
+                <div>
+                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
+                  <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
+                </div>
+                {estadoBeReal.publicado ? (
+                  <span className="text-[11px] font-sans font-medium text-[#23211e] bg-[#e8e4d9]/60 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold">
+                    ✦ Foto de hoy publicada
+                  </span>
+                ) : (
+                  <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <i className="fa-solid fa-camera"></i> publicar foto
+                  </button>
+                )}
+              </div>
+
+              {!haPublicadoMomentoHoy && (
+                <div 
+                  onClick={() => setMostrarModalMomento(true)}
+                  className="p-4 bg-[#23211e] text-[#ffffee] rounded-2xl flex justify-between items-center cursor-pointer hover:bg-[#383531] transition-all shadow-md border border-[#23211e]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#ffffee] text-[#23211e] flex items-center justify-center shrink-0 shadow-sm font-bold text-lg">
+                      ✦
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="font-babydoll font-bold text-base leading-tight">¡Sube tu instantánea de hoy!</p>
+                      <p className="text-[11px] opacity-85 font-sans leading-tight">Comparte tu lectura para desbloquear la comunidad</p>
+                    </div>
+                  </div>
+                  <i className="fa-solid fa-chevron-right text-xs opacity-70"></i>
+                </div>
+              )}
+
+              {momentosGilda.length === 0 ? (
+                <p className="text-xs text-[#75706b] italic font-sans py-8 text-center">Aún no hay instantáneas subidas hoy. ¡Sé la primera!</p>
+              ) : (
+                <div className="space-y-4">
+                  {momentosGilda.map((item, idx) => {
+                    const esMio = sesion?.email && (item.email || '').toLowerCase().trim() === sesion.email.toLowerCase();
+                    const estaBloqueado = !esMio && !haPublicadoMomentoHoy;
+
+                    return (
+                      <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
+                        </div>
+
+                        <div className="relative rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
+                          <img
+                            src={item.portada}
+                            alt="aquí y ahora"
+                            className={`w-full h-full object-cover transition-all duration-300 ${
+                              estaBloqueado ? 'blur-xl scale-105 select-none' : ''
+                            }`}
+                          />
+
+                          {estaBloqueado && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-3">
+                              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg font-bold">
+                                ✦
+                              </div>
+                              <div className="space-y-1">
+                                <p className="font-babydoll text-lg text-[#ffffee] font-bold">Instante reservado ✦</p>
+                                <p className="text-[11px] text-white/85 font-sans max-w-[210px] leading-relaxed mx-auto">
+                                  Comparte tu instantánea de hoy para ver qué está leyendo {item.nombre || 'esta gilda'}.
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setMostrarModalMomento(true)}
+                                className="mt-1 bg-white text-[#23211e] px-4 py-2 rounded-xl text-xs font-bold font-sans shadow-lg hover:bg-[#ffffee] flex items-center gap-1.5"
+                              >
+                                <span>Desbloquear instante</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {subTabInicio === 'muro' && (
+            <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-3">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">El muro del club</h3>
+              </div>
+              {publicacionesMuro.length === 0 ? (
+                <p className="text-xs text-[#75706b] italic font-sans py-4 text-center">Aún no hay publicaciones en el muro.</p>
+              ) : (
+                publicacionesMuro.map((item, idx) => (
+                  <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 flex gap-3 items-center">
+                    <PortadaLibro titulo={item.libro} portada={item.portada} size="thumb" />
+                    <div className="flex flex-col space-y-1 w-full">
+                      <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
+                      {item.cita ? (
+                        <blockquote className="border-l border-[#23211e] pl-2 font-babydoll text-base text-[#23211e]">“{item.cita}”</blockquote>
+                      ) : (
+                        <p className="text-xs font-sans text-[#75706b]">Ha leído <b>{item.libro}</b></p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+        </div>
+
+        <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="page-transition">
+          <EdificioClub AvatarUsuaria={AvatarUsuaria} usuarias={miembrosEdificio} libroActual={libroActual} sesionEmail={sesion?.email} chatBloqueado={esRestringida} onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} onAbrirPrivado={(socia) => {
+            if (esRestringida) { setMostrarModalUpgrade(true); return; }
+            setSeccionApp('comunidad');
+            setSubTabComunidad('chat');
+            setChatModo('privado');
+            setDestinatarioPrivado(socia);
+          }} />
+        </div>
+
+        <div style={{ display: seccionApp === 'habitacion' ? 'block' : 'none' }} className="page-transition">
+          <SeccionHabitacion
+            supabase={supabase}
+            sesion={sesion}
+            miPagina={miPagina}
+            libroActual={libroActual}
+            porcentajeLibro={porcentajeLibro}
+            todosMisLibrosEstanteria={todosMisLibrosEstanteria}
+            librosBibliotecaVisibles={librosBibliotecaVisibles}
+            tabEstanteria={tabEstanteria}
+            setTabEstanteria={setTabEstanteria}
+            isReadingNow={isReadingNow}
+            setIsReadingNow={setIsReadingNow}
+            fotoPerfilPersonalizada={fotoPerfilPersonalizada}
+            nombreUsuarioPersonalizado={nombreUsuarioPersonalizado}
+            handleFotoPerfilUpdate={handleFotoPerfilUpdate}
+            guardarLibroPersonal={guardarLibroPersonal}
+            setLibroSeleccionadoDetalle={setLibroSeleccionadoDetalle}
+            setMostrarModalShare={setMostrarModalShare}
+            registrarActividadPresencia={registrarActividadPresencia}
+            cargarDatosSupabase={cargarDatosSupabase}
+            mostrarToast={mostrarToast}
+            safeSet={safeSet}
+            AvatarUsuaria={AvatarUsuaria}
+          />
+        </div>
+
+        <div style={{ display: seccionApp === 'capitulos' ? 'block' : 'none' }} className="page-transition">
+          <TimelineCapitulos capitulos={capitulos} miPagina={miPagina} comentarios={comentarios} modalidadLimpia={modalidadLimpia} obtenerNombreReal={obtenerNombreReal} sesion={sesion} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} />
+        </div>
+
+        <div style={{ display: seccionApp === 'comunidad' ? 'block' : 'none' }} className="page-transition">
+          <SeccionComunidad
+            subTabComunidad={subTabComunidad}
+            setSubTabComunidad={setSubTabComunidad}
+            chatModo={chatModo}
+            setChatModo={setChatModo}
+            destinatarioPrivado={destinatarioPrivado}
+            setDestinatarioPrivado={setDestinatarioPrivado}
+            usuariasClub={usuariasClub}
+            chatMsgs={chatMsgs}
+            cafecitos={cafecitos}
+            propuestas={propuestas}
+            sesion={sesion}
+            nombreUsuarioPersonalizado={nombreUsuarioPersonalizado}
+            supabase={supabase}
+            cargarDatosSupabase={cargarDatosSupabase}
+            registrarActividadPresencia={registrarActividadPresencia}
+            mostrarToast={mostrarToast}
+            normalizarUbicacion={normalizarUbicacion}
+            geocodificarUbicacion={geocodificarUbicacion}
+            formatearPais={formatearPais}
+            formatearHoraWhatsApp={formatearHoraWhatsApp}
+            obtenerNombreReal={obtenerNombreReal}
+            IndicadorPresencia={IndicadorPresencia}
+            AvatarUsuaria={AvatarUsuaria}
+          />
+        </div>
+
+        <div style={{ display: seccionApp === 'admin' && esAdministradora ? 'block' : 'none' }} className="page-transition">
+          <SeccionAdmin
+            libroActual={libroActual}
+            chatMsgs={chatMsgs}
+            propuestas={propuestas}
+            supabase={supabase}
+            cargarDatosSupabase={cargarDatosSupabase}
+            mostrarToast={mostrarToast}
+          />
+        </div>
+      </main>
+
+      <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 pb-safe flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-3xl bg-[#ffffee]/90 backdrop-blur-md border-t border-[#e8e4d9] shadow-lg">
+        {[
+          { id: 'inicio', label: 'inicio' },
+          { id: 'edificio', label: 'casa' },
+          { id: 'habitacion', label: 'habitación' },
+          { id: 'capitulos', label: 'capítulos' },
+          { id: 'comunidad', label: 'comunidad' }
+        ].map(tab => {
+          const bloqueado = esRestringida && tab.id === 'comunidad';
+          return (
+            <button
+              key={tab.id}
+              onClick={() => { if (bloqueado) setMostrarModalUpgrade(true); else setSeccionApp(tab.id); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-all duration-200 capitalize min-h-[40px] ${
+                seccionApp === tab.id && !bloqueado
+                  ? 'bg-[#23211e] text-[#ffffee]'
+                  : 'text-[#75706b] hover:text-[#23211e]'
+              } ${bloqueado ? 'opacity-40' : ''}`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
