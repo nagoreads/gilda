@@ -33,6 +33,33 @@ export default function SeccionAdmin({
     mostrarToast('Mensaje retirado.');
   };
 
+const [tituloAviso, setTituloAviso] = useState('');
+  const [mensajeAviso, setMensajeAviso] = useState('');
+  const [enviandoAviso, setEnviandoAviso] = useState(false);
+
+  const manejarEnvioAviso = async (e) => {
+    e.preventDefault();
+    if (!tituloAviso.trim() || !mensajeAviso.trim()) return;
+
+    setEnviandoAviso(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enviar-aviso-club', {
+        body: { titulo: tituloAviso.trim(), mensaje: mensajeAviso.trim() },
+      });
+
+      if (error) throw error;
+
+      mostrarToast('¡Aviso enviado por correo a todas las gildas!');
+      setTituloAviso('');
+      setMensajeAviso('');
+    } catch (err) {
+      console.error('Error al enviar avisos:', err);
+      mostrarToast('Error al enviar los correos.');
+    } finally {
+      setEnviandoAviso(false);
+    }
+  };
+
   const adminEliminarPropuesta = async (idProp) => {
     if (!idProp) return;
     await supabase.from('proposals').delete().eq('id', idProp);

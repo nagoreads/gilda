@@ -17,6 +17,8 @@ import SeccionAdmin from './components/SeccionAdmin';
 import SuscribirPush from './components/SuscribirPush';
 import CreaTuGilda from './components/CreaTuGilda';
 
+import { BannerNotificaciones } from './BannerNotificaciones';
+
 import { supabase } from './context/ClubContext.jsx';
 
 const EMAIL_ADMINISTRADORA = 'ndnagore@gmail.com';
@@ -62,13 +64,11 @@ export default function App() {
     } catch { return fallback; }
   };
 
-  // Guardado seguro con liberación automática de caché si se supera el límite
   const safeSet = (key, val) => {
     try {
       localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.code === 22) {
-        // Purgar todas las claves de caché pesadas
         Object.keys(localStorage).forEach(k => {
           if (k.startsWith('gilda_cache_')) {
             localStorage.removeItem(k);
@@ -76,9 +76,7 @@ export default function App() {
         });
         try {
           localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
-        } catch {
-          // Si continúa lleno, se ignora el guardado en localStorage sin detener la app
-        }
+        } catch {}
       }
     }
   };
@@ -114,7 +112,6 @@ export default function App() {
   const [eventosCalendario, setEventosCalendario] = useState(() => safeGetJSON('gilda_cache_calendario', []));
   const [muroActividad, setMuroActividad] = useState(() => safeGetJSON('gilda_cache_muro', []));
   const [cafecitos, setCafecitos] = useState(() => safeGetJSON('gilda_cache_cafecitos', []));
-  const [alertaMomento, setAlertaMomento] = useState(null);
 
   const [miPagina, setMiPagina] = useState(0);
   const [miCiudadInput, setMiCiudadInput] = useState(() => safeGet('gilda_ciudad', ''));
@@ -155,7 +152,6 @@ export default function App() {
 
   const mostrarToast = (texto) => { setToastMsg(texto); setTimeout(() => setToastMsg(null), 3000); };
 
-  // Consulta optimizada a Supabase con límite de registros para controlar el Egress
   const cargarDatosSupabase = async () => {
     try {
       const [
@@ -328,15 +324,6 @@ export default function App() {
     const diff = (new Date() - new Date(timestamp)) / 1000 / 60;
     if (isNaN(diff) || diff >= 15) return <span className="w-2 h-2 rounded-full bg-[#e8e4d9] inline-block shrink-0"></span>;
     return <span className={`w-2 h-2 rounded-full ${diff < 3 ? 'bg-[#23211e] animate-pulse' : 'bg-[#75706b]'} inline-block shrink-0`}></span>;
-  };
-
-  const formatearHoraWhatsApp = (timestampOrStr) => {
-    if (timestampOrStr) {
-      const d = new Date(timestampOrStr);
-      if (!isNaN(d.getTime())) return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    }
-    const ahora = new Date();
-    return `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
   };
 
   const handleFotoPerfilUpdate = async (base64Img) => {
@@ -520,6 +507,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
+      
+      {/* ✦ AQUÍ ESTÁ EL BANNER DE NOTIFICACIONES FIJO ARRIBA ✦ */}
+      <BannerNotificaciones />
+
       {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
 
       {modalImportarAbierto && (
@@ -540,7 +531,6 @@ export default function App() {
         <ModalDetalleLibro libro={libroSeleccionadoDetalle} onClose={() => setLibroSeleccionadoDetalle(null)} sesion={sesion} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} />
       )}
 
-      {/* Encabezado */}
       <header className="w-full mb-5 flex justify-between items-center bg-white p-3.5 rounded-2xl border border-[#e8e4d9]">
         <div className="flex items-center gap-3 overflow-hidden">
           <AvatarUsuaria foto={fotoPerfilPersonalizada} nombre={nombreUsuarioPersonalizado || sesion.nombre} sizeClass="w-9 h-9" textClass="text-base" editable={true} onFotoChange={handleFotoPerfilUpdate} />
@@ -559,9 +549,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenido Principal */}
       <main className="w-full flex-grow space-y-4">
-        {/* INICIO */}
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
@@ -591,7 +579,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* SUBTAB 1: LECTURAS */}
           {subTabInicio === 'progreso' && (
             <>
               <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
@@ -650,7 +637,6 @@ export default function App() {
             </>
           )}
 
-          {/* SUBTAB 2: AQUÍ Y AHORA ✦ */}
           {subTabInicio === 'aqui_ahora' && (
             <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
               <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
@@ -739,7 +725,6 @@ export default function App() {
             </div>
           )}
 
-          {/* SUBTAB 3: EL MURO */}
           {subTabInicio === 'muro' && (
             <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-3">
               <div className="flex justify-between items-center mb-1">
@@ -767,7 +752,6 @@ export default function App() {
 
         </div>
 
-        {/* EDIFICIO / CASA */}
         <div style={{ display: seccionApp === 'edificio' ? 'block' : 'none' }} className="page-transition">
           <EdificioClub AvatarUsuaria={AvatarUsuaria} usuarias={miembrosEdificio} libroActual={libroActual} sesionEmail={sesion?.email} chatBloqueado={esRestringida} onAddWantToRead={(t, a, p) => guardarLibroPersonal(t, 0, 'want_to_read', a, p)} onAbrirPrivado={(socia) => {
             if (esRestringida) { setMostrarModalUpgrade(true); return; }
@@ -778,7 +762,6 @@ export default function App() {
           }} />
         </div>
 
-        {/* HABITACIÓN - Pasa correctamente las props de Supabase, refresco y mensajes */}
         <div style={{ display: seccionApp === 'habitacion' ? 'block' : 'none' }} className="page-transition">
           <SeccionHabitacion
             supabase={supabase}
@@ -806,12 +789,10 @@ export default function App() {
           />
         </div>
 
-        {/* CAPÍTULOS / TIMELINE */}
         <div style={{ display: seccionApp === 'capitulos' ? 'block' : 'none' }} className="page-transition">
           <TimelineCapitulos capitulos={capitulos} miPagina={miPagina} comentarios={comentarios} modalidadLimpia={modalidadLimpia} obtenerNombreReal={obtenerNombreReal} sesion={sesion} nombreUsuarioPersonalizado={nombreUsuarioPersonalizado} supabase={supabase} cargarDatosSupabase={cargarDatosSupabase} registrarActividadPresencia={registrarActividadPresencia} mostrarToast={mostrarToast} />
         </div>
 
-        {/* COMUNIDAD */}
         <div style={{ display: seccionApp === 'comunidad' ? 'block' : 'none' }} className="page-transition">
           <SeccionComunidad
             subTabComunidad={subTabComunidad}
@@ -840,7 +821,6 @@ export default function App() {
           />
         </div>
 
-        {/* ADMIN */}
         <div style={{ display: seccionApp === 'admin' && esAdministradora ? 'block' : 'none' }} className="page-transition">
           <SeccionAdmin
             libroActual={libroActual}
@@ -853,7 +833,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Navegación Inferior Flotante */}
       <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 pb-safe flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-3xl bg-[#ffffee]/90 backdrop-blur-md border-t border-[#e8e4d9] shadow-lg">
         {[
           { id: 'inicio', label: 'inicio' },
