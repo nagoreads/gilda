@@ -11,50 +11,40 @@ export default function BuscadorOpenLibrary({ onSeleccionarLibro }) {
     setBuscando(true);
 
     try {
-      // Búsqueda principal en Google Books restringida a español para portadas de calidad
-      const resGB = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=10`);
-      const dataGB = await resGB.json();
+      // Consulta directa a Open Library
+      const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=25`);
+      if (!res.ok) throw new Error("Error en la red");
+      const data = await res.json();
 
-      let libros = [];
+      let docs = data.docs || [];
 
-      if (dataGB.items && dataGB.items.length > 0) {
-        libros = dataGB.items.map(item => {
-          const info = item.volumeInfo || {};
-          let portadaUrl = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail;
-          
-          if (portadaUrl && portadaUrl.startsWith('http:')) {
-            portadaUrl = portadaUrl.replace('http:', 'https:');
-          }
+      // Priorizar ediciones publicadas en idioma español ('spa' o 'spanish')
+      docs.sort((a, b) => {
+        const aEsSpa = a.language?.some(l => l.toLowerCase().includes('spa')) ? 1 : 0;
+        const bEsSpa = b.language?.some(l => l.toLowerCase().includes('spa')) ? 1 : 0;
+        return bEsSpa - aEsSpa;
+      });
 
-          return {
-            titulo: info.title || 'Título desconocido',
-            autora: info.authors ? info.authors.join(', ') : 'Autora desconocida',
-            paginas: info.pageCount || 200,
-            portada: portadaUrl || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
-          };
-        });
-      }
+      const librosFormateados = docs.slice(0, 10).map(doc => {
+        let portadaUrl = 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api';
+        
+        if (doc.cover_i) {
+          portadaUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
+        } else if (doc.isbn && doc.isbn.length > 0) {
+          portadaUrl = `https://covers.openlibrary.org/b/isbn/${doc.isbn[0]}-M.jpg`;
+        }
 
-      // Si Google Books no devuelve suficientes resultados, se complementa con Open Library
-      if (libros.length < 3) {
-        const resOL = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`);
-        const dataOL = await resOL.json();
-
-        const librosOL = (dataOL.docs || []).map(doc => ({
-          titulo: doc.title,
+        return {
+          titulo: doc.title || 'Título desconocido',
           autora: doc.author_name ? doc.author_name.join(', ') : 'Autora desconocida',
           paginas: doc.number_of_pages_median || 200,
-          portada: doc.cover_i 
-            ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-            : 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'
-        }));
+          portada: portadaUrl
+        };
+      });
 
-        libros = [...libros, ...librosOL];
-      }
-
-      setResultados(libros);
+      setResultados(librosFormateados);
     } catch (err) {
-      console.error("Error al buscar libros:", err);
+      console.error("Error buscando libros:", err);
     } finally {
       setBuscando(false);
     }
@@ -67,7 +57,7 @@ export default function BuscadorOpenLibrary({ onSeleccionarLibro }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar libro o autora (ediciones en español)..."
+          placeholder="Buscar libro o autora..."
           className="flex-1 px-3 py-2 text-xs bg-white border border-[#e8e4d9] rounded-xl focus:outline-none focus:border-[#23211e]"
         />
         <button
@@ -83,24 +73,24 @@ export default function BuscadorOpenLibrary({ onSeleccionarLibro }) {
         <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
           {resultados.map((item, idx) => (
             <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-xl border border-[#e8e4d9]">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0 pr-2">
                 <img 
                   src={item.portada} 
                   alt={item.titulo} 
-                  className="w-10 h-14 object-cover rounded shadow-sm bg-[#f8f6f0]"
+                  className="w-10 h-14 object-cover rounded shadow-sm bg-[#f8f6f0] shrink-0"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api';
                   }}
                 />
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-bold text-[#23211e] line-clamp-1">{item.titulo}</p>
-                  <p className="text-[10px] text-[#75706b]">{item.autora}</p>
+                  <p className="text-[10px] text-[#75706b] line-clamp-1">{item.autora}</p>
                 </div>
               </div>
               <button
                 onClick={() => onSeleccionarLibro(item)}
-                className="px-3 py-1 bg-[#23211e] text-[#ffffee] text-[10px] font-semibold rounded-lg hover:opacity-90 transition-all min-h-[32px]"
+                className="px-3 py-1 bg-[#23211e] text-[#ffffee] text-[10px] font-semibold rounded-lg hover:opacity-90 transition-all shrink-0 min-h-[32px]"
               >
                 Añadir
               </button>

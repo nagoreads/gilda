@@ -63,7 +63,7 @@ export default function SeccionHabitacion({
   const obtenerTituloLibro = (lib) => lib.libro || lib.titulo || lib.title || "";
   const obtenerIdLibro = (lib) => lib.id || lib.id_libro;
 
-  // Cambiar de estante o borrar de manera instantánea y persistente
+  // Acción unificada para cambiar de estante o eliminar
   const manejarAccionLibro = async (lib, nuevaAccion) => {
     const idLibro = obtenerIdLibro(lib);
     const tituloLibro = obtenerTituloLibro(lib);
@@ -72,53 +72,49 @@ export default function SeccionHabitacion({
     if (!emailUsuario) {
       try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
     }
-    const emailFiltro = emailUsuario ? emailUsuario.toLowerCase().trim() : lib.email;
+    const emailFiltro = emailUsuario ? emailUsuario.toLowerCase().trim() : (lib.email || '');
 
     if (nuevaAccion === 'eliminar') {
       if (!window.confirm(`¿Seguro que quieres eliminar "${tituloLibro}" de tu estantería?`)) return;
-
-      // Actualización optimista local
-      if (Array.isArray(todosMisLibrosEstanteria)) {
-        const idx = todosMisLibrosEstanteria.findIndex(item => obtenerTituloLibro(item) === tituloLibro);
-        if (idx !== -1) todosMisLibrosEstanteria.splice(idx, 1);
-      }
-
-      if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado de la estantería.');
 
       try {
         let res;
         if (idLibro) {
           res = await activeClient.from('personal_readings').delete().eq('id', idLibro);
         } else {
-          res = await activeClient.from('personal_readings').delete().eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
+          res = await activeClient.from('personal_readings').delete().eq('email', emailFiltro).eq('libro', tituloLibro);
         }
-        if (res.error) console.error("Error al borrar en Supabase:", res.error);
+        
+        if (res.error) throw res.error;
+
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
       } catch (err) {
-        console.error("Excepción al eliminar libro:", err);
+        console.error("Error al eliminar libro:", err);
+        if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
       }
     } else {
       // Cambio de estado (leyendo, pendiente, leido)
-      lib.estado = nuevaAccion; // Actualización visual inmediata
-
-      if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado.');
-
       try {
         let res;
         if (idLibro) {
           res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('id', idLibro);
         } else {
-          res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
+          res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('email', emailFiltro).eq('libro', tituloLibro);
         }
-        if (res.error) console.error("Error al actualizar estado en Supabase:", res.error);
+
+        if (res.error) throw res.error;
+
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado con éxito.');
       } catch (err) {
-        console.error("Excepción al cambiar de estante:", err);
+        console.error("Error al cambiar de estante:", err);
+        if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
       }
     }
   };
 
-  // Añadir libro de forma optimista
+  // Inserción en Supabase limpia (sin columnas no existentes)
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -134,12 +130,11 @@ export default function SeccionHabitacion({
 
     const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
 
-    const nuevoLibro = {
-      id: Date.now(),
+    // Payload ajustado exclusivamente a las columnas existentes en la tabla Supabase
+    const nuevoLibroBD = {
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',
       libro: tituloClean,
-      titulo: tituloClean,
       autora: libroSeleccionado.autora,
       estado: estadoBD,
       pagina: tabEstanteria === 'leidos' ? 100 : 0,
@@ -148,28 +143,21 @@ export default function SeccionHabitacion({
     };
 
     setMostrarBuscadorOL(false);
-    if (Array.isArray(todosMisLibrosEstanteria)) {
-      todosMisLibrosEstanteria.push(nuevoLibro);
-    }
-    if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido a tu estantería!');
 
     try {
-      const { error } = await activeClient.from('personal_readings').insert([{
-        email: nuevoLibro.email,
-        nombre: nuevoLibro.nombre,
-        libro: nuevoLibro.libro,
-        titulo: nuevoLibro.titulo,
-        autora: nuevoLibro.autora,
-        estado: nuevoLibro.estado,
-        pagina: nuevoLibro.pagina,
-        paginas: nuevoLibro.paginas,
-        portada: nuevoLibro.portada
-      }]);
+      const { error } = await activeClient.from('personal_readings').insert([nuevoLibroBD]);
 
-      if (error) console.error("Error persistiendo en Supabase:", error);
+      if (error) {
+        console.error("Error al persistir en Supabase:", error);
+        if (typeof mostrarToast === 'function') mostrarToast('Error al guardar en Supabase.');
+        return;
+      }
+
+      if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido a tu estantería!');
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
     } catch (err) {
       console.error("Excepción al guardar libro:", err);
+      if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
     } finally {
       setCargandoGuardar(false);
     }
