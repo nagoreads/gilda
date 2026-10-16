@@ -1,41 +1,41 @@
+import { useState } from 'react';
 import ModalImportarBiblioteca from './ModalImportarBiblioteca';
 import SuscribirPush from './SuscribirPush';
-import { useState } from 'react';
 import PortadaLibro from '../PortadaLibro';
 import BuscadorLibros from '../BuscadorLibros';
 import { LomoLibroEstanteria } from './DecoracionesHabitacion';
 
-export default function SeccionHabitacion({ supabase, 
-  sesion,
-  miPagina,
-  libroActual,
-  porcentajeLibro,
-  todosMisLibrosEstanteria,
-  librosBibliotecaVisibles,
+export default function SeccionHabitacion({ 
+  supabase, 
+  sesion, 
+  miPagina, 
+  libroActual, 
+  porcentajeLibro, 
+  todosMisLibrosEstanteria, 
+  librosBibliotecaVisibles, 
   tabEstanteria,
   setTabEstanteria,
+  busquedaLibro,
+  setBusquedaLibro,
+  guardarLibroPersonal,
+  eliminarLibroPersonal,
   isReadingNow,
   setIsReadingNow,
-  fotoPerfilPersonalizada,
-  nombreUsuarioPersonalizado,
-  handleFotoPerfilUpdate,
-  guardarLibroPersonal,
-  setLibroSeleccionadoDetalle,
-  setMostrarModalShare,
-  registrarActividadPresencia,
   safeSet,
-  AvatarUsuaria
+  registrarActividadPresencia,
+  setMostrarModalShare,
+  cargarDatosSupabase,
+  mostrarToast
 }) {
-  const [modoCreacionManual, setModoCreacionManual] = useState(false);
   const [mostrarModalBiblioteca, setMostrarModalBiblioteca] = useState(false);
-  const [libroPersonalInput, setLibroPersonalInput] = useState('');
-  const [paginaPersonalInput, setPaginaPersonalInput] = useState('');
-  const [manualTitulo, setManualTitulo] = useState('');
-  const [manualAutora, setManualAutora] = useState('');
-  const [manualPortada, setManualPortada] = useState('');
+
+  // Filtros y libros de la estantería
+  const librosLeyendo = todosMisLibrosEstanteria?.filter(l => l.estado === 'leyendo' || l.estado === 'leyendo_ahora') || [];
+  const librosQuiero = todosMisLibrosEstanteria?.filter(l => l.estado === 'pendiente' || l.estado === 'quiero_leer') || [];
+  const librosLeidos = todosMisLibrosEstanteria?.filter(l => l.estado === 'leido' || l.estado === 'terminado') || [];
 
   return (
-    <div className="space-y-5 fade-in">
+    <div className="space-y-5 fade-in pb-12">
       {/* Banner Principal */}
       <section className="editorial-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -74,6 +74,84 @@ export default function SeccionHabitacion({ supabase,
           </div>
         </div>
       </section>
+
+      {/* Sección de Estantería */}
+      <section className="editorial-card p-5 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Estantería</h2>
+          <span className="text-xs text-[#75706b] font-sans">{todosMisLibrosEstanteria?.length || 0} libros</span>
+        </div>
+
+        {/* Pestanas de estantería */}
+        <div className="flex gap-2 border-b border-[#e8e4d9] pb-3">
+          <button
+            onClick={() => setTabEstanteria('leyendo')}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              tabEstanteria === 'leyendo'
+                ? 'bg-[#23211e] text-[#ffffee]'
+                : 'bg-white text-[#75706b] border border-[#e8e4d9] hover:bg-[#ffffee]'
+            }`}
+          >
+            Leyendo ({librosLeyendo.length})
+          </button>
+          <button
+            onClick={() => setTabEstanteria('quiero')}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              tabEstanteria === 'quiero'
+                ? 'bg-[#23211e] text-[#ffffee]'
+                : 'bg-white text-[#75706b] border border-[#e8e4d9] hover:bg-[#ffffee]'
+            }`}
+          >
+            Quiero leer ({librosQuiero.length})
+          </button>
+          <button
+            onClick={() => setTabEstanteria('leidos')}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              tabEstanteria === 'leidos'
+                ? 'bg-[#23211e] text-[#ffffee]'
+                : 'bg-white text-[#75706b] border border-[#e8e4d9] hover:bg-[#ffffee]'
+            }`}
+          >
+            Leídos ({librosLeidos.length})
+          </button>
+        </div>
+
+        {/* Visualizador de libros en estantes */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
+          {tabEstanteria === 'leyendo' && librosLeyendo.map((lib, idx) => (
+            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
+              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
+              <div className="truncate w-full">
+                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+              </div>
+            </div>
+          ))}
+
+          {tabEstanteria === 'quiero' && librosQuiero.map((lib, idx) => (
+            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
+              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
+              <div className="truncate w-full">
+                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+              </div>
+            </div>
+          ))}
+
+          {tabEstanteria === 'leidos' && librosLeidos.map((lib, idx) => (
+            <div key={idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col items-center text-center space-y-2">
+              <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow" />
+              <div className="truncate w-full">
+                <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
+                <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Suscripción Push */}
+      <SuscribirPush sesion={sesion} supabase={supabase} />
 
       {/* Renderizado del Modal de Importación */}
       {mostrarModalBiblioteca && (
