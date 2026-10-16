@@ -60,8 +60,15 @@ export default function SeccionHabitacion({
     librosLeidos.push(...librosRestantes);
   }
 
-  // Función unificada en el menú desplegable para cambiar de estante o eliminar de forma robusta
+  // Obtención del título real del libro independientemente del formato del objeto
+  const obtenerTituloLibro = (lib) => lib.libro || lib.titulo || lib.title || "";
+  const obtenerIdLibro = (lib) => lib.id || lib.id_libro;
+
+  // Función unificada para cambiar de estante o eliminar
   const manejarAccionLibro = async (lib, nuevaAccion) => {
+    const idLibro = obtenerIdLibro(lib);
+    const tituloLibro = obtenerTituloLibro(lib);
+
     let emailUsuario = sesion?.email;
     if (!emailUsuario) {
       try { emailUsuario = JSON.parse(localStorage.getItem('gilda_sesion') || '{}').email; } catch (e) {}
@@ -69,16 +76,30 @@ export default function SeccionHabitacion({
     const emailFiltro = emailUsuario ? emailUsuario.toLowerCase().trim() : lib.email;
 
     if (nuevaAccion === 'eliminar') {
-      if (!window.confirm(`¿Seguro que quieres eliminar "${lib.libro}" de tu estantería?`)) return;
-      try {
-        let query = activeClient.from('personal_readings').delete();
-        if (lib.id) {
-          query = query.eq('id', lib.id);
-        } else {
-          query = query.eq('libro', lib.libro).eq('email', emailFiltro);
+      if (!window.confirm(`¿Seguro que quieres eliminar "${tituloLibro}" de tu estantería?`)) return;
+
+      // Si existe la función prop eliminarLibroPersonal la usamos primero
+      if (typeof eliminarLibroPersonal === 'function') {
+        try {
+          await eliminarLibroPersonal(idLibro || tituloLibro);
+          if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
+          if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
+          return;
+        } catch (e) {
+          console.warn("Fallo en eliminarLibroPersonal, reintentando con consulta directa...", e);
         }
-        const { error } = await query;
-        if (error) throw error;
+      }
+
+      try {
+        let res;
+        if (idLibro) {
+          res = await activeClient.from('personal_readings').delete().eq('id', idLibro);
+        } else {
+          // Intenta borrado coincidiendo por título (soporta columna 'libro' y 'titulo')
+          res = await activeClient.from('personal_readings').delete().eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
+        }
+        if (res.error) throw res.error;
+
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
         if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
       } catch (err) {
@@ -86,15 +107,16 @@ export default function SeccionHabitacion({
         if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
       }
     } else {
+      // Cambio de estante (leyendo, pendiente, leido)
       try {
-        let query = activeClient.from('personal_readings').update({ estado: nuevaAccion });
-        if (lib.id) {
-          query = query.eq('id', lib.id);
+        let res;
+        if (idLibro) {
+          res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('id', idLibro);
         } else {
-          query = query.eq('libro', lib.libro).eq('email', emailFiltro);
+          res = await activeClient.from('personal_readings').update({ estado: nuevaAccion }).eq('email', emailFiltro).or(`libro.eq."${tituloLibro}",titulo.eq."${tituloLibro}"`);
         }
-        const { error } = await query;
-        if (error) throw error;
+        if (res.error) throw res.error;
+
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
         if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado con éxito.');
       } catch (err) {
@@ -104,7 +126,7 @@ export default function SeccionHabitacion({
     }
   };
 
-  // Función para guardar el libro seleccionado desde Open Library
+  // Guardar libro desde Open Library
   const manejarLibroSeleccionadoOL = async (libroSeleccionado) => {
     if (cargandoGuardar) return;
     setCargandoGuardar(true);
@@ -118,10 +140,13 @@ export default function SeccionHabitacion({
     if (tabEstanteria === 'leyendo') estadoBD = 'leyendo';
     else if (tabEstanteria === 'leidos') estadoBD = 'leido';
 
+    const tituloClean = libroSeleccionado.titulo || libroSeleccionado.libro;
+
     const nuevoLibro = {
       email: emailUsuario ? emailUsuario.toLowerCase().trim() : 'invitada@gilda.app',
       nombre: sesion?.nombre || 'Socia',
-      libro: libroSeleccionado.titulo,
+      libro: tituloClean,
+      titulo: tituloClean,
       autora: libroSeleccionado.autora,
       estado: estadoBD,
       pagina: tabEstanteria === 'leidos' ? 100 : 0,
@@ -144,29 +169,32 @@ export default function SeccionHabitacion({
     }
   };
 
-  const renderizarTarjetaLibro = (lib, idx) => (
-    <div key={lib.id || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
-      <div className="flex flex-col items-center text-center">
-        <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={lib.libro} className="w-20 h-28 object-cover rounded shadow mb-2" />
-        <div className="truncate w-full">
-          <p className="text-xs font-bold text-[#23211e] truncate">{lib.libro}</p>
-          <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+  const renderizarTarjetaLibro = (lib, idx) => {
+    const tituloDisplay = obtenerTituloLibro(lib);
+    return (
+      <div key={obtenerIdLibro(lib) || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+        <div className="flex flex-col items-center text-center">
+          <img src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} alt={tituloDisplay} className="w-20 h-28 object-cover rounded shadow mb-2" />
+          <div className="truncate w-full">
+            <p className="text-xs font-bold text-[#23211e] truncate">{tituloDisplay}</p>
+            <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
+          </div>
+        </div>
+        <div className="pt-2 border-t border-[#e8e4d9]/50">
+          <select
+            value={lib.estado || 'pendiente'}
+            onChange={(e) => manejarAccionLibro(lib, e.target.value)}
+            className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
+          >
+            <option value="leyendo">Leyendo</option>
+            <option value="pendiente">Quiero leer</option>
+            <option value="leido">Leído</option>
+            <option value="eliminar" className="text-red-600 font-semibold">Eliminar libro</option>
+          </select>
         </div>
       </div>
-      <div className="pt-2 border-t border-[#e8e4d9]/50">
-        <select
-          value={lib.estado || 'pendiente'}
-          onChange={(e) => manejarAccionLibro(lib, e.target.value)}
-          className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
-        >
-          <option value="leyendo">Leyendo</option>
-          <option value="pendiente">Quiero leer</option>
-          <option value="leido">Leído</option>
-          <option value="eliminar" className="text-red-600 font-semibold">Eliminar libro</option>
-        </select>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-5 fade-in pb-12">
@@ -236,7 +264,7 @@ export default function SeccionHabitacion({
           </div>
         )}
 
-        {/* Pestanas de estantería */}
+        {/* Pestañas de estantería */}
         <div className="flex gap-2 border-b border-[#e8e4d9] pb-3">
           <button
             onClick={() => { setTabEstanteria('leyendo'); setMostrarBuscadorOL(false); }}
