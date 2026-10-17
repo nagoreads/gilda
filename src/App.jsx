@@ -311,7 +311,7 @@ export default function App() {
           <div className="absolute inset-0 rounded-full bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <i className="fa-solid fa-camera text-white text-xs"></i>
           </div>
-          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+          <input id="avatar-file-input" name="avatarFile" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
         </div>
       );
     }
@@ -611,7 +611,7 @@ export default function App() {
 
                 <div className="pt-3 border-t border-[#e8e4d9] flex items-center justify-between">
                   <span className="text-xs text-[#75706b] font-sans">Página actual:</span>
-                  <input type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
+                  <input id="reading-page" name="readingPage" autoComplete="off" type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
                     await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
                     mostrarToast('Progreso guardado');
                   }} className="editorial-input w-20 text-center py-1 text-xs font-medium" />
@@ -624,8 +624,8 @@ export default function App() {
                   <button type="button" onClick={obtenerUbicacionActual} className="text-xs font-medium font-sans bg-white border border-[#e8e4d9] text-[#23211e] px-2.5 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">Detectar</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
-                  <input type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
-                  <input type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={e => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input id="profile-city" name="city" autoComplete="address-level2" type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input id="profile-postal-code" name="postalCode" autoComplete="postal-code" type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={e => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
                 </div>
                 <button onClick={async () => {
                   safeSet('gilda_ciudad', miCiudadInput); safeSet('gilda_codigo_postal', miCodigoPostalInput);
