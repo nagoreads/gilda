@@ -31,3 +31,4 @@ dist-ssr
 
 .vercel
 .env*
+sincronizar-stripe.js
