@@ -214,7 +214,7 @@ export default function ModalImportarBiblioteca({ onClose, sesion, supabase, car
               {archivo ? archivo.name : 'Seleccionar archivo CSV'}
             </span>
             <span className="text-[10px] text-[#75706b] mt-0.5">Haz clic aquí para buscar tu archivo</span>
-            <input type="file" accept=".csv" onChange={manejarArchivo} className="hidden" />
+            <input id="csv-file-input" name="csvFile" type="file" accept=".csv" onChange={manejarArchivo} className="hidden" />
           </label>
 
           {cargando && (
