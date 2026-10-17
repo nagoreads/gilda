@@ -1,4 +1,3 @@
-
 export const config = {
   api: {
     bodyParser: false,
@@ -28,13 +27,13 @@ export default async function handler(req, res) {
     // -------------------------------------------------------------
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      const email = session.customer_details?.email || session.customer_email;
+      const email = (session.customer_details?.email || session.customer_email || '').toLowerCase().trim();
       const nombre = session.customer_details?.name || 'Socio/a';
       const amount = (session.amount_total || 0) / 100;
       const stripeSessionId = session.id;
-      
+
       const lineItemDescription = session.line_items?.data?.[0]?.description?.toLowerCase() || '';
-      
+
       let modalidad = 'gilda de café';
 
       if (lineItemDescription.includes('nube')) {
@@ -53,8 +52,13 @@ export default async function handler(req, res) {
         modalidad = 'gilda de café';
       }
 
+      // 🛡️ REGLA DE ORO: Excepción absoluta para la administradora
+      if (email === 'ndnagore@gmail.com') {
+        modalidad = 'gilda absoluta';
+      }
+
       if (email) {
-        // 1. Guardar/actualizar en la tabla profiles (marcando estado 'activo')
+        // 1. Guardar/actualizar en la tabla profiles
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert(
@@ -95,21 +99,27 @@ export default async function handler(req, res) {
     // -------------------------------------------------------------
     if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object;
-      
-      // Solo registrar si es un ciclo de renovación automática
+
       if (invoice.billing_reason === 'subscription_cycle') {
-        const email = invoice.customer_email;
+        const email = (invoice.customer_email || '').toLowerCase().trim();
         const amount = (invoice.amount_paid || 0) / 100;
 
         if (email) {
-          // Consultar modalidad actual del perfil
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('modalidad')
-            .eq('email', email)
-            .maybeSingle();
+          let modalidad = 'gilda de café';
 
-          const modalidad = profile?.modalidad || 'gilda de café';
+          // Si eres tú, siempre absoluta
+          if (email === 'ndnagore@gmail.com') {
+            modalidad = 'gilda absoluta';
+          } else {
+            // Consultar modalidad actual del perfil
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('modalidad')
+              .eq('email', email)
+              .maybeSingle();
+
+            modalidad = profile?.modalidad || 'gilda de café';
+          }
 
           // Insertar la nueva renovación mensual en payment_log
           const { error: logError } = await supabase
@@ -130,10 +140,10 @@ export default async function handler(req, res) {
             console.log(`Renovación mensual registrada en payment_log para ${email}`);
           }
 
-          // Asegurar que su estado sigue siendo activo
+          // Asegurar que su estado sigue siendo activo y modalidad correcta
           await supabase
             .from('profiles')
-            .update({ estado: 'activo' })
+            .update({ estado: 'activo', modalidad: modalidad })
             .eq('email', email);
         }
       }
@@ -152,9 +162,10 @@ export default async function handler(req, res) {
             headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` }
           });
           const customerData = await response.json();
-          const email = customerData.email;
+          const email = (customerData.email || '').toLowerCase().trim();
 
-          if (email) {
+          // Excepción: Jamás se cancela tu cuenta de admin
+          if (email && email !== 'ndnagore@gmail.com') {
             const { error: cancelError } = await supabase
               .from('profiles')
               .update({ estado: 'cancelado' })
