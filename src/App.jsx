@@ -444,7 +444,7 @@ export default function App() {
 
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
               <div>
-                <label className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
+                <label htmlFor="login-email" className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
                 <input id="login-email" name="email" autoComplete="email" type="email" 
                   placeholder="tuemail@ejemplo.com" 
                   value={emailLogin} 
@@ -457,7 +457,7 @@ export default function App() {
               
               {esperandoToken && (
                 <div className="animate-fade-in">
-                  <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
+                  <label htmlFor="login-otp" className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
                   <input id="login-otp" name="oneTimePassword" autoComplete="one-time-code" type="text" placeholder="123456" 
                     value={tokenLogin} 
                     onChange={e => setTokenLogin(e.target.value)} 
