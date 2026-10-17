@@ -12,8 +12,11 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'public',
       filename: 'sw.js',
-      registerType: 'prompt',
-      devOptions: { enabled: true } // Te permite probar el SW en local
+      registerType: 'autoUpdate',
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 5000000
+      },
+      devOptions: { enabled: true }
     })
   ],
 })
