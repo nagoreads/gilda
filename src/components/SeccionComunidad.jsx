@@ -255,7 +255,7 @@ export default function SeccionComunidad({
                     setNuevoChat(textoAEnviar);
                   }
                 }} className="p-3 flex gap-2">
-                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
+                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" id="group-chat-input" name="groupChat" autoComplete="off" placeholder="Escribe al grupo..." />
                   <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
                 </form>
               </div>
