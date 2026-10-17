@@ -15,22 +15,30 @@ export default function TimelineCapitulos({
 }) {
   const [capituloSeleccionado, setCapituloSeleccionado] = useState(null);
   const [nuevoComentario, setNuevoComentario] = useState('');
-  const [respuestaA, setRespuestaA] = useState(null); // ID del comentario al que se responde
+  const [respuestaA, setRespuestaA] = useState(null);
   const [textoRespuesta, setTextoRespuesta] = useState('');
 
   const esRestringida = modalidadLimpia.includes('cotilla');
 
-  // 1. Filtrar y ordenar capítulos disponibles
-  const listaCapitulos = [...capitulos].sort((a, b) => (Number(a.pagina_fin || a.numero) || 0) - (Number(b.pagina_fin || b.numero) || 0));
-  
-  // 2. Definir el capítulo activo PRIMERO (antes de las funciones que lo usen)
-  const capActivo = capituloSeleccionado || listaCapitulos[0] || { id: 1, numero: 1, titulo: 'Capítulo 1', pagina_inicio: 1, pagina_fin: 30 };
+  // 1. Ordenar capítulos por su página final
+  const listaCapitulos = [...capitulos].sort((a, b) => (Number(a.pagina_fin) || 0) - (Number(b.pagina_fin) || 0));
 
-  // 3. Filtrar comentarios del capítulo activo
+  // 2. Definir capítulo activo
+  const capActivo = capituloSeleccionado || listaCapitulos[0] || { id: 1, numero: 1, titulo: 'Parte I', pagina_fin: 156 };
+
+  // 3. Lógica Antispoiler:
+  // Un capítulo está desbloqueado si la página actual de la usuaria es mayor o igual a la página fin del capítulo ANTERIOR.
+  const idxActivo = listaCapitulos.findIndex(c => (c.id || c.numero) === (capActivo.id || capActivo.numero));
+  const capAnterior = idxActivo > 0 ? listaCapitulos[idxActivo - 1] : null;
+  const paginaCorteAntispoiler = capAnterior ? Number(capAnterior.pagina_fin) : 0;
+  
+  // El capítulo actual está desbloqueado si la usuaria ha llegado a la página de inicio de ese bloque
+  const estaCapituloDesbloqueado = Number(miPagina) >= paginaCorteAntispoiler;
+
+  // 4. Comentarios del capítulo activo
   const comentariosCap = comentarios.filter(c => String(c.capitulo_id || c.capitulo) === String(capActivo.id || capActivo.numero));
   const comentariosPrincipales = comentariosCap.filter(c => !c.parent_id);
 
-  // 4. Función de envío (ahora capActivo ya está definida y disponible)
   const enviarComentario = async (parentId = null, texto = '') => {
     const contenido = texto.trim();
     if (!contenido || !sesion?.email) return;
@@ -62,8 +70,10 @@ export default function TimelineCapitulos({
       <section className="editorial-card p-4 space-y-3">
         <h2 className="font-babydoll text-2xl font-bold text-[#23211e]">Capítulos</h2>
         <div className="flex overflow-x-auto gap-2 pb-1 no-scrollbar font-sans">
-          {listaCapitulos.map(cap => {
-            const desbloqueado = miPagina >= (Number(cap.pagina_inicio) || 0);
+          {listaCapitulos.map((cap, index) => {
+            const capPrev = index > 0 ? listaCapitulos[index - 1] : null;
+            const minPagina = capPrev ? Number(capPrev.pagina_fin) : 0;
+            const desbloqueado = Number(miPagina) >= minPagina;
             const esSeleccionado = (capActivo.id || capActivo.numero) === (cap.id || cap.numero);
 
             return (
@@ -78,7 +88,10 @@ export default function TimelineCapitulos({
                     : 'bg-[#ffffee]/40 border border-[#e8e4d9] text-[#75706b] opacity-60'
                 }`}
               >
-                <span className="block font-bold">{cap.titulo || `Parte ${cap.numero}`}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="block font-bold">{cap.titulo || `Parte ${index + 1}`}</span>
+                  {!desbloqueado && <i className="fa-solid fa-lock text-[10px] opacity-70"></i>}
+                </div>
                 <span className="block text-[10px] opacity-80">hasta pág. {cap.pagina_fin}</span>
               </button>
             );
@@ -89,109 +102,121 @@ export default function TimelineCapitulos({
       {/* Detalle del capítulo activo */}
       <section className="editorial-card p-5 space-y-4">
         <div className="border-b border-[#e8e4d9] pb-3">
-          <p className="text-[10px] uppercase font-sans text-[#75706b]">{capActivo.titulo || `Capítulo ${capActivo.numero}`}</p>
-          <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.descripcion || capActivo.titulo || `Capítulo ${capActivo.numero}`}</h1>
+          <p className="text-[10px] uppercase font-sans text-[#75706b]">{capActivo.titulo}</p>
+          <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.descripcion || capActivo.titulo}</h1>
           <p className="text-xs text-[#75706b] font-sans mt-1">Hasta la página {capActivo.pagina_fin}</p>
         </div>
 
-        {/* Anotaciones al margen (Comentarios e Hilos) */}
+        {/* Anotaciones al margen */}
         <div className="space-y-4">
           <h3 className="font-babydoll text-xl font-bold text-[#23211e]">Anotaciones al margen</h3>
 
-          {/* Formulario nuevo comentario principal */}
-          {!esRestringida ? (
-            <form onSubmit={(e) => { e.preventDefault(); enviarComentario(null, nuevoComentario); }} className="space-y-2">
-              <textarea
-                value={nuevoComentario}
-                onChange={(e) => setNuevoComentario(e.target.value)}
-                id="chapter-note-input" name="chapterNote" autoComplete="off" placeholder="Escribe tu reflexión o nota sobre este capítulo..."
-                className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
-              />
-              <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium active:scale-95 transition-transform duration-100">
-                Publicar nota
-              </button>
-            </form>
-          ) : (
-            <p className="text-xs text-[#75706b] font-sans italic bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
-              Tu membresía permite leer las notas del club.
-            </p>
-          )}
-
-          {/* Lista de notas principales e hilos */}
-          <div className="space-y-3 pt-2">
-            {comentariosPrincipales.length === 0 ? (
-              <p className="text-xs text-[#75706b] font-sans italic py-4 text-center">
-                Aún no hay notas en este capítulo. Sé la primera gilda en escribir.
+          {!estaCapituloDesbloqueado ? (
+            /* Pantalla de bloqueo Antispoiler */
+            <div className="p-5 bg-[#ffffee] rounded-xl border border-[#e8e4d9] text-center space-y-2 font-sans">
+              <div className="w-10 h-10 rounded-full bg-[#23211e] text-[#ffffee] flex items-center justify-center mx-auto text-sm font-bold">
+                <i className="fa-solid fa-lock"></i>
+              </div>
+              <h4 className="font-babydoll text-lg font-bold text-[#23211e]">Zona protegida contra spoilers</h4>
+              <p className="text-xs text-[#75706b] leading-relaxed max-w-xs mx-auto">
+                Vas por la página <b>{miPagina}</b>. Para desbloquear las notas de {capActivo.titulo}, necesitas alcanzar al menos la página <b>{paginaCorteAntispoiler + 1}</b>.
               </p>
-            ) : (
-              comentariosPrincipales.map(comentario => {
-                const nombreAutor = obtenerNombreReal(comentario.email, comentario.nombre);
-                const respuestas = comentariosCap.filter(r => String(r.parent_id) === String(comentario.id));
+            </div>
+          ) : (
+            <>
+              {/* Formulario nuevo comentario principal */}
+              {!esRestringida ? (
+                <form onSubmit={(e) => { e.preventDefault(); enviarComentario(null, nuevoComentario); }} className="space-y-2">
+                  <textarea
+                    value={nuevoComentario}
+                    onChange={(e) => setNuevoComentario(e.target.value)}
+                    id="chapter-note-input" name="chapterNote" autoComplete="off" placeholder="Escribe tu reflexión o nota sobre esta parte..."
+                    className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
+                  />
+                  <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium active:scale-95 transition-transform duration-100">
+                    Publicar nota
+                  </button>
+                </form>
+              ) : (
+                <p className="text-xs text-[#75706b] font-sans italic bg-[#ffffee] p-3 rounded-xl border border-[#e8e4d9]">
+                  Tu membresía permite leer las notas del club.
+                </p>
+              )}
 
-                return (
-                  <article key={comentario.id} className="p-3.5 rounded-xl bg-white border border-[#e8e4d9] space-y-2">
-                    <div className="flex justify-between items-baseline font-sans">
-                      <span className="font-bold text-xs text-[#23211e]">{nombreAutor}</span>
-                      <span className="text-[10px] text-[#75706b]">
-                        {comentario.timestamp ? new Date(comentario.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
-                      </span>
-                    </div>
+              {/* Lista de comentarios */}
+              <div className="space-y-3 pt-2">
+                {comentariosPrincipales.length === 0 ? (
+                  <p className="text-xs text-[#75706b] font-sans italic py-4 text-center">
+                    Aún no hay notas en este bloque. Sé la primera gilda en escribir.
+                  </p>
+                ) : (
+                  comentariosPrincipales.map(comentario => {
+                    const nombreAutor = obtenerNombreReal(comentario.email, comentario.nombre);
+                    const respuestas = comentariosCap.filter(r => String(r.parent_id) === String(comentario.id));
 
-                    <p className="text-xs text-[#23211e] font-sans leading-relaxed">{comentario.comentario || comentario.texto}</p>
+                    return (
+                      <article key={comentario.id} className="p-3.5 rounded-xl bg-white border border-[#e8e4d9] space-y-2">
+                        <div className="flex justify-between items-baseline font-sans">
+                          <span className="font-bold text-xs text-[#23211e]">{nombreAutor}</span>
+                          <span className="text-[10px] text-[#75706b]">
+                            {comentario.timestamp ? new Date(comentario.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
+                          </span>
+                        </div>
 
-                    {/* Botón para responder */}
-                    {!esRestringida && (
-                      <button
-                        onClick={() => setRespuestaA(respuestaA === comentario.id ? null : comentario.id)}
-                        className="text-[11px] font-sans font-medium text-[#75706b] hover:text-[#23211e] transition-colors pt-1 active:scale-95 transition-transform duration-100"
-                      >
-                        {respuestaA === comentario.id ? 'Cancelar' : 'Responder'}
-                      </button>
-                    )}
+                        <p className="text-xs text-[#23211e] font-sans leading-relaxed">{comentario.comentario || comentario.texto}</p>
 
-                    {/* Formulario de respuesta en hilo */}
-                    {respuestaA === comentario.id && (
-                      <div className="pt-2 pl-3 border-l-2 border-[#23211e] space-y-2 mt-2">
-                        <textarea
-                          value={textoRespuesta}
-                          onChange={(e) => setTextoRespuesta(e.target.value)}
-                          placeholder={`Responder a ${nombreAutor}...`}
-                          className="w-full editorial-input p-2 text-xs h-16 resize-none font-sans"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => enviarComentario(comentario.id, textoRespuesta)}
-                          className="editorial-btn px-3 py-1.5 text-xs font-medium active:scale-95 transition-transform duration-100"
-                        >
-                          Enviar respuesta
-                        </button>
-                      </div>
-                    )}
+                        {!esRestringida && (
+                          <button
+                            onClick={() => setRespuestaA(respuestaA === comentario.id ? null : comentario.id)}
+                            className="text-[11px] font-sans font-medium text-[#75706b] hover:text-[#23211e] transition-colors pt-1 active:scale-95 transition-transform duration-100"
+                          >
+                            {respuestaA === comentario.id ? 'Cancelar' : 'Responder'}
+                          </button>
+                        )}
 
-                    {/* Respuestas anidadas (Hilo) */}
-                    {respuestas.length > 0 && (
-                      <div className="pl-3 mt-3 border-l border-[#e8e4d9] space-y-2.5 pt-1">
-                        {respuestas.map(resp => {
-                          const nombreAutorResp = obtenerNombreReal(resp.email, resp.nombre);
-                          return (
-                            <div key={resp.id} className="bg-[#ffffee]/50 p-2.5 rounded-lg border border-[#e8e4d9] space-y-1">
-                              <div className="flex justify-between items-baseline font-sans">
-                                <span className="font-bold text-[11px] text-[#23211e]">{nombreAutorResp}</span>
-                                <span className="text-[9px] text-[#75706b]">
-                                  {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
-                                </span>
-                              </div>
-                              <p className="text-xs text-[#23211e] font-sans leading-relaxed">{resp.comentario || resp.texto}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </article>
-                );
-              })
-            )}
-          </div>
+                        {respuestaA === comentario.id && (
+                          <div className="pt-2 pl-3 border-l-2 border-[#23211e] space-y-2 mt-2">
+                            <textarea
+                              value={textoRespuesta}
+                              onChange={(e) => setTextoRespuesta(e.target.value)}
+                              placeholder={`Responder a ${nombreAutor}...`}
+                              className="w-full editorial-input p-2 text-xs h-16 resize-none font-sans"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => enviarComentario(comentario.id, textoRespuesta)}
+                              className="editorial-btn px-3 py-1.5 text-xs font-medium active:scale-95 transition-transform duration-100"
+                            >
+                              Enviar respuesta
+                            </button>
+                          </div>
+                        )}
+
+                        {respuestas.length > 0 && (
+                          <div className="pl-3 mt-3 border-l border-[#e8e4d9] space-y-2.5 pt-1">
+                            {respuestas.map(resp => {
+                              const nombreAutorResp = obtenerNombreReal(resp.email, resp.nombre);
+                              return (
+                                <div key={resp.id} className="bg-[#ffffee]/50 p-2.5 rounded-lg border border-[#e8e4d9] space-y-1">
+                                  <div className="flex justify-between items-baseline font-sans">
+                                    <span className="font-bold text-[11px] text-[#23211e]">{nombreAutorResp}</span>
+                                    <span className="text-[9px] text-[#75706b]">
+                                      {resp.timestamp ? new Date(resp.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : ''}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-[#23211e] font-sans leading-relaxed">{resp.comentario || resp.texto}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>
