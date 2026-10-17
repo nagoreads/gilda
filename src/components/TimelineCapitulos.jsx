@@ -101,7 +101,7 @@ export default function TimelineCapitulos({
               <textarea
                 value={nuevoComentario}
                 onChange={(e) => setNuevoComentario(e.target.value)}
-                placeholder="Escribe tu reflexión o nota sobre este capítulo..."
+                id="chapter-note-input" name="chapterNote" autoComplete="off" placeholder="Escribe tu reflexión o nota sobre este capítulo..."
                 className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
               />
               <button type="submit" className="editorial-btn px-4 py-2 text-xs font-medium active:scale-95 transition-transform duration-100">

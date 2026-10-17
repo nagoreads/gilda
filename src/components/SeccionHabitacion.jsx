@@ -176,7 +176,7 @@ export default function SeccionHabitacion({
           <select
             value={lib.estado || 'pendiente'}
             onChange={(e) => manejarAccionLibro(lib, e.target.value)}
-            className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
+            id="room-book-status" name="roomBookStatus" autoComplete="off" className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
           >
             <option value="leyendo">Leyendo</option>
             <option value="pendiente">Quiero leer</option>
