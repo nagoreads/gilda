@@ -383,8 +383,14 @@ export default function App() {
   };
 
   const libroActual = useMemo(() => {
-  return lecturas.find(l => l.activa === true) || lecturas[0] || { titulo: 'Nada se opone a la noche', autora: 'Delphine de Vigan', paginas_totales: 369, portada: '' };
-}, [lecturas]);
+    return lecturas.find(l => l.activa === true) || lecturas[0] || { titulo: 'Nada se opone a la noche', autora: 'Delphine de Vigan', paginas_totales: 369, portada: '' };
+  }, [lecturas]);
+
+  const porcentajeLibro = useMemo(() => {
+    const paginas = Number(libroActual?.paginas_totales || 369);
+    if (!paginas || paginas <= 0) return 0;
+    return Math.min(Math.round((miPagina / paginas) * 100), 100);
+  }, [miPagina, libroActual]);
 
   const todosMisLibrosEstanteria = useMemo(() => sesion ? lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()) : [], [lecturasPersonales, sesion]);
   const librosBibliotecaVisibles = useMemo(() => todosMisLibrosEstanteria.filter(item => (item.estado || 'leyendo') === tabEstanteria), [todosMisLibrosEstanteria, tabEstanteria]);
