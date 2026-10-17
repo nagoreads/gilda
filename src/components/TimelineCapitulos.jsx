@@ -20,9 +20,10 @@ export default function TimelineCapitulos({
 
   const esRestringida = modalidadLimpia.includes('cotilla');
 
-  // Filtrar capítulos disponibles
-  const listaCapitulos = [...capitulos].sort((a, b) => (Number(a.numero) || 0) - (Number(b.numero) || 0));
-  const capActivo = capituloSeleccionado || listaCapitulos[0] || { id: 1, numero: 1, titulo: 'Capítulo 1', pagina_inicio: 1, pagina_fin: 30 };
+ // Filtrar capítulos del libro activo y ordenarlos por la página final
+const listaCapitulos = [...capitulos]
+  .filter(c => !c.libro_id || String(c.libro_id) === String(libroActual?.id))
+  .sort((a, b) => (Number(a.pagina_fin) || 0) - (Number(b.pagina_fin) || 0));
 
   // Filtrar comentarios del capítulo activo
   const comentariosCap = comentarios.filter(c => String(c.capitulo_id || c.capitulo) === String(capActivo.id || capActivo.numero));
