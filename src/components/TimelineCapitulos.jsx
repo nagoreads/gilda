@@ -20,15 +20,17 @@ export default function TimelineCapitulos({
 
   const esRestringida = modalidadLimpia.includes('cotilla');
 
- // Filtrar capítulos del libro activo y ordenarlos por la página final
-const listaCapitulos = [...capitulos]
-  .filter(c => !c.libro_id || String(c.libro_id) === String(libroActual?.id))
-  .sort((a, b) => (Number(a.pagina_fin) || 0) - (Number(b.pagina_fin) || 0));
+  // 1. Filtrar y ordenar capítulos disponibles
+  const listaCapitulos = [...capitulos].sort((a, b) => (Number(a.pagina_fin || a.numero) || 0) - (Number(b.pagina_fin || b.numero) || 0));
+  
+  // 2. Definir el capítulo activo PRIMERO (antes de las funciones que lo usen)
+  const capActivo = capituloSeleccionado || listaCapitulos[0] || { id: 1, numero: 1, titulo: 'Capítulo 1', pagina_inicio: 1, pagina_fin: 30 };
 
-  // Filtrar comentarios del capítulo activo
+  // 3. Filtrar comentarios del capítulo activo
   const comentariosCap = comentarios.filter(c => String(c.capitulo_id || c.capitulo) === String(capActivo.id || capActivo.numero));
   const comentariosPrincipales = comentariosCap.filter(c => !c.parent_id);
 
+  // 4. Función de envío (ahora capActivo ya está definida y disponible)
   const enviarComentario = async (parentId = null, texto = '') => {
     const contenido = texto.trim();
     if (!contenido || !sesion?.email) return;
@@ -76,7 +78,7 @@ const listaCapitulos = [...capitulos]
                     : 'bg-[#ffffee]/40 border border-[#e8e4d9] text-[#75706b] opacity-60'
                 }`}
               >
-                <span className="block font-bold">Cap. {cap.numero}</span>
+                <span className="block font-bold">{cap.titulo || `Parte ${cap.numero}`}</span>
                 <span className="block text-[10px] opacity-80">hasta pág. {cap.pagina_fin}</span>
               </button>
             );
@@ -87,8 +89,8 @@ const listaCapitulos = [...capitulos]
       {/* Detalle del capítulo activo */}
       <section className="editorial-card p-5 space-y-4">
         <div className="border-b border-[#e8e4d9] pb-3">
-          <p className="text-[10px] uppercase font-sans text-[#75706b]">Capítulo {capActivo.numero}</p>
-          <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.titulo || `Capítulo ${capActivo.numero}`}</h1>
+          <p className="text-[10px] uppercase font-sans text-[#75706b]">{capActivo.titulo || `Capítulo ${capActivo.numero}`}</p>
+          <h1 className="font-babydoll text-2xl font-bold text-[#23211e] mt-0.5">{capActivo.descripcion || capActivo.titulo || `Capítulo ${capActivo.numero}`}</h1>
           <p className="text-xs text-[#75706b] font-sans mt-1">Hasta la página {capActivo.pagina_fin}</p>
         </div>
 
