@@ -98,7 +98,7 @@ export function ModalDetalleLibro({
 
         {mostrarInputCorreccion ? (
           <div className="space-y-2 bg-[#faf9f5] p-3 rounded-xl border border-[#e8e4d9] font-sans">
-            <input type="text" value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} placeholder="Pega la URL de la nueva portada..." className="w-full px-3 py-2 text-xs border border-[#e8e4d9] rounded-lg bg-white text-[#23211e]" />
+            <input id="auto-input-yawvd" name="auto-input-yawvd" autoComplete="off"undefined> setEditandoPortadaUrl(e.target.value)} placeholder="Pega la URL de la nueva portada..." className="w-full px-3 py-2 text-xs border border-[#e8e4d9] rounded-lg bg-white text-[#23211e]" />
             <div className="flex gap-2">
               <button onClick={async () => {
                 const nuevaPortada = editandoPortadaUrl.trim();

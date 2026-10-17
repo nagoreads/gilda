@@ -98,9 +98,7 @@ export default function TimelineCapitulos({
           {/* Formulario nuevo comentario principal */}
           {!esRestringida ? (
             <form onSubmit={(e) => { e.preventDefault(); enviarComentario(null, nuevoComentario); }} className="space-y-2">
-              <textarea
-                value={nuevoComentario}
-                onChange={(e) => setNuevoComentario(e.target.value)}
+              <textarea id="auto-textarea-6uccq" name="auto-textarea-6uccq" autoComplete="off"undefined> setNuevoComentario(e.target.value)}
                 placeholder="Escribe tu reflexión o nota sobre este capítulo..."
                 className="w-full editorial-input p-3 text-xs h-20 resize-none font-sans"
               />
@@ -149,9 +147,7 @@ export default function TimelineCapitulos({
                     {/* Formulario de respuesta en hilo */}
                     {respuestaA === comentario.id && (
                       <div className="pt-2 pl-3 border-l-2 border-[#23211e] space-y-2 mt-2">
-                        <textarea
-                          value={textoRespuesta}
-                          onChange={(e) => setTextoRespuesta(e.target.value)}
+                        <textarea id="auto-textarea-fwdrt" name="auto-textarea-fwdrt" autoComplete="off"undefined> setTextoRespuesta(e.target.value)}
                           placeholder={`Responder a ${nombreAutor}...`}
                           className="w-full editorial-input p-2 text-xs h-16 resize-none font-sans"
                         />
