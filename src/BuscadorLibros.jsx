@@ -63,7 +63,7 @@ export default function BuscadorLibros({ placeholder, valor, setValor, onSelectL
     return (
       <div className="relative w-full">
         <div className="relative flex items-center">
-          <input id="book-search-input" name="bookSearch" autoComplete="off" type="text" placeholder={placeholder} value={valor} onChange={(e) => { setValor(e.target.value); setMostrarDropdown(true); }} className="w-full editorial-input p-2.5 text-xs italic pr-8" />
+          <input type="text" placeholder={placeholder} value={valor} onChange={(e) => { setValor(e.target.value); setMostrarDropdown(true); }} className="w-full editorial-input p-2.5 text-xs italic pr-8" />
           {buscando && <i className="fa-solid fa-spinner animate-spin absolute right-2.5 text-xs text-[var(--primary-olive)]"></i>}
         </div>
         {mostrarDropdown && sugerencias.length > 0 && (

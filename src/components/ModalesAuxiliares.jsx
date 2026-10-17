@@ -41,12 +41,12 @@ export function ModalImportarPin({ onClose, onSave }) {
         </p>
         <div className="space-y-3 font-sans">
           <div>
-            <label htmlFor="moodboard-title" className="block text-xs font-semibold text-[#23211e] mb-1">Título del marco o moodboard</label>
-            <input id="moodboard-title" name="moodboardTitle" autoComplete="off" type="text" id="moodboard-title" name="moodboardTitle" autoComplete="off" placeholder="Ej: Inspiración otoño..." value={tituloInput} onChange={(e) => setTituloInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+            <label className="block text-xs font-semibold text-[#23211e] mb-1">Título del marco o moodboard</label>
+            <input type="text" placeholder="Ej: Inspiración otoño..." value={tituloInput} onChange={(e) => setTituloInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
           </div>
           <div>
-            <label htmlFor="moodboard-url" className="block text-xs font-semibold text-[#23211e] mb-1">URL directa de la imagen (.jpg, .png)</label>
-            <input id="moodboard-url" name="moodboardUrl" autoComplete="off" type="url" id="moodboard-url" name="moodboardUrl" autoComplete="off" placeholder="https://..." value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+            <label className="block text-xs font-semibold text-[#23211e] mb-1">URL directa de la imagen (.jpg, .png)</label>
+            <input type="url" placeholder="https://..." value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
           </div>
         </div>
         <div className="flex gap-2 pt-2">
@@ -98,7 +98,7 @@ export function ModalDetalleLibro({
 
         {mostrarInputCorreccion ? (
           <div className="space-y-2 bg-[#faf9f5] p-3 rounded-xl border border-[#e8e4d9] font-sans">
-            <input id="auto-input-yawvd" name="auto-input-yawvd" autoComplete="off"undefined> setEditandoPortadaUrl(e.target.value)} placeholder="Pega la URL de la nueva portada..." className="w-full px-3 py-2 text-xs border border-[#e8e4d9] rounded-lg bg-white text-[#23211e]" />
+            <input type="text" value={editandoPortadaUrl} onChange={(e) => setEditandoPortadaUrl(e.target.value)} placeholder="Pega la URL de la nueva portada..." className="w-full px-3 py-2 text-xs border border-[#e8e4d9] rounded-lg bg-white text-[#23211e]" />
             <div className="flex gap-2">
               <button onClick={async () => {
                 const nuevaPortada = editandoPortadaUrl.trim();

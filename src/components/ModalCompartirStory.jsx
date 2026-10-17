@@ -84,7 +84,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
       {librosStory.length > 0 && (
         <label className="w-full max-w-[310px] mb-3 flex items-center gap-2 text-xs font-sans text-white shrink-0">
           <span className="font-bold">Libro:</span>
-          <select id="story-book-select" name="storyBook" value={libroStory.titulo} onChange={e => setTituloLibroStory(e.target.value)} className="min-w-0 flex-grow bg-white text-[#23211e] border border-white/30 rounded-xl px-3 py-2 text-xs shadow-sm">
+          <select value={libroStory.titulo} onChange={e => setTituloLibroStory(e.target.value)} className="min-w-0 flex-grow bg-white text-[#23211e] border border-white/30 rounded-xl px-3 py-2 text-xs shadow-sm">
             {librosStory.map(item => <option key={item.titulo} value={item.titulo}>{item.titulo}</option>)}
           </select>
         </label>
@@ -107,7 +107,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
         <div className="w-full flex-grow flex flex-col items-center justify-center my-auto py-2 box-border">
           {modo === 'cita' && (
             <div className="w-full px-1 text-center flex flex-col items-center justify-center space-y-3">
-              <textarea id="story-quote-text" name="storyQuote" aria-label="Texto de la cita para Stories" value={textoCita} onChange={e => setTextoCita(e.target.value)} maxLength={360} className="w-full min-h-[140px] resize-none border border-[#e8e4d9] rounded-2xl bg-white/80 p-3.5 font-babydoll text-base text-[#23211e] leading-relaxed text-center focus:outline-none focus:ring-1 focus:ring-[#8b6040] shadow-xs" />
+              <textarea aria-label="Texto de la cita para Stories" value={textoCita} onChange={e => setTextoCita(e.target.value)} maxLength={360} className="w-full min-h-[140px] resize-none border border-[#e8e4d9] rounded-2xl bg-white/80 p-3.5 font-babydoll text-base text-[#23211e] leading-relaxed text-center focus:outline-none focus:ring-1 focus:ring-[#8b6040] shadow-xs" />
               <button type="button" onClick={elegirOtraCita} className="text-[10px] font-bold text-[var(--primary-olive)] bg-white border border-[#e8e4d9] rounded-full px-3.5 py-1.5 shadow-xs hover:bg-[#faf9f5]">Otra cita</button>
               {libroStory?.titulo && <span className="font-sans text-[10px] text-[#75706b] italic max-w-[260px] truncate">{libroStory.titulo}{libroStory.autora ? ` · ${libroStory.autora}` : ''}</span>}
             </div>

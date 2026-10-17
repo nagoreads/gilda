@@ -173,7 +173,9 @@ export default function SeccionHabitacion({
           </div>
         </div>
         <div className="pt-2 border-t border-[#e8e4d9]/50">
-          <select id="auto-select-j5knu" name="auto-select-j5knu" autoComplete="off"undefined> manejarAccionLibro(lib, e.target.value)}
+          <select
+            value={lib.estado || 'pendiente'}
+            onChange={(e) => manejarAccionLibro(lib, e.target.value)}
             className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
           >
             <option value="leyendo">Leyendo</option>

@@ -255,7 +255,7 @@ export default function SeccionComunidad({
                     setNuevoChat(textoAEnviar);
                   }
                 }} className="p-3 flex gap-2">
-                  <input id="auto-input-ge89w" name="auto-input-ge89w" autoComplete="off"undefined> setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
+                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder="Escribe al grupo..." />
                   <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
                 </form>
               </div>
@@ -389,7 +389,7 @@ export default function SeccionComunidad({
                 setNuevoChatPrivado('');
                 setMensajeRespuesta(null);
               }} className="p-3 border-t border-[#e8e4d9] flex gap-2 bg-white">
-                <input id="auto-input-59oas" name="auto-input-59oas" autoComplete="off"undefined> setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
+                <input type="text" value={nuevoChatPrivado} onChange={e => setNuevoChatPrivado(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" placeholder={`Escribe a ${destinatarioPrivado.nombre || 'gilda'}...`} />
                 <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
               </form>
             </>
@@ -477,7 +477,7 @@ export default function SeccionComunidad({
               mostrarToast('Propuesta añadida.');
             }} className="space-y-2">
               <BuscadorLibros placeholder="Título o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
-              <input id="auto-input-dl9c0" name="auto-input-dl9c0" autoComplete="off"undefined>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+              <input type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
               <button type="submit" className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Añadir propuesta</button>
             </form>
           </div>
@@ -521,7 +521,7 @@ export default function SeccionComunidad({
         <div className="editorial-card p-5 space-y-3">
           <h2 className="font-babydoll text-2xl font-bold">Carta a la fundadora</h2>
           <p className="text-xs text-[#75706b] font-sans">Cualquier idea, duda o nota que quieras compartir en privado.</p>
-          <textarea id="auto-textarea-io8k6" name="auto-textarea-io8k6" autoComplete="off"undefined>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
+          <textarea placeholder="Escribe aquí..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
           <button onClick={async () => {
             if (!mensajeFundadora.trim()) return;
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);

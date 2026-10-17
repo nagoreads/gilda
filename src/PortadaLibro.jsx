@@ -118,7 +118,7 @@ export default function PortadaLibro({ titulo, autora, autor, escritora, portada
     }, [tituloFinal]);
 
     if (urlSegura !== '' && !errorImg) {
-      return <img src={urlSegura} alt={tituloFinal} onError={(e) => { setErrorImg(true); e.target.onerror = null; e.target.src = "https://placehold.co/300x450/23211e/ffffee?text=Portada"; }} className={`${sizeClasses} object-cover rounded shadow-sm shrink-0 bg-gray-100`} />;
+      return <img src={urlSegura} alt={tituloFinal} onError={() => setErrorImg(true)} className={`${sizeClasses} object-cover rounded shadow-sm shrink-0 bg-gray-100`} />;
     }
 
     return (
