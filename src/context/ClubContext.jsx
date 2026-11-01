@@ -1,7 +1,7 @@
 import React, { createContext } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const defaultUrl = "https://lsbdcmshswcqzitqwfiq.supabase.co";
+const defaultUrl = "import.meta.env.VITE_SUPABASE_URL";
 const defaultKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmRjbXNoc3djcXppdHF3ZmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjA2MzUsImV4cCI6MjEwNjU5NjYzNX0.n9KPVdYVDQ_l3WtFCO0RVOMdAI_OLKYNLhHdg34EKK0";
 
 const envUrl = import.meta.env.VITE_SUPABASE_URL;
