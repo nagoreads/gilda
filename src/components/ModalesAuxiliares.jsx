@@ -41,11 +41,11 @@ export function ModalImportarPin({ onClose, onSave }) {
         </p>
         <div className="space-y-3 font-sans">
           <div>
-            <label className="block text-xs font-semibold text-[#23211e] mb-1">Título del marco o moodboard</label>
+            <label htmlFor="input-auto-modalesauxiliares-1" className="block text-xs font-semibold text-[#23211e] mb-1">Título del marco o moodboard</label>
             <input id="modalesauxiliares-input-1" name="modalesauxiliares_input_1" type="text" placeholder="Ej: Inspiración otoño..." value={tituloInput} onChange={(e) => setTituloInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#23211e] mb-1">URL directa de la imagen (.jpg, .png)</label>
+            <label htmlFor="input-auto-modalesauxiliares-2" className="block text-xs font-semibold text-[#23211e] mb-1">URL directa de la imagen (.jpg, .png)</label>
             <input id="modalesauxiliares-input-2" name="modalesauxiliares_input_2" type="url" placeholder="https://..." value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
           </div>
         </div>

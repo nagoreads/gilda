@@ -229,7 +229,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
           )}
 
           {paso === 'preview' && fotoFinal && (
-            <img src={fotoFinal} alt="Momento Gilda" className="w-full h-full object-cover" />
+            <img crossOrigin="anonymous" onError={(e) => { e.target.onerror = null; e.target.src = "/placeholder-book.png"; }} src={fotoFinal} alt="Momento Gilda" className="w-full h-full object-cover" />
           )}
 
           <canvas ref={canvasRef} className="hidden" />

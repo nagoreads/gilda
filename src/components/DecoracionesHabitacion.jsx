@@ -45,7 +45,7 @@ export function ObjetoExternoEnmarcado({ urlImagen, titulo, onClick }) {
         <div className="absolute top-0 w-2 h-3 bg-[#75706b] border-[1px] border-[#23211e] rounded-full z-10 -mt-1"></div>
         <div className="w-full h-full overflow-hidden border-[1px] border-[#23211e]">
           {urlImagen ? (
-            <img src={urlImagen} alt={titulo} style={estiloImagenExterna} className="w-full h-full" />
+            <img crossOrigin="anonymous" onError={(e) => { e.target.onerror = null; e.target.src = "/placeholder-book.png"; }} src={urlImagen} alt={titulo} style={estiloImagenExterna} className="w-full h-full" />
           ) : (
             <div className="w-full h-full bg-[#e8e2d2] flex items-center justify-center">
                <span className="text-[#75706b] text-[10px] text-center font-sans">+ Pin</span>

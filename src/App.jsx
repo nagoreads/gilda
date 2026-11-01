@@ -439,7 +439,7 @@ export default function App() {
             <div className="text-center mb-2 flex flex-col items-center">
               <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium hover:text-[#23211e] transition-colors cursor-default">club de lectura, mailclub y comunidad</p>
               <div className="flex justify-center my-0">
-                <img 
+                <img crossOrigin="anonymous" onError={(e) => { e.target.onerror = null; e.target.src = "/placeholder-book.png"; }} 
                   src="/icon-192.png" 
                   alt="Gilda" 
                   className="w-56 h-56 object-contain hover:scale-105 transition-all duration-300 ease-out cursor-pointer" 
@@ -451,7 +451,7 @@ export default function App() {
 
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
               <div>
-                <label className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
+                <label htmlFor="input-auto-app-1" className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
                 <input aria-label="Campo de entrada" 
                   id="app-input-1" name="app_input_1" type="email" 
                   placeholder="tuemail@ejemplo.com" 
@@ -465,7 +465,7 @@ export default function App() {
               
               {esperandoToken && (
                 <div className="animate-fade-in">
-                  <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
+                  <label htmlFor="input-auto-app-2" className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
                   <input aria-label="Campo de entrada" 
                     id="app-input-2" name="app_input_2" type="text" 
                     placeholder="123456" 
@@ -504,7 +504,7 @@ export default function App() {
             <div className="text-center mb-2 flex flex-col items-center">
               <p className="text-[10px] uppercase tracking-widest text-[#75706b] font-sans font-medium">club de lectura, mailclub y comunidad</p>
               <div className="flex justify-center my-0">
-                <img src="/icon-192.png" alt="Gilda" className="w-56 h-56 object-contain" />
+                <img crossOrigin="anonymous" onError={(e) => { e.target.onerror = null; e.target.src = "/placeholder-book.png"; }} src="/icon-192.png" alt="Gilda" className="w-56 h-56 object-contain" />
               </div>
               <h1 className="font-babydoll text-6xl text-[#23211e] font-bold -mt-4">gilda</h1>
             </div>
