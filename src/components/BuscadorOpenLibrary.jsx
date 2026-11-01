@@ -53,7 +53,7 @@ export default function BuscadorOpenLibrary({ onSeleccionarLibro }) {
     <div className="space-y-3">
       <form onSubmit={buscarLibros} className="flex gap-2">
         <input
-          type="text"
+          id="buscadoropenlibrary-input-1" name="buscadoropenlibrary_input_1" type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar libro o autora..."

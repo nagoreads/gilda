@@ -453,7 +453,7 @@ export default function App() {
               <div>
                 <label className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
                 <input 
-                  type="email" 
+                  id="app-input-1" name="app_input_1" type="email" 
                   placeholder="tuemail@ejemplo.com" 
                   value={emailLogin} 
                   onChange={e => setEmailLogin(e.target.value)} 
@@ -467,7 +467,7 @@ export default function App() {
                 <div className="animate-fade-in">
                   <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
                   <input 
-                    type="text" 
+                    id="app-input-2" name="app_input_2" type="text" 
                     placeholder="123456" 
                     value={tokenLogin} 
                     onChange={e => setTokenLogin(e.target.value)} 
