@@ -1,3 +1,4 @@
+import EmptyState from './EmptyState';
 import { HabitacionSkeleton } from './SkeletonLoaders';
 import { useState } from 'react';
 import ModalImportarBiblioteca from './ModalImportarBiblioteca';
