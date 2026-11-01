@@ -425,7 +425,11 @@ export default function SeccionComunidad({
 
           {cafecitosConVotos.length === 0 ? (
             <div className="editorial-card p-6 text-center">
-              <p className="text-xs text-[#75706b] font-sans">Aún no hay fechas propuestas para esta lectura.</p>
+              <EmptyState
+        icon="✨"
+        title="Sin propuestas todavía"
+        description="¿Tienes pensado algún libro o fecha para la siguiente lectura? Deja tu propuesta y la comentamos."
+      />
             </div>
           ) : (
             <div className="space-y-3">
