@@ -1,3 +1,4 @@
+import BottomSheet from './components/BottomSheet';
 import { initOfflineListener, getOfflineQueue, clearOfflineQueue } from './utils/offlineStorage';
 import { showToast } from './components/Toast';
 import { ToastContainer } from './components/Toast';
