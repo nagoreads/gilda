@@ -1,19 +1,19 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-import BuscadorLibros from './BuscadorLibros';
+const BuscadorLibros = lazy(() => import('./BuscadorLibros'));
 import PortadaLibro from './PortadaLibro';
 import MapaGilda from './MapaGilda';
 import EdificioClub from './EdificioClub';
 
 import CalendarioInteractivo from './components/CalendarioInteractivo';
 import ModalCompartirStory from './components/ModalCompartirStory';
-import TimelineCapitulos from './components/TimelineCapitulos';
+const TimelineCapitulos = lazy(() => import('./components/TimelineCapitulos'));
 import ModalMomentoGilda from './components/ModalMomentoGilda';
 import { ModalUpgrade, ModalImportarPin, ModalDetalleLibro } from './components/ModalesAuxiliares';
-import SeccionComunidad from './components/SeccionComunidad';
-import SeccionHabitacion from './components/SeccionHabitacion';
-import SeccionAdmin from './components/SeccionAdmin';
+const SeccionComunidad = lazy(() => import('./components/SeccionComunidad'));
+const SeccionHabitacion = lazy(() => import('./components/SeccionHabitacion'));
+const SeccionAdmin = lazy(() => import('./components/SeccionAdmin'));
 import CreaTuGilda from './components/CreaTuGilda';
 
 import { BannerNotificaciones } from './BannerNotificaciones';
@@ -565,6 +565,7 @@ export default function App() {
       </header>
 
       <main className="w-full flex-grow space-y-4">
+        <Suspense fallback={<div className="flex items-center justify-center p-8 text-xs font-sans text-[#a09a8e]">Cargando módulo...</div>}>
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
           <div className="flex bg-white p-1 rounded-xl text-xs font-medium border border-[#e8e4d9] font-sans mb-3 gap-1">
@@ -846,6 +847,7 @@ export default function App() {
             mostrarToast={mostrarToast}
           />
         </div>
+      </Suspense>
       </main>
 
       <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 pb-safe flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-3xl bg-[#ffffee]/90 backdrop-blur-md border-t border-[#e8e4d9] shadow-lg">
