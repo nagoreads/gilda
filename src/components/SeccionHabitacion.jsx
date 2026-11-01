@@ -82,10 +82,10 @@ export default function SeccionHabitacion({
         if (res.error) throw res.error;
 
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado correctamente.');
+        if (typeof mostrarToast === 'function') mostrarToast('Libro fuera. Hacemos espacio para los nuevos 🧹');
       } catch (err) {
         console.error("Error al eliminar libro:", err);
-        if (typeof mostrarToast === 'function') mostrarToast('Error al eliminar el libro.');
+        if (typeof mostrarToast === 'function') mostrarToast('Oye, no me deja borrarlo. Prueba otra vez en un segundo 🙏');
       }
     } else {
       try {
@@ -99,10 +99,10 @@ export default function SeccionHabitacion({
         if (res.error) throw res.error;
 
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado con éxito.');
+        if (typeof mostrarToast === 'function') mostrarToast('Movido de estante 👌');
       } catch (err) {
         console.error("Error al cambiar de estante:", err);
-        if (typeof mostrarToast === 'function') mostrarToast('Error al cambiar de estante.');
+        if (typeof mostrarToast === 'function') mostrarToast('No se ha podido mover el libro, intenta de nuevo 😅');
       }
     }
   };
@@ -149,11 +149,11 @@ export default function SeccionHabitacion({
         return;
       }
 
-      if (typeof mostrarToast === 'function') mostrarToast('¡Libro añadido a tu estantería!');
+      if (typeof mostrarToast === 'function') mostrarToast('Guardado. Un libro más a la pila de pendientes 📚');
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
     } catch (err) {
       console.error("Excepción al guardar libro:", err);
-      if (typeof mostrarToast === 'function') mostrarToast('Error al guardar el libro.');
+      if (typeof mostrarToast === 'function') mostrarToast('Aún no se ha guardado, prueba otra vez en un toque 🙈');
     } finally {
       setCargandoGuardar(false);
     }

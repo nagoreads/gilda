@@ -261,7 +261,7 @@ export default function SeccionComunidad({
                     setNuevoChat(textoAEnviar);
                   }
                 }} className="p-3 flex gap-2">
-                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" id="group-chat-input" name="groupChat" autoComplete="off" placeholder="Escribe al grupo..." />
+                  <input type="text" value={nuevoChat} onChange={e => setNuevoChat(e.target.value)} className="flex-grow editorial-input px-3 py-2 text-xs" id="group-chat-input" name="groupChat" autoComplete="off" placeholder="Suelta lo que pienses del capítulo o lo que sea..." />
                   <button type="submit" className="editorial-btn px-4 py-2 text-xs active:scale-95 transition-transform duration-100">Enviar</button>
                 </form>
               </div>
@@ -424,7 +424,7 @@ export default function SeccionComunidad({
 
           {cafecitosConVotos.length === 0 ? (
             <div className="editorial-card p-6 text-center">
-              <p className="text-xs text-[#75706b] font-sans">Aún no hay fechas propuestas.</p>
+              <p className="text-xs text-[#75706b] font-sans">Nadie ha propuesto fechas todavía. ¿Arrancas tú o esperamos?</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -480,10 +480,10 @@ export default function SeccionComunidad({
               await supabase.from('proposals').insert([nueva]);
               await cargarDatosSupabase();
               setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
-              mostrarToast('Propuesta añadida.');
+              mostrarToast('Propuesta dentro 🎯 A ver qué opina el resto.');
             }} className="space-y-2">
-              <BuscadorLibros placeholder="Título o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
-              <input id="seccioncomunidad-input-3" name="seccioncomunidad_input_3" type="text" placeholder="Autora..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
+              <BuscadorLibros placeholder="¿Qué recomendación nos traes? Título o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
+              <input id="seccioncomunidad-input-3" name="seccioncomunidad_input_3" type="text" placeholder="¿Quién lo escribe?..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
               <button type="submit" className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Añadir propuesta</button>
             </form>
           </div>
@@ -532,7 +532,7 @@ export default function SeccionComunidad({
             if (!mensajeFundadora.trim()) return;
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);
             setMensajeFundadora('');
-            mostrarToast('Mensaje enviado.');
+            mostrarToast('Enviado. Te leo en cuanto pueda 💌');
           }} className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Enviar nota</button>
         </div>
       )}
