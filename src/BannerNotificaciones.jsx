@@ -61,7 +61,7 @@ export function BannerNotificaciones() {
         borderBottom: abierto ? '1px solid #efeade' : 'none'
       }} onClick={() => setAbierto(!abierto)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px' }}>✦</span>
+          <span style={{ fontSize: '13px' }}></span>
           <span style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#8c6d46' }}>
             Aviso del Club: {ultimaNotif.titulo}
           </span>

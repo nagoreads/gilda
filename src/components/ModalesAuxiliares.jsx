@@ -126,7 +126,7 @@ export function ModalDetalleLibro({
                 onClick={() => setEstrellasSeleccionadas(num)} 
                 className={`cursor-pointer font-babydoll text-2xl transition-transform hover:scale-125 p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center ${num <= estrellasSeleccionadas ? 'text-[#23211e]' : 'text-[#d4cfbc]'}`}
               >
-                ✦
+                
               </span>
             ))}
           </div>
@@ -143,7 +143,7 @@ export function ModalDetalleLibro({
             await supabase.from('wall_posts').insert([postMuro]);
             await cargarDatosSupabase();
             registrarActividadPresencia();
-            mostrarToast(`¡Marca de ${estrellasSeleccionadas}/5 ✦ guardada!`);
+            mostrarToast(`¡Marca de ${estrellasSeleccionadas}/5  guardada!`);
             onClose();
           }} className="w-full mt-2 editorial-btn py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 min-h-[44px]">
             <i className="fa-solid fa-feather text-[10px]"></i> Estampar en el Muro

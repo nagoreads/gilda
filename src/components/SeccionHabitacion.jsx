@@ -84,7 +84,7 @@ export default function SeccionHabitacion({
         if (res.error) throw res.error;
 
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado de tu habitación 🤍');
+        if (typeof mostrarToast === 'function') mostrarToast('Libro eliminado de tu habitación ');
       } catch (err) {
         console.error("Error al eliminar libro:", err);
         if (typeof mostrarToast === 'function') mostrarToast('No se ha podido eliminar el libro. Inténtalo de nuevo.');
@@ -101,7 +101,7 @@ export default function SeccionHabitacion({
         if (res.error) throw res.error;
 
         if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
-        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado 🤍');
+        if (typeof mostrarToast === 'function') mostrarToast('Estante actualizado ');
       } catch (err) {
         console.error("Error al cambiar de estante:", err);
         if (typeof mostrarToast === 'function') mostrarToast('No se ha podido cambiar de estante. Inténtalo de nuevo.');
@@ -141,7 +141,7 @@ export default function SeccionHabitacion({
       // Optimistic UI: Añadir libro instantáneamente a la colección local
       if (typeof setLecturas === 'function') setLecturas(prev => [nuevoLibroBD, ...prev]);
       if (typeof setLibros === 'function') setLibros(prev => [nuevoLibroBD, ...prev]);
-      if (typeof showToast === 'function') showToast('Guardado. Un libro más a la pila de pendientes 📚', 'success');
+      if (typeof showToast === 'function') showToast('Guardado. Un libro más a la pila de pendientes ', 'success');
 
       const { error } = await activeClient.from('personal_readings').insert([nuevoLibroBD]);
 
@@ -151,7 +151,7 @@ export default function SeccionHabitacion({
         return;
       }
 
-      if (typeof mostrarToast === 'function') mostrarToast('Añadido a tu estantería 📖✨');
+      if (typeof mostrarToast === 'function') mostrarToast('Añadido a tu estantería ');
       if (typeof cargarDatosSupabase === 'function') await cargarDatosSupabase();
     } catch (err) {
       console.error("Excepción al guardar libro:", err);

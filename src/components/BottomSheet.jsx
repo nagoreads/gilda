@@ -41,7 +41,7 @@ export default function BottomSheet({ isOpen, onClose, title, children }) {
               className="text-[#75706b] hover:text-[#2c2825] p-1 rounded-full hover:bg-[#f0ebe1] transition-colors text-sm font-sans"
               aria-label="Cerrar"
             >
-              ✕
+              
             </button>
           </div>
         )}

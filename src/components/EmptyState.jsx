@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function EmptyState({ icon = "📖", title, description, actionLabel, onAction }) {
+export default function EmptyState({ icon = "", title, description, actionLabel, onAction }) {
   return (
     <div className="flex flex-col items-center justify-center text-center p-8 my-8 bg-[#faf8f5] border border-[#e8e4d9] rounded-lg shadow-[0_2px_12px_rgba(40,30,20,0.03)] max-w-md mx-auto">
       <div className="w-10 h-10 rounded-full bg-[#f3efe6] border border-[#e2ddd0] flex items-center justify-center text-lg mb-3 shadow-inner">

@@ -61,7 +61,7 @@ export default function App() {
   useEffect(() => {
     initOfflineListener(async (queue) => {
       if (queue && queue.length > 0) {
-        console.log('🔄 Sincronizando acciones offline pendientes:', queue.length);
+        console.log(' Sincronizando acciones offline pendientes:', queue.length);
         clearOfflineQueue();
       }
     });
@@ -537,7 +537,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col items-center pt-6 pb-28 px-4 sm:px-6 max-w-lg w-full mx-auto relative bg-[#ffffee]">
       
-      {/* ✦ BANNER DE NOTIFICACIONES FIJO ARRIBA ✦ */}
+      {/*  BANNER DE NOTIFICACIONES FIJO ARRIBA  */}
       <BannerNotificaciones />
 
       {toastMsg && <div className="fixed top-6 z-50 bg-[#23211e] text-[#ffffee] text-xs px-4 py-2 rounded-full shadow-md font-sans">{toastMsg}</div>}
@@ -593,7 +593,7 @@ export default function App() {
               onClick={() => setSubTabInicio('aqui_ahora')}
               className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] relative ${subTabInicio === 'aqui_ahora' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'}`}
             >
-              aquí y ahora ✦
+              aquí y ahora 
               {!haPublicadoMomentoHoy && (
                 <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-[#23211e] rounded-full animate-pulse"></span>
               )}
@@ -605,7 +605,7 @@ export default function App() {
               }}
               className={`flex-1 py-1.5 rounded-lg transition-all min-h-[40px] ${subTabInicio === 'muro' ? 'bg-[#23211e] text-[#ffffee]' : 'text-[#75706b]'} ${esRestringida ? 'opacity-60' : ''}`}
             >
-              Muro {esRestringida && '✦'}
+              Muro {esRestringida && ''}
             </button>
           </div>
 
@@ -671,12 +671,12 @@ export default function App() {
             <div className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-5 space-y-4">
               <div className="flex justify-between items-center border-b border-[#e8e4d9] pb-3">
                 <div>
-                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora ✦</h3>
+                  <h3 className="font-babydoll text-2xl font-bold text-[#23211e]">aquí y ahora </h3>
                   <p className="text-[11px] text-[#75706b] font-sans">Instantáneas diarias de la comunidad</p>
                 </div>
                 {estadoBeReal.publicado ? (
                   <span className="text-[11px] font-sans font-medium text-[#23211e] bg-[#e8e4d9]/60 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold">
-                    ✦ Foto de hoy publicada
+                     Foto de hoy publicada
                   </span>
                 ) : (
                   <button onClick={() => setMostrarModalMomento(true)} className="editorial-btn px-3.5 py-1.5 text-xs font-medium flex items-center gap-1.5">
@@ -692,7 +692,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#ffffee] text-[#23211e] flex items-center justify-center shrink-0 shadow-sm font-bold text-lg">
-                      ✦
+                      
                     </div>
                     <div className="space-y-0.5">
                       <p className="font-babydoll font-bold text-base leading-tight">¡Sube tu instantánea de hoy!</p>
@@ -715,7 +715,7 @@ export default function App() {
                       <div key={idx} className="bg-white/70 hover:bg-white border border-[#e8e4d9] hover:border-[#23211e] rounded-xl transition-all duration-200 p-4 space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="font-medium font-sans text-xs text-[#23211e]">{item.nombre || 'gilda'}</span>
-                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora ✦</span>
+                          <span className="text-[10px] font-babydoll font-bold text-[#75706b]">aquí y ahora </span>
                         </div>
 
                         <div className="relative rounded-xl overflow-hidden border border-[#e8e4d9] aspect-[4/5] bg-[#ffffee] max-h-80">
@@ -730,10 +730,10 @@ export default function App() {
                           {estaBloqueado && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center space-y-3">
                               <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-xl shadow-lg font-bold">
-                                ✦
+                                
                               </div>
                               <div className="space-y-1">
-                                <p className="font-babydoll text-lg text-[#ffffee] font-bold">Instante reservado ✦</p>
+                                <p className="font-babydoll text-lg text-[#ffffee] font-bold">Instante reservado </p>
                                 <p className="text-[11px] text-white/85 font-sans max-w-[210px] leading-relaxed mx-auto">
                                   Comparte tu instantánea de hoy para ver qué está leyendo {item.nombre || 'esta gilda'}.
                                 </p>

@@ -148,7 +148,7 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
       ctx.font = 'bold 45px sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 10;
-      ctx.fillText('aquí y ahora ✦ @gilda.app', 60, canvas.height - 80);
+      ctx.fillText('aquí y ahora  @gilda.app', 60, canvas.height - 80);
 
       // Calidad de exportación máxima
       setFotoFinal(canvas.toDataURL('image/jpeg', 0.95));
@@ -204,9 +204,9 @@ export default function ModalMomentoGilda({ onClose, sesion, supabase, cargarDat
       <div className="relative w-full max-w-sm rounded-3xl overflow-hidden bg-black text-[#ffffee] flex flex-col">
         
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
-          <span className="font-babydoll text-xl font-bold drop-shadow-md">aquí y ahora ✦</span>
+          <span className="font-babydoll text-xl font-bold drop-shadow-md">aquí y ahora </span>
           <button onClick={onClose} className="bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center transition-colors active:scale-95 duration-100">
-            ✕
+            
           </button>
         </div>
 

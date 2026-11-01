@@ -48,7 +48,7 @@ export const ToastContainer = () => {
             onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
             className="ml-3 text-xs opacity-50 hover:opacity-100 font-bold px-1"
           >
-            ✕
+            
           </button>
         </div>
       ))}

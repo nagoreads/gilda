@@ -229,7 +229,7 @@ export default function SeccionComunidad({
                       onClick={() => setMensajeRespuesta(null)}
                       className="text-gray-500 hover:text-black font-bold px-1.5 text-xs active:scale-95 transition-transform duration-100"
                     >
-                      ✕
+                      
                     </button>
                   </div>
                 )}
@@ -426,7 +426,7 @@ export default function SeccionComunidad({
           {cafecitosConVotos.length === 0 ? (
             <div className="editorial-card p-6 text-center">
               <EmptyState
-        icon="✨"
+        icon=""
         title="Sin propuestas todavía"
         description="¿Tienes pensado algún libro o fecha para la siguiente lectura? Deja tu propuesta y la comentamos."
       />
@@ -485,7 +485,7 @@ export default function SeccionComunidad({
               await supabase.from('proposals').insert([nueva]);
               await cargarDatosSupabase();
               setNuevaPropuestaTitulo(''); setNuevaPropuestaAutora(''); setNuevaPropuestaPortada('');
-              mostrarToast('Propuesta guardada 📖');
+              mostrarToast('Propuesta guardada ');
             }} className="space-y-2">
               <BuscadorLibros placeholder="Título del libro o autora..." valor={nuevaPropuestaTitulo} setValor={setNuevaPropuestaTitulo} onSelectLibro={(l) => { setNuevaPropuestaTitulo(l.titulo); setNuevaPropuestaAutora(l.autora); setNuevaPropuestaPortada(l.portada); }} />
               <input id="seccioncomunidad-input-3" name="seccioncomunidad_input_3" type="text" placeholder="Autora o autor..." value={nuevaPropuestaAutora || ''} onChange={e=>setNuevaPropuestaAutora(e.target.value)} className="w-full editorial-input p-2.5 text-xs" />
@@ -537,7 +537,7 @@ export default function SeccionComunidad({
             if (!mensajeFundadora.trim()) return;
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);
             setMensajeFundadora('');
-            mostrarToast('Mensaje enviado 💌');
+            mostrarToast('Mensaje enviado ');
           }} className="w-full editorial-btn py-2 text-xs active:scale-95 transition-transform duration-100">Enviar nota</button>
         </div>
       )}

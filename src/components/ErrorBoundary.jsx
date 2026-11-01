@@ -11,7 +11,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('💥 ErrorBoundary capturó un fallo de renderizado:', error, errorInfo);
+    console.error(' ErrorBoundary capturó un fallo de renderizado:', error, errorInfo);
   }
 
   handleReset = () => {
@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#faf8f5] p-6 text-center text-[#2c2c2c]">
           <div className="max-w-md bg-white p-8 rounded-2xl shadow-sm border border-[#e8e2d9] space-y-4">
-            <span className="text-4xl">📖</span>
+            <span className="text-4xl"></span>
             <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">
               Algo no salió como esperábamos
             </h2>
