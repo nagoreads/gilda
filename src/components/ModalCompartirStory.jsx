@@ -1,3 +1,4 @@
+import { showToast } from './Toast';
 import { useState, useEffect, useMemo } from 'react';
 import PortadaLibro from '../PortadaLibro';
 import { LomoLibroEstanteria, IlustracionDecoracion } from './DecoracionesHabitacion';
@@ -61,7 +62,7 @@ export default function ModalCompartirStory({ onClose, usuario, libro, pagina, c
         link.click();
       }).catch(err => {
         console.error("Error al generar la imagen:", err);
-        alert("Hubo un error al generar la imagen. Intenta hacer captura de pantalla.");
+        showToast("Hubo un error al generar la imagen. Intenta hacer captura de pantalla.");
       });
     }
   };

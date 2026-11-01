@@ -1,3 +1,4 @@
+import { showToast } from './Toast';
 import { MuroSkeleton } from './SkeletonLoaders';
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import MapaGilda from '../MapaGilda';
@@ -252,7 +253,7 @@ export default function SeccionComunidad({
                   const { error } = await supabase.from("chat_messages").insert([nuevoMsg]);
                   if (error) {
                     console.error("Error enviando mensaje:", error);
-                    alert("Error al enviar mensaje: " + error.message);
+                    showToast("Error al enviar mensaje: " + error.message);
                     setNuevoChat(textoAEnviar);
                   }
                 }} className="p-3 flex gap-2">

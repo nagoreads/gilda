@@ -1,3 +1,5 @@
+import { showToast } from './components/Toast';
+import { ToastContainer } from './components/Toast';
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
 
@@ -258,7 +260,7 @@ export default function App() {
       setLoadingAuth(true);
       const { error } = await supabase.auth.signInWithOtp({ email: emailLogin.trim().toLowerCase() });
       if (error) {
-        alert("Error: " + error.message);
+        showToast("Error: " + error.message);
       } else {
         setEsperandoToken(true);
       }
@@ -270,7 +272,7 @@ export default function App() {
         token: tokenLogin.trim(),
         type: "email"
       });
-      if (error) alert("Código incorrecto o caducado.");
+      if (error) showToast("Código incorrecto o caducado.");
       setLoadingAuth(false);
     }
   };
@@ -848,6 +850,7 @@ export default function App() {
           />
         </div>
       </Suspense>
+      <ToastContainer />
       </main>
 
       <nav className="editorial-nav fixed bottom-0 left-0 right-0 py-3 px-4 pb-safe flex justify-around items-center max-w-lg mx-auto z-40 rounded-t-3xl bg-[#ffffee]/90 backdrop-blur-md border-t border-[#e8e4d9] shadow-lg">
