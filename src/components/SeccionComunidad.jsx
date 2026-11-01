@@ -527,7 +527,7 @@ export default function SeccionComunidad({
         <div className="editorial-card p-5 space-y-3">
           <h2 className="font-babydoll text-2xl font-bold">Carta a la fundadora</h2>
           <p className="text-xs text-[#75706b] font-sans">Cualquier idea, duda o nota que quieras compartir en privado.</p>
-          <textarea id="seccioncomunidad-textarea-4" name="seccioncomunidad_textarea_4" placeholder="Escribe aquí..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
+          <textarea id="seccioncomunidad-textarea-4" name="seccioncomunidad_textarea_4" placeholder="Cuéntame lo que quieras (te leo en privado, tranqui)..." value={mensajeFundadora} onChange={e=>setMensajeFundadora(e.target.value)} className="w-full editorial-input p-3 text-xs h-28 resize-none"></textarea>
           <button onClick={async () => {
             if (!mensajeFundadora.trim()) return;
             await supabase.from('wall_posts').insert([{ tipo: 'buzon', cita: mensajeFundadora.trim(), email: sesion.email, nombre: nombreUsuarioPersonalizado || sesion.nombre, timestamp: new Date().toISOString() }]);

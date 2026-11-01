@@ -139,7 +139,7 @@ export default function SeccionHabitacion({
       // Optimistic UI: Añadir libro instantáneamente a la colección local
       if (typeof setLecturas === 'function') setLecturas(prev => [nuevoLibroBD, ...prev]);
       if (typeof setLibros === 'function') setLibros(prev => [nuevoLibroBD, ...prev]);
-      if (typeof showToast === 'function') showToast('Libro añadido a tu habitación', 'success');
+      if (typeof showToast === 'function') showToast('Guardado. Un libro más a la pila de pendientes 📚', 'success');
 
       const { error } = await activeClient.from('personal_readings').insert([nuevoLibroBD]);
 
