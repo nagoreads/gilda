@@ -618,7 +618,7 @@ export default function App() {
 
                 <div className="pt-3 border-t border-[#e8e4d9] flex items-center justify-between">
                   <span className="text-xs text-[#75706b] font-sans">Página actual:</span>
-                  <input id={} name="readingPage" autoComplete="off" type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
+                  <input id={`reading-page-${libroActual?.id || "main"}`} name="readingPage" autoComplete="off" type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
                     await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
                     mostrarToast('Progreso guardado');
                   }} className="editorial-input w-20 text-center py-1 text-xs font-medium" />
