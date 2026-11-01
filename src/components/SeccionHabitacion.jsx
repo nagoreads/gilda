@@ -162,18 +162,18 @@ export default function SeccionHabitacion({
   const renderizarTarjetaLibro = (lib, idx) => {
     const tituloDisplay = obtenerTituloLibro(lib);
     return (
-      <div key={obtenerIdLibro(lib) || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm">
+      <div key={obtenerIdLibro(lib) || idx} className="bg-white p-3 rounded-xl border border-[#e8e4d9] flex flex-col justify-between space-y-2 shadow-sm border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card">
         <div className="flex flex-col items-center text-center">
           <img 
             src={lib.portada || 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api'} 
             alt={tituloDisplay} 
-            className="w-20 h-28 object-cover rounded shadow mb-2 bg-[#f8f6f0]"
+            className="w-20 h-28 object-cover rounded shadow mb-2 bg-[#f8f6f0] border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = 'https://books.google.com/books/content?pprint=1&printsec=frontcover&img=1&zoom=1&source=gbs_api';
             }}
           />
-          <div className="truncate w-full">
+          <div className="truncate w-full border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card">
             <p className="text-xs font-bold text-[#23211e] truncate">{tituloDisplay}</p>
             <p className="text-[10px] text-[#75706b] truncate">{lib.autora}</p>
           </div>
@@ -182,7 +182,7 @@ export default function SeccionHabitacion({
           <select aria-label="Seleccionar opción de la habitación"
             value={lib.estado || 'pendiente'}
             onChange={(e) => manejarAccionLibro(lib, e.target.value)}
-            id={`room-book-status-${obtenerIdLibro(lib) || idx}`} name="roomBookStatus" autoComplete="off" className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer"
+            id={`room-book-status-${obtenerIdLibro(lib) || idx}`} name="roomBookStatus" autoComplete="off" className="w-full text-[10px] bg-[#ffffee] border border-[#e8e4d9] rounded-lg px-2 py-1 text-[#23211e] font-medium focus:outline-none cursor-pointer border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card"
           >
             <option value="leyendo">Leyendo</option>
             <option value="pendiente">Quiero leer</option>
@@ -198,20 +198,20 @@ export default function SeccionHabitacion({
     <div className="space-y-5 fade-in pb-12">
       <section className="editorial-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
+          <div className="min-w-0 border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card">
             <h1 className="font-babydoll text-3xl sm:text-4xl font-bold text-[#23211e]">Mi habitación</h1>
             <p className="mt-0.5 text-xs text-[#75706b] font-sans">Tu rincón personal de lectura.</p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
             <button
               onClick={() => setMostrarModalShare(true)}
-              className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px]"
+              className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px] border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card"
             >
               Compartir
             </button>
             <button
               onClick={() => setMostrarModalBiblioteca(true)}
-              className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px] flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs rounded-lg font-medium font-sans bg-white text-[#23211e] border border-[#e8e4d9] hover:bg-[#ffffee] transition-colors min-h-[44px] flex items-center gap-1.5 border-l-2 border-black/15 border-t border-r border-b border-[#e8e4d9] shadow-[0_4px_20px_rgba(40,30,20,0.08)] hover:shadow-[0_8px_28px_rgba(40,30,20,0.14)] transition-all duration-300 rounded-r-sm book-spine border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card"
             >
               <i className="fa-solid fa-book-bookmark text-[10px]"></i> Importar biblioteca
             </button>
@@ -250,7 +250,7 @@ export default function SeccionHabitacion({
         </div>
 
         {mostrarBuscadorOL && (
-          <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2">
+          <div className="bg-white/80 p-4 rounded-2xl border border-[#e8e4d9] fade-in space-y-2 border-[#e8e4d9] shadow-[0_2px_12px_rgba(40,30,20,0.04)] editorial-paper-card">
             <div className="text-xs font-semibold text-[#75706b] flex justify-between items-center">
               <span>Añadiendo al estante actual: <strong className="text-[#23211e] uppercase">{tabEstanteria}</strong></span>
               {cargandoGuardar && <span className="text-xs italic text-[#23211e] animate-pulse">Guardando libro...</span>}
