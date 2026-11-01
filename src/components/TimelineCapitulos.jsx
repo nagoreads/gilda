@@ -127,7 +127,7 @@ export default function TimelineCapitulos({
               {/* Formulario nuevo comentario principal */}
               {!esRestringida ? (
                 <form onSubmit={(e) => { e.preventDefault(); enviarComentario(null, nuevoComentario); }} className="space-y-2">
-                  <textarea
+                  <textarea aria-label="Escribir nota o comentario"
                     id="timelinecapitulos-textarea-1" name="timelinecapitulos_textarea_1" value={nuevoComentario}
                     onChange={(e) => setNuevoComentario(e.target.value)}
                     id="chapter-note-input" name="chapterNote" autoComplete="off" placeholder="Escribe tu reflexión o nota sobre esta parte..."
@@ -176,7 +176,7 @@ export default function TimelineCapitulos({
 
                         {respuestaA === comentario.id && (
                           <div className="pt-2 pl-3 border-l-2 border-[#23211e] space-y-2 mt-2">
-                            <textarea
+                            <textarea aria-label="Escribir nota o comentario"
                               id="timelinecapitulos-textarea-2" name="timelinecapitulos_textarea_2" value={textoRespuesta}
                               onChange={(e) => setTextoRespuesta(e.target.value)}
                               placeholder={`Responder a ${nombreAutor}...`}

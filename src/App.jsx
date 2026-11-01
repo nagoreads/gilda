@@ -311,7 +311,7 @@ export default function App() {
           <div className="absolute inset-0 rounded-full bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <i className="fa-solid fa-camera text-white text-xs"></i>
           </div>
-          <input id="avatar-file-input" name="avatarFile" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+          <input aria-label="Campo de entrada" id="avatar-file-input" name="avatarFile" type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
         </div>
       );
     }
@@ -452,7 +452,7 @@ export default function App() {
             <form onSubmit={handleMagicLinkLogin} className="space-y-4 font-sans text-left pt-2">
               <div>
                 <label className="block text-xs font-medium text-[#23211e] mb-1">Correo electrónico</label>
-                <input 
+                <input aria-label="Campo de entrada" 
                   id="app-input-1" name="app_input_1" type="email" 
                   placeholder="tuemail@ejemplo.com" 
                   value={emailLogin} 
@@ -466,7 +466,7 @@ export default function App() {
               {esperandoToken && (
                 <div className="animate-fade-in">
                   <label className="block text-xs font-medium text-[#23211e] mt-3 mb-1">Código de 6 dígitos recibido</label>
-                  <input 
+                  <input aria-label="Campo de entrada" 
                     id="app-input-2" name="app_input_2" type="text" 
                     placeholder="123456" 
                     value={tokenLogin} 
@@ -618,7 +618,7 @@ export default function App() {
 
                 <div className="pt-3 border-t border-[#e8e4d9] flex items-center justify-between">
                   <span className="text-xs text-[#75706b] font-sans">Página actual:</span>
-                  <input id={`reading-page-${libroActual?.id || "main"}`} name="readingPage" autoComplete="off" type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
+                  <input aria-label="Campo de entrada" id={`reading-page-${libroActual?.id || "main"}`} name="readingPage" autoComplete="off" type="number" value={miPagina} onChange={e => setMiPagina(Number(e.target.value))} onBlur={async () => {
                     await supabase.from('profiles').update({ pagina: miPagina }).eq('email', sesion.email);
                     mostrarToast('Progreso guardado');
                   }} className="editorial-input w-20 text-center py-1 text-xs font-medium" />
@@ -631,8 +631,8 @@ export default function App() {
                   <button type="button" onClick={obtenerUbicacionActual} className="text-xs font-medium font-sans bg-white border border-[#e8e4d9] text-[#23211e] px-2.5 py-1 rounded-lg hover:bg-[#ffffee] transition-colors">Detectar</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
-                  <input id="profile-city" name="city" autoComplete="address-level2" type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
-                  <input id="profile-postal-code" name="postalCode" autoComplete="postal-code" type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={e => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input aria-label="Campo de entrada" id="profile-city" name="city" autoComplete="address-level2" type="text" placeholder="Ciudad..." value={miCiudadInput} onChange={e => setMiCiudadInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
+                  <input aria-label="Campo de entrada" id="profile-postal-code" name="postalCode" autoComplete="postal-code" type="text" placeholder="C. Postal..." value={miCodigoPostalInput} onChange={e => setMiCodigoPostalInput(e.target.value)} className="editorial-input p-2.5 text-xs" />
                 </div>
                 <button onClick={async () => {
                   safeSet('gilda_ciudad', miCiudadInput); safeSet('gilda_codigo_postal', miCodigoPostalInput);

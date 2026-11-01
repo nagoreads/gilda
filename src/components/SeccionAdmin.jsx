@@ -84,16 +84,16 @@ const [tituloAviso, setTituloAviso] = useState('');
           <p className="mb-3 text-[10px] text-[#756a58] font-sans">El relevo de lectura se controla manualmente desde aquí.</p>
           <form key={`${libroActual.titulo}-${libroActual.autora}`} onSubmit={adminGuardarLecturaActiva} className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <label className="space-y-1 text-[10px] font-bold text-[#75706b] font-sans">Título
-              <input name="titulo" defaultValue={libroActual.titulo} required className="editorial-input w-full p-2.5 text-xs font-normal" />
+              <input name="titulo" aria-label="Título del libro" defaultValue={libroActual.titulo} required className="editorial-input w-full p-2.5 text-xs font-normal" />
             </label>
             <label className="space-y-1 text-[10px] font-bold text-[#75706b] font-sans">Autora
-              <input name="autora" defaultValue={libroActual.autora} className="editorial-input w-full p-2.5 text-xs font-normal" />
+              <input name="autora" aria-label="Autora del libro" defaultValue={libroActual.autora} className="editorial-input w-full p-2.5 text-xs font-normal" />
             </label>
             <label className="space-y-1 text-[10px] font-bold text-[#75706b] font-sans">URL de portada
-              <input name="portada" type="url" defaultValue={libroActual.portada} className="editorial-input w-full p-2.5 text-xs font-normal" />
+              <input name="portada" aria-label="URL de la portada" type="url" defaultValue={libroActual.portada} className="editorial-input w-full p-2.5 text-xs font-normal" />
             </label>
             <label className="space-y-1 text-[10px] font-bold text-[#75706b] font-sans">Páginas totales
-              <input name="paginas_totales" type="number" min="1" defaultValue={libroActual.paginas_totales || 280} className="editorial-input w-full p-2.5 text-xs font-normal" />
+              <input name="paginas_totales" aria-label="Páginas totales" type="number" min="1" defaultValue={libroActual.paginas_totales || 280} className="editorial-input w-full p-2.5 text-xs font-normal" />
             </label>
             <button type="submit" className="sm:col-span-2 editorial-btn py-2.5 text-xs min-h-[44px]">Guardar lectura activa</button>
           </form>
