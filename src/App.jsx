@@ -389,7 +389,7 @@ export default function App() {
   const porcentajeLibro = useMemo(() => {
     const paginas = Number(libroActual?.paginas_totales || 369);
     if (!paginas || paginas <= 0) return 0;
-    return Math.min(Math.round((miPagina / paginas) * 100), 100);
+    return Math.min(Math.round(((miPagina || 0) / paginas) * 100), 100) || 0;
   }, [miPagina, libroActual]);
 
   const todosMisLibrosEstanteria = useMemo(() => sesion ? lecturasPersonales.filter(l => (l.email || '').toLowerCase() === sesion.email.toLowerCase()) : [], [lecturasPersonales, sesion]);
