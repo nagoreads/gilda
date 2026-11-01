@@ -566,7 +566,7 @@ export default function App() {
         </div>
       </header>
 
-      <main key={tab} className="w-full flex-grow space-y-4 animate-fade-in">
+      <main key={seccionApp} className="w-full flex-grow space-y-4 animate-fade-in">
         <Suspense fallback={<div className="flex items-center justify-center p-8 text-xs font-sans text-[#a09a8e]">Cargando módulo...</div>}>
         <div style={{ display: seccionApp === 'inicio' ? 'block' : 'none' }} className="space-y-4 page-transition">
           
