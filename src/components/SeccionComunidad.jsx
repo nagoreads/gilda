@@ -250,7 +250,11 @@ export default function SeccionComunidad({
                   setNuevoChat("");
                   setMensajeRespuesta(null);
                   
-                  const { error } = await supabase.from("chat_messages").insert([nuevoMsg]);
+                  // Optimistic UI: Inyectar mensaje inmediatamente si existe estado local
+      if (typeof setMensajes === 'function') setMensajes(prev => [...prev, { ...nuevoMsg, id: 'temp-' + Date.now() }]);
+      if (typeof setChatMessages === 'function') setChatMessages(prev => [...prev, { ...nuevoMsg, id: 'temp-' + Date.now() }]);
+      
+      const { error } = await supabase.from("chat_messages").insert([nuevoMsg]);
                   if (error) {
                     console.error("Error enviando mensaje:", error);
                     showToast("Error al enviar mensaje: " + error.message);
