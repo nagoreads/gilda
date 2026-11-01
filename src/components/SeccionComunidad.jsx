@@ -1,3 +1,4 @@
+import { MuroSkeleton } from './SkeletonLoaders';
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import MapaGilda from '../MapaGilda';
 import BuscadorLibros from '../BuscadorLibros';

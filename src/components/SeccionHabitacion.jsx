@@ -1,3 +1,4 @@
+import { HabitacionSkeleton } from './SkeletonLoaders';
 import { useState } from 'react';
 import ModalImportarBiblioteca from './ModalImportarBiblioteca';
 import SuscribirPush from './SuscribirPush';
