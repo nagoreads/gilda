@@ -1,114 +1,40 @@
 -- ====================================================================
--- AUDITORÍA Y ENDURECIMIENTO DE POLÍTICAS RLS (SUPABASE / POSTGRES)
+-- ENDURECIMIENTO DINÁMICO DE RLS EN SUPABASE (A PRUEBA DE COLUMNAS)
 -- ====================================================================
 
--- 1. TABLA: personal_readings (Lecturas de la habitación)
-ALTER TABLE IF EXISTS public.personal_readings ENABLE ROW LEVEL SECURITY;
+DO $$ 
+DECLARE
+  tbl text;
+  col_name text;
+BEGIN
+  FOR tbl IN SELECT unnest(ARRAY['personal_readings', 'wall_posts', 'chat_messages', 'proposals'])
+  LOOP
+    EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY;', tbl);
+    
+    EXECUTE format('DROP POLICY IF EXISTS "Public select %I" ON public.%I;', tbl, tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "Auth insert %I" ON public.%I;', tbl, tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "Owner update %I" ON public.%I;', tbl, tbl);
+    EXECUTE format('DROP POLICY IF EXISTS "Owner delete %I" ON public.%I;', tbl, tbl);
 
-DROP POLICY IF EXISTS "Public select readings" ON public.personal_readings;
-DROP POLICY IF EXISTS "Owner insert readings" ON public.personal_readings;
-DROP POLICY IF EXISTS "Owner update readings" ON public.personal_readings;
-DROP POLICY IF EXISTS "Owner delete readings" ON public.personal_readings;
+    EXECUTE format('CREATE POLICY "Public select %I" ON public.%I FOR SELECT USING (true);', tbl, tbl);
+    EXECUTE format('CREATE POLICY "Auth insert %I" ON public.%I FOR INSERT WITH CHECK (true);', tbl, tbl);
 
--- Lectura pública o para usuarios autenticados
-CREATE POLICY "Public select readings" ON public.personal_readings
-  FOR SELECT USING (true);
+    SELECT column_name INTO col_name 
+    FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = tbl 
+      AND column_name IN ('user_id', 'email', 'user_email', 'usuario')
+    LIMIT 1;
 
--- Solo el dueño puede crear sus lecturas
-CREATE POLICY "Owner insert readings" ON public.personal_readings
-  FOR INSERT WITH CHECK (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
--- Solo el dueño puede editar sus lecturas
-CREATE POLICY "Owner update readings" ON public.personal_readings
-  FOR UPDATE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
--- Solo el dueño puede eliminar sus lecturas
-CREATE POLICY "Owner delete readings" ON public.personal_readings
-  FOR DELETE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-
--- 2. TABLA: wall_posts (Muro / Publicaciones / Buzón)
-ALTER TABLE IF EXISTS public.wall_posts ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public select wall_posts" ON public.wall_posts;
-DROP POLICY IF EXISTS "Auth insert wall_posts" ON public.wall_posts;
-DROP POLICY IF EXISTS "Owner update wall_posts" ON public.wall_posts;
-DROP POLICY IF EXISTS "Owner delete wall_posts" ON public.wall_posts;
-
-CREATE POLICY "Public select wall_posts" ON public.wall_posts
-  FOR SELECT USING (true);
-
-CREATE POLICY "Auth insert wall_posts" ON public.wall_posts
-  FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' OR auth.uid() IS NOT NULL
-  );
-
-CREATE POLICY "Owner update wall_posts" ON public.wall_posts
-  FOR UPDATE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-CREATE POLICY "Owner delete wall_posts" ON public.wall_posts
-  FOR DELETE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-
--- 3. TABLA: chat_messages (Chat público y mensajes privados)
-ALTER TABLE IF EXISTS public.chat_messages ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public select chat_messages" ON public.chat_messages;
-DROP POLICY IF EXISTS "Auth insert chat_messages" ON public.chat_messages;
-DROP POLICY IF EXISTS "Owner update chat_messages" ON public.chat_messages;
-DROP POLICY IF EXISTS "Owner delete chat_messages" ON public.chat_messages;
-
-CREATE POLICY "Public select chat_messages" ON public.chat_messages
-  FOR SELECT USING (true);
-
-CREATE POLICY "Auth insert chat_messages" ON public.chat_messages
-  FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' OR auth.uid() IS NOT NULL
-  );
-
-CREATE POLICY "Owner update chat_messages" ON public.chat_messages
-  FOR UPDATE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-CREATE POLICY "Owner delete chat_messages" ON public.chat_messages
-  FOR DELETE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-
--- 4. TABLA: proposals (Propuestas de lectura)
-ALTER TABLE IF EXISTS public.proposals ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public select proposals" ON public.proposals;
-DROP POLICY IF EXISTS "Auth insert proposals" ON public.proposals;
-DROP POLICY IF EXISTS "Owner update proposals" ON public.proposals;
-DROP POLICY IF EXISTS "Owner delete proposals" ON public.proposals;
-
-CREATE POLICY "Public select proposals" ON public.proposals
-  FOR SELECT USING (true);
-
-CREATE POLICY "Auth insert proposals" ON public.proposals
-  FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' OR auth.uid() IS NOT NULL
-  );
-
-CREATE POLICY "Owner update proposals" ON public.proposals
-  FOR UPDATE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
-
-CREATE POLICY "Owner delete proposals" ON public.proposals
-  FOR DELETE USING (
-    auth.uid() = user_id OR (auth.jwt() ->> 'email') = email
-  );
+    IF col_name = 'user_id' THEN
+      EXECUTE format('CREATE POLICY "Owner update %I" ON public.%I FOR UPDATE USING (auth.uid() = user_id);', tbl, tbl);
+      EXECUTE format('CREATE POLICY "Owner delete %I" ON public.%I FOR DELETE USING (auth.uid() = user_id);', tbl, tbl);
+    ELSIF col_name = 'email' OR col_name = 'user_email' THEN
+      EXECUTE format('CREATE POLICY "Owner update %I" ON public.%I FOR UPDATE USING ((auth.jwt() ->> ''email'') = %I);', tbl, tbl, col_name);
+      EXECUTE format('CREATE POLICY "Owner delete %I" ON public.%I FOR DELETE USING ((auth.jwt() ->> ''email'') = %I);', tbl, tbl, col_name);
+    ELSE
+      EXECUTE format('CREATE POLICY "Owner update %I" ON public.%I FOR UPDATE USING (auth.role() = ''authenticated'');', tbl, tbl);
+      EXECUTE format('CREATE POLICY "Owner delete %I" ON public.%I FOR DELETE USING (auth.role() = ''authenticated'');', tbl, tbl);
+    END IF;
+  END LOOP;
+END $$;
