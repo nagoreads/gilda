@@ -1,3 +1,4 @@
+import { initOfflineListener, getOfflineQueue, clearOfflineQueue } from './utils/offlineStorage';
 import { showToast } from './components/Toast';
 import { ToastContainer } from './components/Toast';
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
@@ -55,6 +56,16 @@ const geocodificarUbicacion = async (consulta) => {
 };
 
 export default function App() {
+
+  useEffect(() => {
+    initOfflineListener(async (queue) => {
+      if (queue && queue.length > 0) {
+        console.log('🔄 Sincronizando acciones offline pendientes:', queue.length);
+        clearOfflineQueue();
+      }
+    });
+  }, []);
+
   const safeGet = (key, fallback) => { try { const val = localStorage.getItem(key); return val !== null ? val : fallback; } catch { return fallback; } };
   const safeGetJSON = (key, fallback) => {
     try {
